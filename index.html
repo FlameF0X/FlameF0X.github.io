@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlameF0X</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+        }
+
+        body {
+            background-color: black;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            transition: opacity 0.5s ease;
+            opacity: 1;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .welcome, .about_me, .project_link, .other_links {
+            padding: 10px 20px;
+            color: aliceblue;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: inline-block;
+            min-width: auto;
+            background-color: #cc0606;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .about_me {
+            display: block;
+            width: 100%;
+            background-color: #6e0707;
+        }
+
+        .project_section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .other_links {
+            flex: 0 1 auto;
+            position: relative;
+            cursor: pointer;
+            transition: 0.5s;
+            font-size: 0.9rem;
+            border: solid 1px transparent;
+        }
+
+        .other_links:hover {
+            background-color: rgb(73, 4, 4);
+            border: solid 1px red;
+        }
+
+        .project_link {
+            background-color: #9c0808;
+            display: 0;
+            margin-bottom: 10px;
+        }
+
+        /* Tooltip and emoji animations remain the same as in original */
+        .other_links span {
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: 0.8s;
+        }
+
+        .other_links span:after {
+            content: '';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            right: -20px;
+            transition: 0.5s;
+        }
+
+        .muffin span:after { content: '🧁'; }
+        .col span:after { content: '🤖'; }
+        .error404 span:after { content: '🏗️'; }
+
+        .other_links:hover span, {
+            padding-right: 30px;
+        }
+
+        .other_links:hover span:after {
+            opacity: 1;
+            right: 0;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background-color: #9c0808;
+            color: aliceblue;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 10px;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            z-index: 1;
+            margin-top: 5px;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #9c0808 transparent;
+        }
+
+        .other_links:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+
+            .about_me {
+                width: 100%;
+                font-size: 0.9rem;
+            }
+
+            .project_section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .other_links {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .tooltip {
+                width: auto;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="welcome" id="welcomeText">
+                Welcome to my website
+            </div>   
+        </header>
+        <div class="about_me" id="aboutMeText">
+            About Me: Hello there! Call me Daniel, this is my website, I may not be the best developer but I try my best... Well, at least you found this page.😐
+        </div>
+        <div>
+            <div class="project_link" id="projectText"> >>=| Projects: |=>></div>
+            <div class="project_section">
+                <button class="other_links muffin" onclick="redirectToMuffinLM()">
+                    <span id="muffinText">MuffinLM</span>
+                    <div class="tooltip" id="muffinTooltip"> MuffinLM, (also called as Muffin Language Model or MLM) is an AI text generator.</div>
+                </button>
+                <button class="other_links col" onclick="redirectToCOL()">
+                    <span id="colText">COL-Project</span>
+                    <div class="tooltip" id="colTooltip">COL Project is a small Discord Bot powered by AI, available on GitHub for free.</div>
+                </button>
+                <button class="other_links error404" onclick="redirectTo404()">
+                    <span id="errorText">404</span>
+                    <div class="tooltip" id="errorTooltip">Page under construction.</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function redirectToMuffinLM() {
+            window.location.href = 'https://github.com/FlameF0X/MuffinLM';
+        }
+        function redirectToCOL() {
+            window.location.href = 'https://github.com/FlameF0X/COL-project';
+        }          
+        function redirectTo404() {
+            window.location.href = 'https://';
+        }
+    </script>
+</body>
+</html>
