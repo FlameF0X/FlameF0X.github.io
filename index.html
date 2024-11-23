@@ -22,8 +22,6 @@
 
         .container {
             text-align: center;
-            transition: opacity 0.5s ease;
-            opacity: 1;
             width: 100%;
             max-width: 1200px;
         }
@@ -56,51 +54,18 @@
         .other_links {
             flex: 0 1 auto;
             position: relative;
-            cursor: pointer;
-            transition: 0.5s;
             font-size: 0.9rem;
-            border: solid 1px transparent;
+            text-decoration: none;
+            color: aliceblue;
+            padding: 10px 20px;
+            background-color: #9c0808;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            display: inline-block;
         }
 
         .other_links:hover {
             background-color: rgb(73, 4, 4);
-            border: solid 1px red;
-        }
-
-        .project_link {
-            background-color: #9c0808;
-            display: 0;
-            margin-bottom: 10px;
-        }
-
-        /* Tooltip and emoji animations remain the same as in original */
-        .other_links span {
-            cursor: pointer;
-            display: inline-block;
-            position: relative;
-            transition: 0.8s;
-        }
-
-        .other_links span:after {
-            content: '';
-            position: absolute;
-            opacity: 0;
-            top: 0;
-            right: -20px;
-            transition: 0.5s;
-        }
-
-        .muffin span:after { content: '🧁'; }
-        .col span:after { content: '🤖'; }
-        .error404 span:after { content: '🏗️'; }
-
-        .other_links:hover span, {
-            padding-right: 30px;
-        }
-
-        .other_links:hover span:after {
-            opacity: 1;
-            right: 0;
         }
 
         .tooltip {
@@ -168,42 +133,30 @@
 <body>
     <div class="container">
         <header>
-            <div class="welcome" id="welcomeText">
+            <div class="welcome">
                 Welcome to my website
             </div>   
         </header>
-        <div class="about_me" id="aboutMeText">
+        <div class="about_me">
             About Me: Hello there! Call me Daniel, this is my website, I may not be the best developer but I try my best... Well, at least you found this page.😐
         </div>
         <div>
-            <div class="project_link" id="projectText"> >>=| Projects: |=>></div>
+            <div class="project_link"> >>=| Projects: |=>></div>
             <div class="project_section">
-                <button class="other_links muffin" onclick="redirectToMuffinLM()">
-                    <span id="muffinText">MuffinLM</span>
-                    <div class="tooltip" id="muffinTooltip"> MuffinLM, (also called as Muffin Language Model or MLM) is an AI text generator.</div>
-                </button>
-                <button class="other_links col" onclick="redirectToCOL()">
-                    <span id="colText">COL-Project</span>
-                    <div class="tooltip" id="colTooltip">COL Project is a small Discord Bot powered by AI, available on GitHub for free.</div>
-                </button>
-                <button class="other_links error404" onclick="redirectTo404()">
-                    <span id="errorText">404</span>
-                    <div class="tooltip" id="errorTooltip">Page under construction.</div>
-                </button>
+                <a href="https://github.com/FlameF0X/MuffinLM" class="other_links muffin" target="_blank">
+                    <span>MuffinLM</span>
+                    <div class="tooltip"> MuffinLM, (also called as Muffin Language Model or MLM) is an AI text generator.</div>
+                </a>
+                <a href="https://github.com/FlameF0X/COL-project" class="other_links col" target="_blank">
+                    <span>COL-Project</span>
+                    <div class="tooltip">COL Project is a small Discord Bot powered by AI, available on GitHub for free.</div>
+                </a>
+                <a href="#" class="other_links error404" target="_blank">
+                    <span>404</span>
+                    <div class="tooltip">Page under construction.</div>
+                </a>
             </div>
         </div>
     </div>
-
-    <script>
-        function redirectToMuffinLM() {
-            window.location.href = 'https://github.com/FlameF0X/MuffinLM';
-        }
-        function redirectToCOL() {
-            window.location.href = 'https://github.com/FlameF0X/COL-project';
-        }          
-        function redirectTo404() {
-            window.location.href = 'https://';
-        }
-    </script>
 </body>
 </html>
