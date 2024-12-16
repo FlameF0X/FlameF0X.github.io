@@ -5,97 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlameF0X</title>
     <style>
+        /* General Reset */
         * {
             box-sizing: border-box;
-            font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body {
-            background-color: black;
-            margin: 0;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
         }
 
         .container {
             text-align: center;
             width: 100%;
-            max-width: 1200px;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .welcome, .about_me, .project_link, .other_links {
+        .theme-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .theme-button {
+            border: none;
+            background: var(--button-bg);
+            color: var(--button-color);
             padding: 10px 20px;
-            color: aliceblue;
-            border-radius: 10px;
-            margin: 10px 0;
-            display: inline-block;
-            min-width: auto;
-            background-color: #cc0606;
-            word-wrap: break-word;
-            max-width: 100%;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 0 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .theme-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .welcome {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         .about_me {
-            display: block;
-            width: 100%;
-            background-color: #6e0707;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
         }
 
         .project_section {
             display: flex;
             flex-wrap: wrap;
+            gap: 20px;
             justify-content: center;
-            gap: 10px;
         }
 
         .other_links {
-            flex: 0 1 auto;
-            position: relative;
-            font-size: 0.9rem;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
             text-decoration: none;
-            color: aliceblue;
-            padding: 10px 20px;
-            background-color: #9c0808;
-            border-radius: 10px;
-            transition: background-color 0.3s;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .other_links:hover {
-            background-color: rgb(73, 4, 4);
+        .other_links span {
+            margin-left: 10px;
+            font-weight: 500;
         }
 
         .tooltip {
             visibility: hidden;
-            width: 200px;
-            background-color: #9c0808;
-            color: aliceblue;
-            text-align: center;
-            border-radius: 5px;
-            padding: 5px 10px;
+            opacity: 0;
             position: absolute;
-            top: 100%;
+            bottom: -45px;
             left: 50%;
             transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
+            padding: 10px 15px;
+            font-size: 0.875rem;
+            border-radius: 10px;
+            white-space: nowrap;
             z-index: 1;
-            margin-top: 5px;
-        }
-
-        .tooltip::after {
-            content: "";
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent #9c0808 transparent;
         }
 
         .other_links:hover .tooltip {
@@ -103,60 +110,134 @@
             opacity: 1;
         }
 
-        @media screen and (max-width: 768px) {
-            .container {
-                width: 95%;
-            }
+        /* Theme Styles */
+        :root {
+            --bg-color: #f5f5f7;
+            --text-color: #333;
+            --card-bg: #fff;
+            --link-bg: linear-gradient(to bottom right, #e0e0e0, #f9f9f9);
+            --link-color: #007aff;
+            --tooltip-bg: #007aff;
+            --button-bg: #007aff;
+            --button-color: #fff;
+        }
 
-            .about_me {
-                width: 100%;
-                font-size: 0.9rem;
-            }
+        body.light {
+            --bg-color: #f5f5f7;
+            --text-color: #333;
+            --card-bg: #fff;
+            --link-bg: linear-gradient(to bottom right, #e0e0e0, #f9f9f9);
+            --link-color: #007aff;
+            --tooltip-bg: #007aff;
+            --button-bg: #007aff;
+            --button-color: #fff;
+        }
 
-            .project_section {
-                flex-direction: column;
-                align-items: center;
-            }
+        body.dark {
+            --bg-color: #1d1d1f;
+            --text-color: #f5f5f7;
+            --card-bg: #333;
+            --link-bg: linear-gradient(to bottom right, #444, #555);
+            --link-color: #61dafb;
+            --tooltip-bg: #61dafb;
+            --button-bg: #61dafb;
+            --button-color: #1d1d1f;
+        }
 
-            .other_links {
-                width: 100%;
-                max-width: 300px;
-            }
+        body.crimson {
+            --bg-color: #2d0202;
+            --text-color: #f5f5f7;
+            --card-bg: #440202;
+            --link-bg: linear-gradient(to bottom right, #6e0707, #9c0808);
+            --link-color: #f5b7b7;
+            --tooltip-bg: #9c0808;
+            --button-bg: #cc0606;
+            --button-color: #f5f5f7;
+        }
 
-            .tooltip {
-                width: auto;
-                max-width: 250px;
-            }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            background: var(--card-bg);
+        }
+
+        .other_links {
+            background: var(--link-bg);
+            color: var(--link-color);
+        }
+
+        .tooltip {
+            background: var(--tooltip-bg);
+        }
+
+        .theme-button {
+            background: var(--button-bg);
+            color: var(--button-color);
+        }
+
+        .theme-button:hover {
+            background: var(--button-bg);
         }
     </style>
 </head>
 <body>
+    <div class="theme-switcher">
+        <button class="theme-button" onclick="setTheme('light')">Light</button>
+        <button class="theme-button" onclick="setTheme('dark')">Dark</button>
+        <button class="theme-button" onclick="setTheme('crimson')">Crimson</button>
+    </div>
     <div class="container">
         <header>
-            <div class="welcome">
-                Welcome to my website
-            </div>   
+            <div class="welcome">Welcome to My Website</div>   
         </header>
         <div class="about_me">
-            About Me: Hello there! Call me Daniel, this is my website, I may not be the best developer but I try my best... Well, at least you found this page.😐
+            Hi, I’m Daniel. I’m not the best developer, but I’m passionate about creating cool things. Thanks for visiting my page!
         </div>
-        <div>
-            <div class="project_link"> >>=| Projects: |=>></div>
-            <div class="project_section">
-                <a href="https://github.com/FlameF0X/MuffinLM" class="other_links muffin" target="_blank">
-                    <span>MuffinLM</span>
-                    <div class="tooltip"> MuffinLM, (also called as Muffin Language Model or MLM) is an AI text generator.</div>
-                </a>
-                <a href="https://github.com/FlameF0X/COL-project" class="other_links col" target="_blank">
-                    <span>COL-Project</span>
-                    <div class="tooltip">COL Project is a small Discord Bot powered by AI, available on GitHub for free.</div>
-                </a>
-                <a href="#" class="other_links error404" target="_blank">
-                    <span>404</span>
-                    <div class="tooltip">Page under construction.</div>
-                </a>
-            </div>
+        <div class="project_section">
+            <a class="other_links" onclick="redirectToMuffinLM()">
+                <span>MuffinLM</span>
+                <div class="tooltip">MuffinLM: A powerful AI text generator.</div>
+            </a>
+            <a class="other_links" onclick="redirectToCOL()">
+                <span>COL-Project</span>
+                <div class="tooltip">COL Project: An AI-powered Discord bot available on GitHub.</div>
+            </a>
+            <a class="other_links" onclick="redirectTo404()">
+                <span>404</span>
+                <div class="tooltip">This page is under construction.</div>
+            </a>
         </div>
     </div>
+
+    <script>
+        // Set theme based on user's local time
+        window.onload = function () {
+            const currentHour = new Date().getHours();
+            if (currentHour >= 7 && currentHour < 19) {
+                setTheme('light'); // Daytime: Light theme
+            } else {
+                setTheme('dark'); // Nighttime: Dark theme
+            }
+        };
+
+        function setTheme(theme) {
+            document.body.className = theme;
+        }
+
+        function redirectToMuffinLM() {
+            window.location.href = 'https://github.com/FlameF0X/MuffinLM';
+        }
+
+        function redirectToCOL() {
+            window.location.href = 'https://github.com/FlameF0X/COL-project';
+        }
+
+        function redirectTo404() {
+            window.location.href = '#';
+        }
+    </script>
 </body>
 </html>
