@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Daniel.FlameFox Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/-qgGeUlEsf5z-jilWawyO.png" type="image/png">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --new-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --new-glow: 0 0 30px rgba(102, 102, 234, 0.3);
+            --pulse-color: rgba(102, 102, 234, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--dark-bg);
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav ul {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav a:hover {
+            color: var(--primary-light);
+        }
+
+        .section {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-bottom: 1.5rem;
+        }
+
+        .sort-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .sort-select {
+            background-color: var(--card-bg);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sort-select:hover {
+            border-color: var(--primary-light);
+        }
+
+        .post-summary {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            background: #212e43;
+            padding: 20px;
+            border-radius: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .post-summary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* New post highlighting styles */
+        .post-summary.new-post {
+            background: var(--new-gradient);
+            border: 2px solid var(--primary-light);
+            box-shadow: var(--new-glow);
+            animation: subtle-pulse 3s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-summary.new-post::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 2s infinite;
+            pointer-events: none;
+        }
+
+        .post-summary.new-post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 102, 234, 0.4);
+        }
+
+        .new-badge {
+            position: absolute;
+            top: -5px;
+            right: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            animation: badge-bounce 2s infinite;
+        }
+
+        .trending-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ffd700;
+            font-size: 1.2rem;
+            animation: trending-glow 2s infinite alternate;
+        }
+
+        @keyframes subtle-pulse {
+            0%, 100% { 
+                box-shadow: var(--new-glow);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(102, 102, 234, 0.5);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        @keyframes badge-bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes trending-glow {
+            0% { 
+                text-shadow: 0 0 5px #ffd700;
+                transform: scale(1);
+            }
+            100% { 
+                text-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700;
+                transform: scale(1.1);
+            }
+        }
+
+        .post-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            cursor: pointer;
+            transition: color 0.3s;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .post-summary.new-post .post-title {
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+
+        .post-title:hover {
+            color: var(--primary);
+        }
+
+        .post-summary.new-post .post-title:hover {
+            color: #f0f8ff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .post-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .post-summary.new-post .post-date {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .post-content-summary {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .post-summary.new-post .post-content-summary {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        #back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-light);
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        #back-btn:hover {
+            color: var(--primary);
+        }
+
+        .post-content-text {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 0;
+            background: linear-gradient(to right, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .new-badge {
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
+            
+            .trending-icon {
+                right: 10px;
+                font-size: 1rem;
+            }
+            
+            .post-summary {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                <span>Daniel.FlameFox</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="sort-controls">
+            <h1 class="section-title">Blog Posts</h1>
+            <select class="sort-select" id="sort-select">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+            </select>
+        </div>
+
+        <div id="posts-list" class="section"></div>
+        <div id="post-content" class="section" style="display: none;"></div>
+
+        <script>
+            const postsListEl = document.getElementById('posts-list');
+            const postContentEl = document.getElementById('post-content');
+            const sortSelect = document.getElementById('sort-select');
+            const backBtnId = 'back-btn';
+
+            let posts = [];
+
+            // Check if a post is "new" (within last 7 days)
+            function isNewPost(dateString) {
+                const postDate = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - postDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 7;
+            }
+
+            // Check if a post is "hot" (within last 3 days)
+            function isHotPost(dateString) {
+                const postDate = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - postDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 3;
+            }
+
+            function sortPosts() {
+                switch(sortSelect.value) {
+                    case 'newest':
+                        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        break;
+                    case 'oldest':
+                        posts.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        break;
+                    case 'title-asc':
+                        posts.sort((a, b) => a.title.localeCompare(b.title));
+                        break;
+                    case 'title-desc':
+                        posts.sort((a, b) => b.title.localeCompare(a.title));
+                        break;
+                }
+                renderPostsList();
+            }
+
+            function renderPostsList() {
+                postContentEl.style.display = 'none';
+                postsListEl.style.display = 'block';
+                postsListEl.innerHTML = posts.map(post => {
+                    const isNew = isNewPost(post.date);
+                    const isHot = isHotPost(post.date);
+                    
+                    return `
+                        <div class="post-summary ${isNew ? 'new-post' : ''}" data-id="${post.id}">
+                            
+                            ${isHot ? '<i class="fas fa-fire trending-icon"></i>' : ''}
+                            <div class="post-title">${post.title}</div>
+                            <div class="post-date">${post.date}</div>
+                            <div class="post-content-summary">${post.summary}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function showPost(post) {
+                postsListEl.style.display = 'none';
+                postContentEl.style.display = 'block';
+                postContentEl.innerHTML = `
+                    <div id="${backBtnId}" class="post-title">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to All Posts
+                    </div>
+                    <h2 class="post-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${post.title}</h2>
+                    <div class="post-date">${post.date}</div>
+                    <div class="post-content-text">${post.content}</div>
+                `;
+
+                const backBtn = document.getElementById(backBtnId);
+                backBtn.onclick = () => renderPostsList();
+            }
+
+            // Load posts from JSON file
+            fetch('blog-posts.json')
+                .then(res => res.json())
+                .then(data => {
+                    posts = data;
+                    sortPosts();
+                    
+                    postsListEl.addEventListener('click', e => {
+                        const postElement = e.target.closest('.post-summary');
+                        if (postElement) {
+                            const postId = postElement.dataset.id;
+                            const post = posts.find(p => p.id === postId);
+                            showPost(post);
+                        }
+                    });
+                })
+                .catch(err => {
+                    postsListEl.innerHTML = '<p class="post-content-summary">Failed to load blog posts. Make sure blog-posts.json exists in the same directory.</p>';
+                    console.error(err);
+                });
+
+            // Sort event listener
+            sortSelect.addEventListener('change', sortPosts);
+        </script>
+    </div>
+</body>
+</html>
