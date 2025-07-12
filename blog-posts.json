@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "title": "My First Blog Post",
+    "date": "2025-05-18",
+    "summary": "Hello.",
+    "content": "<p>Hello again!</p>"
+  },
+  {
+    "id": "2",
+    "title": "Re-branding Snowflake text generator into SnowflakeCore",
+    "date": "2025-06-14",
+    "summary": "A detailed explanation of why I rebranded my text generator to SnowflakeCore and the importance of clear identity in AI projects.",
+    "content": "<p>During the development of my original text generation model, which I named <strong>Snowflake</strong>, I focused on building a unique architecture from scratch, which I called <strong>SnowflakeCore</strong>. This architecture is designed to be lightweight, efficient, and customizable for a variety of language modeling tasks.</p><p>However, as I began sharing the model on Hugging Face, I realized that the name <strong>Snowflake</strong> was already in use by an established and verified organization on the platform. This organization has a strong presence with several popular models also named <strong>Snowflake</strong>, which are fine-tuned variants and widely recognized by the community.</p><p>Given their verified status and existing user base, this created a potential for confusion among users and posed challenges for establishing a distinct identity for my project. In addition, it raised concerns about visibility, discoverability, and brand differentiation on the platform.</p><p>To resolve these challenges, I decided to rebrand my model under the name <strong>SnowflakeCore</strong>. This new name preserves the connection to my original architecture while clearly distinguishing it from the existing Snowflake organization.</p><p>The rebranding serves several important purposes:</p><ul><li><strong>Clarity:</strong> It prevents any misunderstanding among users about the source and nature of the model.</li><li><strong>Professionalism:</strong> A unique, well-defined brand identity is essential for gaining credibility and trust in the AI community.</li><li><strong>Ownership:</strong> The name SnowflakeCore reflects my personal and technical investment in creating the architecture from the ground up.</li><li><strong>Future-proofing:</strong> As the project grows, having a distinct name reduces risks of conflicts and makes collaboration and dissemination easier.</li></ul><p>I remain fully committed to the development and improvement of SnowflakeCore. My goal is to provide an open-source, transparent, and educational tool that can empower developers and researchers to build their own language models effectively.</p><p>Thank you for following my journey. I look forward to sharing more updates, tutorials, and insights on SnowflakeCore in the near future.</p><p>— Daniel</p>"
+  },
+  {
+    "id":"3",
+    "title":"Experimenting with TensorFlow for SnowflakeCore",
+    "date":"2025-06-18",
+    "summery":"",
+    "content":"<p>I encountered a issue while training SnowflakeCore-G0-R3, that beinf the computation power needed for mapping and training. So I am swithcing from PyTorch to TensorFlow for now so i could use Google's TPUs.</p>"
+  },
+  {
+    "id":"4",
+    "title":"Starting the development of SnowflakeCore-G1 and the issues with it",
+    "date":"2025-06-26",
+    "summery":"Yey, new text-gen.",
+    "content":"<p>Pre-Training G1 it's way too expsnive, using over 300GB of RAM!</p>"
+  }
+]
