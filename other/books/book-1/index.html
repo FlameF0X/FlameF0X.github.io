@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Daniel.FlameFox Portfolio</title>
+    <title>My Book - Daniel.FlameFox</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/-qgGeUlEsf5z-jilWawyO.png" type="image/png">
     <style>
+        /* CSS Variables for consistent theming */
         :root {
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --primary-dark: #4f46e5;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --new-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --new-glow: 0 0 30px rgba(102, 102, 234, 0.3);
-            --pulse-color: rgba(102, 102, 234, 0.4);
+            --primary: #6366f1; /* Indigo 500 */
+            --primary-light: #818cf8; /* Indigo 400 */
+            --primary-dark: #4f46e5; /* Indigo 600 */
+            --dark-bg: #0f172a; /* Slate 900 */
+            --card-bg: #1e293b; /* Slate 800 */
+            --text: #f8fafc; /* Slate 50 */
+            --text-secondary: #cbd5e1; /* Slate 300 */
+            --new-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Custom gradient for emphasis */
+            --new-glow: 0 0 30px rgba(102, 102, 234, 0.3); /* Subtle glow effect */
         }
 
+        /* Global reset and font settings */
         * {
             margin: 0;
             padding: 0;
@@ -28,18 +29,22 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        /* Body styling */
         body {
             min-height: 100vh;
             background-color: var(--dark-bg);
             color: var(--text);
+            line-height: 1.6; /* Improved readability */
         }
 
+        /* Main container for content */
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 1.5rem;
         }
 
+        /* Header styling */
         .header {
             display: flex;
             justify-content: space-between;
@@ -49,6 +54,7 @@
             margin-bottom: 1.5rem;
         }
 
+        /* Logo styling with gradient text */
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
@@ -60,6 +66,7 @@
             gap: 0.5rem;
         }
 
+        /* Navigation menu styling */
         .nav ul {
             display: flex;
             gap: 1.5rem;
@@ -74,6 +81,7 @@
             position: relative;
         }
 
+        /* Underline effect on hover for navigation links */
         .nav a:after {
             content: '';
             position: absolute;
@@ -89,6 +97,11 @@
             color: var(--primary-light);
         }
 
+        .nav a:hover:after {
+            width: 100%;
+        }
+
+        /* Section styling for main content areas */
         .section {
             background-color: var(--card-bg);
             padding: 1.5rem;
@@ -97,11 +110,14 @@
             margin-bottom: 1.5rem;
         }
 
+        /* Controls for sorting/filtering chapters */
         .sort-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 1rem; /* Space between elements */
         }
 
         .sort-select {
@@ -113,17 +129,23 @@
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: all 0.3s;
+            appearance: none; /* Remove default select arrow */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-6.5%200-12.3%203.2-16.1%208.1-3.9%204.9-4.7%2011.6-2.6%2017.6l139%20168c4.4%205.3%2010.8%208.6%2017.8%208.6s13.4-3.3%2017.8-8.6l139-168c2.1-6%201.3-12.7-2.6-17.6z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7em top 50%, 0 0;
+            background-size: 0.65em auto, 100%;
         }
 
         .sort-select:hover {
             border-color: var(--primary-light);
         }
 
-        .post-summary {
+        /* Chapter summary styling */
+        .chapter-summary {
             color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 1.5rem;
-            background: #212e43;
+            background: #212e43; /* Darker background for individual chapters */
             padding: 20px;
             border-radius: 15px;
             position: relative;
@@ -132,94 +154,14 @@
             border: 2px solid transparent;
         }
 
-        .post-summary:hover {
+        .chapter-summary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-light); /* Highlight border on hover */
         }
 
-        /* New post highlighting styles */
-        .post-summary.new-post {
-            background: var(--new-gradient);
-            border: 2px solid var(--primary-light);
-            box-shadow: var(--new-glow);
-            animation: subtle-pulse 3s infinite;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .post-summary.new-post::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shimmer 2s infinite;
-            pointer-events: none;
-        }
-
-        .post-summary.new-post:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(102, 102, 234, 0.4);
-        }
-
-        .new-badge {
-            position: absolute;
-            top: -5px;
-            right: 15px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            animation: badge-bounce 2s infinite;
-        }
-
-        .trending-icon {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #ffd700;
-            font-size: 1.2rem;
-            animation: trending-glow 2s infinite alternate;
-        }
-
-        @keyframes subtle-pulse {
-            0%, 100% { 
-                box-shadow: var(--new-glow);
-            }
-            50% { 
-                box-shadow: 0 0 40px rgba(102, 102, 234, 0.5);
-            }
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-
-        @keyframes badge-bounce {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
-        }
-
-        @keyframes trending-glow {
-            0% { 
-                text-shadow: 0 0 5px #ffd700;
-                transform: scale(1);
-            }
-            100% { 
-                text-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700;
-                transform: scale(1.1);
-            }
-        }
-
-        .post-title {
+        /* Chapter title styling */
+        .chapter-title {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-light);
@@ -229,42 +171,25 @@
             position: relative;
         }
 
-        .post-summary.new-post .post-title {
-            color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            font-weight: 700;
+        .chapter-summary:hover .chapter-title {
+            color: var(--primary); /* Darker primary on hover */
         }
 
-        .post-title:hover {
-            color: var(--primary);
-        }
-
-        .post-summary.new-post .post-title:hover {
-            color: #f0f8ff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-
-        .post-date {
+        /* Chapter date/metadata styling */
+        .chapter-meta {
             font-size: 0.9rem;
             color: var(--text-secondary);
             margin-bottom: 1rem;
             font-family: 'Roboto Mono', monospace;
         }
 
-        .post-summary.new-post .post-date {
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        .post-content-summary {
+        /* Chapter content summary styling */
+        .chapter-content-summary {
             color: var(--text-secondary);
             line-height: 1.6;
         }
 
-        .post-summary.new-post .post-content-summary {
-            color: rgba(255, 255, 255, 0.95);
-        }
-
+        /* Back button styling */
         #back-btn {
             display: inline-flex;
             align-items: center;
@@ -273,18 +198,48 @@
             cursor: pointer;
             margin-bottom: 1.5rem;
             transition: color 0.3s;
+            font-size: 1.1rem; /* Slightly larger for better clickability */
+            font-weight: 500;
         }
 
         #back-btn:hover {
             color: var(--primary);
         }
 
-        .post-content-text {
-            line-height: 1.6;
+        /* Full chapter content styling */
+        .chapter-full-content {
+            line-height: 1.8; /* Increased line-height for readability of long text */
             color: var(--text-secondary);
             margin-top: 1rem;
+            font-size: 1.05rem; /* Slightly larger font for main content */
         }
 
+        .chapter-full-content h1,
+        .chapter-full-content h2,
+        .chapter-full-content h3,
+        .chapter-full-content h4,
+        .chapter-full-content h5,
+        .chapter-full-content h6 {
+            color: var(--primary-light);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .chapter-full-content p {
+            margin-bottom: 1rem;
+        }
+
+        .chapter-full-content ul,
+        .chapter-full-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chapter-full-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Section title for "Table of Contents" */
         .section-title {
             font-size: 2rem;
             margin-bottom: 0;
@@ -295,18 +250,20 @@
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
-            .new-badge {
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 3px 8px;
+            .sort-controls {
+                flex-direction: column;
+                align-items: flex-start;
             }
-            
-            .trending-icon {
-                right: 10px;
-                font-size: 1rem;
+
+            .section-title {
+                font-size: 1.75rem;
             }
-            
-            .post-summary {
+
+            .chapter-title {
+                font-size: 1.3rem;
+            }
+
+            .chapter-summary {
                 padding: 15px;
             }
         }
@@ -316,132 +273,145 @@
     <div class="container">
         <header class="header">
             <div class="logo">
-                <i class="fas fa-code"></i>
-                <span>Daniel.FlameFox</span>
+                <i class="fas fa-book-open"></i> <!-- Changed icon to a book -->
+                <span>My Book</span>
             </div>
             <nav class="nav">
                 <ul>
-                    <li><a href="/">Home</a></li>
+                    <li><a href="#" id="home-link">Table of Contents</a></li>
                 </ul>
             </nav>
         </header>
 
         <div class="sort-controls">
-            <h1 class="section-title">Blog Posts</h1>
+            <h1 class="section-title" id="main-title">Table of Contents</h1>
             <select class="sort-select" id="sort-select">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
+                <option value="chapter-asc">Chapter Number (Asc)</option>
+                <option value="chapter-desc">Chapter Number (Desc)</option>
                 <option value="title-asc">Title (A-Z)</option>
                 <option value="title-desc">Title (Z-A)</option>
             </select>
         </div>
 
-        <div id="posts-list" class="section"></div>
-        <div id="post-content" class="section" style="display: none;"></div>
+        <div id="chapters-list" class="section"></div>
+        <div id="chapter-content" class="section" style="display: none;"></div>
 
         <script>
-            const postsListEl = document.getElementById('posts-list');
-            const postContentEl = document.getElementById('post-content');
+            const chaptersListEl = document.getElementById('chapters-list');
+            const chapterContentEl = document.getElementById('chapter-content');
             const sortSelect = document.getElementById('sort-select');
-            const backBtnId = 'back-btn';
+            const mainTitleEl = document.getElementById('main-title');
+            const homeLinkEl = document.getElementById('home-link');
+            const backBtnId = 'back-to-toc-btn'; // Unique ID for the back button
 
-            let posts = [];
+            let chapters = []; // Array to hold book chapter data
 
-            // Check if a post is "new" (within last 7 days)
-            function isNewPost(dateString) {
-                const postDate = new Date(dateString);
-                const now = new Date();
-                const diffTime = Math.abs(now - postDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 7;
-            }
-
-            // Check if a post is "hot" (within last 3 days)
-            function isHotPost(dateString) {
-                const postDate = new Date(dateString);
-                const now = new Date();
-                const diffTime = Math.abs(now - postDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 3;
-            }
-
-            function sortPosts() {
+            /**
+             * Sorts the chapters based on the selected option and re-renders the table of contents.
+             */
+            function sortChapters() {
                 switch(sortSelect.value) {
-                    case 'newest':
-                        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    case 'chapter-asc':
+                        chapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
                         break;
-                    case 'oldest':
-                        posts.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    case 'chapter-desc':
+                        chapters.sort((a, b) => b.chapterNumber - a.chapterNumber);
                         break;
                     case 'title-asc':
-                        posts.sort((a, b) => a.title.localeCompare(b.title));
+                        chapters.sort((a, b) => a.title.localeCompare(b.title));
                         break;
                     case 'title-desc':
-                        posts.sort((a, b) => b.title.localeCompare(a.title));
+                        chapters.sort((a, b) => b.title.localeCompare(a.title));
                         break;
                 }
-                renderPostsList();
+                renderTableOfContents();
             }
 
-            function renderPostsList() {
-                postContentEl.style.display = 'none';
-                postsListEl.style.display = 'block';
-                postsListEl.innerHTML = posts.map(post => {
-                    const isNew = isNewPost(post.date);
-                    const isHot = isHotPost(post.date);
-                    
+            /**
+             * Renders the list of chapters as a table of contents.
+             * Hides the individual chapter content view.
+             */
+            function renderTableOfContents() {
+                chapterContentEl.style.display = 'none';
+                chaptersListEl.style.display = 'block';
+                mainTitleEl.textContent = 'Table of Contents'; // Update main title
+                sortSelect.style.display = 'block'; // Show sort select
+
+                chaptersListEl.innerHTML = chapters.map(chapter => {
                     return `
-                        <div class="post-summary ${isNew ? 'new-post' : ''}" data-id="${post.id}">
-                            
-                            ${isHot ? '<i class="fas fa-fire trending-icon"></i>' : ''}
-                            <div class="post-title">${post.title}</div>
-                            <div class="post-date">${post.date}</div>
-                            <div class="post-content-summary">${post.summary}</div>
+                        <div class="chapter-summary" data-id="${chapter.id}">
+                            <div class="chapter-title">Chapter ${chapter.chapterNumber}: ${chapter.title}</div>
+                            <div class="chapter-meta">Published: ${chapter.date}</div>
+                            <div class="chapter-content-summary">${chapter.summary}</div>
                         </div>
                     `;
                 }).join('');
             }
 
-            function showPost(post) {
-                postsListEl.style.display = 'none';
-                postContentEl.style.display = 'block';
-                postContentEl.innerHTML = `
-                    <div id="${backBtnId}" class="post-title">
+            /**
+             * Displays the full content of a selected chapter.
+             * Hides the table of contents view.
+             * @param {Object} chapter - The chapter object to display.
+             */
+            function showChapter(chapter) {
+                chaptersListEl.style.display = 'none';
+                sortSelect.style.display = 'none'; // Hide sort select when viewing chapter
+                chapterContentEl.style.display = 'block';
+                mainTitleEl.textContent = chapter.title; // Update main title to chapter title
+
+                chapterContentEl.innerHTML = `
+                    <div id="${backBtnId}">
                         <i class="fas fa-arrow-left"></i>
-                        Back to All Posts
+                        Back to Table of Contents
                     </div>
-                    <h2 class="post-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${post.title}</h2>
-                    <div class="post-date">${post.date}</div>
-                    <div class="post-content-text">${post.content}</div>
+                    <h2 class="chapter-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${chapter.title}</h2>
+                    <div class="chapter-meta">Chapter ${chapter.chapterNumber} | Published: ${chapter.date}</div>
+                    <div class="chapter-full-content">${chapter.content}</div>
                 `;
 
                 const backBtn = document.getElementById(backBtnId);
-                backBtn.onclick = () => renderPostsList();
+                if (backBtn) {
+                    backBtn.onclick = () => renderTableOfContents();
+                }
             }
 
-            // Load posts from JSON file
-            fetch('blog-posts.json')
-                .then(res => res.json())
+            // Load chapters from book.json file
+            fetch('book.json')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
                 .then(data => {
-                    posts = data;
-                    sortPosts();
-                    
-                    postsListEl.addEventListener('click', e => {
-                        const postElement = e.target.closest('.post-summary');
-                        if (postElement) {
-                            const postId = postElement.dataset.id;
-                            const post = posts.find(p => p.id === postId);
-                            showPost(post);
+                    chapters = data;
+                    sortChapters(); // Initial sort and render
+
+                    // Event listener for clicking on chapter summaries
+                    chaptersListEl.addEventListener('click', e => {
+                        const chapterElement = e.target.closest('.chapter-summary');
+                        if (chapterElement) {
+                            const chapterId = chapterElement.dataset.id;
+                            const chapter = chapters.find(c => c.id === chapterId);
+                            if (chapter) {
+                                showChapter(chapter);
+                            }
                         }
+                    });
+
+                    // Event listener for the "Table of Contents" link in the header
+                    homeLinkEl.addEventListener('click', (e) => {
+                        e.preventDefault(); // Prevent default link behavior
+                        renderTableOfContents();
                     });
                 })
                 .catch(err => {
-                    postsListEl.innerHTML = '<p class="post-content-summary">Failed to load blog posts. Make sure blog-posts.json exists in the same directory.</p>';
-                    console.error(err);
+                    chaptersListEl.innerHTML = '<p class="chapter-content-summary">Failed to load book chapters. Please ensure <code>book.json</code> exists and is correctly formatted.</p>';
+                    console.error('Error loading book data:', err);
                 });
 
             // Sort event listener
-            sortSelect.addEventListener('change', sortPosts);
+            sortSelect.addEventListener('change', sortChapters);
         </script>
     </div>
 </body>
