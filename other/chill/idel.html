@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLED Idle Screen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            cursor: none;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+        }
+
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-60px, -60px);
+            }
+        }
+
+        .floating-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .dot {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #333;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-20px);
+                opacity: 0.8;
+            }
+        }
+
+        .time-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #444;
+            font-size: 4rem;
+            font-weight: 300;
+            text-align: center;
+            animation: pulse 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(68, 68, 68, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .date-display {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 300;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .corner-accent {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 1px solid rgba(40, 40, 40, 0.5);
+            border-radius: 50%;
+            animation: cornerPulse 6s ease-in-out infinite;
+        }
+
+        .corner-accent.top-left {
+            top: 30px;
+            left: 30px;
+        }
+
+        .corner-accent.top-right {
+            top: 30px;
+            right: 30px;
+        }
+
+        .corner-accent.bottom-left {
+            bottom: 30px;
+            left: 30px;
+        }
+
+        .corner-accent.bottom-right {
+            bottom: 30px;
+            right: 30px;
+        }
+
+        @keyframes cornerPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+        }
+
+        .breathing-light {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 50%;
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(42, 42, 42, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(42, 42, 42, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid"></div>
+        
+        <div class="floating-dots" id="floatingDots"></div>
+        
+        <div class="time-display" id="timeDisplay">00:00</div>
+        <div class="date-display" id="dateDisplay">Loading...</div>
+        
+        <div class="corner-accent top-left"></div>
+        <div class="corner-accent top-right"></div>
+        <div class="corner-accent bottom-left"></div>
+        <div class="corner-accent bottom-right"></div>
+        
+        <div class="breathing-light"></div>
+    </div>
+
+    <script>
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('timeDisplay').textContent = timeString;
+            document.getElementById('dateDisplay').textContent = dateString;
+        }
+
+        // Create floating dots
+        function createFloatingDots() {
+            const container = document.getElementById('floatingDots');
+            const dotCount = 15;
+            
+            for (let i = 0; i < dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.top = Math.random() * 100 + '%';
+                dot.style.animationDelay = Math.random() * 8 + 's';
+                dot.style.animationDuration = (8 + Math.random() * 4) + 's';
+                container.appendChild(dot);
+            }
+        }
+
+        // Initialize
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        createFloatingDots();
+
+        // Optional: Hide cursor after inactivity
+        let cursorTimeout;
+        document.addEventListener('mousemove', () => {
+            document.body.style.cursor = 'default';
+            clearTimeout(cursorTimeout);
+            cursorTimeout = setTimeout(() => {
+                document.body.style.cursor = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
