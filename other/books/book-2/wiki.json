@@ -11,44 +11,5 @@
     "abilities": ["Pyromancy", "Basic Healing Spells", "Enhanced Agility"],
     "affiliations": ["Arcane Academy (former student)", "The Ember Guard"],
     "firstAppearance": "Chapter 1: The First Spark"
-  },
-  {
-    "id": "char2",
-    "name": "Kael",
-    "age": 35,
-    "genderPronouns": "He/Him",
-    "sexuality": "Asexual",
-    "occupation": "Wanderer, former Soldier",
-    "description": "A stoic and experienced warrior, Kael is a master of close combat and an expert tracker. He carries a heavy burden from his past, which often makes him reserved and cautious. Despite his gruff exterior, he has a hidden soft spot for those he protects.",
-    "backstoryShort": "Once a decorated soldier, Kael deserted his post after a morally compromising mission. He now roams the lands, seeking to atone for his past and find a new purpose, often helping those in need from the shadows.",
-    "abilities": ["Swordsmanship", "Tracking", "Survivalist"],
-    "affiliations": ["The Silent Blades (disbanded)", "The Nomad Collective"],
-    "firstAppearance": "Chapter 2: Echoes in the Forest"
-  },
-  {
-    "id": "char3",
-    "name": "Lyra",
-    "age": 24,
-    "genderPronouns": "She/Her",
-    "sexuality": "Pansexual",
-    "occupation": "Rogue, Information Broker",
-    "description": "A mischievous and cunning rogue, Lyra excels in stealth and subterfuge. She has a sharp wit and an even sharper dagger. While she often operates alone, her loyalty, once earned, is unwavering. She has a mysterious connection to the underworld of the city.",
-    "backstoryShort": "Orphaned at a young age, Lyra grew up on the streets, learning to survive by her wits. She became an adept rogue and carved out a niche as an information broker, navigating the city's criminal underbelly with ease.",
-    "abilities": ["Stealth", "Lockpicking", "Dagger Combat", "Shadow Manipulation"],
-    "affiliations": ["The Shadow Syndicate (loose ties)"],
-    "firstAppearance": "Chapter 3: Whispers in the Alley"
-  },
-  {
-    "id": "char4",
-    "name": "Professor Eldrin",
-    "age": 68,
-    "genderPronouns": "He/Him",
-    "sexuality": "N/A",
-    "occupation": "Archivist, Scholar",
-    "description": "An eccentric but brilliant scholar and archivist, Professor Eldrin possesses vast knowledge of ancient history and forgotten languages. He is often lost in his books but can provide invaluable insights when his attention is captured. He has a peculiar habit of talking to himself.",
-    "backstoryShort": "Professor Eldrin has dedicated his life to the pursuit of knowledge, spending decades within the Grand Library of Veridia. His past is shrouded in academic pursuits and quiet research, with little known beyond his scholarly achievements.",
-    "abilities": ["Ancient Lore", "Linguistics", "Minor Illusions"],
-    "affiliations": ["Grand Library of Veridia"],
-    "firstAppearance": "Chapter 4: The Forgotten Scrolls"
   }
 ]
