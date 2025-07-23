@@ -1,0 +1,34 @@
+[
+  {
+    "id": "char1",
+    "name": "Anya",
+    "description": "A young, aspiring mage with a knack for elemental magic, particularly fire. She is fiercely loyal to her friends and possesses a strong sense of justice. Anya often struggles with controlling her emotions, which can sometimes lead to unpredictable magical outbursts.",
+    "abilities": ["Pyromancy", "Basic Healing Spells", "Enhanced Agility"],
+    "affiliations": ["Arcane Academy (former student)", "The Ember Guard"],
+    "firstAppearance": "Chapter 1: The First Spark"
+  },
+  {
+    "id": "char2",
+    "name": "Kael",
+    "description": "A stoic and experienced warrior, Kael is a master of close combat and an expert tracker. He carries a heavy burden from his past, which often makes him reserved and cautious. Despite his gruff exterior, he has a hidden soft spot for those he protects.",
+    "abilities": ["Swordsmanship", "Tracking", "Survivalist"],
+    "affiliations": ["The Silent Blades (disbanded)", "The Nomad Collective"],
+    "firstAppearance": "Chapter 2: Echoes in the Forest"
+  },
+  {
+    "id": "char3",
+    "name": "Lyra",
+    "description": "A mischievous and cunning rogue, Lyra excels in stealth and subterfuge. She has a sharp wit and an even sharper dagger. While she often operates alone, her loyalty, once earned, is unwavering. She has a mysterious connection to the underworld of the city.",
+    "abilities": ["Stealth", "Lockpicking", "Dagger Combat", "Shadow Manipulation"],
+    "affiliations": ["The Shadow Syndicate (loose ties)"],
+    "firstAppearance": "Chapter 3: Whispers in the Alley"
+  },
+  {
+    "id": "char4",
+    "name": "Professor Eldrin",
+    "description": "An eccentric but brilliant scholar and archivist, Professor Eldrin possesses vast knowledge of ancient history and forgotten languages. He is often lost in his books but can provide invaluable insights when his attention is captured. He has a peculiar habit of talking to himself.",
+    "abilities": ["Ancient Lore", "Linguistics", "Minor Illusions"],
+    "affiliations": ["Grand Library of Veridia"],
+    "firstAppearance": "Chapter 4: The Forgotten Scrolls"
+  }
+]
