@@ -1,6 +1,7 @@
 [
   {
     "title": "Your Book Title",
+    "author": "Daniel Fox",
     "path": "book-1/index.html",
     "description": "A compelling description of your book that will draw readers in.",
     "lastUpdated": "2024-01-15",
@@ -10,7 +11,8 @@
     "tags": ["Fanfict", "Adventure"]
   },
   {
-    "title": "Another Book",
+    "title": "Another Book", 
+    "author": "Daniel Fox & [Name]",
     "path": "book-2/index.html", 
     "description": "Another amazing story waiting to be discovered.",
     "lastUpdated": "2024-06-23",
