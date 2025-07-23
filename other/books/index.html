@@ -23,6 +23,7 @@
             --nsfw-red-dark: #dc2626;
             --tag-bg: #374151;
             --tag-hover: #4b5563;
+            --author-color: #10b981; /* Emerald 500 */
         }
 
         /* Global reset and font settings */
@@ -133,7 +134,7 @@
             font-size: 1.75rem;
             font-weight: 600;
             color: var(--primary-light);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -142,6 +143,21 @@
         .book-icon {
             font-size: 1.5rem;
             color: var(--primary);
+        }
+
+        /* Book author styling */
+        .book-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: var(--author-color);
+            font-weight: 500;
+        }
+
+        .book-author i {
+            font-size: 0.875rem;
         }
 
         /* Book metadata */
@@ -401,6 +417,10 @@
                     ? `<div class="book-status"><span class="status-badge ${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span></div>`
                     : '';
 
+                const authorHTML = book.author 
+                    ? `<div class="book-author"><i class="fas fa-user-pen"></i>${book.author}</div>`
+                    : '';
+
                 return `
                     <div class="book-card" onclick="window.location.href='${book.path}'">
                         ${statusBadge}
@@ -409,6 +429,7 @@
                                 <i class="book-icon ${book.icon || 'fas fa-book'}"></i>
                                 ${book.title}
                             </h2>
+                            ${authorHTML}
                             <div class="book-meta">
                                 <span>Last updated: ${book.lastUpdated}</span>
                                 <span class="chapter-count">${book.chapterCount} chapters</span>
