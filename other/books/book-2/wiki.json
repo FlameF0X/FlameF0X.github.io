@@ -3,13 +3,13 @@
     "id": "char1",
     "name": "Anya",
     "age": 19,
-    "genderPronouns": "She/Her",
-    "sexuality": "Heterosexual",
-    "occupation": "Apprentice Mage",
-    "description": "A young, aspiring mage with a knack for elemental magic, particularly fire. She is fiercely loyal to her friends and possesses a strong sense of justice. Anya often struggles with controlling her emotions, which can sometimes lead to unpredictable magical outbursts.",
-    "backstoryShort": "Raised in a small village, Anya discovered her magical abilities at a young age, leading her to the Arcane Academy. After a tragic incident, she left the Academy to join the Ember Guard, seeking to use her powers for good.",
-    "abilities": ["Pyromancy", "Basic Healing Spells", "Enhanced Agility"],
-    "affiliations": ["Arcane Academy (former student)", "The Ember Guard"],
-    "firstAppearance": "Chapter 1: The First Spark"
+    "genderPronouns": "Non-binary (They/Them)",
+    "sexuality": "Pansexual",
+    "occupation": "Building random stuff in the garage",
+    "description": "A young, lovely, non-binary teen that is very creative and enjoys spending time with their friends. They are afraid of abandon so they dot everything to stay friends.",
+    "backstoryShort": "Born in a small homophobic town from Willowmere and rejected by their parents, Anya runs from home to Emberfall, a big city from the East Coast. Hoping of finding some allays and friends.",
+    "abilities": ["None"],
+    "affiliations": ["The Foundry Collective","Garage Workshop Crew"],
+    "firstAppearance": "Chapter 1: The Accident"
   }
 ]
