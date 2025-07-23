@@ -145,7 +145,7 @@
         }
 
         /* Chapter summary styling */
-        .chapter-summary {
+        .chapter-summary, .character-summary {
             color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 1.5rem;
@@ -158,14 +158,14 @@
             border: 2px solid transparent;
         }
 
-        .chapter-summary:hover {
+        .chapter-summary:hover, .character-summary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             border-color: var(--primary-light); /* Highlight border on hover */
         }
 
         /* Chapter title styling */
-        .chapter-title {
+        .chapter-title, .character-name {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-light);
@@ -175,12 +175,12 @@
             position: relative;
         }
 
-        .chapter-summary:hover .chapter-title {
+        .chapter-summary:hover .chapter-title, .character-summary:hover .character-name {
             color: var(--primary); /* Darker primary on hover */
         }
 
         /* Chapter date/metadata styling */
-        .chapter-meta {
+        .chapter-meta, .character-meta {
             font-size: 0.9rem;
             color: var(--text-secondary);
             margin-bottom: 1rem;
@@ -188,13 +188,13 @@
         }
 
         /* Chapter content summary styling */
-        .chapter-content-summary {
+        .chapter-content-summary, .character-description-summary {
             color: var(--text-secondary);
             line-height: 1.6;
         }
 
         /* Tags container styling */
-        .chapter-tags {
+        .chapter-tags, .character-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
@@ -331,7 +331,7 @@
         }
 
         /* Back button styling */
-        #back-btn {
+        .back-btn { /* Changed from ID to class for reusability */
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -343,12 +343,12 @@
             font-weight: 500;
         }
 
-        #back-btn:hover {
+        .back-btn:hover {
             color: var(--primary);
         }
 
         /* Full chapter content styling */
-        .chapter-full-content {
+        .chapter-full-content, .character-full-details {
             line-height: 1.8; /* Increased line-height for readability of long text */
             color: var(--text-secondary);
             margin-top: 1rem;
@@ -360,23 +360,31 @@
         .chapter-full-content h3,
         .chapter-full-content h4,
         .chapter-full-content h5,
-        .chapter-full-content h6 {
+        .chapter-full-content h6,
+        .character-full-details h1,
+        .character-full-details h2,
+        .character-full-details h3,
+        .character-full-details h4,
+        .character-full-details h5,
+        .character-full-details h6 {
             color: var(--primary-light);
             margin-top: 1.5rem;
             margin-bottom: 0.8rem;
         }
 
-        .chapter-full-content p {
+        .chapter-full-content p, .character-full-details p {
             margin-bottom: 1rem;
         }
 
         .chapter-full-content ul,
-        .chapter-full-content ol {
+        .chapter-full-content ol,
+        .character-full-details ul,
+        .character-full-details ol {
             margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
 
-        .chapter-full-content li {
+        .chapter-full-content li, .character-full-details li {
             margin-bottom: 0.5rem;
         }
 
@@ -405,11 +413,11 @@
                 font-size: 1.75rem;
             }
 
-            .chapter-title {
+            .chapter-title, .character-name {
                 font-size: 1.3rem;
             }
 
-            .chapter-summary {
+            .chapter-summary, .character-summary {
                 padding: 15px;
             }
 
@@ -433,6 +441,7 @@
             <nav class="nav">
                 <ul>
                     <li><a href="#" id="home-link">Table of Contents</a></li>
+                    <li><a href="#" id="wiki-link">Characters Wiki</a></li> <!-- New Wiki Link -->
                 </ul>
             </nav>
         </header>
@@ -449,6 +458,8 @@
 
         <div id="chapters-list" class="section"></div>
         <div id="chapter-content" class="section" style="display: none;"></div>
+        <div id="wiki-list" class="section" style="display: none;"></div> <!-- New Wiki List Container -->
+        <div id="character-content" class="section" style="display: none;"></div> <!-- New Character Detail Container -->
 
         <!-- Age Verification Modal -->
         <div id="age-verification-modal" class="age-verification-modal hidden">
@@ -474,19 +485,86 @@
         </div>
 
         <script>
+            // Mock book.json content for demonstration purposes.
+            // In a real scenario, this would be fetched from a 'book.json' file.
+            /*
+            [
+                {
+                    "id": "chap1",
+                    "chapterNumber": 1,
+                    "title": "The Whispering Woods",
+                    "date": "2023-01-15",
+                    "summary": "A young adventurer embarks on a perilous journey through the ancient, enchanted Whispering Woods, encountering strange creatures and forgotten lore.",
+                    "content": "<p>Deep within the heart of the Eldoria, lay the Whispering Woods, a place of ancient magic and forgotten tales. Elara, a young apprentice cartographer, found herself drawn to its mysteries, armed with only a compass and her grandmother's cryptic notes...</p><p>The trees themselves seemed to hum with a low, resonant energy, and the path ahead was barely visible beneath a carpet of luminous moss. Every rustle of leaves, every distant hoot of an owl, felt like a secret whispered just for her ears.</p>"
+                },
+                {
+                    "id": "chap2",
+                    "chapterNumber": 2,
+                    "title": "Shadows of the Forgotten City",
+                    "date": "2023-02-20",
+                    "summary": "Elara discovers the ruins of an ancient city, long lost to time, and uncovers a dark secret that threatens the balance of the realm.",
+                    "content": "<p>Beyond the Whispering Woods, hidden by an illusion woven by powerful mages, lay the ruins of Aerthos, the forgotten city. Its stone structures, once grand and imposing, were now crumbling husks, overgrown with vines and shrouded in an eerie silence.</p><p>As Elara delved deeper, she found murals depicting a civilization that worshipped shadows, and a chilling prophecy foretelling a great darkness. The air grew heavy, and a sense of dread settled upon her as she realized the true nature of the city's demise.</p>"
+                },
+                {
+                    "id": "chap3",
+                    "chapterNumber": 3,
+                    "title": "The Crimson Blade",
+                    "date": "2023-03-10",
+                    "summary": "A fierce battle ensues as Elara confronts the ancient evil awakened in Aerthos, wielding a legendary artifact to save her world.",
+                    "tags": ["Action", "Fantasy", "Violence", "NSFW"],
+                    "content": "<p>The air crackled with raw magic as the ancient entity, a being of pure shadow, rose from the depths of Aerthos. Its form was a swirling vortex of darkness, eyes glowing with malevolent intent. Elara, gripping the newly discovered Crimson Blade, felt a surge of ancient power flow through her veins.</p><p>The clash was cataclysmic. Spells of light met waves of shadow, and the ground trembled with each strike of the Crimson Blade. This was not merely a fight for survival, but a battle for the very soul of Eldoria. The details of the struggle were brutal, unforgiving, and left an indelible mark on the landscape and on Elara's spirit.</p>"
+                }
+            ]
+            */
+
+            // Mock wiki.json content for demonstration purposes.
+            // In a real scenario, this would be fetched from a 'wiki.json' file.
+            /*
+            [
+              {
+                "id": "char1",
+                "name": "Elias Vance",
+                "description": "A seasoned adventurer with a mysterious past, known for his quick wit and mastery of ancient runes. He often travels with his loyal companion, a griffin named Aerion.",
+                "abilities": ["Rune Magic", "Survival Skills", "Animal Empathy"],
+                "affiliations": ["Order of the Whispering Wind"],
+                "firstAppearance": "Chapter 1"
+              },
+              {
+                "id": "char2",
+                "name": "Lyra Shadowbrook",
+                "description": "A nimble rogue from the shadowed alleys of Silverpine, Lyra is an expert in stealth and lockpicking. Her true motivations are often hidden behind a veil of sarcasm.",
+                "abilities": ["Stealth", "Lockpicking", "Dagger Combat"],
+                "affiliations": ["None (Freelancer)"],
+                "firstAppearance": "Chapter 3"
+              },
+              {
+                "id": "char3",
+                "name": "Kaelen Stormheart",
+                "description": "A powerful warrior and former knight, Kaelen seeks redemption for past mistakes. He wields a massive two-handed sword and possesses incredible strength.",
+                "abilities": ["Greatsword Mastery", "Superhuman Strength", "Battle Cry"],
+                "affiliations": ["Disgraced Knights of Eldoria"],
+                "firstAppearance": "Chapter 2"
+              }
+            ]
+            */
+
             const chaptersListEl = document.getElementById('chapters-list');
             const chapterContentEl = document.getElementById('chapter-content');
+            const wikiListEl = document.getElementById('wiki-list'); // New Wiki List Element
+            const characterContentEl = document.getElementById('character-content'); // New Character Content Element
             const sortSelect = document.getElementById('sort-select');
             const mainTitleEl = document.getElementById('main-title');
             const homeLinkEl = document.getElementById('home-link');
+            const wikiLinkEl = document.getElementById('wiki-link'); // New Wiki Link Element
             const ageModal = document.getElementById('age-verification-modal');
             const ageConfirm = document.getElementById('age-confirm');
             const ageDecline = document.getElementById('age-decline');
-            const backBtnId = 'back-to-toc-btn';
-
+            
             let chapters = [];
+            let characters = []; // To store character data
             let ageVerified = false;
             let pendingNsfwChapter = null;
+            let currentView = 'chapters'; // 'chapters', 'wiki', 'chapter-detail', 'character-detail'
 
             /**
              * Shows the age verification modal
@@ -538,13 +616,17 @@
 
             /**
              * Renders the list of chapters as a table of contents.
-             * Hides the individual chapter content view.
+             * Hides other views.
              */
             function renderTableOfContents() {
                 chapterContentEl.style.display = 'none';
+                wikiListEl.style.display = 'none';
+                characterContentEl.style.display = 'none';
                 chaptersListEl.style.display = 'block';
+                
                 mainTitleEl.textContent = 'Table of Contents';
                 sortSelect.style.display = 'block';
+                currentView = 'chapters';
 
                 chaptersListEl.innerHTML = chapters.map(chapter => {
                     const tagsHtml = chapter.tags && chapter.tags.length > 0 
@@ -564,21 +646,25 @@
 
             /**
              * Displays the full content of a selected chapter.
-             * Hides the table of contents view.
+             * Hides other views.
              * @param {Object} chapter - The chapter object to display.
              */
             function showChapter(chapter) {
                 chaptersListEl.style.display = 'none';
                 sortSelect.style.display = 'none';
+                wikiListEl.style.display = 'none';
+                characterContentEl.style.display = 'none';
                 chapterContentEl.style.display = 'block';
+                
                 mainTitleEl.textContent = chapter.title;
+                currentView = 'chapter-detail';
 
                 const tagsHtml = chapter.tags && chapter.tags.length > 0 
                     ? `<div class="chapter-tags">${chapter.tags.map(tag => renderTag(tag)).join('')}</div>`
                     : '';
 
                 chapterContentEl.innerHTML = `
-                    <div id="${backBtnId}">
+                    <div class="back-btn" data-target="chapters-list">
                         <i class="fas fa-arrow-left"></i>
                         Back to Table of Contents
                     </div>
@@ -588,10 +674,8 @@
                     <div class="chapter-full-content">${chapter.content}</div>
                 `;
 
-                const backBtn = document.getElementById(backBtnId);
-                if (backBtn) {
-                    backBtn.onclick = () => renderTableOfContents();
-                }
+                // Add event listener for the back button
+                chapterContentEl.querySelector('.back-btn').addEventListener('click', () => renderTableOfContents());
             }
 
             /**
@@ -611,6 +695,102 @@
                     showChapter(chapter);
                 }
             }
+
+            /**
+             * Renders the list of characters for the wiki.
+             * Hides other views.
+             */
+            function showCharactersWiki() {
+                chaptersListEl.style.display = 'none';
+                chapterContentEl.style.display = 'none';
+                characterContentEl.style.display = 'none';
+                sortSelect.style.display = 'none'; // Sort select is only for chapters
+                wikiListEl.style.display = 'block';
+
+                mainTitleEl.textContent = 'Characters Wiki';
+                currentView = 'wiki';
+
+                if (characters.length === 0) {
+                    wikiListEl.innerHTML = '<p class="character-description-summary">Loading characters...</p>';
+                    fetch('wiki.json')
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error(`HTTP error! status: ${res.status}`);
+                            }
+                            return res.json();
+                        })
+                        .then(data => {
+                            characters = data;
+                            renderCharacterList();
+                        })
+                        .catch(err => {
+                            wikiListEl.innerHTML = '<p class="character-description-summary">Failed to load characters wiki. Please ensure <code>wiki.json</code> exists and is correctly formatted.</p>';
+                            console.error('Error loading wiki data:', err);
+                        });
+                } else {
+                    renderCharacterList();
+                }
+            }
+
+            /**
+             * Renders the list of characters fetched from wiki.json.
+             */
+            function renderCharacterList() {
+                wikiListEl.innerHTML = characters.map(character => {
+                    const abilitiesHtml = character.abilities && character.abilities.length > 0
+                        ? `<div class="character-tags">${character.abilities.map(ability => `<span class="tag">${ability}</span>`).join('')}</div>`
+                        : '';
+                    return `
+                        <div class="character-summary" data-id="${character.id}">
+                            <div class="character-name">${character.name}</div>
+                            <div class="character-meta">First Appearance: ${character.firstAppearance}</div>
+                            ${abilitiesHtml}
+                            <div class="character-description-summary">${character.description.substring(0, 150)}...</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            /**
+             * Displays the full details of a selected character.
+             * Hides other views.
+             * @param {Object} character - The character object to display.
+             */
+            function showCharacterDetails(character) {
+                chaptersListEl.style.display = 'none';
+                chapterContentEl.style.display = 'none';
+                wikiListEl.style.display = 'none';
+                sortSelect.style.display = 'none';
+                characterContentEl.style.display = 'block';
+
+                mainTitleEl.textContent = character.name;
+                currentView = 'character-detail';
+
+                const abilitiesHtml = character.abilities && character.abilities.length > 0
+                    ? `<h3>Abilities:</h3><ul>${character.abilities.map(ability => `<li>${ability}</li>`).join('')}</ul>`
+                    : '';
+                const affiliationsHtml = character.affiliations && character.affiliations.length > 0
+                    ? `<h3>Affiliations:</h3><ul>${character.affiliations.map(affiliation => `<li>${affiliation}</li>`).join('')}</ul>`
+                    : '';
+
+                characterContentEl.innerHTML = `
+                    <div class="back-btn" data-target="wiki-list">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Characters Wiki
+                    </div>
+                    <h2 class="character-name" style="font-size: 2rem; margin-bottom: 0.5rem;">${character.name}</h2>
+                    <div class="character-meta">First Appearance: ${character.firstAppearance}</div>
+                    <div class="character-full-details">
+                        <p>${character.description}</p>
+                        ${abilitiesHtml}
+                        ${affiliationsHtml}
+                    </div>
+                `;
+
+                // Add event listener for the back button
+                characterContentEl.querySelector('.back-btn').addEventListener('click', () => showCharactersWiki());
+            }
+
 
             // Age verification event listeners
             ageConfirm.addEventListener('click', () => {
@@ -643,7 +823,7 @@
                     console.error('Error loading book data:', err);
                 });
 
-            // Event listeners
+            // Event listeners for chapters
             chaptersListEl.addEventListener('click', e => {
                 const chapterElement = e.target.closest('.chapter-summary');
                 if (chapterElement) {
@@ -655,9 +835,27 @@
                 }
             });
 
+            // Event listener for characters wiki list
+            wikiListEl.addEventListener('click', e => {
+                const characterElement = e.target.closest('.character-summary');
+                if (characterElement) {
+                    const characterId = characterElement.dataset.id;
+                    const character = characters.find(c => c.id === characterId);
+                    if (character) {
+                        showCharacterDetails(character);
+                    }
+                }
+            });
+
+            // Navigation links
             homeLinkEl.addEventListener('click', (e) => {
                 e.preventDefault();
                 renderTableOfContents();
+            });
+
+            wikiLinkEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCharactersWiki();
             });
 
             sortSelect.addEventListener('change', sortChapters);
