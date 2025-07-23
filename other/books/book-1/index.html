@@ -19,6 +19,10 @@
             --text-secondary: #cbd5e1; /* Slate 300 */
             --new-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Custom gradient for emphasis */
             --new-glow: 0 0 30px rgba(102, 102, 234, 0.3); /* Subtle glow effect */
+            --nsfw-red: #ef4444; /* Red 500 for NSFW tags */
+            --nsfw-red-dark: #dc2626; /* Red 600 for darker NSFW elements */
+            --tag-bg: #374151; /* Gray 700 for regular tags */
+            --tag-hover: #4b5563; /* Gray 600 for tag hover */
         }
 
         /* Global reset and font settings */
@@ -189,6 +193,143 @@
             line-height: 1.6;
         }
 
+        /* Tags container styling */
+        .chapter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Individual tag styling */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--tag-bg);
+            color: var(--text);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .tag:hover {
+            background-color: var(--tag-hover);
+            transform: translateY(-1px);
+        }
+
+        /* NSFW tag styling */
+        .tag.nsfw {
+            background-color: var(--nsfw-red);
+            color: white;
+            border-color: var(--nsfw-red-dark);
+            animation: pulse-red 2s infinite;
+        }
+
+        .tag.nsfw:hover {
+            background-color: var(--nsfw-red-dark);
+        }
+
+        /* Pulse animation for NSFW tags */
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Age verification modal styling */
+        .age-verification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .age-verification-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--nsfw-red);
+        }
+
+        .age-verification-title {
+            color: var(--nsfw-red);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .age-verification-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .age-verification-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .age-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .age-btn.confirm {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .age-btn.confirm:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .age-btn.decline {
+            background-color: var(--nsfw-red);
+            color: white;
+        }
+
+        .age-btn.decline:hover {
+            background-color: var(--nsfw-red-dark);
+            transform: translateY(-2px);
+        }
+
+        .privacy-notice {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
         /* Back button styling */
         #back-btn {
             display: inline-flex;
@@ -248,6 +389,11 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* Hidden class for age verification */
+        .hidden {
+            display: none !important;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .sort-controls {
@@ -266,6 +412,14 @@
             .chapter-summary {
                 padding: 15px;
             }
+
+            .age-verification-content {
+                padding: 1.5rem;
+            }
+
+            .age-verification-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -273,8 +427,8 @@
     <div class="container">
         <header class="header">
             <div class="logo">
-                <i class="fas fa-book-open"></i> <!-- Changed icon to a book -->
-                <spanBook name, something something</span>
+                <i class="fas fa-book-open"></i>
+                <span>Book name, something something</span>
             </div>
             <nav class="nav">
                 <ul>
@@ -296,15 +450,70 @@
         <div id="chapters-list" class="section"></div>
         <div id="chapter-content" class="section" style="display: none;"></div>
 
+        <!-- Age Verification Modal -->
+        <div id="age-verification-modal" class="age-verification-modal hidden">
+            <div class="age-verification-content">
+                <div class="age-verification-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Age Verification Required
+                </div>
+                <div class="age-verification-text">
+                    This content contains mature themes and is intended for adults only. 
+                    You must be 18 years or older to view this content.
+                    <br><br>
+                    Are you 18 years of age or older?
+                </div>
+                <div class="age-verification-buttons">
+                    <button class="age-btn confirm" id="age-confirm">Yes, I am 18+</button>
+                    <button class="age-btn decline" id="age-decline">No, I am under 18</button>
+                </div>
+                <div class="privacy-notice">
+                    We do not store or track your age information. This verification is only used for content safety purposes.
+                </div>
+            </div>
+        </div>
+
         <script>
             const chaptersListEl = document.getElementById('chapters-list');
             const chapterContentEl = document.getElementById('chapter-content');
             const sortSelect = document.getElementById('sort-select');
             const mainTitleEl = document.getElementById('main-title');
             const homeLinkEl = document.getElementById('home-link');
-            const backBtnId = 'back-to-toc-btn'; // Unique ID for the back button
+            const ageModal = document.getElementById('age-verification-modal');
+            const ageConfirm = document.getElementById('age-confirm');
+            const ageDecline = document.getElementById('age-decline');
+            const backBtnId = 'back-to-toc-btn';
 
-            let chapters = []; // Array to hold book chapter data
+            let chapters = [];
+            let ageVerified = false;
+            let pendingNsfwChapter = null;
+
+            /**
+             * Shows the age verification modal
+             */
+            function showAgeVerification(chapter) {
+                pendingNsfwChapter = chapter;
+                ageModal.classList.remove('hidden');
+            }
+
+            /**
+             * Hides the age verification modal
+             */
+            function hideAgeVerification() {
+                ageModal.classList.add('hidden');
+                pendingNsfwChapter = null;
+            }
+
+            /**
+             * Renders a tag element
+             */
+            function renderTag(tag) {
+                const isNsfw = tag.toLowerCase() === 'nsfw';
+                const icon = isNsfw ? '<i class="fas fa-exclamation-triangle"></i>' : '';
+                const className = isNsfw ? 'tag nsfw' : 'tag';
+                
+                return `<span class="${className}">${icon}${tag}</span>`;
+            }
 
             /**
              * Sorts the chapters based on the selected option and re-renders the table of contents.
@@ -334,14 +543,19 @@
             function renderTableOfContents() {
                 chapterContentEl.style.display = 'none';
                 chaptersListEl.style.display = 'block';
-                mainTitleEl.textContent = 'Table of Contents'; // Update main title
-                sortSelect.style.display = 'block'; // Show sort select
+                mainTitleEl.textContent = 'Table of Contents';
+                sortSelect.style.display = 'block';
 
                 chaptersListEl.innerHTML = chapters.map(chapter => {
+                    const tagsHtml = chapter.tags && chapter.tags.length > 0 
+                        ? `<div class="chapter-tags">${chapter.tags.map(tag => renderTag(tag)).join('')}</div>`
+                        : '';
+                    
                     return `
                         <div class="chapter-summary" data-id="${chapter.id}">
                             <div class="chapter-title">Chapter ${chapter.chapterNumber}: ${chapter.title}</div>
                             <div class="chapter-meta">Published: ${chapter.date}</div>
+                            ${tagsHtml}
                             <div class="chapter-content-summary">${chapter.summary}</div>
                         </div>
                     `;
@@ -355,9 +569,13 @@
              */
             function showChapter(chapter) {
                 chaptersListEl.style.display = 'none';
-                sortSelect.style.display = 'none'; // Hide sort select when viewing chapter
+                sortSelect.style.display = 'none';
                 chapterContentEl.style.display = 'block';
-                mainTitleEl.textContent = chapter.title; // Update main title to chapter title
+                mainTitleEl.textContent = chapter.title;
+
+                const tagsHtml = chapter.tags && chapter.tags.length > 0 
+                    ? `<div class="chapter-tags">${chapter.tags.map(tag => renderTag(tag)).join('')}</div>`
+                    : '';
 
                 chapterContentEl.innerHTML = `
                     <div id="${backBtnId}">
@@ -366,6 +584,7 @@
                     </div>
                     <h2 class="chapter-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${chapter.title}</h2>
                     <div class="chapter-meta">Chapter ${chapter.chapterNumber} | Published: ${chapter.date}</div>
+                    ${tagsHtml}
                     <div class="chapter-full-content">${chapter.content}</div>
                 `;
 
@@ -374,6 +593,38 @@
                     backBtn.onclick = () => renderTableOfContents();
                 }
             }
+
+            /**
+             * Checks if a chapter has NSFW content
+             */
+            function hasNsfwContent(chapter) {
+                return chapter.tags && chapter.tags.some(tag => tag.toLowerCase() === 'nsfw');
+            }
+
+            /**
+             * Handles chapter click with NSFW verification
+             */
+            function handleChapterClick(chapter) {
+                if (hasNsfwContent(chapter) && !ageVerified) {
+                    showAgeVerification(chapter);
+                } else {
+                    showChapter(chapter);
+                }
+            }
+
+            // Age verification event listeners
+            ageConfirm.addEventListener('click', () => {
+                ageVerified = true;
+                hideAgeVerification();
+                if (pendingNsfwChapter) {
+                    showChapter(pendingNsfwChapter);
+                }
+            });
+
+            ageDecline.addEventListener('click', () => {
+                hideAgeVerification();
+                // Could show a message or redirect if needed
+            });
 
             // Load chapters from book.json file
             fetch('book.json')
@@ -386,32 +637,37 @@
                 .then(data => {
                     chapters = data;
                     sortChapters(); // Initial sort and render
-
-                    // Event listener for clicking on chapter summaries
-                    chaptersListEl.addEventListener('click', e => {
-                        const chapterElement = e.target.closest('.chapter-summary');
-                        if (chapterElement) {
-                            const chapterId = chapterElement.dataset.id;
-                            const chapter = chapters.find(c => c.id === chapterId);
-                            if (chapter) {
-                                showChapter(chapter);
-                            }
-                        }
-                    });
-
-                    // Event listener for the "Table of Contents" link in the header
-                    homeLinkEl.addEventListener('click', (e) => {
-                        e.preventDefault(); // Prevent default link behavior
-                        renderTableOfContents();
-                    });
                 })
                 .catch(err => {
                     chaptersListEl.innerHTML = '<p class="chapter-content-summary">Failed to load book chapters. Please ensure <code>book.json</code> exists and is correctly formatted.</p>';
                     console.error('Error loading book data:', err);
                 });
 
-            // Sort event listener
+            // Event listeners
+            chaptersListEl.addEventListener('click', e => {
+                const chapterElement = e.target.closest('.chapter-summary');
+                if (chapterElement) {
+                    const chapterId = chapterElement.dataset.id;
+                    const chapter = chapters.find(c => c.id === chapterId);
+                    if (chapter) {
+                        handleChapterClick(chapter);
+                    }
+                }
+            });
+
+            homeLinkEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderTableOfContents();
+            });
+
             sortSelect.addEventListener('change', sortChapters);
+
+            // Close modal when clicking outside
+            ageModal.addEventListener('click', (e) => {
+                if (e.target === ageModal) {
+                    hideAgeVerification();
+                }
+            });
         </script>
     </div>
 </body>
