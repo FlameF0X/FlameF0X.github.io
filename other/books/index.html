@@ -1,1 +1,453 @@
-Hi!!!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Library - Daniel.FlameFox</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/-qgGeUlEsf5z-jilWawyO.png" type="image/png">
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary: #6366f1; /* Indigo 500 */
+            --primary-light: #818cf8; /* Indigo 400 */
+            --primary-dark: #4f46e5; /* Indigo 600 */
+            --dark-bg: #0f172a; /* Slate 900 */
+            --card-bg: #1e293b; /* Slate 800 */
+            --text: #f8fafc; /* Slate 50 */
+            --text-secondary: #cbd5e1; /* Slate 300 */
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-hover-glow: 0 0 30px rgba(102, 102, 234, 0.2);
+            --nsfw-red: #ef4444;
+            --nsfw-red-dark: #dc2626;
+            --tag-bg: #374151;
+            --tag-hover: #4b5563;
+        }
+
+        /* Global reset and font settings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Body styling */
+        body {
+            min-height: 100vh;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+        }
+
+        /* Main container for content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header styling */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        /* Main title styling */
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Books grid layout */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Individual book card styling */
+        .book-card {
+            background: linear-gradient(145deg, var(--card-bg), #253449);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+
+        .book-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary-light);
+            box-shadow: var(--card-hover-glow), 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .book-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .book-card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Book title styling */
+        .book-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .book-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* Book metadata */
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .chapter-count {
+            background: var(--tag-bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Book description */
+        .book-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Book tags */
+        .book-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--tag-bg);
+            color: var(--text);
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .tag:hover {
+            background-color: var(--tag-hover);
+            transform: translateY(-1px);
+        }
+
+        .tag.nsfw {
+            background-color: var(--nsfw-red);
+            color: white;
+            border-color: var(--nsfw-red-dark);
+            animation: pulse-red 2s infinite;
+        }
+
+        .tag.nsfw:hover {
+            background-color: var(--nsfw-red-dark);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Read button */
+        .read-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .read-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        /* Status indicators */
+        .book-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 3;
+        }
+
+        .status-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.complete {
+            background: #10b981; /* Green */
+        }
+
+        .status-badge.ongoing {
+            background: #f59e0b; /* Amber */
+        }
+
+        .status-badge.hiatus {
+            background: #ef4444; /* Red */
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-light);
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--card-bg);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 3rem;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .books-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .book-card {
+                padding: 1.5rem;
+            }
+
+            .book-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">
+                <i class="fas fa-book-open"></i>
+                Books Library
+            </h1>
+            <p class="subtitle">Discover stories, adventures, and worlds waiting to be explored</p>
+        </header>
+
+        <div id="books-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading books...</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Daniel.FlameFox - All rights reserved</p>
+        </footer>
+    </div>
+
+    <script>
+        const booksContainer = document.getElementById('books-container');
+
+        /**
+         * Renders a tag element
+         */
+        function renderTag(tag) {
+            const isNsfw = tag.toLowerCase() === 'nsfw';
+            const icon = isNsfw ? '<i class="fas fa-exclamation-triangle"></i>' : '';
+            const className = isNsfw ? 'tag nsfw' : 'tag';
+            
+            return `<span class="${className}">${icon}${tag}</span>`;
+        }
+
+        /**
+         * Renders the books grid
+         */
+        function renderBooks(books) {
+            if (books.length === 0) {
+                booksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>No books found</h3>
+                        <p>Check back later for new stories!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const booksHTML = books.map(book => {
+                const tagsHTML = book.tags && book.tags.length > 0 
+                    ? `<div class="book-tags">${book.tags.map(tag => renderTag(tag)).join('')}</div>`
+                    : '';
+
+                const statusBadge = book.status 
+                    ? `<div class="book-status"><span class="status-badge ${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span></div>`
+                    : '';
+
+                return `
+                    <div class="book-card" onclick="window.location.href='${book.path}'">
+                        ${statusBadge}
+                        <div class="book-card-content">
+                            <h2 class="book-title">
+                                <i class="book-icon ${book.icon || 'fas fa-book'}"></i>
+                                ${book.title}
+                            </h2>
+                            <div class="book-meta">
+                                <span>Last updated: ${book.lastUpdated}</span>
+                                <span class="chapter-count">${book.chapterCount} chapters</span>
+                            </div>
+                            <p class="book-description">${book.description}</p>
+                            ${tagsHTML}
+                            <button class="read-button">
+                                <i class="fas fa-play"></i>
+                                Start Reading
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            booksContainer.innerHTML = `<div class="books-grid">${booksHTML}</div>`;
+        }
+
+        // Load books from books.json
+        fetch('books.json')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(books => {
+                renderBooks(books);
+            })
+            .catch(err => {
+                console.error('Error loading books:', err);
+                booksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to load books</h3>
+                        <p>Please ensure <code>books.json</code> exists and is correctly formatted.</p>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>
