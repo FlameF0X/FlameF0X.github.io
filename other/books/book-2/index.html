@@ -523,27 +523,55 @@
             [
               {
                 "id": "char1",
-                "name": "Elias Vance",
-                "description": "A seasoned adventurer with a mysterious past, known for his quick wit and mastery of ancient runes. He often travels with his loyal companion, a griffin named Aerion.",
-                "abilities": ["Rune Magic", "Survival Skills", "Animal Empathy"],
-                "affiliations": ["Order of the Whispering Wind"],
-                "firstAppearance": "Chapter 1"
+                "name": "Anya",
+                "age": 19,
+                "genderPronouns": "She/Her",
+                "sexuality": "Heterosexual",
+                "occupation": "Apprentice Mage",
+                "description": "A young, aspiring mage with a knack for elemental magic, particularly fire. She is fiercely loyal to her friends and possesses a strong sense of justice. Anya often struggles with controlling her emotions, which can sometimes lead to unpredictable magical outbursts.",
+                "backstoryShort": "Raised in a small village, Anya discovered her magical abilities at a young age, leading her to the Arcane Academy. After a tragic incident, she left the Academy to join the Ember Guard, seeking to use her powers for good.",
+                "abilities": ["Pyromancy", "Basic Healing Spells", "Enhanced Agility"],
+                "affiliations": ["Arcane Academy (former student)", "The Ember Guard"],
+                "firstAppearance": "Chapter 1: The First Spark"
               },
               {
                 "id": "char2",
-                "name": "Lyra Shadowbrook",
-                "description": "A nimble rogue from the shadowed alleys of Silverpine, Lyra is an expert in stealth and lockpicking. Her true motivations are often hidden behind a veil of sarcasm.",
-                "abilities": ["Stealth", "Lockpicking", "Dagger Combat"],
-                "affiliations": ["None (Freelancer)"],
-                "firstAppearance": "Chapter 3"
+                "name": "Kael",
+                "age": 35,
+                "genderPronouns": "He/Him",
+                "sexuality": "Asexual",
+                "occupation": "Wanderer, former Soldier",
+                "description": "A stoic and experienced warrior, Kael is a master of close combat and an expert tracker. He carries a heavy burden from his past, which often makes him reserved and cautious. Despite his gruff exterior, he has a hidden soft spot for those he protects.",
+                "backstoryShort": "Once a decorated soldier, Kael deserted his post after a morally compromising mission. He now roams the lands, seeking to atone for his past and find a new purpose, often helping those in need from the shadows.",
+                "abilities": ["Swordsmanship", "Tracking", "Survivalist"],
+                "affiliations": ["The Silent Blades (disbanded)", "The Nomad Collective"],
+                "firstAppearance": "Chapter 2: Echoes in the Forest"
               },
               {
                 "id": "char3",
-                "name": "Kaelen Stormheart",
-                "description": "A powerful warrior and former knight, Kaelen seeks redemption for past mistakes. He wields a massive two-handed sword and possesses incredible strength.",
-                "abilities": ["Greatsword Mastery", "Superhuman Strength", "Battle Cry"],
-                "affiliations": ["Disgraced Knights of Eldoria"],
-                "firstAppearance": "Chapter 2"
+                "name": "Lyra",
+                "age": 24,
+                "genderPronouns": "She/Her",
+                "sexuality": "Pansexual",
+                "occupation": "Rogue, Information Broker",
+                "description": "A mischievous and cunning rogue, Lyra excels in stealth and subterfuge. She has a sharp wit and an even sharper dagger. While she often operates alone, her loyalty, once earned, is unwavering. She has a mysterious connection to the underworld of the city.",
+                "backstoryShort": "Orphaned at a young age, Lyra grew up on the streets, learning to survive by her wits. She became an adept rogue and carved out a niche as an information broker, navigating the city's criminal underbelly with ease.",
+                "abilities": ["Stealth", "Lockpicking", "Dagger Combat", "Shadow Manipulation"],
+                "affiliations": ["The Shadow Syndicate (loose ties)"],
+                "firstAppearance": "Chapter 3: Whispers in the Alley"
+              },
+              {
+                "id": "char4",
+                "name": "Professor Eldrin",
+                "age": 68,
+                "genderPronouns": "He/Him",
+                "sexuality": "N/A",
+                "occupation": "Archivist, Scholar",
+                "description": "An eccentric but brilliant scholar and archivist, Professor Eldrin possesses vast knowledge of ancient history and forgotten languages. He is often lost in his books but can provide invaluable insights when his attention is captured. He has a peculiar habit of talking to himself.",
+                "backstoryShort": "Professor Eldrin has dedicated his life to the pursuit of knowledge, spending decades within the Grand Library of Veridia. His past is shrouded in academic pursuits and quiet research, with little known beyond his scholarly achievements.",
+                "abilities": ["Ancient Lore", "Linguistics", "Minor Illusions"],
+                "affiliations": ["Grand Library of Veridia"],
+                "firstAppearance": "Chapter 4: The Forgotten Scrolls"
               }
             ]
             */
@@ -551,7 +579,7 @@
             const chaptersListEl = document.getElementById('chapters-list');
             const chapterContentEl = document.getElementById('chapter-content');
             const wikiListEl = document.getElementById('wiki-list'); // New Wiki List Element
-            const characterContentEl = document.getElementById('character-content'); // New Character Content Element
+            const characterContentEl = document.getElementById('character-content'); // New Character Detail Element
             const sortSelect = document.getElementById('sort-select');
             const mainTitleEl = document.getElementById('main-title');
             const homeLinkEl = document.getElementById('home-link');
@@ -743,9 +771,13 @@
                     return `
                         <div class="character-summary" data-id="${character.id}">
                             <div class="character-name">${character.name}</div>
-                            <div class="character-meta">First Appearance: ${character.firstAppearance}</div>
+                            <div class="character-meta">
+                                Age: ${character.age || 'N/A'} | 
+                                Gender: ${character.genderPronouns || 'N/A'} | 
+                                Occupation: ${character.occupation || 'N/A'}
+                            </div>
                             ${abilitiesHtml}
-                            <div class="character-description-summary">${character.description.substring(0, 150)}...</div>
+                            <div class="character-description-summary">${character.backstoryShort || character.description.substring(0, 150) + '...'}</div>
                         </div>
                     `;
                 }).join('');
@@ -779,11 +811,20 @@
                         Back to Characters Wiki
                     </div>
                     <h2 class="character-name" style="font-size: 2rem; margin-bottom: 0.5rem;">${character.name}</h2>
-                    <div class="character-meta">First Appearance: ${character.firstAppearance}</div>
+                    <div class="character-meta">
+                        Age: ${character.age || 'N/A'} | 
+                        Gender/Pronouns: ${character.genderPronouns || 'N/A'} | 
+                        Sexuality: ${character.sexuality || 'N/A'} | 
+                        Occupation: ${character.occupation || 'N/A'}
+                    </div>
                     <div class="character-full-details">
-                        <p>${character.description}</p>
+                        <h3>Backstory:</h3>
+                        <p>${character.backstoryShort || 'No short backstory provided.'}</p>
+                        <h3>Description:</h3>
+                        <p>${character.description || 'No description provided.'}</p>
                         ${abilitiesHtml}
                         ${affiliationsHtml}
+                        <p><strong>First Appearance:</strong> ${character.firstAppearance || 'N/A'}</p>
                     </div>
                 `;
 
