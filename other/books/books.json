@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Your Book Title",
+    "path": "book-1/index.html",
+    "description": "A compelling description of your book that will draw readers in.",
+    "lastUpdated": "2024-01-15",
+    "chapterCount": 5,
+    "status": "ongoing",
+    "icon": "fas fa-dragon",
+    "tags": ["Fanfict", "Adventure"]
+  },
+  {
+    "title": "Another Book",
+    "path": "book-2/index.html", 
+    "description": "Another amazing story waiting to be discovered.",
+    "lastUpdated": "2024-01-20",
+    "chapterCount": 12,
+    "status": "complete",
+    "icon": "fas fa-magic",
+    "tags": ["Romance", "Drama"]
+  }
+]
