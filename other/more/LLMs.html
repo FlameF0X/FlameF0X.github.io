@@ -1,112 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GPT Forward Pass - Math Explanation</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
-    onload="renderMathInElement(document.body);"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 2rem;
-      background-color: #f7f7f7;
-    }
-    h1, h2, h3 {
-      color: #222;
-    }
-    .math-block {
-      background: #fff;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-left: 4px solid #0077cc;
-      overflow-x: auto;
-    }
-    code {
-      background: #eee;
-      padding: 2px 4px;
-      border-radius: 3px;
-    }
-    pre {
-      background: #eee;
-      padding: 1rem;
-      overflow-x: auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Token Prediction: Math & Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2em;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #2d3748;
+            margin: 20px 0 15px 0;
+            font-size: 1.3em;
+        }
+        
+        .math-equation {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            border-radius: 5px;
+        }
+        
+        .code-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #2d3748;
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e17055;
+        }
+        
+        .token-visualization {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .token {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .prediction {
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .math-side {
+            background: #e6fffa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #38b2ac;
+        }
+        
+        .code-side {
+            background: #f0fff4;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #48bb78;
+        }
+        
+        .interactive-demo {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .probability-bar {
+            background: #e2e8f0;
+            height: 20px;
+            border-radius: 10px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Understanding GPT: Mathematical Foundations</h1>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 GPT Token Prediction</h1>
+            <div class="subtitle">Understanding the Mathematics and Code Behind Next-Token Prediction</div>
+        </div>
 
-  <h2>1. Tokenization & Embedding Lookup</h2>
-  <p>Each token is mapped to an index, then embedded into a continuous vector space:</p>
-  <div class="math-block">
-    X = \begin{bmatrix}
-    \text{Embed}("the") \\
-    \text{Embed}("cat") \\
-    \text{Embed}("sat")
-    \end{bmatrix} \in \mathbb{R}^{3 \times 4}
-  </div>
+        <div class="section">
+            <h2>🎯 Introduction: The Prediction Problem</h2>
+            <p>GPT (Generative Pre-trained Transformer) models work by predicting the next token in a sequence. Let's explore how this works using the example:</p>
+            
+            <div class="example-box">
+                <div class="token-visualization">
+                    <span class="token">The</span>
+                    <span class="token">cat</span>
+                    <span class="token">sat</span>
+                    <span class="token">on</span>
+                    <span class="token">the</span>
+                    <span class="token prediction">?</span>
+                </div>
+                <p><strong>Goal:</strong> Predict what comes after "The cat sat on the"</p>
+            </div>
+        </div>
 
-  <h2>2. Linear Projections</h2>
-  <p>Compute queries, keys, and values:</p>
-  <div class="math-block">
-    Q = X W^Q, \quad K = X W^K, \quad V = X W^V
-  </div>
+        <div class="section">
+            <h2>📊 Tokenization: Breaking Down Text</h2>
+            
+            <h3>Mathematical Representation</h3>
+            <div class="math-equation">
+                Input text: "The cat sat on the"<br>
+                Vocabulary V = {The: 1, cat: 2, sat: 3, on: 4, the: 5, ...}<br>
+                Token sequence: [1, 2, 3, 4, 5]<br>
+                Embeddings: X ∈ ℝ^(5×d) where d = embedding dimension
+            </div>
 
-  <h2>3. Scaled Dot-Product Attention</h2>
-  <p>Compare tokens via dot product, scaled by the dimension:</p>
-  <div class="math-block">
-    \text{Scores} = \frac{QK^T}{\sqrt{d_k}} \in \mathbb{R}^{n \times n}
-  </div>
+            <div class="comparison-grid">
+                <div class="math-side">
+                    <h4>Mathematical Form</h4>
+                    <div class="math-equation">
+                        x_i = E[token_i]<br>
+                        where E ∈ ℝ^(|V|×d) is embedding matrix
+                    </div>
+                </div>
+                <div class="code-side">
+                    <h4>Code Implementation</h4>
+                    <div class="code-block">
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">tokenize</span>(<span style="color: #ffcb6b;">text</span>) {
+    <span style="color: #c3e88d;">// Simple tokenization</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">tokens</span> = text.<span style="color: #82aaff;">split</span>(<span style="color: #c3e88d;">' '</span>);
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">vocab</span> = {<span style="color: #c3e88d;">'The'</span>: 1, <span style="color: #c3e88d;">'cat'</span>: 2, <span style="color: #c3e88d;">'sat'</span>: 3, <span style="color: #c3e88d;">'on'</span>: 4, <span style="color: #c3e88d;">'the'</span>: 5};
+    <span style="color: #f78c6c;">return</span> tokens.<span style="color: #82aaff;">map</span>(<span style="color: #ffcb6b;">token</span> => vocab[token]);
+}
 
-  <h2>4. Attention Weights (Softmax)</h2>
-  <div class="math-block">
-    \text{softmax}(z_i) = \frac{e^{z_i}}{\sum_j e^{z_j}}
-  </div>
-  <p>This ensures each row of attention weights sums to 1.</p>
+<span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">tokenIds</span> = <span style="color: #82aaff;">tokenize</span>(<span style="color: #c3e88d;">"The cat sat on the"</span>);
+<span style="color: #c3e88d;">// Result: [1, 2, 3, 4, 5]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <h2>5. Weighted Sum for Context</h2>
-  <div class="math-block">
-    \text{AttentionOutput} = \text{AttentionWeights} \cdot V
-  </div>
+        <div class="section">
+            <h2>🧠 Self-Attention Mechanism</h2>
+            
+            <h3>The Heart of Transformer Architecture</h3>
+            <p>Self-attention allows the model to understand relationships between all tokens in the sequence.</p>
 
-  <h2>6. Feed-Forward Network</h2>
-  <p>Each token vector goes through a nonlinear MLP:</p>
-  <div class="math-block">
-    h_1 = \text{ReLU}(zW_1 + b_1), \quad h_2 = h_1W_2 + b_2
-  </div>
+            <div class="comparison-grid">
+                <div class="math-side">
+                    <h4>Mathematical Foundation</h4>
+                    <div class="math-equation">
+                        Attention(Q,K,V) = softmax(QK^T/√d_k)V<br><br>
+                        Q = XW_Q ∈ ℝ^(n×d_k)<br>
+                        K = XW_K ∈ ℝ^(n×d_k)<br>
+                        V = XW_V ∈ ℝ^(n×d_v)<br><br>
+                        Score_ij = q_i · k_j / √d_k<br>
+                        Attention_ij = exp(Score_ij) / Σ_k exp(Score_ik)
+                    </div>
+                </div>
+                <div class="code-side">
+                    <h4>Code Implementation</h4>
+                    <div class="code-block">
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">selfAttention</span>(<span style="color: #ffcb6b;">X</span>, <span style="color: #ffcb6b;">W_Q</span>, <span style="color: #ffcb6b;">W_K</span>, <span style="color: #ffcb6b;">W_V</span>) {
+    <span style="color: #c3e88d;">// X: [seq_len, d_model]</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">Q</span> = <span style="color: #82aaff;">matmul</span>(X, W_Q);  <span style="color: #c3e88d;">// Queries</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">K</span> = <span style="color: #82aaff;">matmul</span>(X, W_K);  <span style="color: #c3e88d;">// Keys</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">V</span> = <span style="color: #82aaff;">matmul</span>(X, W_V);  <span style="color: #c3e88d;">// Values</span>
+    
+    <span style="color: #c3e88d;">// Compute attention scores</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">scores</span> = <span style="color: #82aaff;">matmul</span>(Q, <span style="color: #82aaff;">transpose</span>(K));
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">scaled_scores</span> = <span style="color: #82aaff;">divide</span>(scores, Math.<span style="color: #82aaff;">sqrt</span>(d_k));
+    
+    <span style="color: #c3e88d;">// Apply causal mask (can't see future tokens)</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">masked_scores</span> = <span style="color: #82aaff;">applyMask</span>(scaled_scores);
+    
+    <span style="color: #c3e88d;">// Softmax to get attention weights</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">attention_weights</span> = <span style="color: #82aaff;">softmax</span>(masked_scores);
+    
+    <span style="color: #c3e88d;">// Apply attention to values</span>
+    <span style="color: #f78c6c;">return</span> <span style="color: #82aaff;">matmul</span>(attention_weights, V);
+}
+                    </div>
+                </div>
+            </div>
 
-  <h2>7. Final Representation</h2>
-  <p>Extract the final token's output to predict the next word:</p>
-  <div class="math-block">
-    h_{\text{final}} = \text{FFNOutput}[-1]
-  </div>
+            <div class="interactive-demo">
+                <h4>🎮 Interactive Attention Visualization</h4>
+                <p>See how each token attends to others in "The cat sat on the"</p>
+                <button onclick="showAttention('The')">The</button>
+                <button onclick="showAttention('cat')">cat</button>
+                <button onclick="showAttention('sat')">sat</button>
+                <button onclick="showAttention('on')">on</button>
+                <button onclick="showAttention('the')">the</button>
+                <div id="attention-display"></div>
+            </div>
+        </div>
 
-  <h2>8. Output Logits</h2>
-  <div class="math-block">
-    \text{Logits} = h_{\text{final}} W_{\text{out}}^T + b_{\text{out}} \in \mathbb{R}^{|\mathcal{V}|}
-  </div>
+        <div class="section">
+            <h2>🔄 Forward Pass Through Transformer</h2>
+            
+            <h3>Layer-by-Layer Processing</h3>
+            
+            <div class="comparison-grid">
+                <div class="math-side">
+                    <h4>Mathematical Flow</h4>
+                    <div class="math-equation">
+                        For each layer l:<br><br>
+                        1. Self-Attention:<br>
+                        h₁ = LayerNorm(x + MultiHead(x))<br><br>
+                        2. Feed-Forward:<br>
+                        h₂ = LayerNorm(h₁ + FFN(h₁))<br><br>
+                        FFN(x) = max(0, xW₁ + b₁)W₂ + b₂<br><br>
+                        3. Output layer:<br>
+                        logits = h_final W_vocab + b_vocab<br>
+                        P(next_token) = softmax(logits)
+                    </div>
+                </div>
+                <div class="code-side">
+                    <h4>Code Implementation</h4>
+                    <div class="code-block">
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">transformerLayer</span>(<span style="color: #ffcb6b;">x</span>, <span style="color: #ffcb6b;">layer_params</span>) {
+    <span style="color: #c3e88d;">// Multi-head self-attention</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">attn_output</span> = <span style="color: #82aaff;">multiHeadAttention</span>(x, layer_params.attn);
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">h1</span> = <span style="color: #82aaff;">layerNorm</span>(<span style="color: #82aaff;">add</span>(x, attn_output));
+    
+    <span style="color: #c3e88d;">// Feed-forward network</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">ffn_output</span> = <span style="color: #82aaff;">feedForward</span>(h1, layer_params.ffn);
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">h2</span> = <span style="color: #82aaff;">layerNorm</span>(<span style="color: #82aaff;">add</span>(h1, ffn_output));
+    
+    <span style="color: #f78c6c;">return</span> h2;
+}
 
-  <h2>9. Softmax for Probabilities</h2>
-  <div class="math-block">
-    P(y_i) = \frac{e^{\text{Logits}_i}}{\sum_j e^{\text{Logits}_j}}
-  </div>
-  <p>This gives a valid probability distribution over the vocabulary.</p>
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">gptForward</span>(<span style="color: #ffcb6b;">input_tokens</span>) {
+    <span style="color: #f78c6c;">let</span> <span style="color: #ffcb6b;">x</span> = <span style="color: #82aaff;">embed</span>(input_tokens);  <span style="color: #c3e88d;">// Token + positional embeddings</span>
+    
+    <span style="color: #c3e88d;">// Pass through all transformer layers</span>
+    <span style="color: #f78c6c;">for</span> (<span style="color: #f78c6c;">let</span> <span style="color: #ffcb6b;">i</span> = 0; i < num_layers; i++) {
+        x = <span style="color: #82aaff;">transformerLayer</span>(x, model_params.layers[i]);
+    }
+    
+    <span style="color: #c3e88d;">// Project to vocabulary</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">logits</span> = <span style="color: #82aaff;">matmul</span>(x[-1], vocab_projection);  <span style="color: #c3e88d;">// Last token</span>
+    <span style="color: #f78c6c;">return</span> <span style="color: #82aaff;">softmax</span>(logits);  <span style="color: #c3e88d;">// Probability distribution</span>
+}
+                    </div>
+                </div>
+            </div>
 
-  <h2>📌 Not Just Matrix Math</h2>
-  <ul>
-    <li><strong>Softmax:</strong> Makes scores probabilistic.</li>
-    <li><strong>ReLU/GELU:</strong> Adds non-linearity.</li>
-    <li><strong>Attention:</strong> Dynamic token interaction.</li>
-    <li><strong>Probability:</strong> Output is a distribution.</li>
-    <li><strong>Training:</strong> Backpropagation, loss gradients.</li>
-    <li><strong>Positional encoding (not shown):</strong> Adds order to input.</li>
-  </ul>
+            <div class="example-box">
+                <h4>Training Example with "The cat sat on the mat"</h4>
+                <p><strong>Training pairs generated:</strong></p>
+                <ul style="list-style: none; padding: 0;">
+                    <li>📖 "The" → predict "cat"</li>
+                    <li>📖 "The cat" → predict "sat"</li>
+                    <li>📖 "The cat sat" → predict "on"</li>
+                    <li>📖 "The cat sat on" → predict "the"</li>
+                    <li>📖 "The cat sat on the" → predict "mat"</li>
+                </ul>
+                <p>Each prediction contributes to the loss, and gradients flow back to update all parameters.</p>
+            </div>
+        </div>
 
-  <h2>Want to go further?</h2>
-  <p>Try extending this with math.js or Pyodide to compute values directly in-browser.</p>
+        <div class="section">
+            <h2>🔬 Detailed Mathematical Walkthrough</h2>
+            
+            <h3>Step-by-Step: Predicting "mat" after "The cat sat on the"</h3>
+            
+            <div class="math-equation">
+                <strong>Step 1: Token Embeddings</strong><br>
+                X = [E[1], E[2], E[3], E[4], E[5]] + positional_embeddings<br>
+                where E[i] ∈ ℝ^512 (embedding dimension)
+            </div>
 
+            <div class="math-equation">
+                <strong>Step 2: Multi-Head Attention (Layer 1)</strong><br>
+                Q₁ = XW_Q₁, K₁ = XW_K₁, V₁ = XW_V₁<br>
+                A₁ = softmax(Q₁K₁ᵀ/√64)V₁  [with causal mask]<br>
+                H₁ = LayerNorm(X + A₁)
+            </div>
+
+            <div class="math-equation">
+                <strong>Step 3: Feed-Forward Network (Layer 1)</strong><br>
+                FFN₁ = max(0, H₁W₁ + b₁)W₂ + b₂<br>
+                H₁_out = LayerNorm(H₁ + FFN₁)
+            </div>
+
+            <div class="math-equation">
+                <strong>Step 4: Repeat for all 12 layers</strong><br>
+                H₂ = TransformerLayer₂(H₁_out)<br>
+                H₃ = TransformerLayer₃(H₂)<br>
+                ...<br>
+                H₁₂ = TransformerLayer₁₂(H₁₁)
+            </div>
+
+            <div class="math-equation">
+                <strong>Step 5: Final Prediction</strong><br>
+                logits = H₁₂[-1] W_vocab + b_vocab  [last token only]<br>
+                P(next_token) = softmax(logits)<br>
+                P("mat" | "The cat sat on the") = exp(logit_mat) / Σᵢ exp(logitᵢ)
+            </div>
+
+            <div class="interactive-demo">
+                <h4>🎮 Interactive Prediction Demo</h4>
+                <p>Click to see the step-by-step prediction process:</p>
+                <button onclick="simulatePrediction()">Run Prediction Simulation</button>
+                <div id="simulation-output"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎨 Key Insights and Properties</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: #e6fffa; padding: 20px; border-radius: 10px; border: 2px solid #38b2ac;">
+                    <h4>🎯 Autoregressive Generation</h4>
+                    <p>GPT generates text one token at a time, using its own previous outputs as input for the next prediction. This creates coherent, contextual text.</p>
+                </div>
+                
+                <div style="background: #fef5e7; padding: 20px; border-radius: 10px; border: 2px solid #d69e2e;">
+                    <h4>🔄 Parallel Training</h4>
+                    <p>During training, all positions can be computed in parallel using teacher forcing, but inference must be sequential.</p>
+                </div>
+                
+                <div style="background: #e6ffed; padding: 20px; border-radius: 10px; border: 2px solid #38a169;">
+                    <h4>🎭 Emergent Abilities</h4>
+                    <p>Complex behaviors like reasoning, translation, and code generation emerge from the simple objective of next-token prediction.</p>
+                </div>
+                
+                <div style="background: #fef0ff; padding: 20px; border-radius: 10px; border: 2px solid #b794f6;">
+                    <h4>📊 Scale Effects</h4>
+                    <p>Larger models with more parameters and training data show dramatically improved performance across all tasks.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Advanced Topics</h2>
+            
+            <h3>Beyond Basic Prediction</h3>
+            
+            <div class="comparison-grid">
+                <div style="background: #f0f8ff; padding: 20px; border-radius: 10px;">
+                    <h4>🎵 Positional Encoding</h4>
+                    <div class="math-equation">
+                        PE(pos, 2i) = sin(pos/10000^(2i/d))<br>
+                        PE(pos, 2i+1) = cos(pos/10000^(2i/d))
+                    </div>
+                    <p>Allows the model to understand token positions in the sequence.</p>
+                </div>
+                
+                <div style="background: #fffaf0; padding: 20px; border-radius: 10px;">
+                    <h4>🎭 Attention Patterns</h4>
+                    <div class="math-equation">
+                        Induction heads: A[i,j] ≈ 1 if token[j] follows token[i-1]<br>
+                        Copy heads: A[i,j] ≈ 1 if token[j] = token[i]
+                    </div>
+                    <p>Different attention heads learn specialized patterns for various linguistic tasks.</p>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 15px; margin: 20px 0;">
+                <h4>🔮 The Magic of Emergence</h4>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    The remarkable thing about GPT is that complex behaviors like reasoning, creativity, and problem-solving 
+                    emerge naturally from the simple mathematical objective of predicting the next token. This demonstrates 
+                    the power of scale and the universality of language as a medium for intelligence.
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Summary</h2>
+            <p>GPT's token prediction works through a elegant combination of:</p>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+                <li><strong>Tokenization:</strong> Converting text to numerical representations</li>
+                <li><strong>Self-Attention:</strong> Understanding relationships between all tokens</li>
+                <li><strong>Layer Stacking:</strong> Building increasingly abstract representations</li>
+                <li><strong>Probability Distribution:</strong> Converting final representations to next-token probabilities</li>
+                <li><strong>Autoregressive Generation:</strong> Using predictions as input for future predictions</li>
+            </ul>
+            
+            <div class="example-box">
+                <p><strong>Final Example:</strong> When you type "The cat sat on the", the model has learned from billions of similar patterns that "mat", "floor", "couch" etc. are likely completions, with "mat" being most probable based on common usage patterns in its training data.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAttention(token) {
+            const attentionPatterns = {
+                'The': 'The (0.1) → cat (0.2) → sat (0.1) → on (0.1) → the (0.5)',
+                'cat': 'The (0.3) → cat (0.4) → sat (0.2) → on (0.05) → the (0.05)',
+                'sat': 'The (0.1) → cat (0.3) → sat (0.4) → on (0.15) → the (0.05)',
+                'on': 'The (0.05) → cat (0.1) → sat (0.3) → on (0.4) → the (0.15)',
+                'the': 'The (0.2) → cat (0.1) → sat (0.1) → on (0.2) → the (0.4)'
+            };
+            
+            document.getElementById('attention-display').innerHTML = `
+                <div style="background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <h5>Attention weights for "${token}":</h5>
+                    <p style="font-family: monospace; font-size: 1.1em;">${attentionPatterns[token]}</p>
+                    <p style="font-size: 0.9em; color: #666;">Higher values indicate stronger attention to that token.</p>
+                </div>
+            `;
+        }
+
+        function simulatePrediction() {
+            const output = document.getElementById('simulation-output');
+            const steps = [
+                "🔤 Tokenizing: 'The cat sat on the' → [1, 2, 3, 4, 5]",
+                "📊 Creating embeddings: 5 × 512 dimensional vectors",
+                "🧠 Layer 1: Computing self-attention patterns...",
+                "🔄 Layer 1: Feed-forward processing...",
+                "📈 Layers 2-12: Deep representation building...",
+                "🎯 Final layer: Projecting to vocabulary (50,000 tokens)",
+                "📊 Softmax: Converting to probabilities...",
+                "🏆 Result: 'mat' (85%), 'floor' (10%), 'couch' (3%), ..."
+            ];
+
+            output.innerHTML = '<div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px; margin-top: 15px;"><h5>Prediction Simulation:</h5><div id="steps"></div></div>';
+            
+            const stepsDiv = document.getElementById('steps');
+            steps.forEach((step, i) => {
+                setTimeout(() => {
+                    stepsDiv.innerHTML += `<p style="margin: 8px 0; opacity: 0; animation: fadeIn 0.5s forwards;">${step}</p>`;
+                }, i * 800);
+            });
+        }
+
+        // Add fadeIn animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
+            
+            <h3>From Logits to Probabilities</h3>
+            
+            <div class="example-box">
+                <h4>Example: Predicting after "The cat sat on the"</h4>
+                <div id="prediction-demo">
+                    <p><strong>Top predictions:</strong></p>
+                    <div style="margin: 10px 0;">
+                        <span style="display: inline-block; width: 100px;">mat:</span>
+                        <div class="probability-bar" style="width: 200px; display: inline-block;">
+                            <div class="probability-fill" style="width: 85%;"></div>
+                        </div>
+                        <span style="margin-left: 10px;">85%</span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span style="display: inline-block; width: 100px;">floor:</span>
+                        <div class="probability-bar" style="width: 200px; display: inline-block;">
+                            <div class="probability-fill" style="width: 10%;"></div>
+                        </div>
+                        <span style="margin-left: 10px;">10%</span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span style="display: inline-block; width: 100px;">couch:</span>
+                        <div class="probability-bar" style="width: 200px; display: inline-block;">
+                            <div class="probability-fill" style="width: 3%;"></div>
+                        </div>
+                        <span style="margin-left: 10px;">3%</span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span style="display: inline-block; width: 100px;">table:</span>
+                        <div class="probability-bar" style="width: 200px; display: inline-block;">
+                            <div class="probability-fill" style="width: 2%;"></div>
+                        </div>
+                        <span style="margin-left: 10px;">2%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="math-side">
+                    <h4>Mathematical Process</h4>
+                    <div class="math-equation">
+                        logits = h_final W_vocab + b_vocab<br><br>
+                        P(w_i | context) = exp(logit_i) / Σⱼ exp(logit_j)<br><br>
+                        where context = "The cat sat on the"<br><br>
+                        Sampling strategies:<br>
+                        • Greedy: argmax(P)<br>
+                        • Temperature: P' = softmax(logits/T)<br>
+                        • Top-k: sample from k highest P<br>
+                        • Nucleus: sample from cumulative P ≥ p
+                    </div>
+                </div>
+                <div class="code-side">
+                    <h4>Code Implementation</h4>
+                    <div class="code-block">
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">predictNextToken</span>(<span style="color: #ffcb6b;">context</span>) {
+    <span style="color: #c3e88d;">// Forward pass through model</span>
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">tokens</span> = <span style="color: #82aaff;">tokenize</span>(context);
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">probs</span> = <span style="color: #82aaff;">gptForward</span>(tokens);
+    
+    <span style="color: #c3e88d;">// Different sampling strategies</span>
+    <span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">greedySample</span>(<span style="color: #ffcb6b;">probs</span>) {
+        <span style="color: #f78c6c;">return</span> <span style="color: #82aaff;">argmax</span>(probs);
+    }
+    
+    <span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">temperatureSample</span>(<span style="color: #ffcb6b;">logits</span>, <span style="color: #ffcb6b;">temperature</span>) {
+        <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">scaled_logits</span> = logits.<span style="color: #82aaff;">map</span>(<span style="color: #ffcb6b;">l</span> => l / temperature);
+        <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">probs</span> = <span style="color: #82aaff;">softmax</span>(scaled_logits);
+        <span style="color: #f78c6c;">return</span> <span style="color: #82aaff;">sample</span>(probs);
+    }
+    
+    <span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">topKSample</span>(<span style="color: #ffcb6b;">probs</span>, <span style="color: #ffcb6b;">k</span>) {
+        <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">topK</span> = <span style="color: #82aaff;">getTopK</span>(probs, k);
+        <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">normalized</span> = <span style="color: #82aaff;">normalize</span>(topK);
+        <span style="color: #f78c6c;">return</span> <span style="color: #82aaff;">sample</span>(normalized);
+    }
+    
+    <span style="color: #f78c6c;">return</span> {
+        greedy: <span style="color: #82aaff;">greedySample</span>(probs),
+        temperature: <span style="color: #82aaff;">temperatureSample</span>(logits, 0.8),
+        topK: <span style="color: #82aaff;">topKSample</span>(probs, 50)
+    };
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Training Process</h2>
+            
+            <h3>How GPT Learns to Predict</h3>
+            
+            <div class="comparison-grid">
+                <div class="math-side">
+                    <h4>Training Mathematics</h4>
+                    <div class="math-equation">
+                        Loss function (Cross-entropy):<br>
+                        L = -Σᵢ Σⱼ yᵢⱼ log(pᵢⱼ)<br><br>
+                        where:<br>
+                        • yᵢⱼ = true token (one-hot)<br>
+                        • pᵢⱼ = predicted probability<br><br>
+                        Gradient computation:<br>
+                        ∂L/∂θ = ∂L/∂y · ∂y/∂h · ∂h/∂θ<br><br>
+                        Parameter update:<br>
+                        θ ← θ - α∇L(θ)<br>
+                        where α = learning rate
+                    </div>
+                </div>
+                <div class="code-side">
+                    <h4>Training Loop</h4>
+                    <div class="code-block">
+<span style="color: #f78c6c;">function</span> <span style="color: #82aaff;">trainStep</span>(<span style="color: #ffcb6b;">batch</span>, <span style="color: #ffcb6b;">model</span>) {
+    <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">losses</span> = [];
+    
+    <span style="color: #f78c6c;">for</span> (<span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">sequence</span> <span style="color: #f78c6c;">of</span> batch) {
+        <span style="color: #c3e88d;">// For each position, predict next token</span>
+        <span style="color: #f78c6c;">for</span> (<span style="color: #f78c6c;">let</span> <span style="color: #ffcb6b;">i</span> = 0; i < sequence.length - 1; i++) {
+            <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">context</span> = sequence.<span style="color: #82aaff;">slice</span>(0, i + 1);
+            <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">target</span> = sequence[i + 1];
+            
+            <span style="color: #c3e88d;">// Forward pass</span>
+            <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">predictions</span> = <span style="color: #82aaff;">gptForward</span>(context);
+            
+            <span style="color: #c3e88d;">// Compute loss</span>
+            <span style="color: #f78c6c;">const</span> <span style="color: #ffcb6b;">loss</span> = <span style="color: #82aaff;">crossEntropyLoss</span>(predictions, target);
+            losses.<span style="color: #82aaff;">push</span>(loss);
+            
+            <span style="color: #c3e88d;">// Backward pass</span>
+            <span style="color: #82aaff;">backpropagate</span>(loss, model);
+        }
+    }
+    
+    <span style="color: #c3e88d;">// Update parameters</span>
+    <span style="color: #82aaff;">optimizerStep
