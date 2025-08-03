@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simplified GPT Forward Pass</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body);"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 2rem;
+      background-color: #f7f7f7;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    .math-block {
+      background: #fff;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 4px solid #0077cc;
+      overflow-x: auto;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    pre {
+      background: #eee;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Simplified GPT-like Forward Pass</h1>
+
+  <h2>Objective</h2>
+  <p>
+    Given a simplified input sequence and pre-defined model parameters, calculate the probability distribution
+    for the next predicted token. This mimics a single forward pass of a simplified GPT-like model.
+  </p>
+
+  <h2>Assumptions & Simplifications</h2>
+  <ul>
+    <li>Small Vocabulary: \( \mathcal{V} = \{\text{"the"}, \text{"cat"}, \text{"sat"}, \text{"on"}, \text{"mat"}, \text{"</s>"}\} \)</li>
+    <li>Embedding dimension: \( d = 4 \)</li>
+    <li>No positional encoding</li>
+    <li>Single self-attention head</li>
+    <li>One transformer block only</li>
+    <li>No layer norm or residuals</li>
+    <li>All parameters are pre-defined</li>
+  </ul>
+
+  <h2>Word Embeddings</h2>
+  <div class="math-block">
+    \( E =
+    \begin{pmatrix}
+      0.1 & 0.2 & 0.3 & 0.4 \\
+      0.5 & 0.6 & 0.7 & 0.8 \\
+      0.9 & 0.0 & 0.1 & 0.2 \\
+      0.3 & 0.4 & 0.5 & 0.6 \\
+      0.7 & 0.8 & 0.9 & 0.0 \\
+      0.1 & 0.1 & 0.1 & 0.1
+    \end{pmatrix} \)
+  </div>
+
+  <h2>Attention Weight Matrices</h2>
+  <div class="math-block">
+    \( W^Q =
+    \begin{pmatrix}
+      0.1 & 0.0 & 0.2 & 0.0 \\
+      0.0 & 0.3 & 0.0 & 0.4 \\
+      0.5 & 0.0 & 0.1 & 0.0 \\
+      0.0 & 0.6 & 0.0 & 0.7
+    \end{pmatrix} \)
+    <br><br>
+    \( W^K =
+    \begin{pmatrix}
+      0.8 & 0.0 & 0.1 & 0.0 \\
+      0.0 & 0.9 & 0.0 & 0.2 \\
+      0.3 & 0.0 & 0.4 & 0.0 \\
+      0.0 & 0.5 & 0.0 & 0.6
+    \end{pmatrix} \)
+    <br><br>
+    \( W^V =
+    \begin{pmatrix}
+      0.2 & 0.0 & 0.3 & 0.0 \\
+      0.0 & 0.4 & 0.0 & 0.5 \\
+      0.6 & 0.0 & 0.7 & 0.0 \\
+      0.0 & 0.8 & 0.0 & 0.9
+    \end{pmatrix} \)
+  </div>
+
+  <h2>Feed-Forward Network Parameters</h2>
+  <div class="math-block">
+    \( W_1 =
+    \begin{pmatrix}
+      0.1 & 0.2 & 0.3 & 0.4 \\
+      0.5 & 0.6 & 0.7 & 0.8 \\
+      0.9 & 0.0 & 0.1 & 0.2 \\
+      0.3 & 0.4 & 0.5 & 0.6
+    \end{pmatrix}, \quad
+    b_1 = \begin{pmatrix} 0.1 & 0.2 & 0.3 & 0.4 \end{pmatrix} \)
+
+    <br><br>
+    \( W_2 =
+    \begin{pmatrix}
+      0.1 & 0.2 & 0.3 & 0.4 \\
+      0.5 & 0.6 & 0.7 & 0.8 \\
+      0.9 & 0.0 & 0.1 & 0.2 \\
+      0.3 & 0.4 & 0.5 & 0.6
+    \end{pmatrix}, \quad
+    b_2 = \begin{pmatrix} 0.05 & 0.05 & 0.05 & 0.05 \end{pmatrix} \)
+  </div>
+
+  <h2>Output Layer Parameters</h2>
+  <div class="math-block">
+    \( W_{\text{out}} =
+    \begin{pmatrix}
+      0.1 & 0.0 & 0.2 & 0.0 \\
+      0.0 & 0.3 & 0.0 & 0.4 \\
+      0.5 & 0.0 & 0.1 & 0.0 \\
+      0.0 & 0.6 & 0.0 & 0.7 \\
+      0.8 & 0.0 & 0.9 & 0.0 \\
+      0.0 & 0.1 & 0.0 & 0.2
+    \end{pmatrix}, \quad
+    b_{\text{out}} = \begin{pmatrix} 0.1 & 0.1 & 0.1 & 0.1 & 0.1 & 0.1 \end{pmatrix} \)
+  </div>
+
+  <h2>Input Sequence</h2>
+  <p><code>text = "thecatsat"</code></p>
+
+  <h2>Tasks</h2>
+  <ol>
+    <li><strong>Tokenization & Embedding Lookup:</strong> Map tokens to indices and look up rows in \( E \).</li>
+    <li><strong>Compute Q, K, V:</strong> \( Q = XW^Q \), \( K = XW^K \), \( V = XW^V \)</li>
+    <li><strong>Compute Attention Scores:</strong> \( \text{Scores} = \frac{QK^T}{\sqrt{d_k}} \)</li>
+    <li><strong>Apply Softmax:</strong> \( \text{AttentionWeights} = \text{softmax}(\text{Scores}) \)</li>
+    <li><strong>Compute Attention Output:</strong> \( \text{AttentionOutput} = \text{AttentionWeights} \cdot V \)</li>
+    <li><strong>Feed-Forward:</strong>
+      <ul>
+        <li>\( h_1 = \text{ReLU}(zW_1 + b_1) \)</li>
+        <li>\( h_2 = h_1W_2 + b_2 \)</li>
+        <li>\( \text{FFNOutput} = h_2 \)</li>
+      </ul>
+    </li>
+    <li><strong>Next Token Prediction:</strong> Use the final row: \( h_{\text{final}} = \text{FFNOutput}[-1] \)</li>
+    <li><strong>Compute Logits:</strong> \( \text{Logits} = h_{\text{final}}W_{\text{out}} + b_{\text{out}} \)</li>
+    <li><strong>Softmax for Probability Distribution:</strong> \( P = \text{softmax}(\text{Logits}) \)</li>
+  </ol>
+
+  <h2>Note</h2>
+  <p>This model intentionally omits details like positional encoding and layer norm to help focus on core mechanics of transformer blocks.</p>
+
+</body>
+</html>
