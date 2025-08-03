@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Mathematical and Computational Exposition of Generative Transformers</title>
+    <title>A Low-Level Mathematical Exposition of Generative Transformers</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
@@ -12,7 +12,6 @@
             color: #E0E0E0;
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            /* Prevent horizontal overflow on the whole page */
             overflow-x: hidden;
         }
         .paper-container {
@@ -37,6 +36,7 @@
             border-left: 4px solid #3B82F6;
             padding: 1.5rem;
             margin-bottom: 2rem;
+            border-radius: 0.5rem;
         }
         .section-title {
             font-size: 1.8rem;
@@ -52,19 +52,18 @@
             margin-bottom: 0.5rem;
             color: #C0C0C0;
         }
-        code, pre {
+        pre {
             background-color: #1E1E1E;
             color: #D4D4D4;
             padding: 1rem;
             border-radius: 0.5rem;
             font-family: 'Fira Code', monospace;
-            display: block; /* Ensure the block takes up full width */
+            display: block;
             width: 100%;
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
-            overflow-x: auto; /* Enable horizontal scrolling for long lines */
-        }
-        pre {
-            white-space: pre; /* Ensure whitespace is preserved */
+            box-sizing: border-box;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         table {
             width: 100%;
@@ -81,7 +80,6 @@
             background-color: #2D2D2D;
             color: #E0E0E0;
         }
-        /* Custom styles for research paper feel */
         .paper-container p, .paper-container li {
             text-align: justify;
         }
@@ -91,225 +89,155 @@
 
 <div class="paper-container">
     <header class="header">
-        <h1 class="text-3xl font-bold">A Mathematical and Computational Exposition of Generative Transformers</h1>
-        <p class="mt-2 text-sm">Daniel Fox, Gemin AI and Claude AI</p>
-        <p class="mt-1 text-xs"><sup>1</sup>Generative Intelligence Research Lab</p>
+        <h1 class="text-3xl font-bold">A Low-Level Mathematical Exposition of Generative Transformers</h1>
+        <p class="mt-2 text-sm">Daniel Fox and Gemini AI</p>
+        <p class="mt-1 text-xs">Generative Intelligence Research Lab</p>
     </header>
 
     <div class="abstract">
         <h2 class="text-xl font-semibold mb-2">Abstract</h2>
-        <p>This paper provides a low-level, mathematical, and computational explanation of how a Generative Pre-trained Transformer (GPT) model predicts the next token in a sequence. It demystifies the process by breaking down the core concepts of the forward pass, token embedding, and the iterative training loop. We present the fundamental principles of linear algebra and calculus, such as matrix multiplication and gradient descent, and compare their theoretical formulations with a practical, library-free pseudo-code implementation. The document uses the exemplary phrase "The cat sat on the" to illustrate each step of the prediction and training lifecycle, highlighting the direct relationship between the underlying mathematics and a working computational model.</p>
+        <p>This paper provides an in-depth, from-scratch explanation of how a Generative Pre-trained Transformer (GPT) model predicts the next token. It moves beyond computational abstractions to explore the core mathematical operations that form the basis of the model. We detail how matrices and vectors are manipulated and then apply these primitives to construct a complete forward and backward pass for a single transformer layer. Using the example phrase "The cat sat on the", this document demonstrates the direct relationship between advanced linear algebra and calculus in a working computational model.</p>
     </div>
 
     <main>
         <section>
-            <h2 class="section-title">1. From Words to Numbers: Tokenization and Embedding</h2>
-            <p>Before a model can process language, it must convert text into a numerical format. This is a two-step process involving tokenization and embedding. Tokenization breaks a sentence into discrete units (tokens), and embedding converts each token into a dense vector of numbers, which is the model's internal representation of the word's meaning.</p>
+            <h2 class="section-title">1. Core Computational Primitives</h2>
+            <p>At its heart, a neural network is a series of matrix and vector operations. Before we build the transformer, we must first define the low-level functions that perform these fundamental calculations. We represent matrices as lists of lists and vectors as simple lists.</p>
 
             <div class="mt-4">
-                <div class="subsection-title">Example Tokenization</div>
-                <p>Consider the input sentence: "The cat sat on the". A simple tokenizer might split this into the following tokens:</p>
-                <pre><code>["The", "cat", "sat", "on", "the"]</code></pre>
+                <div class="subsection-title">1.1. Matrix Multiplication</div>
+                <p>The product of two matrices, $C = A \cdot B$, is defined such that the element at row $i$ and column $j$ of $C$ is the sum of the products of the elements in row $i$ of $A$ and column $j$ of $B$.</p>
+                $$ C_{ij} = \sum_{k=1}^{n} A_{ik} B_{kj} $$
             </div>
 
             <div class="mt-4">
-                <div class="subsection-title">Mathematical Representation (Embedding)</div>
-                <p>Each token is mapped to a unique embedding vector. Let $V$ be the vocabulary size and $d_{model}$ be the embedding dimension. The embedding matrix, $E \in \mathbb{R}^{V \times d_{model}}$, stores the vector for each token. The embedding for a token, say 'cat' (with index $i$), is simply the $i$-th row of this matrix.</p>
-                <p>For our example, the sequence of tokens is converted into a sequence of vectors:
-                $$ \text{Embedding}(\text{"The"}) = \mathbf{e}_{\text{The}} \in \mathbb{R}^{d_{model}} $$
-                $$ \text{Embedding}(\text{"cat"}) = \mathbf{e}_{\text{cat}} \in \mathbb{R}^{d_{model}} $$
-                $$ \text{Sequence} = [\mathbf{e}_{\text{The}}, \mathbf{e}_{\text{cat}}, \mathbf{e}_{\text{sat}}, \mathbf{e}_{\text{on}}, \mathbf{e}_{\text{the}}] $$
-                </p>
+                <div class="subsection-title">1.2. Matrix Transposition</div>
+                <p>Transposition involves flipping a matrix over its diagonal, converting the rows into columns and the columns into rows.</p>
+                $$ B_{ij} = A_{ji} $$
             </div>
 
             <div class="mt-4">
-                <div class="subsection-title">Code Implementation (Pseudo-code)</div>
-                <pre><code>
-// Define an embedding matrix
-let vocab_size = 10000;
-let d_model = 512;
-let embedding_matrix = create_matrix(vocab_size, d_model); // Initialized with random values
-
-// Define a simple vocabulary-to-index mapping
-let vocab_to_idx = {
-    "The": 0, "cat": 1, "sat": 2, "on": 3, "the": 4, "mat": 5, "rug": 6
-};
-
-// Function to get a token's embedding
-function get_embedding(token) {
-    let token_idx = vocab_to_idx[token];
-    return embedding_matrix[token_idx];
-}
-
-// Get the sequence of embeddings
-let tokens = ["The", "cat", "sat", "on", "the"];
-let embeddings = tokens.map(get_embedding);
-</code></pre>
+                <div class="subsection-title">1.3. Element-wise Operations (Addition, etc.)</div>
+                <p>These operations are applied to each corresponding element of two matrices of the same size, or between a matrix and a single scalar.</p>
+                $$ C_{ij} = A_{ij} + B_{ij} $$
             </div>
         </section>
 
         <section>
             <h2 class="section-title">2. The Forward Pass: From Embeddings to Prediction</h2>
-            <p>The forward pass is the process where the model takes the sequence of embedding vectors and transforms them through its layers to produce a final prediction. At its core, this involves a series of matrix multiplications and non-linear activation functions. The key component is the self-attention mechanism, which allows the model to weigh the importance of different tokens in the sequence.</p>
+            <p>The forward pass takes an input sequence and processes it through the model's layers to produce a final prediction.</p>
 
             <div class="mt-4">
-                <div class="subsection-title">Mathematical Representation (Simplified)</div>
-                <p>The entire sequence of embeddings can be represented as a single matrix $X \in \mathbb{R}^{sequence\_length \times d_{model}}$. Each layer of the transformer then applies a series of linear and non-linear transformations. For a single feed-forward block, the operation is a simple linear transformation followed by an activation function, applied to each token's vector.
-                $$ \mathbf{z} = X \mathbf{W}_{1} + \mathbf{b}_{1} $$
-                $$ \mathbf{a} = \text{ReLU}(\mathbf{z}) $$
-                $$ \text{Output} = \mathbf{a} \mathbf{W}_{2} + \mathbf{b}_{2} $$
-                where $\mathbf{W}_{1}, \mathbf{W}_{2}$ are weight matrices and $\mathbf{b}_{1}, \mathbf{b}_{2}$ are bias vectors. In reality, the self-attention mechanism is more complex, involving queries, keys, and values matrices, but the principle remains a series of matrix operations. The final output of the model for the sequence is a matrix of "logits", one for each token position, with a dimension equal to the vocabulary size.
-                $$ \text{Logits} \in \mathbb{R}^{sequence\_length \times vocab\_size} $$
-                We are interested in the final row of this matrix, which represents the prediction for the next token. Let this be $\mathbf{l}_{final} \in \mathbb{R}^{vocab\_size}$.</p>
+                <div class="subsection-title">2.1. Tokenization and Embedding</div>
+                <p>The input sequence "The cat sat on the" is tokenized and then mapped to embedding vectors, which are the model's internal representation of each word. The input is a matrix $X$ of shape $[sequence\_length \times d_{model}]$.</p>
+            </div>
+            
+            <div class="mt-4">
+                <div class="subsection-title">2.2. Self-Attention Mechanism (Full Math)</div>
+                <p>This is the core of the transformer. The input matrix $X$ is transformed into three matrices: Query ($Q$), Key ($K$), and Value ($V$). The attention scores are calculated as the dot product of $Q$ and $K$ and then scaled. A softmax function turns these scores into probabilities, which are then multiplied by the $V$ matrix to get the final attention output.</p>
+                <p>Mathematical Formula:</p>
+                $$ \text{Attention}(Q, K, V) = \text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V $$
+                <p>Where:</p>
+                <ul>
+                    <li>$Q = X \cdot W_Q$</li>
+                    <li>$K = X \cdot W_K$</li>
+                    <li>$V = X \cdot W_V$</li>
+                    <li>$W_Q$, $W_K$, $W_V$ are the weight matrices for the Query, Key, and Value vectors.</li>
+                </ul>
+                <p>The scores are calculated as:</p>
+                $$ \text{Scores} = Q K^T $$
+                <p>The scaled scores are:</p>
+                $$ \text{Scores}_{scaled} = \frac{\text{Scores}}{\sqrt{d_k}} $$
+                <p>A causal mask is applied to the scaled scores to prevent a token from attending to future tokens. The masked scores are then passed through the softmax function to get the attention probabilities:</p>
+                $$ \text{Softmax}(\mathbf{z}_i) = \frac{e^{z_i}}{\sum_{j} e^{z_j}} $$
+                <p>The final attention output, $Z_{attn}$, is a matrix of shape $[sequence\_length \times d_k]$:</p>
+                $$ Z_{attn} = \text{Softmax}(\text{Scores}_{scaled}) \cdot V $$
+                <p>This output is then passed through an output weight matrix $W_O$ and added to the original input $X$ (the residual connection), before being normalized.</p>
+            </div>
+            
+            <div class="mt-4">
+                <div class="subsection-title">2.3. Feed-Forward Network</div>
+                <p>The output of the attention block, $Z$, is passed through a simple feed-forward network. This network consists of two linear layers with a non-linear activation function (ReLU) in between.</p>
+                $$ \text{FFN}(\mathbf{x}) = \text{ReLU}(\mathbf{x}W_1 + \mathbf{b}_1)W_2 + \mathbf{b}_2 $$
             </div>
 
             <div class="mt-4">
-                <div class="subsection-title">Code Implementation (Pseudo-code)</div>
-                <pre><code>
-// Assume a simplified single layer with weights W1, b1, W2, b2
-let W1 = create_matrix(d_model, hidden_dim);
-let b1 = create_vector(hidden_dim);
-let W2 = create_matrix(hidden_dim, vocab_size);
-let b2 = create_vector(vocab_size);
-
-// Forward pass for the sequence "The cat sat on the"
-function forward_pass(embeddings) {
-    let sequence_matrix = embeddings; // A matrix of shape [5, 512]
-    
-    // Simplified feed-forward layer
-    let z = matrix_multiply(sequence_matrix, W1) + b1;
-    let a = relu(z);
-    let logits = matrix_multiply(a, W2) + b2;
-
-    // We only need the logits for the last token to predict the next
-    let final_logits = logits[logits.length - 1];
-    return final_logits;
-}
-
-let next_token_logits = forward_pass(embeddings);
-</code></pre>
+                <div class="subsection-title">2.4. Final Linear Layer to Logits</div>
+                <p>The output of the FFN, $\text{Output}_{final}$, is passed through the final linear layer to produce logits for each token in the vocabulary.</p>
+                $$ \mathbf{l}_{final} = \text{Output}_{final} \cdot W_{final} + \mathbf{b}_{final} $$
+                <p>The final logits vector $\mathbf{l}_{final}$ is what the model uses to make its prediction.</p>
             </div>
         </section>
 
         <section>
-            <h2 class="section-title">3. The Backward Pass: The Iterative Training Loop</h2>
-            <p>Training a GPT model is an iterative process of trial and error. The model makes a prediction (forward pass), we measure how wrong it was, and then we adjust the model's parameters (weights and biases) to reduce that error. This adjustment process is the backward pass, or backpropagation, and it is the core of "learning".</p>
+            <h2 class="section-title">3. The Backward Pass: The Iterative Training Loop (Full Math)</h2>
+            <p>The backward pass is the process of computing the gradient of the loss with respect to each model parameter. We start with the loss, and use the chain rule to backpropagate the gradients through the network, layer by layer.</p>
 
             <div class="mt-4">
-                <div class="subsection-title">Mathematical Representation (Loss and Gradient)</div>
-                <p>For a given prediction, $\mathbf{l}_{final}$, and the true next token (e.g., 'mat'), represented as a one-hot encoded vector $\mathbf{y}_{true}$, we calculate the loss. A common loss function is the **Cross-Entropy Loss**. First, the logits are converted into probabilities using the **Softmax function**:
-                $$ \text{Softmax}(\mathbf{l})_i = \frac{e^{l_i}}{\sum_{j=1}^{V} e^{l_j}} $$
-                The loss is then calculated as:
-                $$ \text{Loss}(y, \hat{y}) = - \sum_{i=1}^{V} y_i \log(\hat{y}_i) $$
-                The heart of backpropagation is computing the **gradient** of the loss with respect to every weight and bias in the network, using the **Chain Rule** from calculus. The gradient tells us the direction of steepest ascent of the loss function. We then take a small step in the opposite direction (gradient descent) to minimize the loss.
-                $$ \text{Weight}_{new} = \text{Weight}_{old} - \alpha \frac{\partial \text{Loss}}{\partial \text{Weight}_{old}} $$
-                Here, $\alpha$ is the learning rate, a small constant.</p>
+                <div class="subsection-title">3.1. Loss and Initial Gradient Calculation</div>
+                <p>We use Cross-Entropy Loss to measure the error. The gradient of the loss with respect to the output logits is simply the difference between the predicted probabilities and the one-hot encoded true label.</p>
+                <p>Initial Gradient:</p>
+                $$ \frac{\partial L}{\partial \mathbf{l}} = \hat{y} - y_{true} $$
+            </div>
+            
+            <div class="mt-4">
+                <div class="subsection-title">3.2. Backpropagating through the Final Linear Layer</div>
+                <p>We compute the gradients for $W_{final}$ and $b_{final}$ using the chain rule.</p>
+                $$ \frac{\partial L}{\partial W_{final}} = \text{Output}_{final}^T \cdot \frac{\partial L}{\partial \mathbf{l}} $$
+                $$ \frac{\partial L}{\partial \mathbf{b}_{final}} = \frac{\partial L}{\partial \mathbf{l}} $$
+                <p>The gradient passed back to the FFN is:</p>
+                $$ \frac{\partial L}{\partial \text{Output}_{final}} = \frac{\partial L}{\partial \mathbf{l}} \cdot W_{final}^T $$
             </div>
 
             <div class="mt-4">
-                <div class="subsection-title">Code Implementation (Pseudo-code)</div>
-                <pre><code>
-// Assume our example continues with the sentence "The cat sat on the [mat]"
-let true_next_token = "mat";
-let true_next_token_idx = vocab_to_idx[true_next_token];
-let one_hot_label = create_one_hot_vector(vocab_size, true_next_token_idx);
+                <div class="subsection-title">3.3. Backpropagating through the Feed-Forward Network</div>
+                <p>The FFN has a linear layer, a ReLU activation, and another linear layer. We apply the chain rule to each component.</p>
+                $$ \frac{\partial L}{\partial W_{ffn2}} = \text{Output}_{ffn1}^T \cdot \frac{\partial L}{\partial \text{Output}_{final}} $$
+                $$ \frac{\partial L}{\partial \mathbf{b}_{ffn2}} = \sum_{i=1}^{sequence\_length} \frac{\partial L}{\partial \text{Output}_{final}^{(i)}} $$
+                <p>The gradient through the ReLU activation is:</p>
+                $$ \frac{\partial L}{\partial \text{Output}_{ffn1}} = \left( \frac{\partial L}{\partial \text{Output}_{final}} \cdot W_{ffn2}^T \right) \odot \text{ReLU}'(\text{FFN1}_{\text{output}}) $$
+                <p>where $\odot$ denotes element-wise multiplication.</p>
+                <p>The gradients for the first FFN layer are:</p>
+                $$ \frac{\partial L}{\partial W_{ffn1}} = Z^T \cdot \frac{\partial L}{\partial \text{Output}_{ffn1}} $$
+                $$ \frac{\partial L}{\partial \mathbf{b}_{ffn1}} = \sum_{i=1}^{sequence\_length} \frac{\partial L}{\partial \text{Output}_{ffn1}^{(i)}} $$
+            </div>
 
-// Softmax function
-function softmax(logits) {
-    let max_logit = Math.max(...logits);
-    let exp_logits = logits.map(l => Math.exp(l - max_logit));
-    let sum_exp = exp_logits.reduce((a, b) => a + b, 0);
-    return exp_logits.map(e => e / sum_exp);
-}
-
-// Cross-Entropy Loss
-function cross_entropy_loss(probabilities, one_hot_label) {
-    let loss = 0;
-    for (let i = 0; i < vocab_size; i++) {
-        loss -= one_hot_label[i] * Math.log(probabilities[i] + 1e-9); // Add small epsilon for stability
-    }
-    return loss;
-}
-
-// --- The Backward Pass (simplified for a single layer) ---
-// 1. Calculate the gradient of the loss with respect to the final logits
-let d_loss_d_logits = softmax(next_token_logits) - one_hot_label;
-
-// 2. Backpropagate the gradient through the layers
-// This is the core of the chain rule. We calculate how the gradient for one layer
-// depends on the gradient of the next layer.
-// Example for W2:
-let d_loss_d_W2 = matrix_multiply(a.transpose(), d_loss_d_logits); // Requires intermediate 'a' from forward pass
-
-// 3. Update the weights and biases using the learning rate
-let learning_rate = 0.001;
-W2 -= learning_rate * d_loss_d_W2;
-b2 -= learning_rate * d_loss_d_logits; // Update b2
-
-// This process repeats for all layers, working backward to the embedding layer.
-</code></pre>
+            <div class="mt-4">
+                <div class="subsection-title">3.4. Backpropagating through the Self-Attention Mechanism (Full Derivation)</div>
+                <p>This is the most complex part. We must find the gradients for $W_Q, W_K, W_V$ by backpropagating through the entire attention formula. Let's start from the gradient of the attention output $Z_{attn}$ and work backward.</p>
+                $$ \frac{\partial L}{\partial Z_{attn}} = \frac{\partial L}{\partial Z} \cdot W_O^T $$
+                <p>The derivative of the final attention output with respect to the attention probabilities and the Value matrix are:</p>
+                $$ \frac{\partial L}{\partial \text{Softmax}(...) } = \frac{\partial L}{\partial Z_{attn}} \cdot V^T $$
+                $$ \frac{\partial L}{\partial V } = \text{Softmax}(...)^T \cdot \frac{\partial L}{\partial Z_{attn}} $$
+                <p>The derivative of the softmax is complex, but we can simplify the calculation of the gradient with respect to the attention scores ($S$) as:</p>
+                $$ \frac{\partial L}{\partial S_{ij}} = \sum_{k} \frac{\partial L}{\partial \text{Softmax}(S)_{ik}} \cdot \left( \text{Softmax}(S)_{ik} (\delta_{jk} - \text{Softmax}(S)_{jk}) \right) $$
+                <p>Using this, we can derive the gradients for the weights:</p>
+                $$ \frac{\partial L}{\partial W_v} = X^T \cdot \frac{\partial L}{\partial V} $$
+                $$ \frac{\partial L}{\partial W_k} = X^T \cdot \frac{\partial L}{\partial K} $$
+                $$ \frac{\partial L}{\partial W_q} = X^T \cdot \frac{\partial L}{\partial Q} $$
+            </div>
+            
+            <div class="mt-4">
+                <div class="subsection-title">3.5. Parameter Update (Gradient Descent)</div>
+                <p>The final step is to update the weights and biases by subtracting the gradients multiplied by the learning rate. This adjusts the parameters in the direction that minimizes the loss.</p>
+                $$ \text{Weight}_{new} = \text{Weight}_{old} - \alpha \cdot \frac{\partial L}{\partial \text{Weight}_{old}} $$
             </div>
         </section>
 
         <section>
             <h2 class="section-title">4. Final Prediction: Sampling the Next Token</h2>
-            <p>After the forward pass, the model outputs a vector of logits for the next token. These logits are raw, unnormalized scores. The final step is to convert these scores into a probability distribution over the entire vocabulary and then select the next token based on that distribution.</p>
-
+            <p>After the forward pass is complete, we must convert the final logits into a token prediction. The logits are passed through a softmax function to get a probability distribution, and the token with the highest probability is selected.</p>
+            
             <div class="mt-4">
-                <div class="subsection-title">Mathematical Representation (Softmax)</div>
-                <p>The softmax function converts the logits into a probability distribution where all values are between 0 and 1 and sum to 1. For our final logits vector $\mathbf{l}_{final}$:</p>
-                $$ P(\text{token}_i | \text{"The cat sat on the"}) = \frac{e^{l_{final, i}}}{\sum_{j=1}^{V} e^{l_{final, j}}} $$
-                <p>The next token is then selected from this probability distribution. The most common method is to choose the token with the highest probability (greedy sampling), but more advanced methods like temperature sampling or top-k sampling are used to make the output more varied and creative.</p>
-                <div class="mt-4">
-                    <p>For example, for the input "The cat sat on the", the model might produce a probability distribution like this:</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Token</th>
-                                <th>Probability</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>mat</td><td>0.75</td></tr>
-                            <tr><td>rug</td><td>0.15</td></tr>
-                            <tr><td>floor</td><td>0.08</td></tr>
-                            <tr><td>...</td><td>...</td></tr>
-                            <tr><td>car</td><td>0.001</td></tr>
-                        </tbody>
-                    </table>
-                    <p>In this case, the model would predict "mat" as the next token.</p>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <div class="subsection-title">Code Implementation (Pseudo-code)</div>
-                <pre><code>
-// Get the final logits from the forward pass
-let final_logits = forward_pass(embeddings);
-
-// Convert logits to probabilities
-let probabilities = softmax(final_logits);
-
-// Find the index of the highest probability
-function argmax(array) {
-    return array.indexOf(Math.max(...array));
-}
-
-let predicted_token_idx = argmax(probabilities);
-
-// Look up the token from the index
-let idx_to_vocab = ["The", "cat", "sat", "on", "the", "mat", "rug", "floor", "car", ...];
-let predicted_token = idx_to_vocab[predicted_token_idx];
-
-console.log("Predicted next token:", predicted_token);
-// Expected output: Predicted next token: mat
-</code></pre>
+                <div class="subsection-title">Softmax on the final logits</div>
+                $$ P(\text{token}_i) = \frac{e^{l_i}}{\sum_{j} e^{l_j}} $$
+                <p>The predicted token is the one corresponding to the index with the maximum probability.</p>
             </div>
         </section>
 
         <section>
             <h2 class="section-title">Conclusion</h2>
-            <p>At a low level, a generative transformer's ability to predict the next token is a complex but logical dance between linear algebra and calculus. The forward pass is a sequence of matrix operations that transform text embeddings into a probability distribution. The backward pass, driven by the chain rule and gradient descent, is an iterative optimization process that updates the model's parameters to minimize prediction errors. This elegant interplay of mathematics is the foundation for the sophisticated language capabilities we observe in modern AI models.</p>
+            <p>This document has demonstrated that the seemingly magical ability of a GPT model to predict text is, in fact, a series of deterministic mathematical operations. By breaking down the components and tracing the chain of derivatives through the backward pass, we can see that a transformer is an elegant system of linear algebra and calculus.</p>
         </section>
     </main>
 </div>
