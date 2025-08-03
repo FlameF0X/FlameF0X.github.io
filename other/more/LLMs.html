@@ -12,6 +12,8 @@
             color: #E0E0E0;
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
+            /* Prevent horizontal overflow on the whole page */
+            overflow-x: hidden;
         }
         .paper-container {
             max-width: 900px;
@@ -56,11 +58,13 @@
             padding: 1rem;
             border-radius: 0.5rem;
             font-family: 'Fira Code', monospace;
-            overflow-x: auto;
+            display: block; /* Ensure the block takes up full width */
+            width: 100%;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
         }
         pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            white-space: pre; /* Ensure whitespace is preserved */
         }
         table {
             width: 100%;
