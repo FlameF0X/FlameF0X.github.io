@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitPlace - The Collaborative Pixel Canvas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /*
+            This CSS file provides a custom font and a smooth transition effect.
+            The primary styling is handled by Tailwind CSS classes in the HTML.
+        */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
+        /* Custom styles for the color input to remove default browser appearance */
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border-radius: 6px;
+            border: none;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: transparent;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Ensure the canvas and its container maintain a 1:1 aspect ratio */
+        .aspect-square {
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Base styles for buttons and other interactive elements */
+        button, input[type="color"], input[type="text"] {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-inter">
+    <div class="container mx-auto p-4 flex flex-col items-center">
+        <header class="text-center mb-6">
+            <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+                GitPlace
+            </h1>
+            <p class="mt-2 text-lg text-gray-400">
+                A collaborative pixel canvas powered by GitHub.
+            </p>
+        </header>
+
+        <main class="flex flex-col lg:flex-row items-center lg:items-start space-y-8 lg:space-y-0 lg:space-x-8">
+            <div class="relative w-full max-w-2xl aspect-square bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
+                <canvas id="pixelCanvas" class="w-full h-full"></canvas>
+            </div>
+
+            <aside class="w-full max-w-sm p-6 bg-gray-800 rounded-lg shadow-2xl flex flex-col space-y-6">
+                <h3 class="text-xl font-bold text-white text-center">Controls</h3>
+                
+                <div class="flex flex-col space-y-2">
+                    <label for="colorPicker" class="text-sm font-medium text-gray-300">Choose a Color</label>
+                    <input type="color" id="colorPicker" value="#FFFFFF" class="w-full h-12 rounded-lg border-2 border-gray-700 cursor-pointer">
+                </div>
+
+                <div class="flex flex-col space-y-2">
+                    <label for="coordsDisplay" class="text-sm font-medium text-gray-300">Selected Coordinates</label>
+                    <input type="text" id="coordsDisplay" class="w-full p-3 rounded-lg bg-gray-700 text-gray-200 border-2 border-gray-600 focus:outline-none focus:border-blue-500" readonly>
+                </div>
+                
+                <button id="placePixelButton" class="w-full px-6 py-3 rounded-lg text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    Place Pixel
+                </button>
+
+                <div id="statusMessage" class="text-center text-sm font-medium text-gray-400 min-h-6">
+                    Ready to place a pixel.
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        // =========================================================
+        // === GitPlace - Main JavaScript for a GitHub-backed canvas ===
+        // =========================================================
+
+        // --- Configuration ---
+        // You will need to replace these with your own GitHub details.
+        // To get your GitHub Personal Access Token (PAT):
+        // 1. Go to Settings > Developer settings > Personal access tokens > Tokens (classic)
+        // 2. Click "Generate new token (classic)"
+        // 3. Give it a descriptive name (e.g., "GitPlace-API")
+        // 4. Set an expiration date.
+        // 5. Grant it "repo" scope (full control of private repositories).
+        // 6. Save the token securely. DO NOT SHARE IT.
+        // 7. Paste it below.
+        const GITHUB_PAT = 'YOUR_PERSONAL_ACCESS_TOKEN'; // <-- IMPORTANT: Replace this.
+
+        // Replace with your GitHub username and repository name.
+        const GITHUB_USERNAME = 'your-username';
+        const GITHUB_REPO_NAME = 'your-repo';
+
+        const JSON_FILE_PATH = 'board.json';
+        const BOARD_SIZE = 1024;
+        const UPDATE_INTERVAL_MS = 5000; // Poll for updates every 5 seconds
+        const COOLDOWN_SECONDS = 300; // 5 minutes (300 seconds)
+        const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/contents/${JSON_FILE_PATH}`;
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d');
+        const colorPicker = document.getElementById('colorPicker');
+        const coordsDisplay = document.getElementById('coordsDisplay');
+        const placePixelButton = document.getElementById('placePixelButton');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // --- State Variables ---
+        let boardData = []; // The 2D array of pixel colors
+        let selectedX = -1;
+        let selectedY = -1;
+        let currentSHA = ''; // SHA of the last commit for updating the file
+        let isCooldownActive = false;
+        let lastPlacementTime = 0;
+
+        // --- Helper Functions ---
+
+        /**
+         * Converts a hex color string to an array of RGBA values.
+         * @param {string} hex - The hex color string (e.g., "#FF5733").
+         * @returns {number[]} - An array like [255, 87, 51, 255].
+         */
+        function hexToRgbA(hex) {
+            if (!hex) return [0, 0, 0, 0]; // Default to transparent or black
+            let c;
+            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+                c = hex.substring(1).split('');
+                if (c.length === 3) {
+                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c = '0x' + c.join('');
+                return [(c >> 16) & 255, (c >> 8) & 255, c & 255, 255];
+            }
+            return [0, 0, 0, 0];
+        }
+
+        /**
+         * Encodes a string to Base64.
+         * @param {string} str - The string to encode.
+         * @returns {string} - The Base64 encoded string.
+         */
+        function toBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        /**
+         * Updates the UI to reflect a cooldown timer.
+         */
+        function startCooldownTimer() {
+            isCooldownActive = true;
+            placePixelButton.disabled = true;
+
+            const interval = setInterval(() => {
+                const remainingTime = COOLDOWN_SECONDS - Math.floor((Date.now() - lastPlacementTime) / 1000);
+                if (remainingTime <= 0) {
+                    clearInterval(interval);
+                    isCooldownActive = false;
+                    placePixelButton.disabled = false;
+                    statusMessage.textContent = 'Ready to place a pixel.';
+                } else {
+                    statusMessage.textContent = `Cooldown: ${remainingTime}s remaining.`;
+                }
+            }, 1000);
+        }
+
+        // --- Drawing Functions ---
+
+        /**
+         * Draws the entire board from the current boardData array onto the canvas.
+         */
+        function drawBoard() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Make sure the canvas size matches the board size
+            const pixelSize = canvas.width / BOARD_SIZE;
+
+            // Draw each pixel
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                for (let x = 0; x < BOARD_SIZE; x++) {
+                    const color = boardData[y][x];
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+        }
+
+        // --- Fetch and Update Functions ---
+
+        /**
+         * Fetches the latest board data from GitHub and redraws the canvas.
+         */
+        async function fetchBoard() {
+            try {
+                // First, fetch the file metadata to get the SHA and download URL
+                const contentResponse = await fetch(GITHUB_API_URL);
+
+                if (!contentResponse.ok) {
+                    throw new Error(`Failed to fetch board metadata: ${contentResponse.status} ${contentResponse.statusText}`);
+                }
+
+                const contentResponseJson = await contentResponse.json();
+                currentSHA = contentResponseJson.sha;
+                const downloadUrl = contentResponseJson.download_url;
+
+                if (!downloadUrl) {
+                    throw new Error('Could not get download URL from GitHub API.');
+                }
+                
+                // Then, fetch the raw content using the download URL
+                const rawResponse = await fetch(downloadUrl);
+
+                if (!rawResponse.ok) {
+                    throw new Error(`Failed to fetch raw board data: ${rawResponse.status} ${rawResponse.statusText}`);
+                }
+                
+                const data = await rawResponse.json();
+
+                boardData = data;
+                drawBoard();
+            } catch (error) {
+                console.error('Error fetching board:', error);
+                statusMessage.textContent = 'Error: Could not load the canvas. Check console for details.';
+            }
+        }
+
+        /**
+         * Handles the click event for placing a pixel.
+         */
+        async function placePixel() {
+            if (selectedX === -1 || selectedY === -1 || GITHUB_PAT === 'YOUR_PERSONAL_ACCESS_TOKEN' || !GITHUB_PAT) {
+                statusMessage.textContent = 'Please select a pixel and configure your GitHub PAT.';
+                return;
+            }
+
+            if (isCooldownActive) {
+                statusMessage.textContent = 'Still on cooldown. Please wait.';
+                return;
+            }
+
+            try {
+                // Fetch the latest board metadata to get the SHA and download URL before placing pixel
+                const contentResponse = await fetch(GITHUB_API_URL);
+                if (!contentResponse.ok) {
+                    throw new Error(`Failed to re-fetch board metadata: ${contentResponse.status} ${contentResponse.statusText}`);
+                }
+                const contentJson = await contentResponse.json();
+                currentSHA = contentJson.sha;
+                const downloadUrl = contentJson.download_url;
+                
+                if (!downloadUrl) {
+                    throw new Error('Could not get download URL from GitHub API.');
+                }
+
+                const rawContentResponse = await fetch(downloadUrl);
+                if (!rawContentResponse.ok) {
+                    throw new Error(`Failed to fetch raw board data before placing pixel: ${rawContentResponse.status} ${rawContentResponse.statusText}`);
+                }
+                
+                const updatedBoardData = await rawContentResponse.json();
+                
+                // Apply the new pixel color
+                updatedBoardData[selectedY][selectedX] = colorPicker.value;
+
+                // Create the payload for the GitHub API PUT request
+                const payload = {
+                    message: `GitPlace: Placed pixel at (${selectedX}, ${selectedY})`,
+                    content: btoa(JSON.stringify(updatedBoardData, null, 2)), // Use btoa directly
+                    sha: currentSHA
+                };
+
+                statusMessage.textContent = 'Placing pixel...';
+                placePixelButton.disabled = true;
+
+                const apiResponse = await fetch(GITHUB_API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_PAT}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!apiResponse.ok) {
+                    const errorData = await apiResponse.json();
+                    throw new Error(`GitHub API Error: ${apiResponse.status} - ${errorData.message}`);
+                }
+
+                statusMessage.textContent = 'Pixel placed successfully! Waiting for GitHub Pages to update...';
+                
+                // Update local board and start cooldown
+                boardData = updatedBoardData;
+                drawBoard();
+                lastPlacementTime = Date.now();
+                localStorage.setItem('lastPlacementTime', lastPlacementTime);
+                startCooldownTimer();
+
+            } catch (error) {
+                console.error('Error placing pixel:', error);
+                statusMessage.textContent = `Error: ${error.message}`;
+                placePixelButton.disabled = false;
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Handle clicks on the canvas
+        canvas.addEventListener('click', (event) => {
+            // Get the bounding rectangle of the canvas
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            // Calculate the coordinates relative to the canvas
+            const x = Math.floor((event.clientX - rect.left) * scaleX);
+            const y = Math.floor((event.clientY - rect.top) * scaleY);
+
+            // Store the selected pixel
+            selectedX = x;
+            selectedY = y;
+
+            // Update the coordinate display
+            coordsDisplay.value = `(${x}, ${y})`;
+        });
+
+        // Handle the "Place Pixel" button click
+        placePixelButton.addEventListener('click', placePixel);
+
+        // --- Initialization ---
+        function initialize() {
+            // Set the canvas dimensions
+            canvas.width = BOARD_SIZE;
+            canvas.height = BOARD_SIZE;
+
+            // Load last placement time from local storage
+            const storedTime = localStorage.getItem('lastPlacementTime');
+            if (storedTime) {
+                lastPlacementTime = parseInt(storedTime, 10);
+                const remaining = COOLDOWN_SECONDS - Math.floor((Date.now() - lastPlacementTime) / 1000);
+                if (remaining > 0) {
+                    startCooldownTimer();
+                }
+            }
+
+            // Initial fetch of the board
+            fetchBoard();
+
+            // Periodically fetch the board to get updates from other users
+            setInterval(fetchBoard, UPDATE_INTERVAL_MS);
+        }
+
+        // Start the application
+        initialize();
+    </script>
+</body>
+</html>
