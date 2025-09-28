@@ -75,10 +75,11 @@
         <div class="grid md:grid-cols-3 gap-8">
             <!-- Hero Column -->
             <div class="md:col-span-2 raw-border p-6 md:p-10">
+                <!-- Brutalist Header with Scramble Animation -->
                 <h2 class="brutalist-header font-black uppercase mb-8">
-                    <span class="block">AI.</span>
-                    <span class="block accent-text">WEB.</span>
-                    <span class="block">RESEARCH.</span>
+                    <span class="scramble">AI.</span><br>
+                    <span class="scramble accent-text">WEB.</span><br>
+                    <span class="scramble">RESEARCH.</span>
                 </h2>
                 <p class="text-xl text-stone-300 mb-10 max-w-2xl">
                     I'm Daniel, a developer focused on machine learning, open-source, and web technologies. I build, experiment, and share. My work is about making AI and tools accessible, robust, and a little bit fun.
@@ -112,7 +113,7 @@
         </div>
     </main>
 
-    <!-- Project List (Raw, Unformatted List) -->
+    <!-- Project List -->
     <section id="projects" class="container mx-auto px-6 py-12 md:py-20">
         <h3 class="text-2xl font-bold mono-font mb-8 border-b-2 border-stone-700 pb-4">PROJECTS</h3>
         <div class="space-y-6">
@@ -195,6 +196,38 @@
         </div>
         <p class="mono-font text-xs text-stone-500">&copy; 2025 Daniel.FlameFox. All rights reserved.</p>
     </footer>
+
+    <!-- Text Scramble Animation Script -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const scrambleChars = '1234567890asdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM!<>-_\\/[]{}—=+*^?#________';
+        const spans = document.querySelectorAll('.brutalist-header .scramble');
+
+        spans.forEach(span => {
+            const targetText = span.textContent;
+            const iterations = [];
+            for (let i = 0; i < targetText.length; i++) {
+                iterations.push(Math.floor(Math.random() * 30) + 10);
+            }
+
+            let frame = 0;
+            const interval = setInterval(() => {
+                const displayed = targetText.split('').map((char, idx) => {
+                    if (frame >= iterations[idx]) return char;
+                    return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                }).join('');
+
+                span.textContent = displayed;
+                frame++;
+
+                if (frame > Math.max(...iterations)) {
+                    span.textContent = targetText;
+                    clearInterval(interval);
+                }
+            }, 0 + Math.random() * 30);
+        });
+    });
+    </script>
 
 </body>
 </html>
