@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM Token Speed Simulator</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom scrollbar styling for the output box */
         #output-text {
@@ -23,36 +22,25 @@
             <p class="mt-2 text-gray-500">Input a Tokens Per Second (TPS) value to visualize the generation speed.</p>
         </header>
 
-        <!-- Input and Control Panel -->
-        <div class="flex flex-col sm:flex-row gap-4">
+        <!-- Input and Control Panel --><div class="flex flex-col sm:flex-row gap-4">
             <div class="flex-grow">
                 <label for="tps-input" class="block text-sm font-medium text-gray-700 mb-1">Tokens Per Second (TPS)</label>
-                <input type="number" id="tps-input" value="15" min="1" class="w-full p-3 border border-indigo-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg" placeholder="e.g., 10, 50, 100">
+                <input type="number" id="tps-input" value="15" min="1" oninput="startSimulation()" class="w-full p-3 border border-indigo-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg" placeholder="e.g., 10, 50, 100">
             </div>
             <div class="flex items-end">
-                <button onclick="startSimulation()" id="start-button"
-                    class="w-full sm:w-auto px-6 py-3 text-lg font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Start Simulation
+                <!-- EDITED: Changed button behavior. It now explicitly starts/restarts only. --><button onclick="startSimulation()" id="start-button"
+                    class="w-full sm:w-auto px-6 py-3 text-lg font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 active:bg-indigo-800">
+                    Start / Restart Simulation
                 </button>
             </div>
         </div>
 
-        <!-- Output Display -->
-        <div class="mt-8">
+        <!-- Output Display --><div class="mt-8">
             <h2 class="text-xl font-semibold text-gray-800 mb-3">Generation Output:</h2>
             <div id="output-container" class="relative">
-                <!-- Text Area -->
-                <pre id="output-text" class="bg-gray-100 p-6 border border-gray-300 rounded-lg text-gray-800 text-base leading-relaxed overflow-y-auto shadow-inner transition duration-500 ease-in-out"></pre>
+                <!-- Text Area --><pre id="output-text" class="bg-gray-100 p-6 border border-gray-300 rounded-lg text-gray-800 text-base leading-relaxed overflow-y-auto shadow-inner transition duration-500 ease-in-out"></pre>
 
-                <!-- Loading/Status Indicator -->
-                <div id="status-indicator" class="absolute inset-0 bg-white/70 rounded-lg flex items-center justify-center hidden">
-                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-xl font-medium text-indigo-700">Generating...</span>
-                </div>
-            </div>
+                <!-- REMOVED: Status indicator div is no longer present --></div>
             <p id="tps-display" class="mt-2 text-sm text-center text-gray-500"></p>
         </div>
 
@@ -77,7 +65,7 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
         const outputTextElement = document.getElementById('output-text');
         const startButton = document.getElementById('start-button');
         const tpsInput = document.getElementById('tps-input');
-        const statusIndicator = document.getElementById('status-indicator');
+        // REMOVED: No longer need statusIndicator element
         const tpsDisplay = document.getElementById('tps-display');
 
         /**
@@ -153,18 +141,17 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
                 clearInterval(simulationInterval);
                 simulationInterval = null;
             }
-            startButton.disabled = false;
-            startButton.textContent = 'Restart Simulation';
-            statusIndicator.classList.add('hidden');
+            // The button should always be clickable to start/restart
+            startButton.textContent = 'Start / Restart Simulation';
+            // REMOVED: No more statusIndicator to hide
         }
 
         function startSimulation() {
-            stopSimulation(); // Stop any previous simulation
+            stopSimulation(); // Stop any previous simulation immediately
 
             const tps = parseFloat(tpsInput.value);
 
             if (isNaN(tps) || tps <= 0) {
-                // Show a gentle error instead of alert()
                 tpsDisplay.textContent = 'Please enter a valid Tokens Per Second (TPS) value greater than 0.';
                 tpsDisplay.classList.add('text-red-500');
                 return;
@@ -179,26 +166,23 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
                 .replace('[CPS_VALUE]', charactersPerSecond);
 
             // Calculate the delay for one character in milliseconds
-            // delay = 1000ms / (TPS * CHARS_PER_TOKEN)
             const delay = 1000 / charactersPerSecond;
 
             charIndex = 0;
-            outputTextElement.textContent = '';
-            startButton.disabled = true;
-            startButton.textContent = 'Generating...';
-            statusIndicator.classList.remove('hidden');
-
+            outputTextElement.textContent = ''; // Clear output for new simulation
+            
+            // Update button text to indicate active generation
+            startButton.textContent = 'Generating...'; 
+            
             tpsDisplay.textContent = `Simulating speed: ${tps.toFixed(1)} TPS (approx. ${charactersPerSecond} characters/sec)`;
 
             simulationInterval = setInterval(() => {
                 if (charIndex < renderedText.length) {
-                    // Append the next character
                     outputTextElement.textContent += renderedText.charAt(charIndex);
                     charIndex++;
-                    // Scroll to the bottom as text is added
                     outputTextElement.scrollTop = outputTextElement.scrollHeight;
                 } else {
-                    stopSimulation();
+                    stopSimulation(); // This will reset button text to "Start / Restart Simulation"
                     tpsDisplay.textContent = `Simulation complete! Final speed was ${tps.toFixed(1)} TPS.`;
                 }
             }, delay);
@@ -206,12 +190,8 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
 
         // Initialize on load
         window.onload = function() {
-            // Set initial height for the pre block for visual consistency
-            const outputContainer = document.getElementById('output-container');
-            // Set a responsive height (e.g., 60vh max height on desktops)
             outputTextElement.style.maxHeight = '60vh';
-            // Start with a default simulation upon load
-            startSimulation();
+            startSimulation(); // Start with a default simulation upon load
         }
 
     </script>
