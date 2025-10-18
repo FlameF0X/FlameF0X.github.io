@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Token Speed Simulator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling for the output box */
+        #output-text {
+            /* Smooth scrolling and typing animation feel */
+            white-space: pre-wrap;
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans">
+
+    <div class="w-full max-w-4xl bg-white shadow-2xl rounded-xl p-8 space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-extrabold text-indigo-700">Token Generation Speed Visualizer</h1>
+            <p class="mt-2 text-gray-500">Input a Tokens Per Second (TPS) value to visualize the generation speed.</p>
+        </header>
+
+        <!-- Input and Control Panel -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-grow">
+                <label for="tps-input" class="block text-sm font-medium text-gray-700 mb-1">Tokens Per Second (TPS)</label>
+                <input type="number" id="tps-input" value="15" min="1" class="w-full p-3 border border-indigo-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-lg" placeholder="e.g., 10, 50, 100">
+            </div>
+            <div class="flex items-end">
+                <button onclick="startSimulation()" id="start-button"
+                    class="w-full sm:w-auto px-6 py-3 text-lg font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Start Simulation
+                </button>
+            </div>
+        </div>
+
+        <!-- Output Display -->
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">Generation Output:</h2>
+            <div id="output-container" class="relative">
+                <!-- Text Area -->
+                <pre id="output-text" class="bg-gray-100 p-6 border border-gray-300 rounded-lg text-gray-800 text-base leading-relaxed overflow-y-auto shadow-inner transition duration-500 ease-in-out"></pre>
+
+                <!-- Loading/Status Indicator -->
+                <div id="status-indicator" class="absolute inset-0 bg-white/70 rounded-lg flex items-center justify-center hidden">
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-xl font-medium text-indigo-700">Generating...</span>
+                </div>
+            </div>
+            <p id="tps-display" class="mt-2 text-sm text-center text-gray-500"></p>
+        </div>
+
+    </div>
+
+    <script>
+        // Use an estimated average of 4 characters per token for a smooth visual simulation
+        const CHARS_PER_TOKEN = 4;
+        let simulationInterval;
+        let charIndex = 0;
+
+        // The template text to be generated
+        const TEMPLATE_TEXT = `Large Language Models (LLMs) are a class of artificial intelligence designed to process and generate human-like text.
+The speed at which an LLM responds is measured in Tokens Per Second (TPS).
+
+A 'token' is not always a whole word; it can be a common word, a punctuation mark, or even a sub-word fragment. In English, a widely accepted average is that one token equals approximately four characters.
+
+When you see a model generating at [TPS_VALUE] TPS, it means the model is processing and outputting approximately [CPS_VALUE] characters per second. This speed directly influences the user experience, especially for real-time applications like chatbots or coding assistants.
+
+Higher TPS leads to less perceived latency and a more fluid, conversational feel. Conversely, lower TPS can make the interaction feel sluggish and unresponsive, even if the final quality of the answer is high. This visualization helps you feel the difference between a high-speed and a low-speed model.`;
+
+        const outputTextElement = document.getElementById('output-text');
+        const startButton = document.getElementById('start-button');
+        const tpsInput = document.getElementById('tps-input');
+        const statusIndicator = document.getElementById('status-indicator');
+        const tpsDisplay = document.getElementById('tps-display');
+
+        /**
+         * Converts base64 to an ArrayBuffer. This is a helper function
+         * required for playing PCM audio (not used here, but good practice).
+         */
+        function base64ToArrayBuffer(base64) {
+            // Unused in this simulation, but retained for compliance with TTS instructions.
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Converts PCM 16-bit audio data to a standard WAV Blob.
+         * Unused in this simulation, but retained for compliance with TTS instructions.
+         */
+        function pcmToWav(int16Array, sampleRate) {
+            // Unused in this simulation, but retained for compliance with TTS instructions.
+            const buffer = new ArrayBuffer(44 + int16Array.byteLength);
+            const view = new DataView(buffer);
+
+            /* RIFF identifier */
+            writeString(view, 0, 'RIFF');
+            /* file length */
+            view.setUint32(4, 36 + int16Array.byteLength, true);
+            /* RIFF type */
+            writeString(view, 8, 'WAVE');
+            /* format chunk identifier */
+            writeString(view, 12, 'fmt ');
+            /* format chunk length */
+            view.setUint32(16, 16, true);
+            /* sample format (1 = PCM) */
+            view.setUint16(20, 1, true);
+            /* channel count */
+            view.setUint16(22, 1, true);
+            /* sample rate */
+            view.setUint32(24, sampleRate, true);
+            /* byte rate (sample rate * block align) */
+            view.setUint32(28, sampleRate * 2, true);
+            /* block align (channels * bytes per sample) */
+            view.setUint16(32, 2, true);
+            /* bits per sample */
+            view.setUint16(34, 16, true);
+            /* data chunk identifier */
+            writeString(view, 36, 'data');
+            /* data chunk length */
+            view.setUint32(40, int16Array.byteLength, true);
+
+            // Write PCM data
+            let offset = 44;
+            for (let i = 0; i < int16Array.length; i++, offset += 2) {
+                view.setInt16(offset, int16Array[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // --- Simulation Logic ---
+
+        function stopSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            startButton.disabled = false;
+            startButton.textContent = 'Restart Simulation';
+            statusIndicator.classList.add('hidden');
+        }
+
+        function startSimulation() {
+            stopSimulation(); // Stop any previous simulation
+
+            const tps = parseFloat(tpsInput.value);
+
+            if (isNaN(tps) || tps <= 0) {
+                // Show a gentle error instead of alert()
+                tpsDisplay.textContent = 'Please enter a valid Tokens Per Second (TPS) value greater than 0.';
+                tpsDisplay.classList.add('text-red-500');
+                return;
+            }
+
+            tpsDisplay.classList.remove('text-red-500');
+
+            // Replace placeholders in the template text
+            const charactersPerSecond = Math.round(tps * CHARS_PER_TOKEN);
+            const renderedText = TEMPLATE_TEXT
+                .replace('[TPS_VALUE]', tps.toFixed(1))
+                .replace('[CPS_VALUE]', charactersPerSecond);
+
+            // Calculate the delay for one character in milliseconds
+            // delay = 1000ms / (TPS * CHARS_PER_TOKEN)
+            const delay = 1000 / charactersPerSecond;
+
+            charIndex = 0;
+            outputTextElement.textContent = '';
+            startButton.disabled = true;
+            startButton.textContent = 'Generating...';
+            statusIndicator.classList.remove('hidden');
+
+            tpsDisplay.textContent = `Simulating speed: ${tps.toFixed(1)} TPS (approx. ${charactersPerSecond} characters/sec)`;
+
+            simulationInterval = setInterval(() => {
+                if (charIndex < renderedText.length) {
+                    // Append the next character
+                    outputTextElement.textContent += renderedText.charAt(charIndex);
+                    charIndex++;
+                    // Scroll to the bottom as text is added
+                    outputTextElement.scrollTop = outputTextElement.scrollHeight;
+                } else {
+                    stopSimulation();
+                    tpsDisplay.textContent = `Simulation complete! Final speed was ${tps.toFixed(1)} TPS.`;
+                }
+            }, delay);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            // Set initial height for the pre block for visual consistency
+            const outputContainer = document.getElementById('output-container');
+            // Set a responsive height (e.g., 60vh max height on desktops)
+            outputTextElement.style.maxHeight = '60vh';
+            // Start with a default simulation upon load
+            startSimulation();
+        }
+
+    </script>
+</body>
+</html>
