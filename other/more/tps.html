@@ -65,7 +65,6 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
         const outputTextElement = document.getElementById('output-text');
         const startButton = document.getElementById('start-button');
         const tpsInput = document.getElementById('tps-input');
-        // REMOVED: No longer need statusIndicator element
         const tpsDisplay = document.getElementById('tps-display');
 
         /**
@@ -143,7 +142,6 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
             }
             // The button should always be clickable to start/restart
             startButton.textContent = 'Start / Restart Simulation';
-            // REMOVED: No more statusIndicator to hide
         }
 
         function startSimulation() {
@@ -165,8 +163,9 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
                 .replace('[TPS_VALUE]', tps.toFixed(1))
                 .replace('[CPS_VALUE]', charactersPerSecond);
 
-            // Calculate the delay for one character in milliseconds
-            const delay = 1000 / charactersPerSecond;
+            // Calculate the delay for one TOKEN in milliseconds
+            // The interval now fires once for every token generated
+            const tokenIntervalMs = 1000 / tps;
 
             charIndex = 0;
             outputTextElement.textContent = ''; // Clear output for new simulation
@@ -174,18 +173,25 @@ Higher TPS leads to less perceived latency and a more fluid, conversational feel
             // Update button text to indicate active generation
             startButton.textContent = 'Generating...'; 
             
-            tpsDisplay.textContent = `Simulating speed: ${tps.toFixed(1)} TPS (approx. ${charactersPerSecond} characters/sec)`;
+            tpsDisplay.textContent = `Simulating speed: ${tps.toFixed(1)} TPS (1 token burst every ${tokenIntervalMs.toFixed(2)} ms)`;
 
             simulationInterval = setInterval(() => {
                 if (charIndex < renderedText.length) {
-                    outputTextElement.textContent += renderedText.charAt(charIndex);
-                    charIndex++;
+                    // Calculate the end index for the current "token chunk"
+                    const charactersInToken = CHARS_PER_TOKEN;
+                    const end = Math.min(charIndex + charactersInToken, renderedText.length);
+                    const chunk = renderedText.substring(charIndex, end);
+                    
+                    // Append the entire chunk at once
+                    outputTextElement.textContent += chunk;
+                    charIndex += chunk.length; // Jump the index forward by the chunk size
+                    
                     outputTextElement.scrollTop = outputTextElement.scrollHeight;
                 } else {
-                    stopSimulation(); // This will reset button text to "Start / Restart Simulation"
+                    stopSimulation(); // This will reset button text
                     tpsDisplay.textContent = `Simulation complete! Final speed was ${tps.toFixed(1)} TPS.`;
                 }
-            }, delay);
+            }, tokenIntervalMs);
         }
 
         // Initialize on load
