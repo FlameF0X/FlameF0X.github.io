@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unfocus Counter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .counter-display {
+            font-size: 5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .label {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .reset-btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .status.focused {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.unfocused {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👀 Page Unfocus Tracker</h1>
+        
+        <div class="label">Times You Left This Page:</div>
+        <div class="counter-display" id="counter">0</div>
+        
+        <div class="status focused" id="status">Page is currently focused</div>
+        
+        <button class="reset-btn" onclick="resetCounter()">Reset Counter</button>
+        
+        <div class="info">
+            <strong>How it works:</strong><br>
+            Every time you switch to another tab, window, or app, the counter increases. Try clicking outside this window or switching tabs!
+        </div>
+    </div>
+
+    <script>
+        let unfocusCount = 0;
+        const counterEl = document.getElementById('counter');
+        const statusEl = document.getElementById('status');
+
+        // Listen for blur event (when page loses focus)
+        window.addEventListener('blur', () => {
+            unfocusCount++;
+            counterEl.textContent = unfocusCount;
+            statusEl.textContent = 'Page lost focus!';
+            statusEl.className = 'status unfocused';
+        });
+
+        // Listen for focus event (when page regains focus)
+        window.addEventListener('focus', () => {
+            statusEl.textContent = 'Page is currently focused';
+            statusEl.className = 'status focused';
+        });
+
+        function resetCounter() {
+            unfocusCount = 0;
+            counterEl.textContent = unfocusCount;
+        }
+    </script>
+</body>
+</html>
