@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Daily Pebble | Truth Set in Stone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300&family=Open+Sans:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .headline {
+            font-family: 'Merriweather', serif;
+        }
+
+        .drop-cap::first-letter {
+            font-size: 3.5rem;
+            line-height: 0.8;
+            float: left;
+            margin-right: 0.5rem;
+            margin-top: 0.2rem;
+            font-weight: 700;
+        }
+
+        .ad-banner {
+            background-image: repeating-linear-gradient(
+                45deg,
+                #f3f4f6,
+                #f3f4f6 10px,
+                #e5e7eb 10px,
+                #e5e7eb 20px
+            );
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
+
+    <!-- Top Bar -->
+    <div class="bg-gray-900 text-white text-xs py-1">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div id="current-date" class="font-semibold uppercase tracking-wider"></div>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-gray-300">Subscribe</a>
+                <a href="#" class="hover:text-gray-300">Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-300 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-6 flex flex-col items-center border-b border-gray-200">
+            <div class="text-4xl md:text-6xl font-black tracking-tighter uppercase text-center mb-2 headline">
+                The Daily Pebble
+            </div>
+            <div class="text-sm italic text-gray-600 font-serif">"Journalism That Hits Rock Bottom"</div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="container mx-auto px-4 py-3 flex justify-center overflow-x-auto no-scrollbar">
+            <ul class="flex space-x-6 md:space-x-8 text-sm font-bold uppercase tracking-wide whitespace-nowrap">
+                <li><a href="#" class="hover:text-red-700 border-b-2 border-transparent hover:border-red-700 pb-1">World</a></li>
+                <li><a href="#" class="hover:text-red-700 border-b-2 border-transparent hover:border-red-700 pb-1">Politics</a></li>
+                <li><a href="#" class="text-red-700 border-b-2 border-red-700 pb-1">Technology</a></li>
+                <li><a href="#" class="hover:text-red-700 border-b-2 border-transparent hover:border-red-700 pb-1">Science</a></li>
+                <li><a href="#" class="hover:text-red-700 border-b-2 border-transparent hover:border-red-700 pb-1">Opinion</a></li>
+                <li><a href="#" class="hover:text-red-700 border-b-2 border-transparent hover:border-red-700 pb-1">Geology</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Breaking News Ticker -->
+    <div class="bg-red-700 text-white text-sm font-bold py-2 overflow-hidden whitespace-nowrap">
+        <div class="inline-block animate-marquee px-4">
+            BREAKING: OCEAN LEVELS ACTUALLY RISING BECAUSE FISH ARE GETTING FATTER  •  STUDY: YOUR CAT IS DEFINITELY JUDGING YOUR OUTFIT  •  MARKETS: INVESTORS PANIC AS 'NOTHING' HITS ALL-TIME HIGH
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Main Article -->
+            <article class="lg:col-span-8 bg-white p-6 md:p-8 shadow-sm border border-gray-200">
+                <div class="mb-4">
+                    <span class="text-red-700 font-bold uppercase text-xs tracking-widest">Technology & Nature</span>
+                </div>
+                
+                <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4 text-gray-900 headline">
+                    Whistleblower Confirms: Wikipedia Maintained Entirely by Sentient Rocks
+                </h1>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between text-gray-500 text-sm mb-6 border-b border-gray-200 pb-6">
+                    <div class="flex items-center mb-2 md:mb-0">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3 overflow-hidden">
+                            <i class="fas fa-user text-gray-500"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-gray-900 block">By Sandy Loam</span>
+                            <span class="text-xs">Senior Geotech Correspondent</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="shareArticle()" class="text-gray-400 hover:text-blue-600 transition"><i class="fab fa-twitter text-xl"></i></button>
+                        <button onclick="shareArticle()" class="text-gray-400 hover:text-blue-800 transition"><i class="fab fa-facebook text-xl"></i></button>
+                        <button onclick="shareArticle()" class="text-gray-400 hover:text-gray-600 transition"><i class="fas fa-link text-xl"></i></button>
+                    </div>
+                </div>
+
+                <!-- Featured Image (SVG) -->
+                <div class="bg-gray-100 w-full h-64 md:h-96 mb-8 flex items-center justify-center relative overflow-hidden rounded-sm border border-gray-300 group cursor-pointer">
+                     <!-- Simple SVG Scene -->
+                    <svg viewBox="0 0 400 200" class="w-full h-full">
+                        <!-- Background -->
+                        <rect width="400" height="200" fill="#e5e7eb"/>
+                        
+                        <!-- Desk -->
+                        <rect x="50" y="150" width="300" height="10" fill="#8B4513"/>
+                        <rect x="60" y="160" width="20" height="40" fill="#8B4513"/>
+                        <rect x="320" y="160" width="20" height="40" fill="#8B4513"/>
+
+                        <!-- Computer Monitor -->
+                        <rect x="150" y="80" width="100" height="70" fill="#333" stroke="#111" stroke-width="2"/>
+                        <rect x="155" y="85" width="90" height="60" fill="#1a202c"/> <!-- Screen -->
+                        <!-- Code on screen -->
+                        <line x1="160" y1="95" x2="200" y2="95" stroke="#48bb78" stroke-width="2"/>
+                        <line x1="160" y1="105" x2="230" y2="105" stroke="#48bb78" stroke-width="2"/>
+                        <line x1="160" y1="115" x2="190" y2="115" stroke="#48bb78" stroke-width="2"/>
+                        <line x1="160" y1="125" x2="220" y2="125" stroke="#48bb78" stroke-width="2"/>
+                        
+                        <!-- Monitor Stand -->
+                        <rect x="190" y="150" width="20" height="10" fill="#333"/>
+                        <rect x="180" y="160" width="40" height="5" fill="#333"/>
+
+                        <!-- The Rock Developer -->
+                        <path d="M 80 140 Q 100 90 130 140 L 80 140" fill="#718096" stroke="#4a5568" stroke-width="2"/>
+                        <!-- Glasses on Rock -->
+                        <circle cx="95" cy="115" r="5" fill="none" stroke="black" stroke-width="1"/>
+                        <circle cx="115" cy="115" r="5" fill="none" stroke="black" stroke-width="1"/>
+                        <line x1="100" y1="115" x2="110" y2="115" stroke="black" stroke-width="1"/>
+                        
+                        <!-- Keyboard -->
+                        <rect x="140" y="155" width="120" height="5" fill="#ddd"/>
+                    </svg>
+                    <div class="absolute bottom-2 right-2 text-xs text-gray-500 bg-white px-1 opacity-75">Photo: Getty Images / Lithosphere</div>
+                </div>
+                <p class="text-sm text-gray-500 italic mb-6 border-l-4 border-red-700 pl-4">
+                    Above: A Senior Backend Granite reviewing pull requests for the "History of Jazz" article.
+                </p>
+
+                <div class="prose max-w-none text-gray-800 text-lg leading-relaxed">
+                    <p class="drop-cap mb-4">
+                        <strong>SILICON VALLEY —</strong> For nearly two decades, the world has believed that Wikipedia is the product of millions of tireless human volunteers. Today, that illusion crumbled like dry sandstone.
+                    </p>
+                    <p class="mb-4">
+                        A bombshell report released by the Geological Survey of the Internet (GSI) has confirmed that 92% of Wikipedia's source code, as well as the entirety of its editing history, is generated by a small pile of sedimentary rocks located in a Nevada basement.
+                    </p>
+                    <p class="mb-4">
+                        "We always assumed the term 'rock-solid stability' was a metaphor," said baffled tech analyst Marcus Flint. "It wasn't. The backend database is literally run by three large pieces of igneous basalt and a very opinionated piece of quartz."
+                    </p>
+
+                    <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-4 headline">The "Piezoelectric" Method</h3>
+                    <p class="mb-4">
+                        According to Dr. Petra Slate, the lead researcher on the discovery, the rocks communicate using complex piezoelectric vibrations. When placed near a server rack, these vibrations manipulate the magnetic fields of hard drives, effectively "writing" code and editing articles at speeds impossible for human hands.
+                    </p>
+                    <p class="mb-4">
+                        "Sedimentary rocks are natural historians," Dr. Slate explained. "They've been recording the earth's history for millions of years. Editing the Wikipedia page for the 1996 Chicago Bulls is child's play for them. They just vibrate at a specific frequency and boom—citation added."
+                    </p>
+
+                    <div class="bg-blue-50 p-6 border-l-4 border-blue-700 my-8 italic font-serif text-xl text-blue-900">
+                        "Metamorphic rocks handle the CSS because they love change. But never let a diamond touch the database; they are too hard-headed."
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-4 headline">Community Backlash</h3>
+                    <p class="mb-4">
+                        The revelation has caused chaos in the Wikimedia community. "I spent 4,000 hours editing the page on Spoons," said one distraught "human" editor. "To find out my edits were just being peer-reviewed by a pebble named 'Steve' is devastating."
+                    </p>
+                    <p class="mb-4">
+                        The rocks, for their part, have remained silent on the controversy, though a moss-covered stone near the server room was seen briefly rolling its eyes—or at least, rotating slightly to the left.
+                    </p>
+                    <p>
+                        Wikipedia founder Jimmy Wales could not be reached for comment, as he was reportedly in his garden, suspiciously whispering to a retaining wall.
+                    </p>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-gray-200">
+                    <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Tags</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full hover:bg-gray-200 cursor-pointer">#TechNews</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full hover:bg-gray-200 cursor-pointer">#Geology</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full hover:bg-gray-200 cursor-pointer">#Wikipedia</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full hover:bg-gray-200 cursor-pointer">#SedimentaryLife</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Sidebar -->
+            <aside class="lg:col-span-4 space-y-8">
+                
+                <!-- Ad Block -->
+                <div class="ad-banner h-64 w-full flex items-center justify-center border border-gray-300 text-gray-400 text-sm font-bold tracking-widest flex-col p-4 text-center">
+                    <span class="text-xs mb-2">ADVERTISEMENT</span>
+                    <h3 class="text-gray-800 text-lg font-black mb-2">BUY DIRT NOW</h3>
+                    <p class="text-xs text-gray-600">It's like rocks, but softer. Limited time offer.</p>
+                    <button class="mt-4 bg-blue-600 text-white px-4 py-2 text-xs uppercase font-bold hover:bg-blue-700">Shop Soil</button>
+                </div>
+
+                <!-- Trending Stories -->
+                <div class="bg-white border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold uppercase border-b-2 border-black pb-2 mb-4 headline">Trending Now</h3>
+                    <ul class="space-y-4">
+                        <li class="group cursor-pointer">
+                            <span class="text-red-700 font-bold text-xs">POLITICS</span>
+                            <h4 class="text-md font-bold leading-snug group-hover:text-blue-700 mt-1">
+                                Tree Elected Mayor in Vermont; Promises More Shade, Less Talking
+                            </h4>
+                        </li>
+                        <li class="group cursor-pointer">
+                            <span class="text-red-700 font-bold text-xs">LIFESTYLE</span>
+                            <h4 class="text-md font-bold leading-snug group-hover:text-blue-700 mt-1">
+                                Millennial Discovers "Outside" Has Terrible Wi-Fi, Returns Indoors
+                            </h4>
+                        </li>
+                        <li class="group cursor-pointer">
+                            <span class="text-red-700 font-bold text-xs">SCIENCE</span>
+                            <h4 class="text-md font-bold leading-snug group-hover:text-blue-700 mt-1">
+                                Study Finds Clouds Are Just Ghost Sheep Watching Us
+                            </h4>
+                        </li>
+                        <li class="group cursor-pointer">
+                            <span class="text-red-700 font-bold text-xs">ECONOMY</span>
+                            <h4 class="text-md font-bold leading-snug group-hover:text-blue-700 mt-1">
+                                Inflation Hits Tooth Fairy: Average Tooth Now Worth $15 in Crypto
+                            </h4>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="bg-gray-900 text-white p-6 text-center">
+                    <i class="far fa-envelope text-3xl mb-3 text-gray-400"></i>
+                    <h3 class="font-bold text-xl mb-2 headline">The Daily Sediment</h3>
+                    <p class="text-sm text-gray-400 mb-4">Get ground-breaking news delivered straight to your inbox. No spam, just gravel.</p>
+                    <div class="flex flex-col gap-2">
+                        <input type="email" placeholder="Your email address" class="px-4 py-2 text-gray-900 text-sm focus:outline-none">
+                        <button class="bg-red-700 text-white px-4 py-2 font-bold text-sm uppercase hover:bg-red-800 transition">Subscribe</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">By subscribing, you agree to our Terms of Geology.</p>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 border-t-4 border-red-700">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h5 class="font-bold text-lg mb-4 headline">The Daily Pebble</h5>
+                    <p class="text-sm text-gray-400">We leave no stone unturned, unless it's heavy.</p>
+                </div>
+                <div>
+                    <h5 class="font-bold text-sm uppercase mb-4 text-gray-500">Sections</h5>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-white">World</a></li>
+                        <li><a href="#" class="hover:text-white">Tech</a></li>
+                        <li><a href="#" class="hover:text-white">Science</a></li>
+                        <li><a href="#" class="hover:text-white">Weather (Mostly Rain)</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold text-sm uppercase mb-4 text-gray-500">About Us</h5>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-white">Our Mission</a></li>
+                        <li><a href="#" class="hover:text-white">Careers</a></li>
+                        <li><a href="#" class="hover:text-white">Advertise</a></li>
+                        <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold text-sm uppercase mb-4 text-gray-500">Connect</h5>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-blue-600"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-blue-400"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center hover:bg-red-600"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-xs text-gray-500">
+                &copy; 2023 The Daily Pebble Media Group. All rights reserved. This is a satire site. Please do not eat the rocks.
+            </div>
+        </div>
+    </footer>
+
+    <div id="notification" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded shadow-lg transform translate-y-20 transition-transform duration-300 z-50 flex items-center">
+        <i class="fas fa-check-circle text-green-400 mr-3"></i>
+        <span>Link copied to clipboard!</span>
+    </div>
+
+    <script>
+        // Set Current Date
+        const dateElement = document.getElementById('current-date');
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+
+        // Simple Share Function
+        function shareArticle() {
+            const notification = document.getElementById('notification');
+            
+            // Fake copy to clipboard
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            // Show notification
+            notification.classList.remove('translate-y-20');
+            
+            setTimeout(() => {
+                notification.classList.add('translate-y-20');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
