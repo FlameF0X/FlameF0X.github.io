@@ -236,8 +236,8 @@
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="hidden md:inline font-mono text-[10px] text-stone-600">ENTER TO SEND</span>
-                                <button id="send-btn" onclick="ChatUI.sendMessage()" class="bg-stone-800 hover:bg-accent text-white p-2 transition-colors">
-                                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                                <button id="send-btn" onclick="ChatUI.sendMessage()" class="bg-stone-800 hover:bg-accent text-white p-2 transition-colors w-10 h-10 flex items-center justify-center">
+                                    <i id="send-icon" data-lucide="arrow-right" class="w-5 h-5"></i>
                                 </button>
                             </div>
                         </div>
@@ -257,9 +257,7 @@
     <div class="fixed bottom-0 left-0 w-full bg-bg border-t border-stone-800 z-50 px-4 py-1 flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest text-stone-500">
         <div class="flex gap-4">
             <span class="text-accent flex items-center gap-2">
-                <!-- ADDED ID="status-indicator" HERE -->
                 <span id="status-indicator" class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
-                <!-- ADDED ID="status-text" HERE -->
                 <span id="status-text">LIVE</span>
             </span>
             <span class="hidden md:inline">API: FLAMEFOX-i3-200m</span>
@@ -314,6 +312,21 @@
                 SessionManager.renderSessionList(); // Update sidebar (removes active highlight from others)
             },
 
+            deleteSession: (id) => {
+                if(!confirm("CONFIRM: Delete this entire session log?")) return;
+                
+                let sessions = SessionManager.getSessions();
+                sessions = sessions.filter(s => s.id !== id);
+                localStorage.setItem(SessionManager.STORAGE_KEY, JSON.stringify(sessions));
+                
+                // If we deleted the active session, switch to new or another
+                if (SessionManager.getCurrentSessionId() === id) {
+                    SessionManager.createNewSession();
+                } else {
+                    SessionManager.renderSessionList();
+                }
+            },
+
             loadSession: (id) => {
                 const sessions = SessionManager.getSessions();
                 const session = sessions.find(s => s.id === id);
@@ -325,19 +338,16 @@
             },
 
             // Called when a message is sent or received
-            appendMessageToCurrent: (role, text) => {
+            appendMessageToCurrent: (role, text, existingId = null) => {
                 let currentId = SessionManager.getCurrentSessionId();
                 const sessions = SessionManager.getSessions();
                 let session = sessions.find(s => s.id === currentId);
 
                 if (!session) {
-                    // Initialize new session on first message if ID doesn't exist in storage
-                    // Or if currentID was null
                     if(!currentId) {
                          currentId = 'sys_' + Date.now().toString(36);
                          SessionManager.setCurrentSessionId(currentId);
                     }
-                    
                     session = {
                         id: currentId,
                         title: text.length > 25 ? text.substring(0, 25) + '...' : text,
@@ -346,8 +356,18 @@
                     };
                 }
 
-                session.messages.push({ role, text, timestamp: Date.now() });
+                // If updating an existing message (e.g. final system response), remove it first
+                if (existingId) {
+                    const idx = session.messages.findIndex(m => m.id === existingId);
+                    if (idx !== -1) {
+                        session.messages.splice(idx, 1);
+                    }
+                }
+
+                const msgId = existingId || ('msg-' + Date.now() + Math.random().toString(16).slice(2));
+                session.messages.push({ id: msgId, role, text, timestamp: Date.now() });
                 SessionManager.saveSession(session);
+                return msgId;
             },
 
             clearAllData: () => {
@@ -371,13 +391,23 @@
                 listEl.innerHTML = sessions.map(s => {
                     const isActive = s.id === currentId;
                     const activeClass = isActive ? 'text-white border-l-accent bg-stone-800' : 'text-stone-400 border-l-transparent hover:text-white hover:border-stone-600 hover:bg-stone-800/50';
+                    // Added group class for hover detection
+                    // Added delete button with opacity transition and delay-700
                     return `
-                        <button onclick="SessionManager.loadSession('${s.id}')" class="w-full text-left px-3 py-2 text-xs border-l-2 truncate transition-all font-mono group flex justify-between items-center ${activeClass}">
-                            <span class="truncate pr-2">> ${s.title}</span>
-                            ${isActive ? '<span class="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></span>' : ''}
-                        </button>
+                        <div class="group flex items-center w-full border-l-2 transition-all font-mono ${activeClass} cursor-pointer">
+                            <button onclick="SessionManager.loadSession('${s.id}')" class="flex-1 text-left px-3 py-2 text-xs truncate outline-none">
+                                <span class="truncate">> ${s.title}</span>
+                            </button>
+                            <div class="flex items-center gap-2 pr-2">
+                                ${isActive ? '<span class="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></span>' : ''}
+                                <button onclick="event.stopPropagation(); SessionManager.deleteSession('${s.id}')" class="text-stone-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-700 p-1" title="Delete Session">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
                     `;
                 }).join('');
+                lucide.createIcons(); // Re-init icons for the new delete buttons
             }
         };
 
@@ -386,6 +416,8 @@
         // ---------------------------------------------------------
         const ChatUI = {
             API_URL: "https://flamef0x-i3-200m.hf.space/gradio_api/call/predict",
+            abortController: null,
+            isGenerating: false,
             
             init: () => {
                 // Check if we have a current session to load
@@ -424,24 +456,24 @@
                 historyEl.innerHTML = '';
 
                 messages.forEach(msg => {
-                    ChatUI.appendMessageToDOM(msg.role, msg.text, false);
+                    ChatUI.appendMessageToDOM(msg.role, msg.text, false, msg.id);
                 });
                 
                 ChatUI.scrollToBottom();
             },
 
-            appendMessageToDOM: (role, text, isLoading = false) => {
+            appendMessageToDOM: (role, text, isLoading = false, existingId = null) => {
                 const history = document.getElementById('chat-history');
-                const msgId = 'msg-' + Date.now() + Math.random().toString(16).slice(2);
+                const msgId = existingId || ('msg-' + Date.now() + Math.random().toString(16).slice(2));
                 
                 const div = document.createElement('div');
                 div.id = msgId;
-                div.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+                div.className = `flex w-full group relative transition-opacity duration-300 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
                 
                 // Icon
                 const icon = role === 'user' 
-                    ? `<div class="w-8 h-8 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400">USR</div>`
-                    : `<div class="w-8 h-8 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold">AI</div>`;
+                    ? `<div class="w-8 h-8 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">USR</div>`
+                    : `<div class="w-8 h-8 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">AI</div>`;
 
                 // Bubble
                 const bubbleClass = role === 'user'
@@ -449,7 +481,6 @@
                     : "bg-transparent text-accent border border-accent/50 scanline relative overflow-hidden";
                 
                 // Content
-                // Sanitize input roughly to prevent raw HTML injection from user, but allow line breaks
                 const safeText = text
                     .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
@@ -461,9 +492,9 @@
                 const content = isLoading 
                     ? `<span class="animate-pulse">${safeText}</span>` 
                     : safeText;
-
+                
                 div.innerHTML = `
-                    <div class="flex gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'}">
+                    <div class="flex gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
                         <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box">
                             <div class="message-content">${content}</div>
@@ -480,7 +511,6 @@
                 const msgEl = document.getElementById(msgId);
                 if (msgEl) {
                     const contentEl = msgEl.querySelector('.message-content');
-                    // Safe formatting for streaming text
                     const formatted = newText
                         .replace(/&/g, "&amp;")
                         .replace(/</g, "&lt;")
@@ -488,7 +518,6 @@
                         .replace(/\n/g, '<br>');
 
                     contentEl.innerHTML = formatted;
-                    // Add cursor
                     contentEl.innerHTML += `<span class="inline-block w-2 h-4 bg-accent ml-1 animate-pulse"></span>`;
                     ChatUI.scrollToBottom();
                 }
@@ -499,7 +528,41 @@
                 scrollArea.scrollTop = scrollArea.scrollHeight;
             },
 
+            stopGeneration: () => {
+                if (ChatUI.abortController) {
+                    ChatUI.abortController.abort();
+                    ChatUI.abortController = null;
+                }
+            },
+
+            setGeneratingState: (isGen) => {
+                ChatUI.isGenerating = isGen;
+                const btn = document.getElementById('send-btn');
+                const icon = document.getElementById('send-icon');
+                
+                if (isGen) {
+                    // Stop Button Style
+                    btn.classList.add('bg-red-900', 'hover:bg-red-700', 'border-red-500', 'border');
+                    btn.classList.remove('bg-stone-800', 'hover:bg-accent');
+                    icon.setAttribute('data-lucide', 'square');
+                    icon.classList.add('fill-current');
+                } else {
+                    // Send Button Style
+                    btn.classList.remove('bg-red-900', 'hover:bg-red-700', 'border-red-500', 'border');
+                    btn.classList.add('bg-stone-800', 'hover:bg-accent');
+                    icon.setAttribute('data-lucide', 'arrow-right');
+                    icon.classList.remove('fill-current');
+                }
+                lucide.createIcons(); // Refresh icons
+            },
+
             sendMessage: async () => {
+                // If currently generating, Stop instead
+                if (ChatUI.isGenerating) {
+                    ChatUI.stopGeneration();
+                    return;
+                }
+
                 const inputEl = document.getElementById('user-input');
                 const prompt = inputEl.value.trim();
                 if (!prompt) return;
@@ -509,17 +572,20 @@
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
 
-                // 2. Add User Message to DOM & Storage
-                ChatUI.appendMessageToDOM('user', prompt);
-                SessionManager.appendMessageToCurrent('user', prompt);
+                // 2. Add User Message
+                const userMsgId = ChatUI.appendMessageToDOM('user', prompt);
+                SessionManager.appendMessageToCurrent('user', prompt, userMsgId);
                 
-                // 3. Add Loading System Message to DOM
+                // 3. Prepare for Generation
+                ChatUI.setGeneratingState(true);
+                ChatUI.abortController = new AbortController();
+                const signal = ChatUI.abortController.signal;
+
                 const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING_INFERENCE_STREAM...', true);
                 
-                // Update Status Bar
+                // Status Update
                 const statusText = document.getElementById('status-text');
                 const statusInd = document.getElementById('status-indicator');
-                
                 if (statusText) statusText.innerText = "PROCESSING...";
                 if (statusInd) {
                     statusInd.classList.remove('bg-green-500');
@@ -527,6 +593,7 @@
                 }
                 
                 const startTime = Date.now();
+                let accumulatedText = "";
 
                 try {
                     // 4. API Call
@@ -534,8 +601,9 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            data: [ prompt, 150, 0.8, 40 ] // Max Tokens, Temp, Top-k
-                        })
+                            data: [ prompt, 150, 0.8, 40 ]
+                        }),
+                        signal
                     });
 
                     if (!response.ok) throw new Error("Connection Refused");
@@ -544,11 +612,9 @@
                     const eventId = json.event_id;
                     const streamUrl = `${ChatUI.API_URL}/${eventId}`;
                     
-                    const streamResponse = await fetch(streamUrl);
+                    const streamResponse = await fetch(streamUrl, { signal });
                     const reader = streamResponse.body.getReader();
                     const decoder = new TextDecoder();
-                    
-                    let accumulatedText = "";
 
                     while (true) {
                         const { value, done } = await reader.read();
@@ -571,8 +637,17 @@
                         }
                     }
 
-                    // 5. Finalize & Save AI Response
-                    // Remove cursor by re-setting text without it
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        // User manually stopped
+                        accumulatedText += "\n[SYSTEM_INTERRUPT: GENERATION_HALTED_BY_USER]";
+                        ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                    } else {
+                        console.error(error);
+                        ChatUI.updateSystemMessage(loadingId, `ERROR: ${error.message}\nCHECK_CONNECTION_AND_RETRY.`);
+                    }
+                } finally {
+                    // 5. Cleanup & Save
                     const msgEl = document.getElementById(loadingId);
                     if(msgEl) {
                          const contentEl = msgEl.querySelector('.message-content');
@@ -584,26 +659,21 @@
                          contentEl.innerHTML = safeFinal;
                     }
 
-                    // Save to Storage
-                    SessionManager.appendMessageToCurrent('system', accumulatedText);
+                    // Save accumulated text (even if partial/stopped)
+                    SessionManager.appendMessageToCurrent('system', accumulatedText, loadingId);
                     
-                    // Update Latency
                     const duration = Date.now() - startTime;
                     const latencyEl = document.getElementById('latency-val');
                     if (latencyEl) latencyEl.innerText = duration;
-
-                } catch (error) {
-                    console.error(error);
-                    ChatUI.updateSystemMessage(loadingId, `ERROR: ${error.message}\nCHECK_CONNECTION_AND_RETRY.`);
-                } finally {
-                    const statusText = document.getElementById('status-text');
-                    const statusInd = document.getElementById('status-indicator');
 
                     if(statusText) statusText.innerText = "SYSTEM ONLINE";
                     if(statusInd) {
                         statusInd.classList.remove('bg-orange-500', 'animate-ping');
                         statusInd.classList.add('bg-green-500');
                     }
+                    
+                    ChatUI.setGeneratingState(false);
+                    ChatUI.abortController = null;
                 }
             }
         };
