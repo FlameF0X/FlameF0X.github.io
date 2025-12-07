@@ -264,7 +264,7 @@
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             i3_V1.0
+             MODEL VERSION: i3_200m-V2.0 // UI VERSION: 1.2
         </div>
     </div>
 
@@ -477,7 +477,7 @@
 
                 // Bubble
                 const bubbleClass = role === 'user'
-                    ? "bg-stone-800 text-stone-200 border border-stone-700"
+                    ? "bg-stone-800 text-stone-200 border border-stone-700 overflow-hidden"
                     : "bg-transparent text-accent border border-accent/50 scanline relative overflow-hidden";
                 
                 // Content
@@ -496,7 +496,7 @@
                 div.innerHTML = `
                     <div class="flex gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
-                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box">
+                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box break-all">
                             <div class="message-content">${content}</div>
                         </div>
                     </div>
