@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlameF0X | Terminal Interface</title>
+    
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        bg: '#0c0a09', // Darker stone
+                        surface: '#1c1917',
+                        surface_hover: '#292524',
+                        text: '#e7e5e4',
+                        accent: '#ea580c', // Vibrant orange
+                        'accent-dim': '#431407',
+                        border: '#44403c',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        :root {
+            --grid-color: rgba(231, 229, 228, 0.05);
+        }
+        
+        body {
+            background-color: theme('colors.bg');
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: theme('colors.text');
+        }
+
+        /* Utilities */
+        .raw-border { border: 2px solid theme('colors.border'); }
+        .raw-border-focus:focus-within { border-color: theme('colors.accent'); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: theme('colors.bg'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.stone.800'); }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.accent'); }
+
+        /* Glitch/Hover Effects */
+        .hover-invert { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hover-invert:hover {
+            background-color: theme('colors.text');
+            color: theme('colors.bg');
+            border-color: theme('colors.text');
+        }
+        .hover-invert:hover * { color: theme('colors.bg'); stroke: theme('colors.bg'); }
+
+        /* Bracket Box (Corner Brackets) */
+        .bracket-box { position: relative; }
+        .bracket-box::before, .bracket-box::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-color: theme('colors.accent');
+            border-style: solid;
+            transition: all 0.2s ease;
+            opacity: 0;
+        }
+        .bracket-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .bracket-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        
+        .bracket-box:hover::before, .bracket-box:hover::after { opacity: 1; width: 100%; height: 100%; }
+
+        /* Animations */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            background: linear-gradient(to bottom, transparent, rgba(234, 88, 12, 0.1), transparent);
+            animation: scanline 2s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col antialiased selection:bg-accent selection:text-white overflow-hidden">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden flex items-center justify-between p-4 border-b border-stone-800 bg-bg/95 backdrop-blur">
+        <span class="font-black italic text-lg tracking-tighter text-accent">// FLAME.AI</span>
+        <button class="text-stone-400 hover:text-white"><i data-lucide="menu"></i></button>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <!-- SIDEBAR (Gemini Style Layout, Brutalist Aesthetic) -->
+        <aside class="hidden md:flex flex-col w-[280px] border-r border-stone-800 bg-bg/50 backdrop-blur-sm z-20">
+            <!-- Top / Hamburger -->
+            <div class="p-6 pb-2">
+                <button class="p-2 -ml-2 hover:bg-surface text-stone-400 hover:text-white rounded-none transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- New Chat Button -->
+            <div class="px-4 mb-6">
+                <button onclick="SessionManager.createNewSession()" class="w-full flex items-center gap-3 px-4 py-3 bg-surface hover:bg-stone-800 border border-stone-700 hover:border-accent transition-all group">
+                    <i data-lucide="plus" class="w-4 h-4 text-stone-500 group-hover:text-accent"></i>
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest text-stone-300 group-hover:text-white">New_Session</span>
+                </button>
+            </div>
+
+            <!-- Recent History -->
+            <div class="flex-1 overflow-y-auto px-4 space-y-1">
+                <div class="font-mono text-[10px] text-stone-600 uppercase tracking-widest mb-3 mt-2 pl-2 border-l border-stone-800 flex justify-between items-center">
+                    <span>Recent_Logs</span>
+                    <button onclick="SessionManager.clearAllData()" class="text-[9px] hover:text-red-500 cursor-pointer" title="Clear Local Storage">[WIPE_MEM]</button>
+                </div>
+                
+                <div id="session-list" class="space-y-1">
+                    <!-- Dynamic Sessions will be injected here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col relative w-full overflow-hidden">
+
+            <!-- CHAT SCROLL AREA -->
+            <div id="chat-scroll-area" class="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-32">
+                
+                <!-- Welcome/Greeting Section (Hidden after first message) -->
+                <div id="welcome-section" class="w-full max-w-4xl px-4 flex flex-col gap-8 md:gap-12 mt-[15vh]">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i data-lucide="terminal" class="w-8 h-8 text-accent animate-pulse-slow"></i>
+                            <h1 class="text-4xl md:text-5xl font-black tracking-tighter uppercase">
+                                <span class="text-transparent stroke-white" style="-webkit-text-stroke: 1px #78716c;">Hello, </span>
+                                <span class="scramble text-accent" data-text="USER">GI8rcvI9d</span>
+                            </h1>
+                        </div>
+                        <p class="font-mono text-stone-500 text-lg md:text-xl pl-11 border-l-2 border-stone-800">
+                            How can I assist your operations today?
+                        </p>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pl-11">
+                        <button class="bracket-box text-left p-4 border border-stone-800 bg-surface/30 hover:bg-surface group transition-all" onclick="ChatUI.setInput('Generate a system architecture diagram for a neural network')">
+                            <div class="flex items-start justify-between mb-2">
+                                <i data-lucide="image" class="w-5 h-5 text-stone-500 group-hover:text-accent transition-colors"></i>
+                                <span class="font-mono text-[10px] text-stone-600 opacity-0 group-hover:opacity-100">CMD_01</span>
+                            </div>
+                            <span class="font-mono text-xs font-bold text-stone-300 group-hover:text-white block">Generate Arch</span>
+                        </button>
+                        <button class="bracket-box text-left p-4 border border-stone-800 bg-surface/30 hover:bg-surface group transition-all" onclick="ChatUI.setInput('Debug this python error: IndexError: list index out of range')">
+                            <div class="flex items-start justify-between mb-2">
+                                <i data-lucide="code-2" class="w-5 h-5 text-stone-500 group-hover:text-accent transition-colors"></i>
+                                <span class="font-mono text-[10px] text-stone-600 opacity-0 group-hover:opacity-100">CMD_02</span>
+                            </div>
+                            <span class="font-mono text-xs font-bold text-stone-300 group-hover:text-white block">Debug Code</span>
+                        </button>
+                        <button class="bracket-box text-left p-4 border border-stone-800 bg-surface/30 hover:bg-surface group transition-all" onclick="ChatUI.setInput('Brainstorm ideas for a new transformer architecture')">
+                            <div class="flex items-start justify-between mb-2">
+                                <i data-lucide="brain-circuit" class="w-5 h-5 text-stone-500 group-hover:text-accent transition-colors"></i>
+                                <span class="font-mono text-[10px] text-stone-600 opacity-0 group-hover:opacity-100">CMD_03</span>
+                            </div>
+                            <span class="font-mono text-xs font-bold text-stone-300 group-hover:text-white block">Brainstorm</span>
+                        </button>
+                        <button class="bracket-box text-left p-4 border border-stone-800 bg-surface/30 hover:bg-surface group transition-all" onclick="ChatUI.setInput('Summarize the key differences between RNNs and Transformers')">
+                            <div class="flex items-start justify-between mb-2">
+                                <i data-lucide="graduation-cap" class="w-5 h-5 text-stone-500 group-hover:text-accent transition-colors"></i>
+                                <span class="font-mono text-[10px] text-stone-600 opacity-0 group-hover:opacity-100">CMD_04</span>
+                            </div>
+                            <span class="font-mono text-xs font-bold text-stone-300 group-hover:text-white block">Summarize</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Chat Container -->
+                <div id="chat-history" class="w-full max-w-3xl flex flex-col gap-6 px-4 hidden mb-12">
+                    <!-- Dynamic messages will be inserted here -->
+                </div>
+
+            </div>
+
+            <!-- Bottom Input Area (Fixed position relative to main) -->
+            <div class="absolute bottom-0 left-0 w-full flex justify-center p-4 bg-gradient-to-t from-bg via-bg to-transparent pb-8">
+                <div class="w-full max-w-4xl relative group">
+                     <!-- Input Label -->
+                    <div class="absolute -top-3 left-4 bg-bg px-2 font-mono text-[10px] text-accent uppercase tracking-widest z-10 group-focus-within:opacity-100 opacity-0 transition-opacity">
+                        Input_Stream [i3-200m]
+                    </div>
+                    
+                    <div class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)]">
+                        <textarea 
+                            id="user-input"
+                            class="w-full bg-transparent border-none focus:ring-0 text-stone-200 placeholder-stone-600 resize-none font-mono text-sm md:text-base h-12 md:h-14 py-2 leading-relaxed" 
+                            placeholder="Enter command for i3-200m model..."
+                            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ChatUI.sendMessage(); }"
+                        ></textarea>
+                        
+                        <div class="flex justify-between items-center mt-2 border-t border-stone-800 pt-3">
+                            <div class="flex gap-2">
+                                <button class="p-2 hover:bg-stone-800 text-stone-500 hover:text-white transition-colors rounded-none border border-transparent hover:border-stone-600">
+                                    <i data-lucide="image-plus" class="w-5 h-5"></i>
+                                </button>
+                                <button class="p-2 hover:bg-stone-800 text-stone-500 hover:text-white transition-colors rounded-none border border-transparent hover:border-stone-600">
+                                    <i data-lucide="mic" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="hidden md:inline font-mono text-[10px] text-stone-600">ENTER TO SEND</span>
+                                <button id="send-btn" onclick="ChatUI.sendMessage()" class="bg-stone-800 hover:bg-accent text-white p-2 transition-colors">
+                                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Background Decorative Text -->
+             <div class="absolute bottom-4 left-4 text-[120px] font-black text-stone-900 -z-10 select-none opacity-20 pointer-events-none leading-none tracking-tighter">
+                AI/SYS
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Fixed Footer Status Bar -->
+    <div class="fixed bottom-0 left-0 w-full bg-bg border-t border-stone-800 z-50 px-4 py-1 flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest text-stone-500">
+        <div class="flex gap-4">
+            <span class="text-accent flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
+                LIVE
+            </span>
+            <span class="hidden md:inline">API: FLAMEFOX-i3-200m</span>
+            <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
+        </div>
+        <div>
+             i3_V1.0
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // ---------------------------------------------------------
+        // LocalStorage Session Manager
+        // ---------------------------------------------------------
+        const SessionManager = {
+            STORAGE_KEY: 'flamefox_sessions_v1',
+            CURRENT_ID_KEY: 'flamefox_current_id',
+            
+            getSessions: () => {
+                const stored = localStorage.getItem(SessionManager.STORAGE_KEY);
+                return stored ? JSON.parse(stored) : [];
+            },
+
+            getCurrentSessionId: () => {
+                return localStorage.getItem(SessionManager.CURRENT_ID_KEY);
+            },
+
+            setCurrentSessionId: (id) => {
+                localStorage.setItem(SessionManager.CURRENT_ID_KEY, id);
+            },
+
+            saveSession: (session) => {
+                const sessions = SessionManager.getSessions();
+                const existingIndex = sessions.findIndex(s => s.id === session.id);
+                if (existingIndex >= 0) {
+                    sessions[existingIndex] = session;
+                } else {
+                    sessions.unshift(session); // Add to top
+                }
+                localStorage.setItem(SessionManager.STORAGE_KEY, JSON.stringify(sessions));
+                SessionManager.renderSessionList();
+            },
+
+            createNewSession: () => {
+                const newId = 'sys_' + Date.now().toString(36);
+                SessionManager.setCurrentSessionId(newId);
+                ChatUI.resetUI(); // Clear UI
+                SessionManager.renderSessionList(); // Update sidebar (removes active highlight from others)
+            },
+
+            loadSession: (id) => {
+                const sessions = SessionManager.getSessions();
+                const session = sessions.find(s => s.id === id);
+                if (session) {
+                    SessionManager.setCurrentSessionId(id);
+                    ChatUI.renderChatHistory(session.messages);
+                    SessionManager.renderSessionList();
+                }
+            },
+
+            // Called when a message is sent or received
+            appendMessageToCurrent: (role, text) => {
+                let currentId = SessionManager.getCurrentSessionId();
+                const sessions = SessionManager.getSessions();
+                let session = sessions.find(s => s.id === currentId);
+
+                if (!session) {
+                    // Initialize new session on first message if ID doesn't exist in storage
+                    // Or if currentID was null
+                    if(!currentId) {
+                         currentId = 'sys_' + Date.now().toString(36);
+                         SessionManager.setCurrentSessionId(currentId);
+                    }
+                    
+                    session = {
+                        id: currentId,
+                        title: text.length > 25 ? text.substring(0, 25) + '...' : text,
+                        timestamp: Date.now(),
+                        messages: []
+                    };
+                }
+
+                session.messages.push({ role, text, timestamp: Date.now() });
+                SessionManager.saveSession(session);
+            },
+
+            clearAllData: () => {
+                if(confirm('CONFIRM WIPE: This will delete all local chat history.')) {
+                    localStorage.removeItem(SessionManager.STORAGE_KEY);
+                    localStorage.removeItem(SessionManager.CURRENT_ID_KEY);
+                    location.reload();
+                }
+            },
+
+            renderSessionList: () => {
+                const listEl = document.getElementById('session-list');
+                const sessions = SessionManager.getSessions();
+                const currentId = SessionManager.getCurrentSessionId();
+
+                if (sessions.length === 0) {
+                    listEl.innerHTML = '<div class="text-[10px] text-stone-700 font-mono italic pl-2">NO_LOGS_FOUND</div>';
+                    return;
+                }
+
+                listEl.innerHTML = sessions.map(s => {
+                    const isActive = s.id === currentId;
+                    const activeClass = isActive ? 'text-white border-l-accent bg-stone-800' : 'text-stone-400 border-l-transparent hover:text-white hover:border-stone-600 hover:bg-stone-800/50';
+                    return `
+                        <button onclick="SessionManager.loadSession('${s.id}')" class="w-full text-left px-3 py-2 text-xs border-l-2 truncate transition-all font-mono group flex justify-between items-center ${activeClass}">
+                            <span class="truncate pr-2">> ${s.title}</span>
+                            ${isActive ? '<span class="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></span>' : ''}
+                        </button>
+                    `;
+                }).join('');
+            }
+        };
+
+        // ---------------------------------------------------------
+        // Chat UI Controller
+        // ---------------------------------------------------------
+        const ChatUI = {
+            API_URL: "https://flamef0x-i3-200m.hf.space/gradio_api/call/predict",
+            
+            init: () => {
+                // Check if we have a current session to load
+                const currentId = SessionManager.getCurrentSessionId();
+                if (currentId) {
+                    SessionManager.loadSession(currentId);
+                } else {
+                    ChatUI.resetUI();
+                }
+                SessionManager.renderSessionList();
+            },
+
+            setInput: (text) => {
+                const input = document.getElementById('user-input');
+                input.value = text;
+                input.focus();
+            },
+
+            resetUI: () => {
+                document.getElementById('welcome-section').classList.remove('hidden');
+                document.getElementById('chat-history').classList.add('hidden');
+                document.getElementById('chat-history').innerHTML = '';
+            },
+
+            renderChatHistory: (messages) => {
+                const welcome = document.getElementById('welcome-section');
+                const historyEl = document.getElementById('chat-history');
+                
+                if (!messages || messages.length === 0) {
+                    ChatUI.resetUI();
+                    return;
+                }
+
+                welcome.classList.add('hidden');
+                historyEl.classList.remove('hidden');
+                historyEl.innerHTML = '';
+
+                messages.forEach(msg => {
+                    ChatUI.appendMessageToDOM(msg.role, msg.text, false);
+                });
+                
+                ChatUI.scrollToBottom();
+            },
+
+            appendMessageToDOM: (role, text, isLoading = false) => {
+                const history = document.getElementById('chat-history');
+                const msgId = 'msg-' + Date.now() + Math.random().toString(16).slice(2);
+                
+                const div = document.createElement('div');
+                div.id = msgId;
+                div.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+                
+                // Icon
+                const icon = role === 'user' 
+                    ? `<div class="w-8 h-8 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400">USR</div>`
+                    : `<div class="w-8 h-8 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold">AI</div>`;
+
+                // Bubble
+                const bubbleClass = role === 'user'
+                    ? "bg-stone-800 text-stone-200 border border-stone-700"
+                    : "bg-transparent text-accent border border-accent/50 scanline relative overflow-hidden";
+                
+                // Content
+                // Sanitize input roughly to prevent raw HTML injection from user, but allow line breaks
+                const safeText = text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;")
+                    .replace(/\n/g, '<br>');
+
+                const content = isLoading 
+                    ? `<span class="animate-pulse">${safeText}</span>` 
+                    : safeText;
+
+                div.innerHTML = `
+                    <div class="flex gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'}">
+                        ${icon}
+                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box">
+                            <div class="message-content">${content}</div>
+                        </div>
+                    </div>
+                `;
+                
+                history.appendChild(div);
+                ChatUI.scrollToBottom();
+                return msgId;
+            },
+
+            updateSystemMessage: (msgId, newText) => {
+                const msgEl = document.getElementById(msgId);
+                if (msgEl) {
+                    const contentEl = msgEl.querySelector('.message-content');
+                    // Safe formatting for streaming text
+                    const formatted = newText
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/\n/g, '<br>');
+
+                    contentEl.innerHTML = formatted;
+                    // Add cursor
+                    contentEl.innerHTML += `<span class="inline-block w-2 h-4 bg-accent ml-1 animate-pulse"></span>`;
+                    ChatUI.scrollToBottom();
+                }
+            },
+
+            scrollToBottom: () => {
+                const scrollArea = document.getElementById('chat-scroll-area');
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            },
+
+            sendMessage: async () => {
+                const inputEl = document.getElementById('user-input');
+                const prompt = inputEl.value.trim();
+                if (!prompt) return;
+
+                // 1. UI Updates
+                inputEl.value = '';
+                document.getElementById('welcome-section').classList.add('hidden');
+                document.getElementById('chat-history').classList.remove('hidden');
+
+                // 2. Add User Message to DOM & Storage
+                ChatUI.appendMessageToDOM('user', prompt);
+                SessionManager.appendMessageToCurrent('user', prompt);
+                
+                // 3. Add Loading System Message to DOM
+                const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING_INFERENCE_STREAM...', true);
+                
+                // Update Status Bar
+                document.getElementById('status-text').innerText = "PROCESSING...";
+                document.getElementById('status-indicator').classList.remove('bg-green-500');
+                document.getElementById('status-indicator').classList.add('bg-orange-500', 'animate-ping');
+                const startTime = Date.now();
+
+                try {
+                    // 4. API Call
+                    const response = await fetch(ChatUI.API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            data: [ prompt, 150, 0.8, 40 ] // Max Tokens, Temp, Top-k
+                        })
+                    });
+
+                    if (!response.ok) throw new Error("Connection Refused");
+                    
+                    const json = await response.json();
+                    const eventId = json.event_id;
+                    const streamUrl = `${ChatUI.API_URL}/${eventId}`;
+                    
+                    const streamResponse = await fetch(streamUrl);
+                    const reader = streamResponse.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    let accumulatedText = "";
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.replace('data: ', '').trim();
+                                try {
+                                    const data = JSON.parse(dataStr);
+                                    if (Array.isArray(data) && data.length > 0) {
+                                        accumulatedText = data[0]; 
+                                        ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                                    }
+                                } catch (e) { /* Ignore control messages */ }
+                            }
+                        }
+                    }
+
+                    // 5. Finalize & Save AI Response
+                    // Remove cursor by re-setting text without it
+                    const msgEl = document.getElementById(loadingId);
+                    if(msgEl) {
+                         const contentEl = msgEl.querySelector('.message-content');
+                         const safeFinal = accumulatedText
+                            .replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/\n/g, '<br>');
+                         contentEl.innerHTML = safeFinal;
+                    }
+
+                    // Save to Storage
+                    SessionManager.appendMessageToCurrent('system', accumulatedText);
+                    
+                    // Update Latency
+                    const duration = Date.now() - startTime;
+                    document.getElementById('latency-val').innerText = duration;
+
+                } catch (error) {
+                    console.error(error);
+                    ChatUI.updateSystemMessage(loadingId, `ERROR: ${error.message}\nCHECK_CONNECTION_AND_RETRY.`);
+                } finally {
+                    document.getElementById('status-text').innerText = "SYSTEM ONLINE";
+                    document.getElementById('status-indicator').classList.remove('bg-orange-500', 'animate-ping');
+                    document.getElementById('status-indicator').classList.add('bg-green-500');
+                }
+            }
+        };
+
+        // Boot
+        document.addEventListener("DOMContentLoaded", () => {
+            // Text Scramble Effect
+            const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const spans = document.querySelectorAll('.scramble');
+            const scrambleText = (el) => {
+                const originalText = el.getAttribute('data-text') || el.innerText;
+                if (!el.getAttribute('data-text')) el.setAttribute('data-text', originalText);
+                let iteration = 0;
+                const interval = setInterval(() => {
+                    el.innerText = originalText.split("").map((letter, index) => {
+                        if (index < iteration) return originalText[index];
+                        return scrambleChars[Math.floor(Math.random() * 26)];
+                    }).join("");
+                    if (iteration >= originalText.length) clearInterval(interval);
+                    iteration += 1 / 3;
+                }, 30);
+            };
+            spans.forEach(span => scrambleText(span));
+
+            // Init Chat
+            ChatUI.init();
+        });
+    </script>
+</body>
+</html>
