@@ -107,7 +107,8 @@
         .bracket-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
         .bracket-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
         
-        .bracket-box:hover::before, .bracket-box:hover::after { opacity: 1; width: 100%; height: 100%; }
+        /* The following line is responsible for the sliding/expanding effect on hover. Removing it disables the effect entirely. */
+        /* .bracket-box:hover::before, .bracket-box:hover::after { opacity: 1; width: 100%; height: 100%; } */
 
         /* Animations */
         @keyframes pulse-slow {
@@ -718,7 +719,7 @@
                 // Bubble
                 const bubbleClass = role === 'user'
                     ? "bg-stone-800 text-stone-200 border border-stone-700 overflow-hidden"
-                    : "bg-transparent text-accent border border-accent/50 scanline relative overflow-hidden";
+                    : "bg-transparent text-accent border border-accent/50 relative overflow-hidden";
                 
                 // Content
                 const safeText = text
@@ -733,11 +734,11 @@
                     ? `<span class="animate-pulse">${safeText}</span>` 
                     : safeText;
                 
-                // ADDED items-start to prevent vertical stretching
+                // REMOVED bracket-box class from the inner div below
                 div.innerHTML = `
                     <div class="flex items-start gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
-                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box break-all">
+                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed break-all">
                             <div class="message-content">${content}</div>
                         </div>
                     </div>
