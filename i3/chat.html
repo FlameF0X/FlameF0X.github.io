@@ -172,9 +172,19 @@
                 </div>
             </div>
 
-            <!-- SETTINGS BUTTON (Bottom Sidebar) -->
-            <div class="p-4 border-t border-stone-800 mt-auto bg-bg/80 mb-10 overflow-hidden">
-                <button onclick="SettingsUI.toggle()" class="w-full flex items-center gap-3 px-3 py-2 text-stone-400 hover:text-white hover:bg-surface transition-colors whitespace-nowrap">
+            <!-- FOOTER AREA (Support & Settings) -->
+            <div class="mt-auto bg-bg/80 mb-6 overflow-hidden border-t border-stone-800">
+                
+                <!-- SIDEBAR SUPPORT (Hidden by default, toggled via logic) -->
+                <div id="sidebar-support" class="hidden transition-all duration-500 ease-in-out">
+                    <a href="https://ko-fi.com/flamef0x" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 bg-accent/10 border-b border-stone-800 hover:bg-accent hover:text-bg transition-all group whitespace-nowrap">
+                        <i data-lucide="coffee" class="w-4 h-4 text-accent group-hover:text-bg shrink-0"></i>
+                        <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-bg">Support_Dev</span>
+                    </a>
+                </div>
+
+                <!-- SETTINGS BUTTON -->
+                <button onclick="SettingsUI.toggle()" class="w-full flex items-center gap-3 px-4 py-4 text-stone-400 hover:text-white hover:bg-surface transition-colors whitespace-nowrap">
                     <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
                     <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest">Settings</span>
                 </button>
@@ -188,7 +198,7 @@
             <div id="chat-scroll-area" class="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-96">
                 
                 <!-- Welcome/Greeting Section (Hidden after first message) -->
-                <div id="welcome-section" class="w-full max-w-4xl px-4 flex flex-col gap-8 md:gap-12 mt-[15vh]">
+                <div id="welcome-section" class="w-full max-w-4xl px-4 flex flex-col gap-8 md:gap-10 mt-[10vh]">
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 mb-2">
                             <i data-lucide="terminal" class="w-8 h-8 text-accent animate-pulse-slow"></i>
@@ -233,6 +243,30 @@
                             <span class="font-mono text-xs font-bold text-stone-300 group-hover:text-white block">Summarize</span>
                         </button>
                     </div>
+
+                    <!-- WELCOME SUPPORT SECTION (Only visible when chat is empty) -->
+                    <div id="welcome-support" class="pl-11 mt-2">
+                        <div class="raw-border border-accent p-6 text-center bg-accent relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
+                            <!-- Background pattern -->
+                            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(black 1px, transparent 1px); background-size: 20px 20px;"></div>
+                            
+                            <div class="relative z-10 text-bg flex flex-col md:flex-row items-center justify-between gap-6 text-left">
+                                <div>
+                                    <h2 class="text-2xl font-black uppercase tracking-tighter mb-1">Fuel the Research</h2>
+                                    <p class="font-mono font-bold text-xs opacity-80 max-w-md">
+                                        Training SOTA models requires GPU hours. Help keep the servers online.
+                                    </p>
+                                </div>
+                                <div class="shrink-0">
+                                    <a href="https://ko-fi.com/flamef0x" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-bg text-accent font-black font-mono uppercase text-sm hover:bg-white hover:text-black transition-all hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5">
+                                        <span>Support via Ko-Fi</span>
+                                        <i data-lucide="coffee" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Live Chat Container -->
@@ -378,7 +412,7 @@
         lucide.createIcons();
 
         // ---------------------------------------------------------
-        // Sidebar Manager (New Feature)
+        // Sidebar Manager
         // ---------------------------------------------------------
         const SidebarUI = {
             isCollapsed: false,
@@ -438,14 +472,11 @@
 
             reset: () => {
                 if(confirm("RESET CONFIG: Restore default system parameters?")) {
-                    // Restore defaults to UI inputs
                     document.getElementById('setting-system-prompt').value = SettingsUI.defaults.systemPrompt;
                     document.getElementById('setting-temp').value = SettingsUI.defaults.temperature;
                     document.getElementById('val-temp').innerText = SettingsUI.defaults.temperature;
                     document.getElementById('setting-tokens').value = SettingsUI.defaults.maxTokens;
                     document.getElementById('val-tokens').innerText = SettingsUI.defaults.maxTokens;
-                    
-                    // Trigger save to commit defaults to storage and close modal
                     SettingsUI.save();
                 }
             },
@@ -458,7 +489,9 @@
                 };
                 
                 localStorage.setItem('flamefox_settings', JSON.stringify(newSettings));
-                SettingsUI.toggle(); // Close modal
+                
+                const modal = document.getElementById('settings-modal');
+                modal.classList.add('hidden');
                 
                 // Show brief visual confirmation
                 const statusText = document.getElementById('status-text');
@@ -555,7 +588,6 @@
                     };
                 }
 
-                // If updating an existing message (e.g. final system response), remove it first
                 if (existingId) {
                     const idx = session.messages.findIndex(m => m.id === existingId);
                     if (idx !== -1) {
@@ -573,6 +605,7 @@
                 if(confirm('CONFIRM WIPE: This will delete all local chat history.')) {
                     localStorage.removeItem(SessionManager.STORAGE_KEY);
                     localStorage.removeItem(SessionManager.CURRENT_ID_KEY);
+                    localStorage.removeItem('flamefox_settings'); // also clear settings on wipe
                     location.reload();
                 }
             },
@@ -604,7 +637,7 @@
                         </div>
                     `;
                 }).join('');
-                lucide.createIcons(); // Re-init icons for the new delete buttons
+                lucide.createIcons();
             }
         };
 
@@ -633,23 +666,33 @@
                 input.focus();
             },
 
+            // State: WELCOME (No Chat)
             resetUI: () => {
                 document.getElementById('welcome-section').classList.remove('hidden');
                 document.getElementById('chat-history').classList.add('hidden');
                 document.getElementById('chat-history').innerHTML = '';
+                
+                // Layout Logic: Show big banner, hide sidebar link
+                document.getElementById('sidebar-support').classList.add('hidden');
             },
 
             renderChatHistory: (messages) => {
                 const welcome = document.getElementById('welcome-section');
                 const historyEl = document.getElementById('chat-history');
+                const sidebarSupport = document.getElementById('sidebar-support');
                 
                 if (!messages || messages.length === 0) {
                     ChatUI.resetUI();
                     return;
                 }
 
+                // State: CHAT ACTIVE
                 welcome.classList.add('hidden');
                 historyEl.classList.remove('hidden');
+                
+                // Layout Logic: Show sidebar link
+                sidebarSupport.classList.remove('hidden');
+
                 historyEl.innerHTML = '';
 
                 messages.forEach(msg => {
@@ -764,10 +807,13 @@
                 const prompt = inputEl.value.trim();
                 if (!prompt) return;
 
-                // 1. UI Updates
+                // 1. UI Updates (Trigger Chat State)
                 inputEl.value = '';
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
+                
+                // Show Sidebar Support immediately when chat starts
+                document.getElementById('sidebar-support').classList.remove('hidden');
 
                 // 2. Add User Message
                 const userMsgId = ChatUI.appendMessageToDOM('user', prompt);
@@ -840,8 +886,8 @@
                                 try {
                                     const data = JSON.parse(dataStr);
                                     if (Array.isArray(data) && data.length > 0) {
-                                        accumulatedText = data[0]; 
-                                        ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                                         accumulatedText = data[0]; 
+                                         ChatUI.updateSystemMessage(loadingId, accumulatedText);
                                     }
                                 } catch (e) { /* Ignore control messages */ }
                             }
