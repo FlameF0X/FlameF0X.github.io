@@ -144,40 +144,39 @@
     <div class="flex flex-1 overflow-hidden relative">
         
         <!-- SIDEBAR (Gemini Style Layout, Brutalist Aesthetic) -->
-        <aside class="hidden md:flex flex-col w-[280px] border-r border-stone-800 bg-bg/50 backdrop-blur-sm z-20">
+        <aside id="main-sidebar" class="hidden md:flex flex-col w-[280px] border-r border-stone-800 bg-bg/50 backdrop-blur-sm z-20 transition-all duration-300 ease-in-out">
             <!-- Top / Hamburger -->
             <div class="p-6 pb-2">
-                <button class="p-2 -ml-2 hover:bg-surface text-stone-400 hover:text-white rounded-none transition-colors">
+                <button onclick="SidebarUI.toggle()" class="p-2 -ml-2 hover:bg-surface text-stone-400 hover:text-white rounded-none transition-colors">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
 
             <!-- New Chat Button -->
-            <div class="px-4 mb-6">
-                <button onclick="SessionManager.createNewSession()" class="w-full flex items-center gap-3 px-4 py-3 bg-surface hover:bg-stone-800 border border-stone-700 hover:border-accent transition-all group">
-                    <i data-lucide="plus" class="w-4 h-4 text-stone-500 group-hover:text-accent"></i>
-                    <span class="font-mono text-xs font-bold uppercase tracking-widest text-stone-300 group-hover:text-white">New_Session</span>
+            <div class="px-4 mb-6 overflow-hidden">
+                <button onclick="SessionManager.createNewSession()" class="w-full flex items-center gap-3 px-4 py-3 bg-surface hover:bg-stone-800 border border-stone-700 hover:border-accent transition-all group whitespace-nowrap">
+                    <i data-lucide="plus" class="w-4 h-4 text-stone-500 group-hover:text-accent shrink-0"></i>
+                    <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest text-stone-300 group-hover:text-white">New_Session</span>
                 </button>
             </div>
 
             <!-- Recent History -->
-            <div class="flex-1 overflow-y-auto px-4 space-y-1">
-                <div class="font-mono text-[10px] text-stone-600 uppercase tracking-widest mb-3 mt-2 pl-2 border-l border-stone-800 flex justify-between items-center">
+            <div class="flex-1 overflow-y-auto px-4 space-y-1 overflow-x-hidden">
+                <div class="sidebar-text font-mono text-[10px] text-stone-600 uppercase tracking-widest mb-3 mt-2 pl-2 border-l border-stone-800 flex justify-between items-center whitespace-nowrap">
                     <span>Recent_Logs</span>
                     <button onclick="SessionManager.clearAllData()" class="text-[9px] hover:text-red-500 cursor-pointer" title="Clear Local Storage">[WIPE_MEM]</button>
                 </div>
                 
-                <div id="session-list" class="space-y-1">
+                <div id="session-list" class="sidebar-text space-y-1">
                     <!-- Dynamic Sessions will be injected here -->
                 </div>
             </div>
 
             <!-- SETTINGS BUTTON (Bottom Sidebar) -->
-            <!-- ADDED mb-10 to lift it up -->
-            <div class="p-4 border-t border-stone-800 mt-auto bg-bg/80 mb-10">
-                <button onclick="SettingsUI.toggle()" class="w-full flex items-center gap-3 px-3 py-2 text-stone-400 hover:text-white hover:bg-surface transition-colors">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                    <span class="font-mono text-xs font-bold uppercase tracking-widest">Settings</span>
+            <div class="p-4 border-t border-stone-800 mt-auto bg-bg/80 mb-10 overflow-hidden">
+                <button onclick="SettingsUI.toggle()" class="w-full flex items-center gap-3 px-3 py-2 text-stone-400 hover:text-white hover:bg-surface transition-colors whitespace-nowrap">
+                    <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+                    <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest">Settings</span>
                 </button>
             </div>
         </aside>
@@ -298,7 +297,7 @@
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             MODEL VERSION: i3_200m-V2.0 // UI VERSION: 1.4
+             MODEL VERSION: i3_200m-V2.0 // UI VERSION: 1.5
         </div>
     </div>
 
@@ -361,7 +360,6 @@
             </div>
 
             <!-- Modal Footer -->
-            <!-- UPDATED: Flex justify-between to accommodate Reset button -->
             <div class="p-4 border-t border-stone-800 bg-surface flex justify-between items-center">
                 <button onclick="SettingsUI.reset()" class="text-[10px] font-mono text-red-900 hover:text-red-500 uppercase tracking-wider transition-colors">
                     [RESET_DEFAULTS]
@@ -380,11 +378,36 @@
         lucide.createIcons();
 
         // ---------------------------------------------------------
-        // Settings Manager (New Feature)
+        // Sidebar Manager (New Feature)
+        // ---------------------------------------------------------
+        const SidebarUI = {
+            isCollapsed: false,
+            toggle: () => {
+                const sidebar = document.getElementById('main-sidebar');
+                const textElements = document.querySelectorAll('.sidebar-text');
+                
+                SidebarUI.isCollapsed = !SidebarUI.isCollapsed;
+                
+                if (SidebarUI.isCollapsed) {
+                    sidebar.classList.remove('w-[280px]');
+                    sidebar.classList.add('w-[70px]');
+                    // Hide text
+                    textElements.forEach(el => el.classList.add('hidden'));
+                } else {
+                    sidebar.classList.add('w-[280px]');
+                    sidebar.classList.remove('w-[70px]');
+                    // Show text
+                    textElements.forEach(el => el.classList.remove('hidden'));
+                }
+            }
+        };
+
+        // ---------------------------------------------------------
+        // Settings Manager
         // ---------------------------------------------------------
         const SettingsUI = {
             defaults: {
-                systemPrompt: "You are a helpful AI assistant.",
+                systemPrompt: "",
                 temperature: 0.8,
                 maxTokens: 150
             },
