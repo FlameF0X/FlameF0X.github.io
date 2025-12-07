@@ -257,8 +257,10 @@
     <div class="fixed bottom-0 left-0 w-full bg-bg border-t border-stone-800 z-50 px-4 py-1 flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest text-stone-500">
         <div class="flex gap-4">
             <span class="text-accent flex items-center gap-2">
-                <span class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
-                LIVE
+                <!-- ADDED ID="status-indicator" HERE -->
+                <span id="status-indicator" class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
+                <!-- ADDED ID="status-text" HERE -->
+                <span id="status-text">LIVE</span>
             </span>
             <span class="hidden md:inline">API: FLAMEFOX-i3-200m</span>
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
@@ -515,9 +517,15 @@
                 const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING_INFERENCE_STREAM...', true);
                 
                 // Update Status Bar
-                document.getElementById('status-text').innerText = "PROCESSING...";
-                document.getElementById('status-indicator').classList.remove('bg-green-500');
-                document.getElementById('status-indicator').classList.add('bg-orange-500', 'animate-ping');
+                const statusText = document.getElementById('status-text');
+                const statusInd = document.getElementById('status-indicator');
+                
+                if (statusText) statusText.innerText = "PROCESSING...";
+                if (statusInd) {
+                    statusInd.classList.remove('bg-green-500');
+                    statusInd.classList.add('bg-orange-500', 'animate-ping');
+                }
+                
                 const startTime = Date.now();
 
                 try {
@@ -581,15 +589,21 @@
                     
                     // Update Latency
                     const duration = Date.now() - startTime;
-                    document.getElementById('latency-val').innerText = duration;
+                    const latencyEl = document.getElementById('latency-val');
+                    if (latencyEl) latencyEl.innerText = duration;
 
                 } catch (error) {
                     console.error(error);
                     ChatUI.updateSystemMessage(loadingId, `ERROR: ${error.message}\nCHECK_CONNECTION_AND_RETRY.`);
                 } finally {
-                    document.getElementById('status-text').innerText = "SYSTEM ONLINE";
-                    document.getElementById('status-indicator').classList.remove('bg-orange-500', 'animate-ping');
-                    document.getElementById('status-indicator').classList.add('bg-green-500');
+                    const statusText = document.getElementById('status-text');
+                    const statusInd = document.getElementById('status-indicator');
+
+                    if(statusText) statusText.innerText = "SYSTEM ONLINE";
+                    if(statusInd) {
+                        statusInd.classList.remove('bg-orange-500', 'animate-ping');
+                        statusInd.classList.add('bg-green-500');
+                    }
                 }
             }
         };
