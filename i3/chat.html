@@ -710,10 +710,10 @@
                 div.id = msgId;
                 div.className = `flex w-full group relative transition-opacity duration-300 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
                 
-                // Icon
+                // Icon - Added shrink-0 to prevent width squashing
                 const icon = role === 'user' 
-                    ? `<div class="w-8 h-8 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">USR</div>`
-                    : `<div class="w-8 h-8 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">i3</div>`;
+                    ? `<div class="w-8 h-8 shrink-0 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">USR</div>`
+                    : `<div class="w-8 h-8 shrink-0 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">i3</div>`;
 
                 // Bubble
                 const bubbleClass = role === 'user'
@@ -733,8 +733,9 @@
                     ? `<span class="animate-pulse">${safeText}</span>` 
                     : safeText;
                 
+                // ADDED items-start to prevent vertical stretching
                 div.innerHTML = `
-                    <div class="flex gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
+                    <div class="flex items-start gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
                         <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed bracket-box break-all">
                             <div class="message-content">${content}</div>
