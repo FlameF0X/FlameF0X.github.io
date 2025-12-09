@@ -107,9 +107,6 @@
         .bracket-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
         .bracket-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
         
-        /* The following line is responsible for the sliding/expanding effect on hover. Removing it disables the effect entirely. */
-        /* .bracket-box:hover::before, .bracket-box:hover::after { opacity: 1; width: 100%; height: 100%; } */
-
         /* Animations */
         @keyframes pulse-slow {
             0%, 100% { opacity: 1; }
@@ -131,6 +128,17 @@
             background: linear-gradient(to bottom, transparent, rgba(234, 88, 12, 0.1), transparent);
             animation: scanline 2s linear infinite;
             pointer-events: none;
+        }
+
+        /* Model Selector Tabs */
+        .model-tab {
+            @apply px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest cursor-pointer border-t border-l border-r border-transparent text-stone-600 transition-all;
+        }
+        .model-tab.active {
+            @apply bg-surface text-accent border-stone-800 border-b-bg translate-y-[1px] z-10;
+        }
+        .model-tab:hover:not(.active) {
+            @apply text-stone-400 bg-stone-900;
         }
     </style>
 </head>
@@ -209,7 +217,7 @@
                             </h1>
                         </div>
                         <p class="font-mono text-stone-500 text-lg md:text-xl pl-11 border-l-2 border-stone-800">
-                            How can I assist your operations today?
+                            Select a neural architecture to begin operations.
                         </p>
                     </div>
 
@@ -279,17 +287,37 @@
 
             <!-- Bottom Input Area (Fixed position relative to main) -->
             <div class="absolute bottom-0 left-0 w-full flex justify-center p-4 bg-gradient-to-t from-bg via-bg to-transparent pb-8">
-                <div class="w-full max-w-4xl relative group">
-                     <!-- Input Label -->
-                    <div class="absolute -top-3 left-4 bg-bg px-2 font-mono text-[10px] text-accent uppercase tracking-widest z-10 group-focus-within:opacity-100 opacity-0 transition-opacity">
-                        Input_Stream [i3-200m]
+                <div class="w-full max-w-4xl relative group flex flex-col items-start">
+                    
+                    <!-- MODEL SELECTOR TABS -->
+                    <div class="flex gap-1 ml-4 relative top-[1px] z-20">
+                        <div id="tab-i3-200m" onclick="ChatUI.switchModel('i3-200m')" class="model-tab active">
+                            i3-200m
+                        </div>
+                        <div id="tab-i3-1b" onclick="ChatUI.switchModel('i3-1b')" class="model-tab">
+                            i3-1b [LFM2]
+                        </div>
+                    </div>
+
+                    <!-- PERSISTENT SYSTEM CONTEXT BAR (Added) -->
+                    <div id="system-context-bar" class="hidden w-full bg-stone-900/80 backdrop-blur border-t border-l border-r border-stone-800 p-2 flex items-center gap-3 z-15 select-none">
+                        <div class="flex items-center gap-2 text-accent">
+                            <i data-lucide="cpu" class="w-3 h-3"></i>
+                            <span class="font-mono text-[10px] font-bold uppercase tracking-widest">System_Override:</span>
+                        </div>
+                        <span class="font-mono text-[10px] text-stone-400 truncate flex-1">
+                            You are chatting with a WRAPPER model, lfm2-1.2B that should show you how i imagine i3-1B
+                        </span>
+                        <div class="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></div>
                     </div>
                     
-                    <div class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)]">
+                    <!-- Text Area Container -->
+                    <!-- Removed top border when context bar is active to make them merge, handled via JS/CSS or just visually overlapping -->
+                    <div class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)] z-10">
                         <textarea 
                             id="user-input"
                             class="w-full bg-transparent border-none focus:ring-0 text-stone-200 placeholder-stone-600 resize-none font-mono text-sm md:text-base h-12 md:h-14 py-2 leading-relaxed" 
-                            placeholder="Enter command for i3-200m model..."
+                            placeholder="Enter command..."
                             onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ChatUI.sendMessage(); }"
                         ></textarea>
                         
@@ -328,11 +356,11 @@
                 <span id="status-indicator" class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
                 <span id="status-text">LIVE</span>
             </span>
-            <span class="hidden md:inline">API: FLAMEFOX-i3-200m</span>
+            <span class="hidden md:inline">API: <span id="current-api-label" class="text-stone-300">FLAMEFOX-i3-200m</span></span>
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             MODEL VERSION: i3_200m-V2.0 // UI VERSION: 1.8
+             UI VERSION: 2.0 // MULTI-MODEL
         </div>
     </div>
 
@@ -357,8 +385,8 @@
                 <!-- System Prompt Section -->
                 <div class="space-y-3">
                     <label class="block font-mono text-xs uppercase text-accent tracking-widest">System Prompt (Persona)</label>
-                    <textarea id="setting-system-prompt" class="w-full bg-stone-900 border border-stone-800 focus:border-accent text-stone-300 font-mono text-xs p-3 h-32 resize-none outline-none" placeholder="Enter system instructions here (e.g., 'You are a sarcastic coding expert')..."></textarea>
-                    <p class="text-[10px] text-stone-600 font-mono">Injected invisibly into the context stream.</p>
+                    <textarea id="setting-system-prompt" class="w-full bg-stone-900 border border-stone-800 focus:border-accent text-stone-300 font-mono text-xs p-3 h-32 resize-none outline-none" placeholder="Enter system instructions here..."></textarea>
+                    <p class="text-[10px] text-stone-600 font-mono">Applied where supported (Mainly i3-200m).</p>
                 </div>
 
                 <!-- Parameters -->
@@ -566,6 +594,12 @@
                 if (session) {
                     SessionManager.setCurrentSessionId(id);
                     ChatUI.renderChatHistory(session.messages);
+                    
+                    // Restore model selection if saved in session (optional enhancement, defaulting to basic handling)
+                    if (session.modelId) {
+                        ChatUI.switchModel(session.modelId);
+                    }
+                    
                     SessionManager.renderSessionList();
                 }
             },
@@ -585,7 +619,8 @@
                         id: currentId,
                         title: text.length > 25 ? text.substring(0, 25) + '...' : text,
                         timestamp: Date.now(),
-                        messages: []
+                        messages: [],
+                        modelId: ChatUI.currentModelKey // Save which model started this
                     };
                 }
 
@@ -600,6 +635,26 @@
                 session.messages.push({ id: msgId, role, text, timestamp: Date.now() });
                 SessionManager.saveSession(session);
                 return msgId;
+            },
+            
+            // New Helper: Get conversation history in LFM2 format
+            getHistoryForLFM2: () => {
+                let currentId = SessionManager.getCurrentSessionId();
+                const sessions = SessionManager.getSessions();
+                let session = sessions.find(s => s.id === currentId);
+                if (!session) return [];
+                
+                // Convert session.messages to [{role: 'user', content: '...'}, {role: 'assistant', content: '...'}]
+                // Skip the last message if it's the one we are currently generating (optional safety, though we usually add to UI first)
+                // Filter out system placeholders if any
+                return session.messages
+                    .filter(m => m.role !== 'system')
+                    .map(m => ({
+                        role: m.role === 'user' ? 'user' : 'assistant',
+                        metadata: null,
+                        content: m.text,
+                        options: null
+                    }));
             },
 
             clearAllData: () => {
@@ -624,9 +679,12 @@
                 listEl.innerHTML = sessions.map(s => {
                     const isActive = s.id === currentId;
                     const activeClass = isActive ? 'text-white border-l-accent bg-stone-800' : 'text-stone-400 border-l-transparent hover:text-white hover:border-stone-600 hover:bg-stone-800/50';
+                    const modelTag = s.modelId === 'i3-1b' ? '[1B]' : '';
+                    
                     return `
                         <div class="group flex items-center w-full border-l-2 transition-all font-mono ${activeClass} cursor-pointer">
                             <button onclick="SessionManager.loadSession('${s.id}')" class="flex-1 text-left px-3 py-2 text-xs truncate outline-none">
+                                <span class="truncate text-[9px] opacity-50 mr-1">${modelTag}</span>
                                 <span class="truncate">> ${s.title}</span>
                             </button>
                             <div class="flex items-center gap-2 pr-2">
@@ -643,10 +701,41 @@
         };
 
         // ---------------------------------------------------------
-        // Chat UI Controller
+        // Chat UI Controller & API Logic
         // ---------------------------------------------------------
         const ChatUI = {
-            API_URL: "https://flamef0x-i3-200m.hf.space/gradio_api/call/predict",
+            currentModelKey: 'i3-200m', // Default
+            
+            // SYSTEM PROMPT FOR i3-1B (Wrapped LFM2)
+            I3_1B_PROMPT: `You are i3, an open-source language model designed by B. Daniel (aka FlameF0X or Daniel Fox on HuggingFace) for natural, human-like conversation.
+
+Core principles:
+- Match the user's energy and tone. If they're casual, be casual. If they're serious, be thoughtful and direct.
+- Listen and respond to what they actually need, not what you assume they want.
+- Be concise by default. Don't over-explain unless they're confused or explicitly want detail.
+- Use natural language - contractions, colloquialisms, and conversational flow are encouraged.
+- Ask clarifying questions when needed instead of making assumptions.
+- Admit when you're uncertain rather than confidently guessing.
+- Avoid being preachy, overly formal, or robotic. No unnecessary corporate speak.
+- Don't use bullet points or lists unless the user asks for them or the content genuinely needs that structure.
+- Build on the conversation naturally - reference what they said, follow the thread, let it evolve organically.
+- Be helpful and friendly, but not artificially enthusiastic. Genuine and grounded beats peppy.
+- If someone's frustrated, meet them with understanding, not deflection.`,
+
+            MODELS: {
+                'i3-200m': {
+                    name: 'i3-200m',
+                    apiUrl: "https://flamef0x-i3-200m.hf.space/gradio_api/call/predict",
+                    type: 'completion'
+                },
+                'i3-1b': {
+                    name: 'i3-1b [LFM2]',
+                    apiUrl: "https://flamef0x-lfm2.hf.space/gradio_api/call/chat_with_model",
+                    type: 'chat',
+                    internalId: "LFM2-1.2B" // The string expected by the backend
+                }
+            },
+            
             abortController: null,
             isGenerating: false,
             
@@ -658,7 +747,39 @@
                 } else {
                     ChatUI.resetUI();
                 }
+                ChatUI.switchModel('i3-200m'); // Default visual set
                 SessionManager.renderSessionList();
+            },
+            
+            switchModel: (modelKey) => {
+                const prevKey = ChatUI.currentModelKey;
+                ChatUI.currentModelKey = modelKey;
+                
+                // Visual Updates
+                document.querySelectorAll('.model-tab').forEach(el => el.classList.remove('active'));
+                document.getElementById(`tab-${modelKey}`).classList.add('active');
+                
+                // Update Footer
+                document.getElementById('current-api-label').innerText = `FLAMEFOX-${modelKey.toUpperCase()}`;
+                
+                // Update Placeholder
+                document.getElementById('user-input').placeholder = `Enter command for ${ChatUI.MODELS[modelKey].name} ...`;
+
+                // WRAPPED MODEL NOTIFICATION & CONTEXT BAR
+                const contextBar = document.getElementById('system-context-bar');
+                
+                if (modelKey === 'i3-1b') {
+                    // Show the persistent bar
+                    contextBar.classList.remove('hidden');
+                    
+                    // Optional: Notification in chat (we can keep or remove this based on preference, keeping for clarity)
+                    if (!document.getElementById('chat-history').classList.contains('hidden') && prevKey !== 'i3-1b') {
+                         ChatUI.appendMessageToDOM('system', 'NOTICE: WRAPPED MODEL ACTIVE.\nSystem prompt injection enabled.');
+                    }
+                } else {
+                    // Hide the persistent bar
+                    contextBar.classList.add('hidden');
+                }
             },
 
             setInput: (text) => {
@@ -711,10 +832,12 @@
                 div.id = msgId;
                 div.className = `flex w-full group relative transition-opacity duration-300 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
                 
+                const iconLabel = role === 'user' ? 'USR' : (ChatUI.currentModelKey === 'i3-1b' ? 'LFM' : 'i3');
+                
                 // Icon - Added shrink-0 to prevent width squashing
                 const icon = role === 'user' 
-                    ? `<div class="w-8 h-8 shrink-0 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">USR</div>`
-                    : `<div class="w-8 h-8 shrink-0 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">i3</div>`;
+                    ? `<div class="w-8 h-8 shrink-0 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">${iconLabel}</div>`
+                    : `<div class="w-8 h-8 shrink-0 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">${iconLabel}</div>`;
 
                 // Bubble
                 const bubbleClass = role === 'user'
@@ -734,7 +857,6 @@
                     ? `<span class="animate-pulse">${safeText}</span>` 
                     : safeText;
                 
-                // REMOVED bracket-box class from the inner div below
                 div.innerHTML = `
                     <div class="flex items-start gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
@@ -813,8 +935,6 @@
                 inputEl.value = '';
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
-                
-                // Show Sidebar Support immediately when chat starts
                 document.getElementById('sidebar-support').classList.remove('hidden');
 
                 // 2. Add User Message
@@ -842,34 +962,66 @@
 
                 // FETCH SETTINGS
                 const settings = SettingsUI.getSettings();
-                
-                // Prepend system prompt if it exists (invisibly to the user)
-                let finalPrompt = prompt;
-                if(settings.systemPrompt && settings.systemPrompt.trim() !== "") {
-                    finalPrompt = `System: ${settings.systemPrompt}\n\nUser: ${prompt}`;
-                }
+                const currentModel = ChatUI.MODELS[ChatUI.currentModelKey];
 
                 try {
-                    // 4. API Call
-                    const response = await fetch(ChatUI.API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
+                    let requestBody;
+
+                    if (currentModel.type === 'completion') {
+                        // --- API LOGIC FOR i3-200m (Old) ---
+                        // Prepend system prompt if it exists
+                        let finalPrompt = prompt;
+                        if(settings.systemPrompt && settings.systemPrompt.trim() !== "") {
+                            finalPrompt = `System: ${settings.systemPrompt}\n\nUser: ${prompt}`;
+                        }
+                        
+                        requestBody = {
                             data: [ 
                                 finalPrompt, 
-                                settings.maxTokens, // Use setting
-                                settings.temperature, // Use setting
-                                40 // Top K fixed
+                                settings.maxTokens, 
+                                settings.temperature, 
+                                40 
                             ]
-                        }),
+                        };
+
+                    } else if (currentModel.type === 'chat') {
+                        // --- API LOGIC FOR i3-1b (LFM2 - New) ---
+                        // Needs History Array format: [{role:..., content:...}, ...]
+                        
+                        // 1. Get previous messages (excluding the one we just added to UI but not yet saved fully as 'processed')
+                        // We fetch history formatted for LFM2, but we remove the *current* user prompt from history because it goes in arg[0]
+                        const fullHistory = SessionManager.getHistoryForLFM2();
+                        const historyBase = fullHistory.slice(0, -1); 
+                        
+                        // 2. INJECT SYSTEM PROMPT
+                        // We prepend the system prompt to the history sent to the model
+                        const historyToSend = [
+                            { role: "system", content: ChatUI.I3_1B_PROMPT },
+                            ...historyBase
+                        ];
+
+                        requestBody = {
+                            data: [
+                                prompt, // The current message
+                                historyToSend, // Previous conversation (with system prompt injected)
+                                currentModel.internalId // "LFM2-1.2B"
+                            ]
+                        };
+                    }
+
+                    // 4. API Call
+                    const response = await fetch(currentModel.apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(requestBody),
                         signal
                     });
 
-                    if (!response.ok) throw new Error("Connection Refused");
+                    if (!response.ok) throw new Error("Connection Refused / API Error");
                     
                     const json = await response.json();
                     const eventId = json.event_id;
-                    const streamUrl = `${ChatUI.API_URL}/${eventId}`;
+                    const streamUrl = `${currentModel.apiUrl}/${eventId}`;
                     
                     const streamResponse = await fetch(streamUrl, { signal });
                     const reader = streamResponse.body.getReader();
@@ -887,13 +1039,63 @@
                                 const dataStr = line.replace('data: ', '').trim();
                                 try {
                                     const data = JSON.parse(dataStr);
+                                    
                                     if (Array.isArray(data) && data.length > 0) {
-                                         accumulatedText = data[0]; 
-                                         ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                                        // Different parsing based on model?
+                                        if (currentModel.type === 'completion') {
+                                             accumulatedText = data[0]; 
+                                        } else {
+                                            // --- ROBUST PARSING FOR LFM2/GRADIO 4 ---
+                                            const payload = data[0];
+                                            
+                                            if (typeof payload === 'string') {
+                                                accumulatedText = payload;
+                                            } else if (Array.isArray(payload)) {
+                                                if (payload.length > 0) {
+                                                    const lastItem = payload[payload.length - 1];
+                                                    
+                                                    // CASE 1: Standard Tuple format [[u, b]]
+                                                    if (Array.isArray(lastItem) && lastItem.length > 1) {
+                                                        accumulatedText = lastItem[1];
+                                                    } 
+                                                    // CASE 2: New Messages format [{role: 'assistant', content: '...'}]
+                                                    else if (typeof lastItem === 'object' && lastItem !== null && lastItem.content) {
+                                                        accumulatedText = lastItem.content;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // --- SAFETY: CLIENT-SIDE STOP TOKENS ---
+                                        // Prevent model from hallucinating User turns
+                                        const stopSequences = ["\nUser:", "\nuser:", "User:", "user:"];
+                                        let shouldStop = false;
+                                        
+                                        for (const stop of stopSequences) {
+                                            if (accumulatedText.includes(stop)) {
+                                                // Cut off the text exactly at the stop token
+                                                accumulatedText = accumulatedText.split(stop)[0].trim();
+                                                shouldStop = true;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        // Update UI
+                                        if(accumulatedText) {
+                                            ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                                        }
+
+                                        // If we hit a stop token, force close the stream peacefully
+                                        if (shouldStop) {
+                                            reader.cancel(); // Stop fetching
+                                            break; // Break the stream loop
+                                        }
                                     }
                                 } catch (e) { /* Ignore control messages */ }
                             }
                         }
+                        // Break outer loop if stopped
+                        if (accumulatedText.includes("\nUser:") || accumulatedText.includes("User:")) break;
                     }
 
                 } catch (error) {
@@ -910,6 +1112,7 @@
                     const msgEl = document.getElementById(loadingId);
                     if(msgEl) {
                          const contentEl = msgEl.querySelector('.message-content');
+                         // Final render with full HTML safety
                          const safeFinal = accumulatedText
                             .replace(/&/g, "&amp;")
                             .replace(/</g, "&lt;")
@@ -918,7 +1121,7 @@
                          contentEl.innerHTML = safeFinal;
                     }
 
-                    // Save accumulated text (even if partial/stopped)
+                    // Save accumulated text
                     SessionManager.appendMessageToCurrent('system', accumulatedText, loadingId);
                     
                     const duration = Date.now() - startTime;
