@@ -1,9 +1,9 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlameF0X | i3-200M Neural Architecture</title>
+    <title>FlameF0X | i3: a SOTA architecture</title>
     
     <!-- Tailwind & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -82,21 +82,6 @@
         .bracket-box::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
         .bracket-box::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
         
-        /* Scanline Overlay */
-        .scanline::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 50;
-            opacity: 0.15;
-        }
-
         /* Glitch Text Effect on Hover */
         .glitch-hover:hover {
             animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
@@ -134,20 +119,19 @@
         }
     </style>
 </head>
-<body class="antialiased selection:bg-accent selection:text-white overflow-x-hidden scanline">
+<body class="antialiased selection:bg-accent selection:text-white overflow-x-hidden">
 
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-40 bg-bg/90 backdrop-blur-md border-b border-border transition-transform duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <i data-lucide="flame" class="text-accent w-5 h-5"></i>
-                <span class="font-black italic tracking-tighter text-xl">FLAME.AI</span>
+                <span class="font-black tracking-tighter text-xl">i3 - a Daniel Fox product</span>
             </div>
             <div class="hidden md:flex items-center gap-8 font-mono text-xs font-bold uppercase tracking-widest text-stone-400">
                 <a href="#specs" class="hover:text-accent transition-colors">Specs</a>
                 <a href="#architecture" class="hover:text-accent transition-colors">Architecture</a>
                 <a href="#benchmarks" class="hover:text-accent transition-colors">Telemetry</a>
-                <a href="https://huggingface.co/spaces/FlameF0X/i3-200m" class="text-accent hover:text-white transition-colors flex items-center gap-2">
+                <a href="https://flamefox.gattodev.tech/i3/chat.html" class="text-accent hover:text-white transition-colors flex items-center gap-2">
                     [Launch_Interface] <i data-lucide="external-link" class="w-3 h-3"></i>
                 </a>
             </div>
@@ -156,23 +140,20 @@
 
     <!-- Hero Section -->
     <header class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        <!-- Background decorative elements -->
-        <div class="absolute top-1/4 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-
+        
         <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
             
             <!-- Text Content -->
             <div class="space-y-8">
                 
-                <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase opacity-0 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] uppercase opacity-0 animate-fade-in-up" style="animation-delay: 0.1s;">
                     i3-200M<br>
                     <span class="text-transparent stroke-white scramble" style="-webkit-text-stroke: 2px #44403c;">RWKV-V4</span><br>
                     <span class="text-accent glitch-hover cursor-default scramble">Hybrid</span>
                 </h1>
                 
                 <!-- Updated Philosophy Text -->
-                <div class="opacity-0 animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="opacity-0 animate-fade-in-up" style="animation-delay: 0.2s;">
                     <p class="text-xl text-white font-bold mb-2">
                         "Chase the SOTA pipeline, not the MMLU slop."
                     </p>
@@ -181,8 +162,8 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
-                    <a href="chat.html" class="px-8 py-4 bg-accent text-bg font-bold font-mono uppercase tracking-wider hover:bg-white hover:text-black transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
+                <div class="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <a href="https://flamefox.gattodev.tech/i3/chat.html" class="px-8 py-4 bg-accent text-bg font-bold font-mono uppercase tracking-wider hover:bg-white hover:text-black transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
                         <i data-lucide="terminal" class="w-4 h-4"></i> Initialize Chat
                     </a>
                     <a href="https://huggingface.co/FlameF0X" class="px-8 py-4 border border-stone-700 text-stone-300 font-bold font-mono uppercase tracking-wider hover:border-accent hover:text-accent transition-all flex items-center justify-center gap-2">
@@ -192,7 +173,7 @@
             </div>
 
             <!-- Terminal Visual -->
-            <div class="w-full aspect-square md:aspect-video lg:aspect-square bg-surface border border-stone-800 p-1 relative overflow-hidden group opacity-0 animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="w-full aspect-square md:aspect-video lg:aspect-square bg-surface border border-stone-800 p-1 relative overflow-hidden group opacity-0 animate-fade-in-up" style="animation-delay: 0.5s;">
                 <!-- Header -->
                 <div class="h-8 bg-stone-900 border-b border-stone-800 flex items-center justify-between px-3">
                     <span class="text-[10px] font-mono text-stone-500">root@flamef0x:~</span>
@@ -343,7 +324,7 @@
                                 <span>22.6M</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-stone-800 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="13%"></div>
+                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="3%"></div>
                             </div>
                         </div>
                         <!-- i3-80M -->
@@ -353,17 +334,27 @@
                                 <span>82.8M</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-stone-800 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="48%"></div>
+                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="8%"></div>
                             </div>
                         </div>
                         <!-- i3-200M -->
                         <div>
                             <div class="flex justify-between text-xs font-mono text-accent mb-1">
-                                <span class="font-bold">i3-200M [CURRENT]</span>
+                                <span class="font-bold">i3-200M [RELEASED]</span>
                                 <span class="font-bold">169.8M</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-accent/30 w-full relative group">
-                                <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors shadow-[0_0_15px_-5px_rgba(234,88,12,0.5)]" data-width="100%"></div>
+                                <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors" data-width="17%"></div>
+                            </div>
+                        </div>
+                        <!-- i3-1B -->
+                        <div>
+                            <div class="flex justify-between text-xs font-mono text-stone-300 mb-1">
+                                <span class="font-bold animate-pulse text-stone-300">i3-1B [TRAINING]</span>
+                                <span class="font-bold">~1.0B</span>
+                            </div>
+                            <div class="h-8 bg-stone-900 border border-stone-700 w-full relative group">
+                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors dashed-border opacity-80" data-width="100%"></div>
                             </div>
                         </div>
                     </div>
@@ -406,7 +397,7 @@
                                 <span class="font-bold">5.2</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-accent/30 w-full relative group">
-                                <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors shadow-[0_0_15px_-5px_rgba(234,88,12,0.5)]" data-width="52%"></div>
+                                <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors" data-width="52%"></div>
                             </div>
                         </div>
                     </div>
@@ -441,15 +432,28 @@
 
                         <!-- i3-200M -->
                         <div class="mt-4">
-                            <div class="flex justify-between text-xs font-mono text-accent mb-1 items-end">
+                            <div class="flex justify-between text-xs font-mono text-stone-400 mb-1 items-end">
                                 <span class="font-bold text-lg">i3-200M</span>
                                 <span class="font-bold">1x P100 (~2 Hours)</span>
                             </div>
-                            <div class="h-8 bg-stone-900 border border-accent/50 w-full relative group">
-                                <!-- The width is intentionally tiny (1%) to dramatically visualize the efficiency diff -->
-                                <div class="chart-bar h-full bg-accent shadow-[0_0_20px_rgba(234,88,12,0.8)]" data-width="1%"></div>
-                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-accent whitespace-nowrap ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="h-8 bg-stone-900 border border-stone-700 w-full relative group">
+                                <div class="chart-bar h-full bg-stone-600" data-width="1%"></div>
+                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-white whitespace-nowrap ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     < 0.01% Compute Cost
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- i3-1B -->
+                        <div class="mt-2">
+                            <div class="flex justify-between text-xs font-mono text-accent mb-1 items-end">
+                                <span class="font-bold text-lg">i3-1B [TRAINING]</span>
+                                <span class="font-bold">1x RTX 5060 Ti (5 Hours)</span>
+                            </div>
+                            <div class="h-8 bg-stone-900 border border-accent/50 w-full relative group">
+                                <div class="chart-bar h-full bg-accent" data-width="1.5%"></div>
+                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-white whitespace-nowrap ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Ultra-Efficient 1B
                                 </span>
                             </div>
                         </div>
@@ -509,11 +513,11 @@
                     <button onclick="navigator.clipboard.writeText(document.getElementById('bibtex').innerText)" class="text-xs font-mono text-accent hover:text-white uppercase">[Copy_BibTex]</button>
                 </div>
                 <div class="font-mono text-[10px] text-stone-500 mb-2">// CITATION</div>
-                <pre id="bibtex" class="font-mono text-xs text-stone-400 overflow-x-auto whitespace-pre-wrap">@article{RWKV,
-  title={RWKV: Reinventing RNNs for the Transformer Era},
-  author={Peng, Bo and others},
-  journal={arXiv preprint arXiv:2305.13048},
-  year={2023}
+                <pre id="bibtex" class="font-mono text-xs text-stone-400 overflow-x-auto whitespace-pre-wrap">@article{flamef0x_i3_200m,
+  title={i3-200M: Hybrid RWKV-Attention Language Model},
+  author={FlameF0X},
+  year={2025},
+  publisher={HuggingFace}
 }</pre>
             </div>
 
