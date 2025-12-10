@@ -114,22 +114,6 @@
         }
         .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-        .scanline::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 20%;
-            background: linear-gradient(to bottom, transparent, rgba(234, 88, 12, 0.1), transparent);
-            animation: scanline 2s linear infinite;
-            pointer-events: none;
-        }
-
         /* Model Selector Tabs */
         .model-tab {
             @apply px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest cursor-pointer border-t border-l border-r border-transparent text-stone-600 transition-all;
@@ -152,7 +136,7 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <!-- SIDEBAR (Gemini Style Layout, Brutalist Aesthetic) -->
+        <!-- SIDEBAR -->
         <aside id="main-sidebar" class="hidden md:flex flex-col w-[280px] border-r border-stone-800 bg-bg/50 backdrop-blur-sm z-20 transition-all duration-300 ease-in-out">
             <!-- Top / Hamburger -->
             <div class="p-6 pb-2">
@@ -161,11 +145,18 @@
                 </button>
             </div>
 
-            <!-- New Chat Button -->
-            <div class="px-4 mb-6 overflow-hidden">
+            <!-- New Chat Buttons -->
+            <div class="px-4 mb-6 space-y-2 overflow-hidden">
+                <!-- Standard Session -->
                 <button onclick="SessionManager.createNewSession()" class="w-full flex items-center gap-3 px-4 py-3 bg-surface hover:bg-stone-800 border border-stone-700 hover:border-accent transition-all group whitespace-nowrap">
                     <i data-lucide="plus" class="w-4 h-4 text-stone-500 group-hover:text-accent shrink-0"></i>
                     <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest text-stone-300 group-hover:text-white">New_Session</span>
+                </button>
+                
+                <!-- Temporary i3-1b Session -->
+                <button onclick="SessionManager.createTemporaryI3Session()" class="w-full flex items-center gap-3 px-4 py-2 bg-transparent hover:bg-stone-800/50 border border-dashed border-stone-800 hover:border-accent/50 transition-all group whitespace-nowrap">
+                    <i data-lucide="flask-conical" class="w-3 h-3 text-stone-600 group-hover:text-orange-400 shrink-0"></i>
+                    <span class="sidebar-text font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500 group-hover:text-orange-300">Try i3-1b (Demo)</span>
                 </button>
             </div>
 
@@ -181,18 +172,14 @@
                 </div>
             </div>
 
-            <!-- FOOTER AREA (Support & Settings) -->
+            <!-- FOOTER AREA -->
             <div class="mt-auto bg-bg/80 mb-6 overflow-hidden border-t border-stone-800">
-                
-                <!-- SIDEBAR SUPPORT (Hidden by default, toggled via logic) -->
                 <div id="sidebar-support" class="hidden transition-all duration-500 ease-in-out">
                     <a href="https://ko-fi.com/flamef0x" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 bg-accent/10 border-b border-stone-800 hover:bg-accent hover:text-bg transition-all group whitespace-nowrap">
                         <i data-lucide="coffee" class="w-4 h-4 text-accent group-hover:text-bg shrink-0"></i>
                         <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest text-accent group-hover:text-bg">Support_Dev</span>
                     </a>
                 </div>
-
-                <!-- SETTINGS BUTTON -->
                 <button onclick="SettingsUI.toggle()" class="w-full flex items-center gap-3 px-4 py-4 text-stone-400 hover:text-white hover:bg-surface transition-colors whitespace-nowrap">
                     <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
                     <span class="sidebar-text font-mono text-xs font-bold uppercase tracking-widest">Settings</span>
@@ -206,7 +193,7 @@
             <!-- CHAT SCROLL AREA -->
             <div id="chat-scroll-area" class="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-96">
                 
-                <!-- Welcome/Greeting Section (Hidden after first message) -->
+                <!-- Welcome/Greeting Section -->
                 <div id="welcome-section" class="w-full max-w-4xl px-4 flex flex-col gap-8 md:gap-10 mt-[10vh]">
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 mb-2">
@@ -253,12 +240,10 @@
                         </button>
                     </div>
 
-                    <!-- WELCOME SUPPORT SECTION (Only visible when chat is empty) -->
+                    <!-- WELCOME SUPPORT SECTION -->
                     <div id="welcome-support" class="pl-11 mt-2">
                         <div class="raw-border border-accent p-6 text-center bg-accent relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300">
-                            <!-- Background pattern -->
                             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(black 1px, transparent 1px); background-size: 20px 20px;"></div>
-                            
                             <div class="relative z-10 text-bg flex flex-col md:flex-row items-center justify-between gap-6 text-left">
                                 <div>
                                     <h2 class="text-2xl font-black uppercase tracking-tighter mb-1">Fuel the Research</h2>
@@ -275,7 +260,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 <!-- Live Chat Container -->
@@ -285,7 +269,7 @@
 
             </div>
 
-            <!-- Bottom Input Area (Fixed position relative to main) -->
+            <!-- Bottom Input Area -->
             <div class="absolute bottom-0 left-0 w-full flex justify-center p-4 bg-gradient-to-t from-bg via-bg to-transparent pb-8">
                 <div class="w-full max-w-4xl relative group flex flex-col items-start">
                     
@@ -294,25 +278,10 @@
                         <div id="tab-i3-200m" onclick="ChatUI.switchModel('i3-200m')" class="model-tab active">
                             i3-200m
                         </div>
-                        <div id="tab-i3-1b" onclick="ChatUI.switchModel('i3-1b')" class="model-tab">
-                            i3-1b [LFM2]
-                        </div>
+                        <!-- Removed i3-1b Tab -->
                     </div>
 
-                    <!-- PERSISTENT SYSTEM CONTEXT BAR (Added) -->
-                    <div id="system-context-bar" class="hidden w-full bg-stone-900/80 backdrop-blur border-t border-l border-r border-stone-800 p-2 flex items-center gap-3 z-15 select-none">
-                        <div class="flex items-center gap-2 text-accent">
-                            <i data-lucide="cpu" class="w-3 h-3"></i>
-                            <span class="font-mono text-[10px] font-bold uppercase tracking-widest">System_Override:</span>
-                        </div>
-                        <span class="font-mono text-[10px] text-stone-400 truncate flex-1">
-                            You are chatting with a WRAPPER model, lfm2-1.2B that should show you how i imagine i3-1B
-                        </span>
-                        <div class="w-1.5 h-1.5 bg-accent rounded-full animate-pulse"></div>
-                    </div>
-                    
                     <!-- Text Area Container -->
-                    <!-- Removed top border when context bar is active to make them merge, handled via JS/CSS or just visually overlapping -->
                     <div class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)] z-10">
                         <textarea 
                             id="user-input"
@@ -360,7 +329,7 @@
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             UI VERSION: 2.0 // MULTI-MODEL
+             UI VERSION: 2.1 // TRANSIENT-DEMO
         </div>
     </div>
 
@@ -408,7 +377,7 @@
                     </div>
                 </div>
 
-                <!-- Privacy Policy (Requested) -->
+                <!-- Privacy Policy -->
                 <div class="border border-stone-800 bg-stone-900/50 p-4">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="shield" class="w-3 h-3 text-stone-500"></i>
@@ -535,12 +504,15 @@
         };
 
         // ---------------------------------------------------------
-        // LocalStorage Session Manager
+        // Session Manager (Handles both Persistent and Transient/Demo)
         // ---------------------------------------------------------
         const SessionManager = {
             STORAGE_KEY: 'flamefox_sessions_v1',
             CURRENT_ID_KEY: 'flamefox_current_id',
             
+            // Temporary storage for i3-1b demo sessions (RAM only, no localStorage)
+            tempSession: null,
+
             getSessions: () => {
                 const stored = localStorage.getItem(SessionManager.STORAGE_KEY);
                 return stored ? JSON.parse(stored) : [];
@@ -555,6 +527,9 @@
             },
 
             saveSession: (session) => {
+                // GUARD: Never save temp sessions to local storage
+                if (session.id === 'temp_demo_session') return;
+
                 const sessions = SessionManager.getSessions();
                 const existingIndex = sessions.findIndex(s => s.id === session.id);
                 if (existingIndex >= 0) {
@@ -566,11 +541,36 @@
                 SessionManager.renderSessionList();
             },
 
+            // Standard "New Session" (Persistent, i3-200m)
             createNewSession: () => {
+                SessionManager.tempSession = null; // Clear any temp data
                 const newId = 'sys_' + Date.now().toString(36);
                 SessionManager.setCurrentSessionId(newId);
                 ChatUI.resetUI(); // Clear UI
-                SessionManager.renderSessionList(); // Update sidebar (removes active highlight from others)
+                ChatUI.switchModel('i3-200m'); // Default model
+                SessionManager.renderSessionList(); 
+            },
+
+            // Temporary "Demo" Session (Transient, i3-1b)
+            createTemporaryI3Session: () => {
+                // Define the temp session structure in memory
+                SessionManager.tempSession = {
+                    id: 'temp_demo_session',
+                    title: 'i3-1b [DEMO_MODE]',
+                    timestamp: Date.now(),
+                    messages: [],
+                    modelId: 'i3-1b'
+                };
+                
+                // Set ID to specific string, but don't rely on it for persistence
+                SessionManager.setCurrentSessionId('temp_demo_session');
+                
+                // UI Reset
+                ChatUI.resetUI();
+                ChatUI.switchModel('i3-1b');
+                
+                // Render list will unselect other sessions, but won't show this one
+                SessionManager.renderSessionList();
             },
 
             deleteSession: (id) => {
@@ -589,13 +589,15 @@
             },
 
             loadSession: (id) => {
+                // If loading a real session, clear temp
+                SessionManager.tempSession = null;
+
                 const sessions = SessionManager.getSessions();
                 const session = sessions.find(s => s.id === id);
                 if (session) {
                     SessionManager.setCurrentSessionId(id);
                     ChatUI.renderChatHistory(session.messages);
                     
-                    // Restore model selection if saved in session (optional enhancement, defaulting to basic handling)
                     if (session.modelId) {
                         ChatUI.switchModel(session.modelId);
                     }
@@ -607,6 +609,23 @@
             // Called when a message is sent or received
             appendMessageToCurrent: (role, text, existingId = null) => {
                 let currentId = SessionManager.getCurrentSessionId();
+                
+                // --- HANDLE TEMPORARY SESSION ---
+                if (currentId === 'temp_demo_session') {
+                    const msgId = existingId || ('msg-' + Date.now() + Math.random().toString(16).slice(2));
+                    if (SessionManager.tempSession) {
+                        // Update existing message if editing/streaming
+                        if (existingId) {
+                             const idx = SessionManager.tempSession.messages.findIndex(m => m.id === existingId);
+                             if(idx !== -1) SessionManager.tempSession.messages.splice(idx, 1);
+                        }
+                        SessionManager.tempSession.messages.push({ id: msgId, role, text, timestamp: Date.now() });
+                    }
+                    // Do NOT call saveSession
+                    return msgId;
+                }
+
+                // --- HANDLE PERSISTENT SESSION ---
                 const sessions = SessionManager.getSessions();
                 let session = sessions.find(s => s.id === currentId);
 
@@ -620,7 +639,7 @@
                         title: text.length > 25 ? text.substring(0, 25) + '...' : text,
                         timestamp: Date.now(),
                         messages: [],
-                        modelId: ChatUI.currentModelKey // Save which model started this
+                        modelId: ChatUI.currentModelKey 
                     };
                 }
 
@@ -637,16 +656,20 @@
                 return msgId;
             },
             
-            // New Helper: Get conversation history in LFM2 format
             getHistoryForLFM2: () => {
                 let currentId = SessionManager.getCurrentSessionId();
-                const sessions = SessionManager.getSessions();
-                let session = sessions.find(s => s.id === currentId);
+                let session;
+
+                // Handle Temp
+                if (currentId === 'temp_demo_session') {
+                    session = SessionManager.tempSession;
+                } else {
+                    const sessions = SessionManager.getSessions();
+                    session = sessions.find(s => s.id === currentId);
+                }
+
                 if (!session) return [];
                 
-                // Convert session.messages to [{role: 'user', content: '...'}, {role: 'assistant', content: '...'}]
-                // Skip the last message if it's the one we are currently generating (optional safety, though we usually add to UI first)
-                // Filter out system placeholders if any
                 return session.messages
                     .filter(m => m.role !== 'system')
                     .map(m => ({
@@ -661,7 +684,7 @@
                 if(confirm('CONFIRM WIPE: This will delete all local chat history.')) {
                     localStorage.removeItem(SessionManager.STORAGE_KEY);
                     localStorage.removeItem(SessionManager.CURRENT_ID_KEY);
-                    localStorage.removeItem('flamefox_settings'); // also clear settings on wipe
+                    localStorage.removeItem('flamefox_settings'); 
                     location.reload();
                 }
             },
@@ -706,21 +729,15 @@
         const ChatUI = {
             currentModelKey: 'i3-200m', // Default
             
-            // SYSTEM PROMPT FOR i3-1B (Wrapped LFM2)
             I3_1B_PROMPT: `You are i3, an open-source language model designed by B. Daniel (aka FlameF0X or Daniel Fox on HuggingFace) for natural, human-like conversation.
 
 Core principles:
-- Match the user's energy and tone. If they're casual, be casual. If they're serious, be thoughtful and direct.
-- Listen and respond to what they actually need, not what you assume they want.
-- Be concise by default. Don't over-explain unless they're confused or explicitly want detail.
+- Match the user's energy and tone. If they're casual, be casual.
+- Be concise by default.
 - Use natural language - contractions, colloquialisms, and conversational flow are encouraged.
-- Ask clarifying questions when needed instead of making assumptions.
 - Admit when you're uncertain rather than confidently guessing.
 - Avoid being preachy, overly formal, or robotic. No unnecessary corporate speak.
-- Don't use bullet points or lists unless the user asks for them or the content genuinely needs that structure.
-- Build on the conversation naturally - reference what they said, follow the thread, let it evolve organically.
-- Be helpful and friendly, but not artificially enthusiastic. Genuine and grounded beats peppy.
-- If someone's frustrated, meet them with understanding, not deflection.`,
+- Be helpful and friendly, but not artificially enthusiastic.`,
 
             MODELS: {
                 'i3-200m': {
@@ -732,7 +749,7 @@ Core principles:
                     name: 'i3-1b [LFM2]',
                     apiUrl: "https://flamef0x-lfm2.hf.space/gradio_api/call/chat_with_model",
                     type: 'chat',
-                    internalId: "LFM2-1.2B" // The string expected by the backend
+                    internalId: "LFM2-1.2B"
                 }
             },
             
@@ -740,46 +757,27 @@ Core principles:
             isGenerating: false,
             
             init: () => {
-                // Check if we have a current session to load
                 const currentId = SessionManager.getCurrentSessionId();
-                if (currentId) {
+                if (currentId && currentId !== 'temp_demo_session') {
                     SessionManager.loadSession(currentId);
                 } else {
-                    ChatUI.resetUI();
+                    SessionManager.createNewSession(); // Defaults to 200m
                 }
-                ChatUI.switchModel('i3-200m'); // Default visual set
-                SessionManager.renderSessionList();
             },
             
             switchModel: (modelKey) => {
-                const prevKey = ChatUI.currentModelKey;
                 ChatUI.currentModelKey = modelKey;
                 
-                // Visual Updates
+                // Visual Updates for Tabs (Check if tab exists first, since i3-1b tab is removed)
                 document.querySelectorAll('.model-tab').forEach(el => el.classList.remove('active'));
-                document.getElementById(`tab-${modelKey}`).classList.add('active');
+                const tab = document.getElementById(`tab-${modelKey}`);
+                if(tab) tab.classList.add('active');
                 
                 // Update Footer
                 document.getElementById('current-api-label').innerText = `FLAMEFOX-${modelKey.toUpperCase()}`;
                 
                 // Update Placeholder
                 document.getElementById('user-input').placeholder = `Enter command for ${ChatUI.MODELS[modelKey].name} ...`;
-
-                // WRAPPED MODEL NOTIFICATION & CONTEXT BAR
-                const contextBar = document.getElementById('system-context-bar');
-                
-                if (modelKey === 'i3-1b') {
-                    // Show the persistent bar
-                    contextBar.classList.remove('hidden');
-                    
-                    // Optional: Notification in chat (we can keep or remove this based on preference, keeping for clarity)
-                    if (!document.getElementById('chat-history').classList.contains('hidden') && prevKey !== 'i3-1b') {
-                         ChatUI.appendMessageToDOM('system', 'NOTICE: WRAPPED MODEL ACTIVE.\nSystem prompt injection enabled.');
-                    }
-                } else {
-                    // Hide the persistent bar
-                    contextBar.classList.add('hidden');
-                }
             },
 
             setInput: (text) => {
@@ -793,8 +791,6 @@ Core principles:
                 document.getElementById('welcome-section').classList.remove('hidden');
                 document.getElementById('chat-history').classList.add('hidden');
                 document.getElementById('chat-history').innerHTML = '';
-                
-                // Layout Logic: Show big banner, hide sidebar link
                 document.getElementById('sidebar-support').classList.add('hidden');
             },
 
@@ -811,8 +807,6 @@ Core principles:
                 // State: CHAT ACTIVE
                 welcome.classList.add('hidden');
                 historyEl.classList.remove('hidden');
-                
-                // Layout Logic: Show sidebar link
                 sidebarSupport.classList.remove('hidden');
 
                 historyEl.innerHTML = '';
@@ -834,7 +828,7 @@ Core principles:
                 
                 const iconLabel = role === 'user' ? 'USR' : (ChatUI.currentModelKey === 'i3-1b' ? 'LFM' : 'i3');
                 
-                // Icon - Added shrink-0 to prevent width squashing
+                // Icon
                 const icon = role === 'user' 
                     ? `<div class="w-8 h-8 shrink-0 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">${iconLabel}</div>`
                     : `<div class="w-8 h-8 shrink-0 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">${iconLabel}</div>`;
@@ -917,11 +911,10 @@ Core principles:
                     icon.setAttribute('data-lucide', 'arrow-right');
                     icon.classList.remove('fill-current');
                 }
-                lucide.createIcons(); // Refresh icons
+                lucide.createIcons();
             },
 
             sendMessage: async () => {
-                // If currently generating, Stop instead
                 if (ChatUI.isGenerating) {
                     ChatUI.stopGeneration();
                     return;
@@ -931,7 +924,7 @@ Core principles:
                 const prompt = inputEl.value.trim();
                 if (!prompt) return;
 
-                // 1. UI Updates (Trigger Chat State)
+                // 1. UI Updates
                 inputEl.value = '';
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
@@ -968,8 +961,7 @@ Core principles:
                     let requestBody;
 
                     if (currentModel.type === 'completion') {
-                        // --- API LOGIC FOR i3-200m (Old) ---
-                        // Prepend system prompt if it exists
+                        // --- API LOGIC FOR i3-200m ---
                         let finalPrompt = prompt;
                         if(settings.systemPrompt && settings.systemPrompt.trim() !== "") {
                             finalPrompt = `System: ${settings.systemPrompt}\n\nUser: ${prompt}`;
@@ -985,16 +977,10 @@ Core principles:
                         };
 
                     } else if (currentModel.type === 'chat') {
-                        // --- API LOGIC FOR i3-1b (LFM2 - New) ---
-                        // Needs History Array format: [{role:..., content:...}, ...]
-                        
-                        // 1. Get previous messages (excluding the one we just added to UI but not yet saved fully as 'processed')
-                        // We fetch history formatted for LFM2, but we remove the *current* user prompt from history because it goes in arg[0]
+                        // --- API LOGIC FOR i3-1b (LFM2) ---
                         const fullHistory = SessionManager.getHistoryForLFM2();
                         const historyBase = fullHistory.slice(0, -1); 
                         
-                        // 2. INJECT SYSTEM PROMPT
-                        // We prepend the system prompt to the history sent to the model
                         const historyToSend = [
                             { role: "system", content: ChatUI.I3_1B_PROMPT },
                             ...historyBase
@@ -1002,9 +988,9 @@ Core principles:
 
                         requestBody = {
                             data: [
-                                prompt, // The current message
-                                historyToSend, // Previous conversation (with system prompt injected)
-                                currentModel.internalId // "LFM2-1.2B"
+                                prompt, 
+                                historyToSend, 
+                                currentModel.internalId 
                             ]
                         };
                     }
@@ -1041,66 +1027,52 @@ Core principles:
                                     const data = JSON.parse(dataStr);
                                     
                                     if (Array.isArray(data) && data.length > 0) {
-                                        // Different parsing based on model?
                                         if (currentModel.type === 'completion') {
                                              accumulatedText = data[0]; 
                                         } else {
-                                            // --- ROBUST PARSING FOR LFM2/GRADIO 4 ---
                                             const payload = data[0];
-                                            
                                             if (typeof payload === 'string') {
                                                 accumulatedText = payload;
-                                            } else if (Array.isArray(payload)) {
-                                                if (payload.length > 0) {
-                                                    const lastItem = payload[payload.length - 1];
-                                                    
-                                                    // CASE 1: Standard Tuple format [[u, b]]
-                                                    if (Array.isArray(lastItem) && lastItem.length > 1) {
-                                                        accumulatedText = lastItem[1];
-                                                    } 
-                                                    // CASE 2: New Messages format [{role: 'assistant', content: '...'}]
-                                                    else if (typeof lastItem === 'object' && lastItem !== null && lastItem.content) {
-                                                        accumulatedText = lastItem.content;
-                                                    }
+                                            } else if (Array.isArray(payload) && payload.length > 0) {
+                                                const lastItem = payload[payload.length - 1];
+                                                if (Array.isArray(lastItem) && lastItem.length > 1) {
+                                                    accumulatedText = lastItem[1];
+                                                } 
+                                                else if (typeof lastItem === 'object' && lastItem !== null && lastItem.content) {
+                                                    accumulatedText = lastItem.content;
                                                 }
                                             }
                                         }
 
                                         // --- SAFETY: CLIENT-SIDE STOP TOKENS ---
-                                        // Prevent model from hallucinating User turns
                                         const stopSequences = ["\nUser:", "\nuser:", "User:", "user:"];
                                         let shouldStop = false;
                                         
                                         for (const stop of stopSequences) {
                                             if (accumulatedText.includes(stop)) {
-                                                // Cut off the text exactly at the stop token
                                                 accumulatedText = accumulatedText.split(stop)[0].trim();
                                                 shouldStop = true;
                                                 break;
                                             }
                                         }
                                         
-                                        // Update UI
                                         if(accumulatedText) {
                                             ChatUI.updateSystemMessage(loadingId, accumulatedText);
                                         }
 
-                                        // If we hit a stop token, force close the stream peacefully
                                         if (shouldStop) {
-                                            reader.cancel(); // Stop fetching
-                                            break; // Break the stream loop
+                                            reader.cancel(); 
+                                            break; 
                                         }
                                     }
                                 } catch (e) { /* Ignore control messages */ }
                             }
                         }
-                        // Break outer loop if stopped
                         if (accumulatedText.includes("\nUser:") || accumulatedText.includes("User:")) break;
                     }
 
                 } catch (error) {
                     if (error.name === 'AbortError') {
-                        // User manually stopped
                         accumulatedText += "\n[SYSTEM_INTERRUPT: GENERATION_HALTED_BY_USER]";
                         ChatUI.updateSystemMessage(loadingId, accumulatedText);
                     } else {
@@ -1112,7 +1084,6 @@ Core principles:
                     const msgEl = document.getElementById(loadingId);
                     if(msgEl) {
                          const contentEl = msgEl.querySelector('.message-content');
-                         // Final render with full HTML safety
                          const safeFinal = accumulatedText
                             .replace(/&/g, "&amp;")
                             .replace(/</g, "&lt;")
@@ -1121,7 +1092,6 @@ Core principles:
                          contentEl.innerHTML = safeFinal;
                     }
 
-                    // Save accumulated text
                     SessionManager.appendMessageToCurrent('system', accumulatedText, loadingId);
                     
                     const duration = Date.now() - startTime;
