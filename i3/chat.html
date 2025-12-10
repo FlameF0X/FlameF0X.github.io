@@ -329,7 +329,7 @@
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             UI VERSION: 2.1 // TRANSIENT-DEMO
+             UI VERSION: 2.2 // WORD-WRAP-FIX
         </div>
     </div>
 
@@ -729,7 +729,7 @@
         const ChatUI = {
             currentModelKey: 'i3-200m', // Default
             
-            I3_1B_PROMPT: `You are i3, an open-source language model designed by B. Daniel (aka FlameF0X or Daniel Fox on HuggingFace) for natural, human-like conversation.
+            I3_1B_PROMPT: `You are i3, an open-source language model designed by B. Daniel (aka FlameF0X or Daniel Fox on HuggingFace) based on the i3 architecture for natural, human-like conversation.
 
 Core principles:
 - Match the user's energy and tone. If they're casual, be casual.
@@ -854,7 +854,7 @@ Core principles:
                 div.innerHTML = `
                     <div class="flex items-start gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
-                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed break-all">
+                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed break-words">
                             <div class="message-content">${content}</div>
                         </div>
                     </div>
