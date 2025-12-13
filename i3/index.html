@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlameF0X | i3: a SOTA architecture</title>
+    <title>FlameF0X | i3 & Stable-Lime</title>
     
     <!-- Tailwind & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,6 +28,7 @@
                         accent: '#ea580c', // Vibrant orange
                         'accent-dim': '#431407',
                         border: '#44403c',
+                        lime: '#84cc16' // Stable-Lime Green
                     },
                     backgroundImage: {
                         'grid-pattern': "linear-gradient(rgba(231, 229, 228, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(231, 229, 228, 0.05) 1px, transparent 1px)",
@@ -82,6 +83,11 @@
         .bracket-box::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
         .bracket-box::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
         
+        /* Special Lime Bracket */
+        .bracket-box-lime::before, .bracket-box-lime::after {
+            border-color: theme('colors.lime');
+        }
+
         /* Glitch Text Effect on Hover */
         .glitch-hover:hover {
             animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
@@ -125,13 +131,13 @@
     <nav class="fixed top-0 w-full z-40 bg-bg/90 backdrop-blur-md border-b border-border transition-transform duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="font-black tracking-tighter text-xl">i3 - a Daniel Fox product</span>
+                <span class="font-black tracking-tighter text-xl">i3 // Research</span>
             </div>
             <div class="hidden md:flex items-center gap-8 font-mono text-xs font-bold uppercase tracking-widest text-stone-400">
-                <a href="#specs" class="hover:text-accent transition-colors">Specs</a>
-                <a href="#architecture" class="hover:text-accent transition-colors">Architecture</a>
+                <a href="#i3-arch" class="hover:text-accent transition-colors">i3-Core</a>
+                <a href="#stable-lime" class="hover:text-lime transition-colors">Stable-Lime</a>
                 <a href="#benchmarks" class="hover:text-accent transition-colors">Telemetry</a>
-                <a href="https://flamefox.gattodev.tech/i3/chat.html" class="text-accent hover:text-white transition-colors flex items-center gap-2">
+                <a href="chat.html" class="text-accent hover:text-white transition-colors flex items-center gap-2">
                     [Launch_Interface] <i data-lucide="external-link" class="w-3 h-3"></i>
                 </a>
             </div>
@@ -152,21 +158,21 @@
                     <span class="text-accent glitch-hover cursor-default scramble">Hybrid</span>
                 </h1>
                 
-                <!-- Updated Philosophy Text -->
+                <!-- Philosophy Text -->
                 <div class="opacity-0 animate-fade-in-up" style="animation-delay: 0.2s;">
                     <p class="text-xl text-white font-bold mb-2">
                         "Chase the SOTA pipeline, not the MMLU slop."
                     </p>
                     <p class="text-lg text-stone-400 max-w-lg leading-relaxed font-light">
-                        i3 is a proof of concept for democratizing AI. <strong class="text-white">Built solo by a 17-year-old researcher</strong>, it demonstrates that efficient architectures matter more than massive compute clusters.
+                        i3 is a proof of concept for democratizing AI. Built solo by a 17-year-old researcher, demonstrating that efficient architectures matter more than massive compute clusters.
                     </p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up" style="animation-delay: 0.3s;">
-                    <a href="https://flamefox.gattodev.tech/i3/chat.html" class="px-8 py-4 bg-accent text-bg font-bold font-mono uppercase tracking-wider hover:bg-white hover:text-black transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <a href="chat.html" class="px-8 py-4 bg-accent text-bg font-bold font-mono uppercase tracking-wider hover:bg-white hover:text-black transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
                         <i data-lucide="terminal" class="w-4 h-4"></i> Initialize Chat
                     </a>
-                    <a href="https://huggingface.co/FlameF0X" class="px-8 py-4 border border-stone-700 text-stone-300 font-bold font-mono uppercase tracking-wider hover:border-accent hover:text-accent transition-all flex items-center justify-center gap-2">
+                    <a href="https://huggingface.co/FlameF0X" class="px-8 py-4 border border-stone-700 text-stone-300 font-bold font-mono uppercase tracking-wider hover:border-lime hover:text-lime transition-all flex items-center justify-center gap-2">
                         <i data-lucide="github" class="w-4 h-4"></i> HuggingFace
                     </a>
                 </div>
@@ -210,25 +216,25 @@
                 </div>
                 <!-- Card 3 -->
                 <div class="bracket-box p-6 bg-surface/50 border border-stone-800/50 hover:bg-surface hover:border-stone-700 transition-colors group reveal" style="transition-delay: 0.2s;">
-                    <p class="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-1">Layers</p>
-                    <h3 class="text-3xl font-black text-white group-hover:text-accent transition-colors">16 <span class="text-sm font-normal text-stone-500">Total</span></h3>
+                    <p class="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-1">Architecture</p>
+                    <h3 class="text-3xl font-black text-white group-hover:text-accent transition-colors">RWKV<span class="text-sm font-normal text-stone-500">v4</span></h3>
                 </div>
-                <!-- Card 4 -->
-                <div class="bracket-box p-6 bg-surface/50 border border-stone-800/50 hover:bg-surface hover:border-stone-700 transition-colors group reveal" style="transition-delay: 0.3s;">
-                    <p class="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vocab</p>
-                    <h3 class="text-3xl font-black text-white group-hover:text-accent transition-colors">32k</h3>
+                <!-- Card 4 (Stable-Lime) -->
+                <div class="bracket-box bracket-box-lime p-6 bg-surface/50 border border-stone-800/50 hover:bg-surface hover:border-lime/50 transition-colors group reveal" style="transition-delay: 0.3s;">
+                    <p class="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-1">Vision</p>
+                    <h3 class="text-3xl font-black text-lime group-hover:text-white transition-colors">S-LIME</h3>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Architecture Section -->
-    <section id="architecture" class="py-24 max-w-7xl mx-auto px-6">
+    <!-- i3 Architecture Section -->
+    <section id="i3-arch" class="py-24 max-w-7xl mx-auto px-6">
         <div class="flex flex-col md:flex-row gap-16">
             <!-- Left: Description -->
             <div class="md:w-1/2 space-y-8 reveal">
                 <div>
-                    <h2 class="text-4xl font-black uppercase tracking-tighter mb-4">Architecture <span class="text-accent">Breakdown</span></h2>
+                    <h2 class="text-4xl font-black uppercase tracking-tighter mb-4">i3 Architecture <span class="text-stone-500">// TEXT</span></h2>
                     <p class="text-stone-400 leading-relaxed">
                         The i3-200M (RWKV-Pro) is the result of "Chasing the Pipeline". By prioritizing training throughput on limited VRAM over raw benchmark chasing, we created a highly efficient hybrid stack.
                     </p>
@@ -300,6 +306,70 @@
         </div>
     </section>
 
+    <!-- NEW: Stable-Lime Dedicated Section -->
+    <section id="stable-lime" class="py-24 bg-stone-900/50 border-y border-lime/10 relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#84cc16 1px, transparent 1px); background-size: 30px 30px;"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+             <div class="flex flex-col md:flex-row-reverse gap-16">
+                <!-- Text Side -->
+                <div class="md:w-1/2 space-y-8 reveal">
+                    <div>
+                        <div class="inline-block px-2 py-1 bg-lime/10 text-lime font-mono text-[10px] font-bold uppercase tracking-widest mb-4 border border-lime/20">New Integration</div>
+                        <h2 class="text-4xl font-black uppercase tracking-tighter mb-4 text-white">Stable-Lime <span class="text-lime">v1.1</span></h2>
+                        <p class="text-stone-400 leading-relaxed">
+                            A specialized <strong class="text-lime">Unconditional U-Net</strong> designed for high-fidelity citrus synthesis. Unlike massive text-to-image models that require H100s, Stable-Lime is optimized for a singular, perfect purpose: generating limes from the latent void.
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 border border-lime/30 bg-bg hover:bg-lime/5 transition-colors group">
+                            <i data-lucide="cpu" class="w-6 h-6 text-lime mb-2 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="font-bold text-white text-sm uppercase">CPU Native</h4>
+                            <p class="text-xs text-stone-500 mt-1">Trainable on standard CPU threads without discrete GPU requirements. Democratizing generative art.</p>
+                        </div>
+                        <div class="p-4 border border-lime/30 bg-bg hover:bg-lime/5 transition-colors group">
+                            <i data-lucide="layers" class="w-6 h-6 text-lime mb-2 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="font-bold text-white text-sm uppercase">U-Net Core</h4>
+                            <p class="text-xs text-stone-500 mt-1">Pure unconditional latent diffusion process with 100 inference steps for maximum detail.</p>
+                        </div>
+                    </div>
+
+                    <a href="chat.html" class="inline-flex items-center gap-2 text-lime font-mono font-bold text-sm uppercase hover:text-white transition-colors">
+                        Launch Generator <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+
+                <!-- Visual Side -->
+                <div class="md:w-1/2 flex items-center justify-center reveal">
+                    <!-- Custom Lime Diagram -->
+                    <div class="w-full max-w-sm border border-lime/30 p-6 bg-bg relative">
+                        <div class="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-lime"></div>
+                        <div class="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-lime"></div>
+                        
+                        <div class="flex flex-col gap-2 font-mono text-center text-xs">
+                            <div class="p-2 border border-stone-700 text-stone-500">Gaussian Noise</div>
+                            <div class="h-4 w-px bg-lime/50 mx-auto"></div>
+                            
+                            <div class="p-4 border border-lime bg-lime/10 text-lime font-bold">
+                                UNCONDITIONAL U-NET
+                                <div class="text-[9px] font-normal opacity-70 mt-1">Downsample -> Bottleneck -> Upsample</div>
+                            </div>
+                            
+                            <div class="h-4 w-px bg-lime/50 mx-auto"></div>
+                            <div class="p-2 border border-stone-700 text-white bg-stone-900">128x128 Latents</div>
+                            <div class="h-4 w-px bg-lime/50 mx-auto"></div>
+                            <div class="p-2 border border-stone-700 text-stone-500">VAE Decoder</div>
+                            <div class="h-4 w-px bg-lime/50 mx-auto"></div>
+                            <div class="p-3 border border-white text-white font-bold bg-lime/20">Generated Image</div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </section>
+
     <!-- Benchmarks Charts Section -->
     <section id="benchmarks" class="py-20 bg-surface border-y border-stone-800">
         <div class="max-w-7xl mx-auto px-6">
@@ -317,16 +387,6 @@
                 <div class="space-y-6 reveal">
                     <h3 class="font-mono text-sm font-bold text-stone-300 uppercase border-b border-stone-800 pb-2">Model Scaling (Parameters)</h3>
                     <div class="space-y-4">
-                        <!-- i3-22M -->
-                        <div>
-                            <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
-                                <span>i3-22M</span>
-                                <span>22.6M</span>
-                            </div>
-                            <div class="h-8 bg-stone-900 border border-stone-800 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="3%"></div>
-                            </div>
-                        </div>
                         <!-- i3-80M -->
                         <div>
                             <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
@@ -340,90 +400,38 @@
                         <!-- i3-200M -->
                         <div>
                             <div class="flex justify-between text-xs font-mono text-accent mb-1">
-                                <span class="font-bold">i3-200M [RELEASED]</span>
+                                <span class="font-bold">i3-200M</span>
                                 <span class="font-bold">169.8M</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-accent/30 w-full relative group">
                                 <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors" data-width="17%"></div>
                             </div>
                         </div>
-                        <!-- i3-1B -->
+                        <!-- Stable-Lime -->
                         <div>
-                            <div class="flex justify-between text-xs font-mono text-stone-300 mb-1">
-                                <span class="font-bold animate-pulse text-stone-300">i3-1B [TRAINING]</span>
-                                <span class="font-bold">~1.0B</span>
+                            <div class="flex justify-between text-xs font-mono text-lime mb-1">
+                                <span class="font-bold">Stable-Lime v1.1</span>
+                                <span class="font-bold">~100M (Est)</span>
                             </div>
-                            <div class="h-8 bg-stone-900 border border-stone-700 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors dashed-border opacity-80" data-width="100%"></div>
+                            <div class="h-8 bg-stone-900 border border-lime/30 w-full relative group">
+                                <div class="chart-bar h-full bg-lime/80 group-hover:bg-lime transition-colors" data-width="10%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chart 2: Perplexity -->
+                <!-- Chart 2: Resource Intensity -->
                 <div class="space-y-6 reveal" style="transition-delay: 0.2s;">
                     <div class="flex justify-between border-b border-stone-800 pb-2">
-                        <h3 class="font-mono text-sm font-bold text-stone-300 uppercase">Perplexity Reduction</h3>
-                        <span class="text-[10px] font-mono text-stone-500 uppercase self-end">LOWER IS BETTER</span>
+                        <h3 class="font-mono text-sm font-bold text-stone-300 uppercase">Compute Intensity</h3>
                     </div>
-                    
-                    <div class="space-y-4">
-                        <!-- i3-80M (Worst baseline for viz) -->
-                        <div>
-                            <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
-                                <span>i3-80M</span>
-                                <span>10.0</span>
-                            </div>
-                            <div class="h-8 bg-stone-900 border border-stone-800 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-red-900/50 transition-colors" data-width="100%"></div>
-                            </div>
-                        </div>
-
-                         <!-- i3-22M -->
-                         <div>
-                            <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
-                                <span>i3-22M</span>
-                                <span>9.7</span>
-                            </div>
-                            <div class="h-8 bg-stone-900 border border-stone-800 w-full relative group">
-                                <div class="chart-bar h-full bg-stone-700 group-hover:bg-stone-600 transition-colors" data-width="97%"></div>
-                            </div>
-                        </div>
-
-                        <!-- i3-200M -->
-                        <div>
-                            <div class="flex justify-between text-xs font-mono text-accent mb-1">
-                                <span class="font-bold">i3-200M [CURRENT]</span>
-                                <span class="font-bold">5.2</span>
-                            </div>
-                            <div class="h-8 bg-stone-900 border border-accent/30 w-full relative group">
-                                <div class="chart-bar h-full bg-accent group-hover:bg-orange-400 transition-colors" data-width="52%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- New Section: Resource Intensity Comparison -->
-                <div class="col-span-1 lg:col-span-2 mt-12 reveal">
-                    <h3 class="font-mono text-sm font-bold text-stone-300 uppercase border-b border-stone-800 pb-2 mb-6">Compute Intensity Comparison</h3>
                     
                     <div class="space-y-6">
                          <!-- TinyLlama -->
                          <div>
                             <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
                                 <span class="font-bold text-stone-400">TinyLlama (1.1B)</span>
-                                <span>16x A100s (90 Days)</span>
-                            </div>
-                            <div class="h-6 bg-stone-900 border border-stone-800 w-full relative group overflow-hidden">
-                                <div class="chart-bar h-full bg-stone-800" data-width="100%"></div>
-                            </div>
-                        </div>
-
-                        <!-- GPT-2 -->
-                        <div>
-                            <div class="flex justify-between text-xs font-mono text-stone-500 mb-1">
-                                <span class="font-bold text-stone-400">GPT-2 (1.5B)</span>
-                                <span>256x TPU v3 Cores</span>
+                                <span>16x A100s</span>
                             </div>
                             <div class="h-6 bg-stone-900 border border-stone-800 w-full relative group overflow-hidden">
                                 <div class="chart-bar h-full bg-stone-800" data-width="100%"></div>
@@ -434,7 +442,7 @@
                         <div class="mt-4">
                             <div class="flex justify-between text-xs font-mono text-stone-400 mb-1 items-end">
                                 <span class="font-bold text-lg">i3-200M</span>
-                                <span class="font-bold">1x P100 (~2 Hours)</span>
+                                <span class="font-bold">1x P100</span>
                             </div>
                             <div class="h-8 bg-stone-900 border border-stone-700 w-full relative group">
                                 <div class="chart-bar h-full bg-stone-600" data-width="1%"></div>
@@ -444,16 +452,16 @@
                             </div>
                         </div>
 
-                        <!-- i3-1B -->
+                        <!-- Stable-Lime Efficiency -->
                         <div class="mt-2">
-                            <div class="flex justify-between text-xs font-mono text-accent mb-1 items-end">
-                                <span class="font-bold text-lg">i3-1B [TRAINING]</span>
-                                <span class="font-bold">1x RTX 5060 Ti (5 Hours)</span>
+                            <div class="flex justify-between text-xs font-mono text-lime mb-1 items-end">
+                                <span class="font-bold text-lg">Stable-Lime</span>
+                                <span class="font-bold">CPU-Capable</span>
                             </div>
-                            <div class="h-8 bg-stone-900 border border-accent/50 w-full relative group">
-                                <div class="chart-bar h-full bg-accent" data-width="1.5%"></div>
-                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-white whitespace-nowrap ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    Ultra-Efficient 1B
+                            <div class="h-8 bg-stone-900 border border-lime/50 w-full relative group">
+                                <div class="chart-bar h-full bg-lime" data-width="0.5%"></div>
+                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-bg font-bold whitespace-nowrap ml-2 opacity-100 transition-opacity">
+                                    EXTREME EFFICIENCY
                                 </span>
                             </div>
                         </div>
@@ -461,39 +469,10 @@
                 </div>
 
             </div>
-
-            <!-- Training Data Info -->
-            <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 reveal">
-                <div>
-                    <h3 class="font-mono text-xs uppercase text-accent mb-4 tracking-widest">Research Context</h3>
-                    <div class="flex items-center gap-4 text-stone-400 font-mono text-sm">
-                        <div class="flex items-center gap-2 text-white">
-                            <i data-lucide="user" class="w-4 h-4 text-accent"></i>
-                            Solo Dev (17yo)
-                        </div>
-                        <div class="h-4 w-px bg-stone-700"></div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="cpu" class="w-4 h-4"></i>
-                            NVIDIA P100 (16GB)
-                        </div>
-                        <div class="h-4 w-px bg-stone-700"></div>
-                        <div>Time: ~2 hrs</div>
-                    </div>
-                     <div class="mt-4 flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-stone-800 border border-stone-700 text-xs font-mono text-stone-300 hover:border-accent hover:text-white transition-colors cursor-default">TinyStories</span>
-                        <span class="px-3 py-1 bg-stone-800 border border-stone-700 text-xs font-mono text-stone-300 hover:border-accent hover:text-white transition-colors cursor-default">TinyChat</span>
-                        <span class="px-3 py-1 bg-stone-800 border border-stone-700 text-xs font-mono text-stone-300 hover:border-accent hover:text-white transition-colors cursor-default">Wikitext</span>
-                    </div>
-                </div>
-                <div class="text-right flex flex-col justify-end">
-                     <p class="font-mono text-xs text-stone-500 uppercase">INDEPENDENT RESEARCH</p>
-                     <p class="text-3xl font-black text-white">ONE <span class="text-stone-600">VS</span> LABS</p>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- Citation / Footer -->
+    <!-- Footer -->
     <footer class="bg-bg border-t border-stone-800 py-16">
         <div class="max-w-4xl mx-auto px-6 text-center reveal">
             
@@ -507,7 +486,6 @@
                 <i data-lucide="coffee" class="w-4 h-4"></i>
             </a>
 
-            <!-- Citation Block -->
             <div class="text-left bg-stone-900 border border-stone-800 p-6 relative group">
                 <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onclick="navigator.clipboard.writeText(document.getElementById('bibtex').innerText)" class="text-xs font-mono text-accent hover:text-white uppercase">[Copy_BibTex]</button>
@@ -526,7 +504,7 @@
                 <div class="flex gap-4 mt-4 md:mt-0">
                     <a href="#" class="hover:text-accent">Twitter</a>
                     <a href="#" class="hover:text-accent">Github</a>
-                    <a href="#" class="hover:text-accent">HuggingFace</a>
+                    <a href="https://huggingface.co/FlameF0X" class="hover:text-accent">HuggingFace</a>
                 </div>
             </div>
         </div>
@@ -578,10 +556,11 @@
         const logs = [
             "Initializing i3 kernel...",
             "Loading Hybrid_Stack [RWKV v4]...",
-            "Allocating weights: 169.85M parameters...",
+            "Checking Stable-Lime v1.1 connection...",
             "Mounting vocab: 32,000 tokens...",
             "Checking attention heads... [12/12] OK",
             "Loading context window... 256 tokens OK",
+            "Visual Module [Stable-Lime]... ONLINE",
             "System Ready.",
             "Waiting for user input..."
         ];
@@ -592,6 +571,10 @@
             if (lineIndex < logs.length) {
                 const line = document.createElement('div');
                 line.className = 'text-stone-400';
+                
+                if (logs[lineIndex].includes("Stable-Lime")) {
+                    line.className = 'text-lime font-bold';
+                }
                 
                 if (lineIndex === logs.length - 1) {
                     line.className = 'text-accent font-bold mt-2';
