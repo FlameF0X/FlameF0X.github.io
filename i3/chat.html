@@ -1096,7 +1096,7 @@ Core principles:
                 document.getElementById('chat-history').classList.remove('hidden');
                 document.getElementById('sidebar-support').classList.remove('hidden');
 
-                const displayPrompt = (!prompt && ChatUI.currentModelKey === 'stable-lime') ? "[STABLE_LIME]" : prompt;
+                const displayPrompt = (!prompt && ChatUI.currentModelKey === 'stable-lime') ? "[SUMMON_LIME]" : prompt;
                 const userMsgId = ChatUI.appendMessageToDOM('user', displayPrompt);
                 SessionManager.appendMessageToCurrent('user', displayPrompt, userMsgId);
                 
