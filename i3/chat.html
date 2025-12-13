@@ -12,6 +12,13 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- GRADIO CLIENT IMPORT (Module) -->
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+        // Expose Client to the global scope so our main script can use it
+        window.GradioClient = Client;
+    </script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -28,6 +35,7 @@
                         accent: '#ea580c', // Vibrant orange
                         'accent-dim': '#431407',
                         border: '#44403c',
+                        lime: '#84cc16' // Added for Stable-Lime
                     }
                 }
             }
@@ -124,6 +132,61 @@
         .model-tab:hover:not(.active) {
             @apply text-stone-400 bg-stone-900;
         }
+
+        /* --- STABLE-LIME LOADERS --- */
+        .lime-loader {
+            --bg-color: #0c0a09; /* Matches theme('colors.bg') */
+            color: #78716c; /* Stone-500 */
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            height: 40px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lime-words {
+            overflow: hidden;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lime-words::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                var(--bg-color) 10%, 
+                transparent 30%, 
+                transparent 70%, 
+                var(--bg-color) 90%
+            );
+            z-index: 20;
+        }
+
+        .lime-word {
+            display: block;
+            height: 100%;
+            padding-left: 0;
+            color: #84cc16; /* Lime-500 */
+            animation: spin_lime 4s infinite;
+            line-height: 40px; /* Center vertically in the loader height */
+        }
+
+        @keyframes spin_lime {
+            10% { transform: translateY(-102%); }
+            25% { transform: translateY(-100%); }
+            35% { transform: translateY(-202%); }
+            50% { transform: translateY(-200%); }
+            60% { transform: translateY(-302%); }
+            75% { transform: translateY(-300%); }
+            85% { transform: translateY(-402%); }
+            100% { transform: translateY(-400%); }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col antialiased selection:bg-accent selection:text-white overflow-hidden">
@@ -157,6 +220,13 @@
                 <button onclick="SessionManager.createTemporaryI3Session()" class="w-full flex items-center gap-3 px-4 py-2 bg-transparent hover:bg-stone-800/50 border border-dashed border-stone-800 hover:border-accent/50 transition-all group whitespace-nowrap">
                     <i data-lucide="flask-conical" class="w-3 h-3 text-stone-600 group-hover:text-orange-400 shrink-0"></i>
                     <span class="sidebar-text font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500 group-hover:text-orange-300">Try i3-1b (Demo)</span>
+                </button>
+
+                <!-- NEW: Stable-Lime Session -->
+                <!-- FIXED: Used border-lime/50 instead of border-lime-500/50 to match custom config -->
+                <button onclick="SessionManager.createTemporaryLimeSession()" class="w-full flex items-center gap-3 px-4 py-2 bg-transparent hover:bg-stone-800/50 border border-dashed border-stone-800 hover:border-lime/50 transition-all group whitespace-nowrap">
+                    <i data-lucide="citrus" class="w-3 h-3 text-stone-600 group-hover:text-lime shrink-0"></i>
+                    <span class="sidebar-text font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500 group-hover:text-lime">Stable-Lime (v1)</span>
                 </button>
             </div>
 
@@ -278,11 +348,11 @@
                         <div id="tab-i3-200m" onclick="ChatUI.switchModel('i3-200m')" class="model-tab active">
                             i3-200m
                         </div>
-                        <!-- Removed i3-1b Tab -->
+                        <!-- Removed i3-1b Tab (sidebar only) -->
                     </div>
 
                     <!-- Text Area Container -->
-                    <div class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)] z-10">
+                    <div id="text-input-area" class="w-full bg-surface raw-border raw-border-focus p-4 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] hover:shadow-[0_0_15px_-3px_rgba(234,88,12,0.1)] z-10">
                         <textarea 
                             id="user-input"
                             class="w-full bg-transparent border-none focus:ring-0 text-stone-200 placeholder-stone-600 resize-none font-mono text-sm md:text-base h-12 md:h-14 py-2 leading-relaxed" 
@@ -307,6 +377,29 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- LIME GENERATE BUTTON (Hidden by default) -->
+                    <div id="lime-input-area" class="w-full hidden bg-surface raw-border border-lime/30 transition-all duration-300 shadow-[0_0_20px_-10px_rgba(0,0,0,1)] z-10 flex flex-col items-stretch min-h-[120px]">
+                        <div class="flex-1 p-2">
+                            <button onclick="ChatUI.sendMessage()" class="w-full h-full py-4 bg-lime-900/20 border border-lime/50 hover:bg-lime hover:text-bg text-lime font-mono font-bold tracking-[0.2em] text-lg uppercase transition-all flex items-center justify-center gap-3 group relative overflow-hidden">
+                                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMTMyLCAyMDQsIDIyLCAwLjIpIi8+PC9zdmc+')] opacity-20"></div>
+                                <span class="relative z-10">SUMMON LIME</span>
+                                <i data-lucide="zap" class="w-5 h-5 group-hover:scale-125 transition-transform relative z-10"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- NEW: Tech Decor Footer for Stable-Lime -->
+                        <div class="h-8 bg-stone-900 border-t border-lime/20 flex items-center justify-between px-4 text-[9px] font-mono text-lime/60 uppercase tracking-wider">
+                            <div class="flex gap-4">
+                                <span><i data-lucide="cpu" class="w-3 h-3 inline mr-1 opacity-50"></i>LATENT_DIM: 512</span>
+                                <span><i data-lucide="activity" class="w-3 h-3 inline mr-1 opacity-50"></i>STEPS: 100</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="animate-pulse">● MODEL_READY</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -329,7 +422,7 @@
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             UI VERSION: 2.2 // WORD-WRAP-FIX
+             UI VERSION: 3.0 // STABLE-LIME
         </div>
     </div>
 
@@ -510,7 +603,7 @@
             STORAGE_KEY: 'flamefox_sessions_v1',
             CURRENT_ID_KEY: 'flamefox_current_id',
             
-            // Temporary storage for i3-1b demo sessions (RAM only, no localStorage)
+            // Temporary storage for demo sessions (RAM only, no localStorage)
             tempSession: null,
 
             getSessions: () => {
@@ -528,7 +621,7 @@
 
             saveSession: (session) => {
                 // GUARD: Never save temp sessions to local storage
-                if (session.id === 'temp_demo_session') return;
+                if (session.id === 'temp_demo_session' || session.id === 'temp_lime_session') return;
 
                 const sessions = SessionManager.getSessions();
                 const existingIndex = sessions.findIndex(s => s.id === session.id);
@@ -553,7 +646,6 @@
 
             // Temporary "Demo" Session (Transient, i3-1b)
             createTemporaryI3Session: () => {
-                // Define the temp session structure in memory
                 SessionManager.tempSession = {
                     id: 'temp_demo_session',
                     title: 'i3-1b [DEMO_MODE]',
@@ -561,15 +653,24 @@
                     messages: [],
                     modelId: 'i3-1b'
                 };
-                
-                // Set ID to specific string, but don't rely on it for persistence
                 SessionManager.setCurrentSessionId('temp_demo_session');
-                
-                // UI Reset
                 ChatUI.resetUI();
                 ChatUI.switchModel('i3-1b');
-                
-                // Render list will unselect other sessions, but won't show this one
+                SessionManager.renderSessionList();
+            },
+
+            // NEW: Temporary Stable-Lime Session
+            createTemporaryLimeSession: () => {
+                SessionManager.tempSession = {
+                    id: 'temp_lime_session',
+                    title: 'Stable-Lime [GEN]',
+                    timestamp: Date.now(),
+                    messages: [],
+                    modelId: 'stable-lime'
+                };
+                SessionManager.setCurrentSessionId('temp_lime_session');
+                ChatUI.resetUI();
+                ChatUI.switchModel('stable-lime');
                 SessionManager.renderSessionList();
             },
 
@@ -610,8 +711,8 @@
             appendMessageToCurrent: (role, text, existingId = null) => {
                 let currentId = SessionManager.getCurrentSessionId();
                 
-                // --- HANDLE TEMPORARY SESSION ---
-                if (currentId === 'temp_demo_session') {
+                // --- HANDLE TEMPORARY SESSIONS ---
+                if (currentId === 'temp_demo_session' || currentId === 'temp_lime_session') {
                     const msgId = existingId || ('msg-' + Date.now() + Math.random().toString(16).slice(2));
                     if (SessionManager.tempSession) {
                         // Update existing message if editing/streaming
@@ -621,7 +722,6 @@
                         }
                         SessionManager.tempSession.messages.push({ id: msgId, role, text, timestamp: Date.now() });
                     }
-                    // Do NOT call saveSession
                     return msgId;
                 }
 
@@ -661,7 +761,7 @@
                 let session;
 
                 // Handle Temp
-                if (currentId === 'temp_demo_session') {
+                if (currentId === 'temp_demo_session' || currentId === 'temp_lime_session') {
                     session = SessionManager.tempSession;
                 } else {
                     const sessions = SessionManager.getSessions();
@@ -702,7 +802,7 @@
                 listEl.innerHTML = sessions.map(s => {
                     const isActive = s.id === currentId;
                     const activeClass = isActive ? 'text-white border-l-accent bg-stone-800' : 'text-stone-400 border-l-transparent hover:text-white hover:border-stone-600 hover:bg-stone-800/50';
-                    const modelTag = s.modelId === 'i3-1b' ? '[1B]' : '';
+                    const modelTag = s.modelId === 'i3-1b' ? '[1B]' : (s.modelId === 'stable-lime' ? '[LIME]' : '');
                     
                     return `
                         <div class="group flex items-center w-full border-l-2 transition-all font-mono ${activeClass} cursor-pointer">
@@ -742,23 +842,35 @@ Core principles:
             MODELS: {
                 'i3-200m': {
                     name: 'i3-200m',
-                    apiUrl: "https://flamef0x-i3-200m.hf.space/gradio_api/call/predict",
+                    // API Endpoint ID for Gradio Client
+                    apiId: "FlameF0X/i3-200m",
+                    // The function name in the Gradio App
+                    fn_name: "/predict",
                     type: 'completion'
                 },
                 'i3-1b': {
                     name: 'i3-1b [LFM2]',
-                    apiUrl: "https://flamef0x-lfm2.hf.space/gradio_api/call/chat_with_model",
+                    apiId: "FlameF0X/lfm2",
+                    fn_name: "/chat_with_model",
                     type: 'chat',
                     internalId: "LFM2-1.2B"
+                },
+                'stable-lime': {
+                    name: 'Stable-Lime [IMG]',
+                    apiId: "FlameF0X/Stable-Lime",
+                    fn_name: "/generate_lime", 
+                    type: 'image_generation'
                 }
             },
             
             abortController: null,
             isGenerating: false,
+            // Cache for Gradio Client instances
+            clients: {},
             
             init: () => {
                 const currentId = SessionManager.getCurrentSessionId();
-                if (currentId && currentId !== 'temp_demo_session') {
+                if (currentId && (currentId !== 'temp_demo_session' && currentId !== 'temp_lime_session')) {
                     SessionManager.loadSession(currentId);
                 } else {
                     SessionManager.createNewSession(); // Defaults to 200m
@@ -768,11 +880,23 @@ Core principles:
             switchModel: (modelKey) => {
                 ChatUI.currentModelKey = modelKey;
                 
-                // Visual Updates for Tabs (Check if tab exists first, since i3-1b tab is removed)
+                // Visual Updates for Tabs
                 document.querySelectorAll('.model-tab').forEach(el => el.classList.remove('active'));
                 const tab = document.getElementById(`tab-${modelKey}`);
                 if(tab) tab.classList.add('active');
                 
+                // Toggle Input Areas based on model
+                const textArea = document.getElementById('text-input-area');
+                const limeBtn = document.getElementById('lime-input-area');
+                
+                if (modelKey === 'stable-lime') {
+                    textArea.classList.add('hidden');
+                    limeBtn.classList.remove('hidden');
+                } else {
+                    textArea.classList.remove('hidden');
+                    limeBtn.classList.add('hidden');
+                }
+
                 // Update Footer
                 document.getElementById('current-api-label').innerText = `FLAMEFOX-${modelKey.toUpperCase()}`;
                 
@@ -826,36 +950,67 @@ Core principles:
                 div.id = msgId;
                 div.className = `flex w-full group relative transition-opacity duration-300 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
                 
-                const iconLabel = role === 'user' ? 'USR' : (ChatUI.currentModelKey === 'i3-1b' ? 'LFM' : 'i3');
+                // Determine Icon Label
+                let iconLabel = 'i3';
+                if (role === 'user') iconLabel = 'USR';
+                else if (ChatUI.currentModelKey === 'i3-1b') iconLabel = 'LFM';
+                else if (ChatUI.currentModelKey === 'stable-lime') iconLabel = 'LIME';
                 
                 // Icon
                 const icon = role === 'user' 
                     ? `<div class="w-8 h-8 shrink-0 bg-stone-800 flex items-center justify-center text-xs font-mono text-stone-400 select-none">${iconLabel}</div>`
-                    : `<div class="w-8 h-8 shrink-0 bg-accent flex items-center justify-center text-xs font-mono text-bg font-bold select-none">${iconLabel}</div>`;
+                    : `<div class="w-8 h-8 shrink-0 ${ChatUI.currentModelKey === 'stable-lime' ? 'bg-lime-600' : 'bg-accent'} flex items-center justify-center text-xs font-mono text-bg font-bold select-none">${iconLabel}</div>`;
 
                 // Bubble
                 const bubbleClass = role === 'user'
                     ? "bg-stone-800 text-stone-200 border border-stone-700 overflow-hidden"
-                    : "bg-transparent text-accent border border-accent/50 relative overflow-hidden";
+                    : `bg-transparent ${ChatUI.currentModelKey === 'stable-lime' ? 'text-lime-400 border-lime-500/50' : 'text-accent border-accent/50'} border relative overflow-hidden`;
                 
                 // Content
-                const safeText = text
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;")
-                    .replace(/\n/g, '<br>');
-
-                const content = isLoading 
-                    ? `<span class="animate-pulse">${safeText}</span>` 
-                    : safeText;
+                // Check if text looks like an image url we generated
+                const isImage = text.includes('https://flamef0x-stable-lime.hf.space/file=') || text.includes('/file=');
                 
+                let content;
+                
+                if (isImage) {
+                    content = `
+                        <div class="relative w-full max-w-[600px]"> <!-- Further Increased size -->
+                            <img src="${text}" 
+                                 class="rounded w-full mt-2 block min-h-[200px] bg-stone-900/50" 
+                                 alt="Generated Lime"
+                                 loading="lazy"
+                                 onload="this.classList.remove('min-h-[200px]', 'bg-stone-900/50')"
+                                 onerror="this.style.display='none'; document.getElementById('err-${msgId}').classList.remove('hidden');"
+                            >
+                            <div id="err-${msgId}" class="hidden mt-2 p-3 bg-red-900/20 border border-red-500/50 text-red-400 text-xs font-mono break-all rounded">
+                                <div class="font-bold mb-1">[SYSTEM_ERROR] IMAGE_LOAD_FAILED</div>
+                                <div class="opacity-70 mb-2">Browser could not render asset. Link might be invalid or expired.</div>
+                                <div class="mb-1 text-[10px] uppercase text-stone-500">ATTEMPTED_URL:</div>
+                                <a href="${text}" target="_blank" class="underline hover:text-white block break-all bg-black/30 p-2 rounded">${text}</a>
+                            </div>
+                        </div>`;
+                } else {
+                    const safeText = text
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;")
+                        .replace(/\n/g, '<br>');
+                    
+                    content = isLoading 
+                        ? `<span class="animate-pulse">${safeText}</span>` 
+                        : safeText;
+                }
+                
+                // Remove border for image bubbles to avoid white box
+                const finalBubbleClass = isImage ? bubbleClass.replace('border', '') : bubbleClass;
+
                 div.innerHTML = `
                     <div class="flex items-start gap-4 max-w-[85%] md:max-w-[75%] ${role === 'user' ? 'flex-row-reverse' : 'flex-row'} relative">
                         ${icon}
-                        <div class="p-4 ${bubbleClass} font-mono text-sm shadow-lg leading-relaxed break-words">
-                            <div class="message-content">${content}</div>
+                        <div class="p-4 ${finalBubbleClass} font-mono text-sm shadow-lg leading-relaxed break-words">
+                            <div class="message-content min-h-[1.5em]">${content}</div>
                         </div>
                     </div>
                 `;
@@ -865,18 +1020,25 @@ Core principles:
                 return msgId;
             },
 
-            updateSystemMessage: (msgId, newText) => {
+            updateSystemMessage: (msgId, newText, isHtml = false) => {
                 const msgEl = document.getElementById(msgId);
                 if (msgEl) {
                     const contentEl = msgEl.querySelector('.message-content');
-                    const formatted = newText
-                        .replace(/&/g, "&amp;")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;")
-                        .replace(/\n/g, '<br>');
+                    let formatted;
+                    if(isHtml) {
+                        formatted = newText;
+                    } else {
+                        formatted = newText
+                            .replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/\n/g, '<br>');
+                    }
 
                     contentEl.innerHTML = formatted;
-                    contentEl.innerHTML += `<span class="inline-block w-2 h-4 bg-accent ml-1 animate-pulse"></span>`;
+                    if (!isHtml) {
+                        contentEl.innerHTML += `<span class="inline-block w-2 h-4 bg-accent ml-1 animate-pulse"></span>`;
+                    }
                     ChatUI.scrollToBottom();
                 }
             },
@@ -887,10 +1049,11 @@ Core principles:
             },
 
             stopGeneration: () => {
-                if (ChatUI.abortController) {
-                    ChatUI.abortController.abort();
-                    ChatUI.abortController = null;
-                }
+                // Not supported well in basic mode yet, but placeholder remains
+                ChatUI.isGenerating = false;
+                const btn = document.getElementById('send-btn');
+                // visual reset
+                if(btn) ChatUI.setGeneratingState(false);
             },
 
             setGeneratingState: (isGen) => {
@@ -914,15 +1077,18 @@ Core principles:
                 lucide.createIcons();
             },
 
+            // --- UNIFIED API LOGIC START ---
             sendMessage: async () => {
                 if (ChatUI.isGenerating) {
-                    ChatUI.stopGeneration();
+                    // Primitive stop
+                    ChatUI.isGenerating = false;
                     return;
                 }
 
                 const inputEl = document.getElementById('user-input');
                 const prompt = inputEl.value.trim();
-                if (!prompt) return;
+                
+                if (!prompt && ChatUI.currentModelKey !== 'stable-lime') return;
 
                 // 1. UI Updates
                 inputEl.value = '';
@@ -930,18 +1096,14 @@ Core principles:
                 document.getElementById('chat-history').classList.remove('hidden');
                 document.getElementById('sidebar-support').classList.remove('hidden');
 
-                // 2. Add User Message
-                const userMsgId = ChatUI.appendMessageToDOM('user', prompt);
-                SessionManager.appendMessageToCurrent('user', prompt, userMsgId);
+                const displayPrompt = (!prompt && ChatUI.currentModelKey === 'stable-lime') ? "[STABLE_LIME]" : prompt;
+                const userMsgId = ChatUI.appendMessageToDOM('user', displayPrompt);
+                SessionManager.appendMessageToCurrent('user', displayPrompt, userMsgId);
                 
-                // 3. Prepare for Generation
+                // 3. Prepare Generation
                 ChatUI.setGeneratingState(true);
-                ChatUI.abortController = new AbortController();
-                const signal = ChatUI.abortController.signal;
-
-                const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING_INFERENCE_STREAM...', true);
+                const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING_UPLINK...', true);
                 
-                // Status Update
                 const statusText = document.getElementById('status-text');
                 const statusInd = document.getElementById('status-indicator');
                 if (statusText) statusText.innerText = "PROCESSING...";
@@ -958,138 +1120,148 @@ Core principles:
                 const currentModel = ChatUI.MODELS[ChatUI.currentModelKey];
 
                 try {
-                    let requestBody;
+                    // --- ENSURE CLIENT LOADED ---
+                    if (!window.GradioClient) throw new Error("Gradio Client Library not loaded.");
 
+                    // --- CONNECT OR REUSE CLIENT ---
+                    if (!ChatUI.clients[ChatUI.currentModelKey]) {
+                        ChatUI.updateSystemMessage(loadingId, `CONNECTING_TO_${currentModel.name.toUpperCase()}...`);
+                        ChatUI.clients[ChatUI.currentModelKey] = await window.GradioClient.connect(currentModel.apiId);
+                    }
+                    const client = ChatUI.clients[ChatUI.currentModelKey];
+
+                    // --- PREPARE PAYLOAD ---
+                    let payload = [];
+                    
                     if (currentModel.type === 'completion') {
-                        // --- API LOGIC FOR i3-200m ---
+                        // i3-200m Logic
                         let finalPrompt = prompt;
                         if(settings.systemPrompt && settings.systemPrompt.trim() !== "") {
                             finalPrompt = `System: ${settings.systemPrompt}\n\nUser: ${prompt}`;
                         }
-                        
-                        requestBody = {
-                            data: [ 
-                                finalPrompt, 
-                                settings.maxTokens, 
-                                settings.temperature, 
-                                40 
-                            ]
-                        };
-
+                        // Args: [input_text, max_length, temperature, top_k]
+                        payload = [finalPrompt, settings.maxTokens, settings.temperature, 40];
+                    
                     } else if (currentModel.type === 'chat') {
-                        // --- API LOGIC FOR i3-1b (LFM2) ---
+                        // i3-1b Logic
                         const fullHistory = SessionManager.getHistoryForLFM2();
                         const historyBase = fullHistory.slice(0, -1); 
-                        
                         const historyToSend = [
                             { role: "system", content: ChatUI.I3_1B_PROMPT },
                             ...historyBase
                         ];
-
-                        requestBody = {
-                            data: [
-                                prompt, 
-                                historyToSend, 
-                                currentModel.internalId 
-                            ]
-                        };
+                        // Args: [user_input, history, model_id]
+                        payload = [prompt, historyToSend, currentModel.internalId];
+                    
+                    } else if (currentModel.type === 'image_generation') {
+                        // Stable-Lime Logic (0 args)
+                        payload = [];
                     }
 
-                    // 4. API Call
-                    const response = await fetch(currentModel.apiUrl, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(requestBody),
-                        signal
-                    });
-
-                    if (!response.ok) throw new Error("Connection Refused / API Error");
+                    // --- EXECUTE REQUEST (UNIFIED) ---
+                    // 'predict' is generally for non-streaming, 'submit' for streaming
+                    // We use 'submit' for text to catch the stream events
                     
-                    const json = await response.json();
-                    const eventId = json.event_id;
-                    const streamUrl = `${currentModel.apiUrl}/${eventId}`;
-                    
-                    const streamResponse = await fetch(streamUrl, { signal });
-                    const reader = streamResponse.body.getReader();
-                    const decoder = new TextDecoder();
-
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
+                    if (currentModel.type === 'image_generation') {
+                        // Use Custom Loader
+                        const loaderHTML = `
+                            <div class="lime-loader">
+                                <p>STATUS:</p>
+                                <div class="lime-words">
+                                    <span class="lime-word">INITIALIZING</span>
+                                    <span class="lime-word">DENOISING</span>
+                                    <span class="lime-word">REFINING</span>
+                                    <span class="lime-word">RENDERING</span>
+                                    <span class="lime-word">INITIALIZING</span>
+                                </div>
+                            </div>
+                        `;
+                        ChatUI.updateSystemMessage(loadingId, loaderHTML, true);
                         
-                        const chunk = decoder.decode(value);
-                        const lines = chunk.split('\n');
+                        const result = await client.predict(currentModel.fn_name, payload);
                         
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                const dataStr = line.replace('data: ', '').trim();
-                                try {
-                                    const data = JSON.parse(dataStr);
-                                    
-                                    if (Array.isArray(data) && data.length > 0) {
-                                        if (currentModel.type === 'completion') {
-                                             accumulatedText = data[0]; 
-                                        } else {
-                                            const payload = data[0];
-                                            if (typeof payload === 'string') {
-                                                accumulatedText = payload;
-                                            } else if (Array.isArray(payload) && payload.length > 0) {
-                                                const lastItem = payload[payload.length - 1];
-                                                if (Array.isArray(lastItem) && lastItem.length > 1) {
-                                                    accumulatedText = lastItem[1];
-                                                } 
-                                                else if (typeof lastItem === 'object' && lastItem !== null && lastItem.content) {
-                                                    accumulatedText = lastItem.content;
-                                                }
-                                            }
-                                        }
-
-                                        // --- SAFETY: CLIENT-SIDE STOP TOKENS ---
-                                        const stopSequences = ["\nUser:", "\nuser:", "User:", "user:"];
-                                        let shouldStop = false;
-                                        
-                                        for (const stop of stopSequences) {
-                                            if (accumulatedText.includes(stop)) {
-                                                accumulatedText = accumulatedText.split(stop)[0].trim();
-                                                shouldStop = true;
-                                                break;
-                                            }
-                                        }
-                                        
-                                        if(accumulatedText) {
-                                            ChatUI.updateSystemMessage(loadingId, accumulatedText);
-                                        }
-
-                                        if (shouldStop) {
-                                            reader.cancel(); 
-                                            break; 
-                                        }
-                                    }
-                                } catch (e) { /* Ignore control messages */ }
+                        if (result && result.data && result.data.length > 0) {
+                            let rawData = result.data[0];
+                            if (typeof rawData === 'string') {
+                                accumulatedText = rawData;
+                            } else if (typeof rawData === 'object' && rawData.url) {
+                                accumulatedText = rawData.url;
+                            } else if (typeof rawData === 'object' && rawData.path) {
+                                accumulatedText = `https://flamef0x-stable-lime.hf.space/file=${rawData.path}`;
+                            }
+                            if (accumulatedText && !accumulatedText.includes('?t=')) {
+                                accumulatedText += `?t=${Date.now()}`;
                             }
                         }
-                        if (accumulatedText.includes("\nUser:") || accumulatedText.includes("User:")) break;
+                    } else {
+                        // TEXT STREAMING LOGIC
+                        const submission = client.submit(currentModel.fn_name, payload);
+                        
+                        // Async Iterator for streaming events
+                        for await (const msg of submission) {
+                            if (!ChatUI.isGenerating) {
+                                submission.cancel();
+                                break;
+                            }
+                            
+                            if (msg.type === "data") {
+                                // Gradio returns array of outputs [output1, output2...]
+                                // Usually text models return [text] or [history]
+                                const data = msg.data[0];
+                                
+                                // Handling different return shapes
+                                if (typeof data === 'string') {
+                                    accumulatedText = data;
+                                } else if (Array.isArray(data)) {
+                                    // Chat history return style [[u,b], [u,b]]
+                                    const lastTurn = data[data.length - 1];
+                                    if (lastTurn && lastTurn.length > 1) {
+                                        accumulatedText = lastTurn[1];
+                                    }
+                                } else if (data && data.content) {
+                                    // Object return style
+                                    accumulatedText = data.content;
+                                }
+                                
+                                // Update UI live
+                                if(accumulatedText) ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                            }
+                        }
                     }
 
                 } catch (error) {
-                    if (error.name === 'AbortError') {
-                        accumulatedText += "\n[SYSTEM_INTERRUPT: GENERATION_HALTED_BY_USER]";
-                        ChatUI.updateSystemMessage(loadingId, accumulatedText);
-                    } else {
-                        console.error(error);
-                        ChatUI.updateSystemMessage(loadingId, `ERROR: ${error.message}\nCHECK_CONNECTION_AND_RETRY.`);
-                    }
+                    console.error(error);
+                    accumulatedText = `ERROR: ${error.message}`;
+                    ChatUI.updateSystemMessage(loadingId, accumulatedText);
                 } finally {
-                    // 5. Cleanup & Save
+                    // Cleanup
+                    // Handle image fallback again in case it failed inside the block
+                    if (currentModel.type === 'image_generation' && !accumulatedText) {
+                        accumulatedText = "[ERROR: NO_DATA_RECEIVED]";
+                    }
+
+                    // Special re-render for Image
                     const msgEl = document.getElementById(loadingId);
-                    if(msgEl) {
-                         const contentEl = msgEl.querySelector('.message-content');
-                         const safeFinal = accumulatedText
-                            .replace(/&/g, "&amp;")
-                            .replace(/</g, "&lt;")
-                            .replace(/>/g, "&gt;")
-                            .replace(/\n/g, '<br>');
-                         contentEl.innerHTML = safeFinal;
+                    if(msgEl && currentModel.type === 'image_generation') {
+                        const contentEl = msgEl.querySelector('.message-content');
+                        if (accumulatedText.includes('http') && (accumulatedText.includes('file=') || accumulatedText.includes('gradio'))) {
+                             contentEl.innerHTML = `
+                                <div class="relative w-full max-w-[600px]"> <!-- Further Increased size -->
+                                    <img src="${accumulatedText}" 
+                                         class="rounded w-full mt-2 block min-h-[200px] bg-stone-900/50" 
+                                         alt="Generated Lime"
+                                         onload="this.classList.remove('min-h-[200px]', 'bg-stone-900/50')"
+                                         onerror="this.style.display='none'; document.getElementById('err-${loadingId}').classList.remove('hidden');"
+                                    >
+                                    <div id="err-${loadingId}" class="hidden mt-2 p-3 bg-red-900/20 border border-red-500/50 text-red-400 text-xs font-mono break-all rounded">
+                                        <div class="font-bold mb-1">[SYSTEM_ERROR] IMAGE_LOAD_FAILED</div>
+                                        <div class="opacity-70 mb-2">Browser could not render asset. Link might be invalid or expired.</div>
+                                        <a href="${accumulatedText}" target="_blank" class="underline hover:text-white block break-all bg-black/30 p-2 rounded">${accumulatedText}</a>
+                                    </div>
+                                </div>`;
+                        } else {
+                             contentEl.innerHTML = accumulatedText;
+                        }
                     }
 
                     SessionManager.appendMessageToCurrent('system', accumulatedText, loadingId);
@@ -1105,7 +1277,6 @@ Core principles:
                     }
                     
                     ChatUI.setGeneratingState(false);
-                    ChatUI.abortController = null;
                 }
             }
         };
