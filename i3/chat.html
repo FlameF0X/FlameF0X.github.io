@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlameF0X | i3 Interface Chat</title>
+    <title>i3-lab | i3 Chat</title>
     <link rel="icon" type="image/x-icon" href="/assets/logo.png">
     
     <!-- Tailwind & Fonts -->
@@ -194,7 +194,7 @@
 
     <!-- Mobile Header -->
     <header class="md:hidden flex items-center justify-between p-4 border-b border-stone-800 bg-bg/95 backdrop-blur">
-        <span class="font-black italic text-lg tracking-tighter text-accent">// FLAME.AI</span>
+        <span class="font-black italic text-lg tracking-tighter text-accent">// i3-lab</span>
         <button onclick="SettingsUI.toggle()" class="text-stone-400 hover:text-white"><i data-lucide="settings"></i></button>
     </header>
 
@@ -275,7 +275,7 @@
                             </h1>
                         </div>
                         <p class="font-mono text-stone-500 text-lg md:text-xl pl-11 border-l-2 border-stone-800">
-                            Select a neural architecture to begin operations.
+                            Select a neural architecture to begin operations. By default, you use i3-200m-v2.
                         </p>
                     </div>
 
@@ -419,11 +419,11 @@
                 <span id="status-indicator" class="w-1.5 h-1.5 bg-accent rounded-full animate-ping"></span>
                 <span id="status-text">LIVE</span>
             </span>
-            <span class="hidden md:inline">API: <span id="current-api-label" class="text-stone-300">FLAMEFOX-i3-200m</span></span>
+            <span class="hidden md:inline">API: <span id="current-api-label" class="text-stone-300">i3-lab/i3-200m</span></span>
             <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
         </div>
         <div>
-             UI VERSION: 3.0 // STABLE-LIME
+             UI VERSION: 3.5 // MIGRATION
         </div>
     </div>
 
@@ -479,7 +479,7 @@
                     </div>
                     <p class="font-mono text-xs text-stone-400 leading-relaxed">
                         // POLICY DECLARATION:<br>
-                        I don't store anything and I don't use it for training. All local logs are stored in your browser's LocalStorage and can be wiped via the sidebar.
+                       We, i3-lab, dont store anything and and we don't use it for training. All local logs are stored in your browser's LocalStorage and can be wiped via the sidebar.
                     </p>
                 </div>
 
@@ -899,7 +899,7 @@ Core principles:
                 }
 
                 // Update Footer
-                document.getElementById('current-api-label').innerText = `FLAMEFOX-${modelKey.toUpperCase()}`;
+                document.getElementById('current-api-label').innerText = `i3-lab/${modelKey.toUpperCase()}`;
                 
                 // Update Placeholder
                 document.getElementById('user-input').placeholder = `Enter command for ${ChatUI.MODELS[modelKey].name} ...`;
