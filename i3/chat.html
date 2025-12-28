@@ -1282,7 +1282,7 @@ Core principles:
             }
         };
 
-        // Boot
+        // Initialize on load
         document.addEventListener("DOMContentLoaded", () => {
             // Text Scramble Effect
             const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
@@ -1302,6 +1302,9 @@ Core principles:
             };
             spans.forEach(span => scrambleText(span));
 
+            // Initialize session list
+            SessionManager.renderSessionList();
+            
             // Init Chat
             ChatUI.init();
         });
