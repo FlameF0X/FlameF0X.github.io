@@ -453,7 +453,7 @@
                 <span id="status-text">LIVE</span>
             </span>
             <span class="hidden md:inline">API: <span id="current-api-label" class="text-stone-300">i3-lab/i3-200m</span></span>
-            <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms</span>
+            <span class="hidden md:inline">LATENCY: <span id="latency-val">--</span>ms/token</span>
         </div>
         <div>
              UI VERSION: 3.5 // MIGRATION
@@ -1073,6 +1073,12 @@ Core principles:
             // Cache for Gradio Client instances
             clients: {},
             
+            // NEW: Latency tracking
+            latencyUpdateInterval: null,
+            generationStartTime: null,
+            lastTokenTime: null,
+            tokenCount: 0,
+            
             init: () => {
                 const currentId = SessionManager.getCurrentSessionId();
                 if (currentId && (currentId !== 'temp_demo_session' && currentId !== 'temp_lime_session')) {
@@ -1245,7 +1251,61 @@ Core principles:
                         contentEl.innerHTML += `<span class="inline-block w-2 h-4 bg-accent ml-1 animate-pulse"></span>`;
                     }
                     ChatUI.scrollToBottom();
+                    
+                    // NEW: Update token count for latency calculation
+                    if (!isHtml) {
+                        // Simple token approximation: words + punctuation
+                        const tokenEstimate = formatted.split(/\s+/).length + (formatted.match(/[.,!?;:]/g) || []).length;
+                        ChatUI.tokenCount = tokenEstimate;
+                        ChatUI.updateLatencyDisplay();
+                    }
                 }
+            },
+
+            // NEW: Real-time latency display updater
+            updateLatencyDisplay: () => {
+                if (!ChatUI.generationStartTime || ChatUI.tokenCount === 0) return;
+                
+                const elapsedMs = Date.now() - ChatUI.generationStartTime;
+                const latencyPerToken = elapsedMs / Math.max(1, ChatUI.tokenCount);
+                
+                const latencyEl = document.getElementById('latency-val');
+                if (latencyEl) {
+                    latencyEl.innerText = Math.round(latencyPerToken);
+                }
+            },
+
+            // NEW: Start latency tracking
+            startLatencyTracking: () => {
+                ChatUI.generationStartTime = Date.now();
+                ChatUI.lastTokenTime = Date.now();
+                ChatUI.tokenCount = 0;
+                
+                // Clear any existing interval
+                if (ChatUI.latencyUpdateInterval) {
+                    clearInterval(ChatUI.latencyUpdateInterval);
+                }
+                
+                // Update latency display every 100ms during generation
+                ChatUI.latencyUpdateInterval = setInterval(() => {
+                    ChatUI.updateLatencyDisplay();
+                }, 100);
+            },
+
+            // NEW: Stop latency tracking
+            stopLatencyTracking: () => {
+                if (ChatUI.latencyUpdateInterval) {
+                    clearInterval(ChatUI.latencyUpdateInterval);
+                    ChatUI.latencyUpdateInterval = null;
+                }
+                
+                // Final update
+                ChatUI.updateLatencyDisplay();
+                
+                // Reset tracking variables
+                ChatUI.generationStartTime = null;
+                ChatUI.lastTokenTime = null;
+                ChatUI.tokenCount = 0;
             },
 
             scrollToBottom: () => {
@@ -1259,6 +1319,7 @@ Core principles:
                 const btn = document.getElementById('send-btn');
                 // visual reset
                 if(btn) ChatUI.setGeneratingState(false);
+                ChatUI.stopLatencyTracking();
             },
 
             setGeneratingState: (isGen) => {
@@ -1287,6 +1348,7 @@ Core principles:
                 if (ChatUI.isGenerating) {
                     // Primitive stop
                     ChatUI.isGenerating = false;
+                    ChatUI.stopLatencyTracking();
                     return;
                 }
 
@@ -1316,6 +1378,9 @@ Core principles:
                     statusInd.classList.remove('bg-green-500');
                     statusInd.classList.add('bg-orange-500', 'animate-ping');
                 }
+                
+                // NEW: Start latency tracking
+                ChatUI.startLatencyTracking();
                 
                 const startTime = Date.now();
                 let accumulatedText = "";
@@ -1430,6 +1495,9 @@ Core principles:
                                 
                                 // Update UI live
                                 if(accumulatedText) ChatUI.updateSystemMessage(loadingId, accumulatedText);
+                                
+                                // NEW: Update last token time for latency calculation
+                                ChatUI.lastTokenTime = Date.now();
                             }
                         }
                     }
@@ -1440,6 +1508,8 @@ Core principles:
                     ChatUI.updateSystemMessage(loadingId, accumulatedText);
                 } finally {
                     // Cleanup
+                    ChatUI.stopLatencyTracking();
+                    
                     // Handle image fallback again in case it failed inside the block
                     if (currentModel.type === 'image_generation' && !accumulatedText) {
                         accumulatedText = "[ERROR: NO_DATA_RECEIVED]";
@@ -1473,7 +1543,12 @@ Core principles:
                     
                     const duration = Date.now() - startTime;
                     const latencyEl = document.getElementById('latency-val');
-                    if (latencyEl) latencyEl.innerText = duration;
+                    if (latencyEl) {
+                        // Calculate final tokens-per-second
+                        const finalTokens = ChatUI.tokenCount || 1;
+                        const finalLatency = duration / finalTokens;
+                        latencyEl.innerText = Math.round(finalLatency);
+                    }
 
                     if(statusText) statusText.innerText = "SYSTEM ONLINE";
                     if(statusInd) {
