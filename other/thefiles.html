@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Epstein Files - The list of people that have been there | Official Registry of the Bureau of Universal Nomenclature</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;700;900&family=Source+Code+Pro:wght@400;700&display=swap');
+
+        :root {
+            --gov-blue: #003366;
+            --gov-red: #cc0000;
+        }
+
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .gov-banner {
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+            font-size: 12px;
+            padding: 4px 10%;
+        }
+
+        .header-main {
+            background-color: white;
+            border-bottom: 4px solid var(--gov-blue);
+            padding: 20px 10%;
+        }
+
+        .pdf-container {
+            font-family: 'Source Code Pro', monospace;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            line-height: 1.1;
+            font-size: 11px;
+            color: #1a1a1a;
+            column-count: 4;
+            column-gap: 10px;
+            column-rule: 1px solid #eee;
+        }
+
+        @media (max-width: 1024px) { .pdf-container { column-count: 3; } }
+        @media (max-width: 768px) { .pdf-container { column-count: 2; } }
+
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 8rem;
+            color: rgba(200, 200, 200, 0.15);
+            pointer-events: none;
+            z-index: 10;
+            white-space: nowrap;
+            font-weight: 900;
+        }
+
+        .ticker-wrap {
+            background: #222;
+            color: #0f0;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 5px 0;
+            font-size: 0.8rem;
+        }
+
+        .ticker {
+            display: inline-block;
+            animation: ticker 60s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .official-seal {
+            width: 60px;
+            height: 60px;
+            background: var(--gov-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            border: 2px double white;
+            box-shadow: 0 0 0 2px var(--gov-blue);
+        }
+
+        .scanline {
+            height: 1px;
+            background: rgba(0,0,0,0.05);
+            width: 100%;
+            margin: 1px 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen">
+
+    <!-- Official Gov Banner -->
+    <div class="gov-banner flex items-center gap-2">
+        <span class="font-bold">An official website of the United Nations of Nomenclature</span>
+        <span class="text-gray-500">|</span>
+        <span class="underline cursor-help">How you know it's official</span>
+    </div>
+
+    <!-- Main Header -->
+    <header class="header-main flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="official-seal">B.U.N.<br>OFFICIAL</div>
+            <div>
+                <h1 class="text-2xl font-black text-[#003366] tracking-tighter uppercase">The Epstein Files - The list of people that have been there</h1>
+                <p class="text-xs font-bold text-gray-600 uppercase tracking-widest">Universal Registry of Permitted Identities</p>
+            </div>
+        </div>
+        <div class="text-right hidden md:block">
+            <p class="text-[10px] font-mono text-gray-500">REF: DOC-992-ALPHA-X</p>
+            <p class="text-[10px] font-mono text-gray-500">SECURITY CLEARANCE: PUBLIC</p>
+            <button class="bg-[#003366] text-white px-4 py-1 mt-2 text-xs font-bold hover:bg-blue-900">DOWNLOAD FULL LIST (1.2 PB)</button>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto p-4 md:p-8">
+        <!-- PDF Controls -->
+        <div class="bg-gray-700 p-2 flex items-center justify-between text-white rounded-t-lg shadow-lg">
+            <div class="flex items-center gap-4 px-2">
+                <span class="text-sm font-bold">1 / ∞</span>
+                <div class="h-4 w-[1px] bg-gray-500"></div>
+                <div class="flex gap-2">
+                    <button class="px-2 bg-gray-600 hover:bg-gray-500 rounded text-xs">Zoom: 100%</button>
+                    <button class="px-2 bg-gray-600 hover:bg-gray-500 rounded text-xs">Fit Width</button>
+                </div>
+            </div>
+            <div class="text-xs font-mono uppercase opacity-70 italic">
+                Proprietary Formatting: No Margin Protocol v4.0
+            </div>
+        </div>
+
+        <!-- The List Content -->
+        <div class="pdf-container p-1 relative" id="list-target">
+            <div class="watermark">OFFICIAL DOCUMENT - CLASSIFIED: NONE</div>
+            <!-- Names will be injected here -->
+        </div>
+
+        <!-- Loading Footer -->
+        <div id="loading-trigger" class="py-10 text-center text-gray-500 font-mono text-sm">
+            --- GENERATING ADDITIONAL COMBINATIONS (AUTO-APPEND) ---
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 p-10 mt-10 text-xs">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase">Information</h4>
+                <p>The Bureau of Universal Nomenclature (B.U.N.) is responsible for the cataloging of all possible human and non-human identifiers. Any name not on this list is technically illegal.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase">Contact</h4>
+                <p>Email: feedback@thelist.gov.un</p>
+                <p>Phone: 1-800-NAMES-00</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase">Legal</h4>
+                <p>Privacy Policy</p>
+                <p>FOIA Requests</p>
+                <p>Identity Reclamation</p>
+            </div>
+            <div class="flex flex-col items-end justify-center">
+                <div class="official-seal opacity-50 grayscale">B.U.N.</div>
+                <p class="mt-2">© 2026 All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const firstNames = [
+            "John", "Maria", "Wei", "Satoshi", "Yuki", "Fatima", "Olga", "Dmitry", "Zoe", "Amara", 
+            "Lakshmi", "Hans", "Bjorn", "Mateo", "Priya", "Aarav", "Kim", "Nguyen", "Ali", "Sarah",
+            "X Æ A-Xii", "User_772", "Data", "Alpha", "Omega", "Jean-Luc", "Søren", "Íñigo", "Muḥammad",
+            "Chidi", "Tahani", "Eleanor", "Jason", "Bort", "Sterling", "Lana", "Cheryl", "Pam", "Ray"
+        ];
+
+        const lastNames = [
+            "Smith", "Garcia", "Wang", "Müller", "Ivanov", "Singh", "Sato", "Lee", "Kim", "da Silva",
+            "O'Connor", "Hernandez", "Smirnov", "Yamamoto", "Patel", "Dupont", "Andersson", "Kuznetsov",
+            "M0nk3y", "Null", "[REDACTED]", "The Third", "von Hoehenheim", "St. John", "al-Farsi", "A."
+        ];
+
+        const suffixes = ["PhD", "Jr.", "Sr.", "III", "Esq.", "(Pending)", "MD", "DDS", "O.B.E."];
+        
+        const symbols = ["*", "#", "_", "∆", "√", "∞", "@"];
+
+        function generateMixedName() {
+            const type = Math.floor(Math.random() * 8);
+            const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const sfx = suffixes[Math.floor(Math.random() * suffixes.length)];
+            const sym = symbols[Math.floor(Math.random() * symbols.length)];
+
+            switch(type) {
+                case 0: return `${ln}, ${fn}`;
+                case 1: return `${fn} ${ln}`;
+                case 2: return `${fn}-${ln}`;
+                case 3: return `${ln.toUpperCase()} / ${fn}`;
+                case 4: return `${fn} ${ln} ${sfx}`;
+                case 5: return `${fn.charAt(0)}. ${ln}`;
+                case 6: return `${sym}${fn}${ln}${sym}`;
+                case 7: return `${fn} ${ln} (${Math.floor(Math.random() * 999)})`;
+                default: return `${fn} ${ln}`;
+            }
+        }
+
+        const target = document.getElementById('list-target');
+        const ticker = document.getElementById('ticker-content');
+
+        function appendNames(count) {
+            let chunk = "";
+            for (let i = 0; i < count; i++) {
+                chunk += `<div class="break-inside-avoid border-b border-gray-100 hover:bg-yellow-50">${generateMixedName()}</div>`;
+            }
+            target.insertAdjacentHTML('beforeend', chunk);
+        }
+
+        // Initial fill
+        appendNames(800);
+
+        // Infinite scroll logic
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                appendNames(200);
+                
+                // Update ticker with random "updates"
+                if(Math.random() > 0.95) {
+                    ticker.innerText += ` | ${generateMixedName()} ADDED TO REGISTRY... `;
+                }
+            }
+        });
+
+        // Ticker cleanup to prevent memory bloat
+        setInterval(() => {
+            if(ticker.innerText.length > 2000) {
+                ticker.innerText = ticker.innerText.substring(1000);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
