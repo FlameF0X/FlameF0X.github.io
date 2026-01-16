@@ -11,7 +11,7 @@
     
     <!-- FIX: Loading Gradio Client via ESM to resolve 'export' and 'undefined' errors -->
     <script type="module">
-        import { Client } from "https://esm.sh/@gradio/client@1.0.1";
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@latest/dist/index.min.js";
         window.GradioClient = Client;
     </script>
 
