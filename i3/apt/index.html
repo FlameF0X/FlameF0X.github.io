@@ -217,6 +217,7 @@
 
     <script>
         let displayedLinesCount = 0;
+        let isTrainingActive = false;
 
         function switchTab(index) {
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
@@ -277,28 +278,40 @@
             displayedLinesCount = 0;
             lossChart.data.labels = [];
             lossChart.data.datasets[0].data = [];
+            currentLossEl.innerText = "--";
             lossChart.update();
         }
 
+        function setButtonState(state) {
+            if (state === 'ready') {
+                isTrainingActive = false;
+                trainBtn.disabled = false;
+                trainBtn.className = "w-full h-14 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-3";
+                btnText.innerText = "Execute Training";
+                btnLoader.classList.add('hidden');
+            } else if (state === 'processing') {
+                isTrainingActive = true;
+                trainBtn.disabled = true;
+                trainBtn.className = "w-full h-14 bg-stone-800 text-stone-500 cursor-not-allowed font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-3";
+                btnText.innerText = "Processing";
+                btnLoader.classList.remove('hidden');
+            }
+        }
+
         window.addEventListener('gradio-ready', () => {
-            trainBtn.disabled = false;
-            trainBtn.className = "w-full h-14 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-3";
-            btnText.innerText = "Execute Training";
+            setButtonState('ready');
             statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> Online';
         });
 
         trainBtn.addEventListener('click', async () => {
             const hfToken = document.getElementById('hf_token').value;
             if (!hfToken) {
-                appendLog("Error: Missing Hugging Face Write Token", true);
+                appendLog("Error: Missing Hugging Face Write Token");
                 return;
             }
 
-            trainBtn.disabled = true;
-            btnLoader.classList.remove('hidden');
-            btnText.innerText = "Processing";
+            setButtonState('processing');
             appendLog("Initiating connection...");
-            
             displayedLinesCount = 0;
 
             try {
@@ -327,17 +340,34 @@
                         const allLines = msg.data[0].split('\n').filter(l => l.trim() !== "");
                         if (allLines.length > displayedLinesCount) {
                             const newLines = allLines.slice(displayedLinesCount);
-                            newLines.forEach(line => appendLog(line));
+                            newLines.forEach(line => {
+                                appendLog(line);
+                                
+                                // NEW: Check for the push-to-hub message specifically
+                                if (line.includes("Pushing weights to")) {
+                                    appendLog(">>> Detected model push. Finalizing interface for next run...");
+                                    setTimeout(() => {
+                                        clearLogs();
+                                        setButtonState('ready');
+                                        appendLog("> Previous run pushed successfully. Ready for new dispatch.");
+                                    }, 1000);
+                                }
+                            });
                             displayedLinesCount = allLines.length;
                         }
                     }
                 }
+                
+                if (isTrainingActive) {
+                    appendLog("Process sequence completed.");
+                }
+
             } catch (err) {
                 appendLog(`Error: ${err.message}`);
             } finally {
-                trainBtn.disabled = false;
-                btnLoader.classList.add('hidden');
-                btnText.innerText = "Execute Training";
+                if (isTrainingActive) {
+                    setButtonState('ready');
+                }
             }
         });
     </script>
