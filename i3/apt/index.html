@@ -63,19 +63,22 @@
         }
 
         .step-content { display: none; }
-        .step-content.active { @apply flex flex-col gap-6; }
+        .step-content.active { @apply flex flex-col gap-4; }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-stone-700 rounded-full hover:bg-stone-600; }
 
         .loader {
-            @apply border-2 border-white/20 border-t-white rounded-full w-4 h-4 animate-spin;
+            @apply border-2 border-white/20 border-t-white rounded-full w-4 h-4 animate-spin inline-block;
         }
         
-        /* Fixed height for the console content */
         #logs-container {
             @apply flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-black/40 p-6;
+        }
+
+        .tab-btn.active {
+            @apply border-accent text-white;
         }
     </style>
 </head>
@@ -106,7 +109,6 @@
 
         <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-4">
             
-            <!-- Config Column -->
             <div class="lg:col-span-5 flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
                 <div class="glass-panel p-6 shrink-0">
                     <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">HF Write Token</label>
@@ -117,23 +119,23 @@
 
                 <div class="glass-panel p-6 flex-1">
                     <div class="flex gap-4 border-b border-border mb-6">
-                        <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-2 text-[10px] font-bold uppercase tracking-widest border-b-2 border-accent text-white">Data</button>
+                        <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-2 text-[10px] font-bold uppercase tracking-widest border-b-2 text-stone-500">Data</button>
                         <button onclick="switchTab(1)" id="tab-1" class="tab-btn pb-2 text-[10px] font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500">Arch</button>
                         <button onclick="switchTab(2)" id="tab-2" class="tab-btn pb-2 text-[10px] font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500">Hyper</button>
                     </div>
 
                     <div id="content-0" class="step-content active">
                         <div class="space-y-1">
-                            <label class="text-[9px] text-stone-500 uppercase font-bold">Dataset</label>
+                            <label class="text-[9px] text-stone-500 uppercase font-bold">Dataset Source</label>
                             <input type="text" id="dataset_id" value="roneneldan/TinyStories" class="input-field w-full">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1">
-                                <label class="text-[9px] text-stone-500 uppercase font-bold">Limit</label>
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Sample Limit</label>
                                 <input type="number" id="sample_limit" value="1000" class="input-field w-full">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] text-stone-500 uppercase font-bold">Context</label>
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Ctx Length</label>
                                 <select id="context_length" class="input-field w-full">
                                     <option value="128" selected>128</option>
                                     <option value="256">256</option>
@@ -144,29 +146,48 @@
 
                     <div id="content-1" class="step-content">
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="num_layers" value="4" class="input-field w-full" placeholder="Layers">
-                            <input type="number" id="n_embd" value="256" class="input-field w-full" placeholder="Hidden">
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Layers</label>
+                                <input type="number" id="num_layers" value="4" class="input-field w-full">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Hidden Dim</label>
+                                <input type="number" id="n_embd" value="256" class="input-field w-full">
+                            </div>
                         </div>
-                        <input type="number" id="n_head" value="8" class="input-field w-full" placeholder="Heads">
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-stone-500 uppercase font-bold">Attention Heads</label>
+                            <input type="number" id="n_head" value="8" class="input-field w-full">
+                        </div>
                     </div>
 
                     <div id="content-2" class="step-content">
-                        <div class="grid grid-cols-3 gap-2">
-                            <input type="number" id="epochs" value="1" class="input-field w-full">
-                            <input type="number" id="batch_size" value="8" class="input-field w-full">
-                            <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Epochs</label>
+                                <input type="number" id="epochs" value="1" class="input-field w-full">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Batch Size</label>
+                                <input type="number" id="batch_size" value="8" class="input-field w-full">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-stone-500 uppercase font-bold">Learning Rate</label>
+                                <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full">
+                            </div>
                         </div>
                     </div>
 
-                    <button id="train_btn" disabled class="mt-auto w-full h-14 bg-stone-800 text-stone-500 cursor-not-allowed font-black uppercase tracking-widest rounded-xl transition-all">
-                        <span id="btn_text">SDK Loading...</span>
-                    </button>
+                    <div class="mt-8">
+                        <button id="train_btn" disabled class="w-full h-14 bg-stone-800 text-stone-500 cursor-not-allowed font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-3">
+                            <span id="btn_loader_container" class="hidden"><div class="loader"></div></span>
+                            <span id="btn_text">SDK Loading...</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Stats & Console Column -->
             <div class="lg:col-span-7 flex flex-col gap-6 min-h-0">
-                <!-- Loss Graph -->
                 <div class="glass-panel p-6 h-[200px] shrink-0">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">Loss Trend</span>
@@ -177,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Console -->
                 <div class="glass-panel flex-1 min-h-0 overflow-hidden">
                     <div class="px-6 py-2 border-b border-border flex items-center justify-between bg-surface/30 shrink-0">
                         <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.process_stream</span>
@@ -196,18 +216,17 @@
     </main>
 
     <script>
-        // Track seen logs to prevent duplicates
         let displayedLinesCount = 0;
 
         function switchTab(index) {
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('active', 'border-accent', 'text-white');
+                b.classList.remove('active', 'text-white');
                 b.classList.add('border-transparent', 'text-stone-500');
             });
             document.getElementById(`content-${index}`).classList.add('active');
             const btn = document.getElementById(`tab-${index}`);
-            btn.classList.add('active', 'border-accent', 'text-white');
+            btn.classList.add('active');
         }
 
         const ctx = document.getElementById('lossChart').getContext('2d');
@@ -223,6 +242,7 @@
         const logsDiv = document.getElementById('logs');
         const logsContainer = document.getElementById('logs-container');
         const btnText = document.getElementById('btn_text');
+        const btnLoader = document.getElementById('btn_loader_container');
         const currentLossEl = document.getElementById('current_loss_val');
         const statusEl = document.getElementById('connection-status');
 
@@ -231,7 +251,6 @@
             const time = new Date().toLocaleTimeString([], { hour12: false });
             const p = document.createElement('div');
             
-            // Clean Step line coloring
             const isStep = text.includes('Step');
             p.className = `mb-1 ${isStep ? 'text-accent border-l-2 border-accent pl-2 bg-accent/5' : ''}`;
             p.innerHTML = `<span class="text-stone-700 font-bold mr-2">${time}</span>${text}`;
@@ -239,7 +258,6 @@
             logsDiv.appendChild(p);
             logsContainer.scrollTop = logsContainer.scrollHeight;
 
-            // Chart Update
             if (text.includes('"loss"')) {
                 try {
                     const match = text.match(/"loss":\s*([\d.]+)/);
@@ -264,7 +282,7 @@
 
         window.addEventListener('gradio-ready', () => {
             trainBtn.disabled = false;
-            trainBtn.className = "mt-auto w-full h-14 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-accent/20";
+            trainBtn.className = "w-full h-14 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-3";
             btnText.innerText = "Execute Training";
             statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> Online';
         });
@@ -277,10 +295,10 @@
             }
 
             trainBtn.disabled = true;
-            btnText.innerHTML = `<div class="loader"></div> Processing`;
+            btnLoader.classList.remove('hidden');
+            btnText.innerText = "Processing";
             appendLog("Initiating connection...");
             
-            // Reset state for new run
             displayedLinesCount = 0;
 
             try {
@@ -306,10 +324,7 @@
 
                 for await (const msg of submission) {
                     if (msg.type === "data" && msg.data[0]) {
-                        // Split full history into lines
                         const allLines = msg.data[0].split('\n').filter(l => l.trim() !== "");
-                        
-                        // ONLY append lines we haven't seen in this session
                         if (allLines.length > displayedLinesCount) {
                             const newLines = allLines.slice(displayedLinesCount);
                             newLines.forEach(line => appendLog(line));
@@ -321,6 +336,7 @@
                 appendLog(`Error: ${err.message}`);
             } finally {
                 trainBtn.disabled = false;
+                btnLoader.classList.add('hidden');
                 btnText.innerText = "Execute Training";
             }
         });
