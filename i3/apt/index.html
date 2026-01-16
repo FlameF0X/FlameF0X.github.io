@@ -9,10 +9,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     
-    <!-- FIX: Loading Gradio Client via ESM to resolve 'export' and 'undefined' errors -->
+    <!-- FIX: Reliable Gradio Client Import -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@gradio/client": "https://cdn.jsdelivr.net/npm/@gradio/client@latest/dist/index.min.js"
+            }
+        }
+    </script>
     <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@latest/dist/index.min.js";
+        import { Client } from "@gradio/client";
         window.GradioClient = Client;
+        // Signal that the SDK is ready
+        window.dispatchEvent(new Event('gradio-ready'));
     </script>
 
     <!-- Lucide Icons -->
@@ -61,6 +70,10 @@
             @apply bg-bg border border-border text-text rounded-xl px-4 py-3 text-sm font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20 transition-all;
         }
 
+        .input-field:placeholder-shown {
+            @apply border-orange-900/50;
+        }
+
         .step-content { display: none; }
         .step-content.active { display: block; }
 
@@ -69,17 +82,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
 
         .loader {
-            @apply border-2 border-border border-t-accent rounded-full w-4 h-4 animate-spin;
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
+            @apply border-2 border-white/20 border-t-white rounded-full w-4 h-4 animate-spin;
         }
 
         .bracket-box { position: relative; }
@@ -98,8 +101,9 @@
                 </div>
                 <span class="font-black tracking-tighter text-xl uppercase">Auto-PreTrain</span>
             </div>
-            <div class="flex items-center gap-8 font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500">
-                <a href="#" class="hover:text-accent transition-colors">Back to i3</a>
+            <div id="connection-status" class="flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-widest text-stone-500">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                SDK Initializing
             </div>
         </div>
     </nav>
@@ -107,14 +111,14 @@
     <main class="flex-1 pt-32 pb-20 px-6 max-w-[1440px] mx-auto w-full">
         
         <!-- Header -->
-        <header class="mb-16 reveal active">
+        <header class="mb-12">
             <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase mb-6">
                 Direct <span class="text-transparent" style="-webkit-text-stroke: 1px #44403c;">Pre-Training</span><br>
                 <span class="text-accent">To The Hub.</span>
             </h1>
             <p class="text-stone-400 text-lg max-w-3xl leading-relaxed font-light">
-                Utilize the <span class="text-white font-mono">Auto-PreTrain</span> automated synthesis engine. 
-                Backend authentication is handled via internal secrets. Just define your architecture and push.
+                Securely push custom GPT-2 architectures to Hugging Face. <br>
+                <span class="text-white font-mono text-sm underline decoration-accent/40">Write-access HF Token is now required.</span>
             </p>
         </header>
 
@@ -122,25 +126,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             <!-- Left: Configuration Section -->
-            <div class="lg:col-span-7 space-y-8 reveal active">
+            <div class="lg:col-span-7 space-y-8">
                 
-                <!-- 1. Identity & Repo -->
-                <div class="glass-panel p-8 bracket-box">
+                <!-- 1. Identity & Auth -->
+                <div class="glass-panel p-8 bracket-box border-accent/20">
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="zap" class="text-accent w-5 h-5"></i>
-                            <h3 class="font-bold text-sm uppercase tracking-widest text-stone-300">Workspace Identity</h3>
+                            <i data-lucide="shield-check" class="text-accent w-5 h-5"></i>
+                            <h3 class="font-bold text-sm uppercase tracking-widest text-stone-300">Authentication & Target</h3>
                         </div>
-                        <span class="text-[9px] font-mono text-stone-500 uppercase tracking-widest bg-stone-900/50 px-2 py-1 rounded">Engine: Optimized v2</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Repository Name</label>
-                            <input type="text" id="model_name" value="my-tiny-gpt2" class="input-field w-full">
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">HF Write Token (Required)</label>
+                            <input type="password" id="hf_token" placeholder="hf_..." class="input-field w-full border-accent/30 ring-1 ring-accent/5">
                         </div>
                         <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">HF Token (Optional)</label>
-                            <input type="password" id="hf_token" placeholder="Using backend secret..." class="input-field w-full opacity-60 focus:opacity-100 transition-opacity">
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Repository Name</label>
+                            <input type="text" id="model_name" value="my-tiny-gpt2" class="input-field w-full">
                         </div>
                     </div>
                 </div>
@@ -148,12 +151,12 @@
                 <!-- 2. Tabs Control -->
                 <div class="space-y-4">
                     <div class="flex gap-4 border-b border-border">
-                        <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-accent text-white">01. Data_Config</button>
-                        <button onclick="switchTab(1)" id="tab-1" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500 hover:text-stone-300 transition-all">02. Arch_Params</button>
-                        <button onclick="switchTab(2)" id="tab-2" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500 hover:text-stone-300 transition-all">03. Train_Hyper</button>
+                        <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-accent text-white">01. Data</button>
+                        <button onclick="switchTab(1)" id="tab-1" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500">02. Architecture</button>
+                        <button onclick="switchTab(2)" id="tab-2" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500">03. Hyperparameters</button>
                     </div>
 
-                    <div class="glass-panel p-8 min-h-[340px]">
+                    <div class="glass-panel p-8 min-h-[300px]">
                         <div id="content-0" class="step-content active space-y-6">
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Dataset Identifier</label>
@@ -161,16 +164,16 @@
                             </div>
                             <div class="grid grid-cols-2 gap-6">
                                 <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Sample Limit</label>
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Max Samples</label>
                                     <input type="number" id="sample_limit" value="1000" class="input-field w-full">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Context Window</label>
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Sequence Length</label>
                                     <select id="context_length" class="input-field w-full">
-                                        <option value="64">64 Tokens</option>
-                                        <option value="128" selected>128 Tokens</option>
-                                        <option value="256">256 Tokens</option>
-                                        <option value="512">512 Tokens</option>
+                                        <option value="64">64</option>
+                                        <option value="128" selected>128</option>
+                                        <option value="256">256</option>
+                                        <option value="512">512</option>
                                     </select>
                                 </div>
                             </div>
@@ -179,22 +182,22 @@
                         <div id="content-1" class="step-content space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Hidden Layers</label>
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Layers</label>
                                     <input type="number" id="num_layers" value="4" class="input-field w-full">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Embedding Dim</label>
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Hidden Dim</label>
                                     <input type="number" id="n_embd" value="256" class="input-field w-full">
                                 </div>
                             </div>
                             <div class="space-y-2">
-                                <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Attention Heads</label>
+                                <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Heads</label>
                                 <input type="number" id="n_head" value="8" class="input-field w-full">
                             </div>
                         </div>
 
                         <div id="content-2" class="step-content space-y-6">
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            <div class="grid grid-cols-3 gap-6">
                                 <div class="space-y-2">
                                     <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Epochs</label>
                                     <input type="number" id="epochs" value="1" class="input-field w-full">
@@ -204,7 +207,7 @@
                                     <input type="number" id="batch_size" value="8" class="input-field w-full">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Learning Rate</label>
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">LR</label>
                                     <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full">
                                 </div>
                             </div>
@@ -212,19 +215,19 @@
                     </div>
                 </div>
 
-                <button id="train_btn" class="w-full h-16 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all">
-                    <span id="btn_text">Initialize Training Sequence</span>
-                    <i data-lucide="zap" class="w-5 h-5"></i>
+                <button id="train_btn" disabled class="w-full h-16 bg-stone-800 text-stone-500 cursor-not-allowed font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all">
+                    <span id="btn_text">Waiting for SDK...</span>
                 </button>
             </div>
 
             <!-- Right: Status Section -->
             <div class="lg:col-span-5 flex flex-col gap-8">
+                <!-- Loss Graph -->
                 <div class="glass-panel p-6 border-stone-800 h-[280px]">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <i data-lucide="line-chart" class="text-accent w-4 h-4"></i>
-                            <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">Live_Loss_Metrics</span>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">Validation_Loss</span>
                         </div>
                         <span id="current_loss_val" class="font-mono text-xs text-accent font-bold">--</span>
                     </div>
@@ -233,12 +236,14 @@
                     </div>
                 </div>
 
-                <div class="glass-panel flex-1 flex flex-col overflow-hidden min-h-[300px] border-stone-800">
+                <!-- Console -->
+                <div class="glass-panel flex-1 flex flex-col overflow-hidden min-h-[400px] border-stone-800">
                     <div class="px-6 py-3 border-b border-border flex items-center justify-between bg-surface/30">
-                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.process_stream</span>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.engine_stream</span>
+                        <button onclick="clearLogs()" class="text-[9px] text-stone-600 hover:text-stone-400 uppercase font-bold">Clear</button>
                     </div>
-                    <div id="logs" class="flex-1 p-6 font-mono text-[11px] text-stone-400 overflow-y-auto custom-scrollbar bg-black/40 leading-relaxed">
-                        > Ready for automated dispatch.
+                    <div id="logs" class="flex-1 p-6 font-mono text-[11px] text-stone-400 overflow-y-auto custom-scrollbar bg-black/40 leading-relaxed whitespace-pre-wrap">
+> System idle. Authentication required.
                     </div>
                 </div>
             </div>
@@ -265,14 +270,13 @@
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Loss',
                     data: [],
                     borderColor: '#ea580c',
                     backgroundColor: 'rgba(234, 88, 12, 0.1)',
                     borderWidth: 2,
-                    pointRadius: 0,
+                    pointRadius: 2,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.2
                 }]
             },
             options: {
@@ -281,7 +285,10 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { display: false },
-                    y: { grid: { color: 'rgba(231, 229, 228, 0.05)' }, ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } } }
+                    y: { 
+                        grid: { color: 'rgba(231, 229, 228, 0.05)' }, 
+                        ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } } 
+                    }
                 }
             }
         });
@@ -292,16 +299,25 @@
         const logsDiv = document.getElementById('logs');
         const btnText = document.getElementById('btn_text');
         const currentLossEl = document.getElementById('current_loss_val');
+        const statusEl = document.getElementById('connection-status');
 
         function appendLog(text, isError = false) {
+            if (!text.trim()) return;
             const time = new Date().toLocaleTimeString([], { hour12: false });
             const p = document.createElement('div');
             p.className = `mb-1 ${isError ? 'text-red-500' : ''}`;
-            p.innerHTML = `<span class="text-stone-700">[${time}]</span> ${text}`;
+            
+            // Highlight step lines
+            let formattedText = text;
+            if (text.startsWith('Step')) {
+                formattedText = `<span class="text-accent">${text}</span>`;
+            }
+
+            p.innerHTML = `<span class="text-stone-700">[${time}]</span> ${formattedText}`;
             logsDiv.appendChild(p);
             logsDiv.scrollTop = logsDiv.scrollHeight;
 
-            // Simple loss parser
+            // Extract Loss from JSON or text
             if (text.includes('"loss"')) {
                 try {
                     const match = text.match(/"loss":\s*([\d.]+)/);
@@ -316,23 +332,40 @@
             }
         }
 
+        function clearLogs() {
+            logsDiv.innerHTML = '> Console cleared.\n';
+            lossChart.data.labels = [];
+            lossChart.data.datasets[0].data = [];
+            lossChart.update();
+        }
+
+        // Handle SDK Ready
+        window.addEventListener('gradio-ready', () => {
+            trainBtn.disabled = false;
+            trainBtn.className = "w-full h-16 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all";
+            btnText.innerText = "Initialize Training Sequence";
+            statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> SDK Connected';
+        });
+
         trainBtn.addEventListener('click', async () => {
-            // Check if the script module has loaded the client into window
-            if (!window.GradioClient) {
-                appendLog("Gradio SDK is still loading. Please wait a moment...", true);
+            const hfToken = document.getElementById('hf_token').value;
+            
+            if (!hfToken || hfToken.length < 10) {
+                appendLog("Error: Valid Hugging Face token required for this operation.", true);
+                document.getElementById('hf_token').focus();
                 return;
             }
 
             trainBtn.disabled = true;
-            btnText.innerHTML = `<div class="loader"></div> Processing...`;
-            appendLog("Initializing Gradio connection...");
+            btnText.innerHTML = `<div class="loader"></div> Dispatching Job...`;
+            appendLog("Establishing link to Auto-PreTrain backend...");
 
             try {
                 const client = await window.GradioClient.connect("Auto-PreTrain/APT-product");
-                appendLog("Connected to backend. Submitting job...");
+                appendLog("Connection synchronized. Submitting payload...");
 
                 const payload = { 		
-                    token: document.getElementById('hf_token').value || "Hello!!", 		
+                    token: hfToken, 		
                     dataset_id: document.getElementById('dataset_id').value, 		
                     model_name: document.getElementById('model_name').value, 		
                     num_layers: parseInt(document.getElementById('num_layers').value), 		
@@ -352,11 +385,16 @@
 
                 for await (const msg of submission) {
                     if (msg.type === "data" && msg.data[0]) {
-                        msg.data[0].split('\n').forEach(line => appendLog(line));
+                        // Split by lines and filter out initialization spam if necessary
+                        const lines = msg.data[0].split('\n');
+                        lines.forEach(line => {
+                            if (line.trim()) appendLog(line);
+                        });
                     }
                 }
+                appendLog("Sequence complete. Check Hugging Face Hub.");
             } catch (err) {
-                appendLog(`Connection Error: ${err.message}`, true);
+                appendLog(`Backend Error: ${err.message}`, true);
             } finally {
                 trainBtn.disabled = false;
                 btnText.innerText = "Initialize Training Sequence";
