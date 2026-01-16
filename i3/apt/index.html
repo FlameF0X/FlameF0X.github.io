@@ -9,9 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     
-    <!-- Gradio Client CDN (Switched to esm.sh for better ESM compatibility) -->
+    <!-- FIX: Loading Gradio Client via ESM to resolve 'export' and 'undefined' errors -->
     <script type="module">
-        import { Client } from "https://esm.sh/@gradio/client@0.12.0";
+        import { Client } from "https://esm.sh/@gradio/client@1.0.1";
         window.GradioClient = Client;
     </script>
 
@@ -99,7 +99,7 @@
                 <span class="font-black tracking-tighter text-xl uppercase">Auto-PreTrain</span>
             </div>
             <div class="flex items-center gap-8 font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500">
-                <a href="https://flamefox.gattodev.tech/i3/" class="hover:text-accent transition-colors">Back to i3</a>
+                <a href="#" class="hover:text-accent transition-colors">Back to i3</a>
             </div>
         </div>
     </nav>
@@ -122,7 +122,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             <!-- Left: Configuration Section -->
-            <div class="lg:col-span-7 space-y-8 reveal active" style="transition-delay: 0.1s;">
+            <div class="lg:col-span-7 space-y-8 reveal active">
                 
                 <!-- 1. Identity & Repo -->
                 <div class="glass-panel p-8 bracket-box">
@@ -131,7 +131,7 @@
                             <i data-lucide="zap" class="text-accent w-5 h-5"></i>
                             <h3 class="font-bold text-sm uppercase tracking-widest text-stone-300">Workspace Identity</h3>
                         </div>
-                        <span class="text-[9px] font-mono text-stone-500 uppercase tracking-widest bg-stone-900/50 px-2 py-1 rounded">Auth: Secret Managed</span>
+                        <span class="text-[9px] font-mono text-stone-500 uppercase tracking-widest bg-stone-900/50 px-2 py-1 rounded">Engine: Optimized v2</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
@@ -145,7 +145,7 @@
                     </div>
                 </div>
 
-                <!-- 2. The Tabs Control -->
+                <!-- 2. Tabs Control -->
                 <div class="space-y-4">
                     <div class="flex gap-4 border-b border-border">
                         <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-accent text-white">01. Data_Config</button>
@@ -154,7 +154,6 @@
                     </div>
 
                     <div class="glass-panel p-8 min-h-[340px]">
-                        <!-- Step 1: Data -->
                         <div id="content-0" class="step-content active space-y-6">
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Dataset Identifier</label>
@@ -177,7 +176,6 @@
                             </div>
                         </div>
 
-                        <!-- Step 2: Architecture -->
                         <div id="content-1" class="step-content space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div class="space-y-2">
@@ -192,11 +190,9 @@
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Attention Heads</label>
                                 <input type="number" id="n_head" value="8" class="input-field w-full">
-                                <p class="text-[9px] text-accent/80 font-mono mt-2">// Division check: n_embd / n_head must be integer.</p>
                             </div>
                         </div>
 
-                        <!-- Step 3: Hyperparameters -->
                         <div id="content-2" class="step-content space-y-6">
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
                                 <div class="space-y-2">
@@ -212,34 +208,18 @@
                                     <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full">
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Weight Decay</label>
-                                    <input type="number" id="weight_decay" value="0.01" step="0.01" class="input-field w-full">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Warmup</label>
-                                    <input type="number" id="warmup_steps" value="100" class="input-field w-full">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Grad_Accum</label>
-                                    <input type="number" id="grad_accumulation" value="1" class="input-field w-full">
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <button id="train_btn" class="w-full h-16 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all transform hover:-translate-y-1 shadow-2xl shadow-accent/10">
+                <button id="train_btn" class="w-full h-16 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all">
                     <span id="btn_text">Initialize Training Sequence</span>
                     <i data-lucide="zap" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Right: Terminal & Status Section -->
-            <div class="lg:col-span-5 h-full flex flex-col gap-8 reveal active" style="transition-delay: 0.2s;">
-                
-                <!-- Loss Chart Panel -->
+            <!-- Right: Status Section -->
+            <div class="lg:col-span-5 flex flex-col gap-8">
                 <div class="glass-panel p-6 border-stone-800 h-[280px]">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
@@ -253,72 +233,44 @@
                     </div>
                 </div>
 
-                <!-- Terminal Output -->
                 <div class="glass-panel flex-1 flex flex-col overflow-hidden min-h-[300px] border-stone-800">
                     <div class="px-6 py-3 border-b border-border flex items-center justify-between bg-surface/30">
-                        <div class="flex items-center gap-3">
-                            <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-                            <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.process_stream</span>
-                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.process_stream</span>
                     </div>
-                    <div id="logs" class="flex-1 p-6 font-mono text-[11px] text-stone-400 overflow-y-auto custom-scrollbar bg-black/40 leading-relaxed scroll-smooth">
-                        <span class="text-stone-600 font-bold uppercase tracking-tighter">System Booted.</span><br>
+                    <div id="logs" class="flex-1 p-6 font-mono text-[11px] text-stone-400 overflow-y-auto custom-scrollbar bg-black/40 leading-relaxed">
                         > Ready for automated dispatch.
                     </div>
                 </div>
-
-                <!-- Footer Status Bar -->
-                <div class="glass-panel p-6 border-stone-800">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Sync Status</span>
-                        <span id="status_label" class="text-[10px] font-bold text-stone-600 uppercase">Idle</span>
-                    </div>
-                    <div id="status_text" class="text-xs font-mono text-stone-400 italic">
-                        No active job in progress.
-                    </div>
-                </div>
-
             </div>
         </div>
     </main>
 
-    <footer class="border-t border-border py-12 bg-bg/50 backdrop-blur-sm">
-        <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-stone-600 font-mono text-[10px] uppercase tracking-widest">
-            <span>&copy; 2025 i3-lab // Auto-PreTrain Protocol</span>
-            <div class="flex gap-8 mt-4 md:mt-0">
-                <a href="https://huggingface.co/Auto-PreTrain" class="hover:text-accent transition-colors">Auto-PreTrain</a>
-                <a href="https://huggingface.co/i3-lab" class="hover:text-accent transition-colors">i3-lab</a>
-            </div>
-        </div>
-    </footer>
-
     <script>
+        // Tab switching logic
         function switchTab(index) {
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('active', 'border-accent', 'text-white');
                 b.classList.add('border-transparent', 'text-stone-500');
             });
-            
             document.getElementById(`content-${index}`).classList.add('active');
             const btn = document.getElementById(`tab-${index}`);
             btn.classList.add('active', 'border-accent', 'text-white');
-            btn.classList.remove('border-transparent', 'text-stone-500');
         }
 
+        // Initialize Chart
         const ctx = document.getElementById('lossChart').getContext('2d');
         const lossChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Training Loss',
+                    label: 'Loss',
                     data: [],
                     borderColor: '#ea580c',
                     backgroundColor: 'rgba(234, 88, 12, 0.1)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
                     fill: true,
                     tension: 0.4
                 }]
@@ -328,7 +280,7 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { display: false } },
+                    x: { display: false },
                     y: { grid: { color: 'rgba(231, 229, 228, 0.05)' }, ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } } }
                 }
             }
@@ -338,118 +290,78 @@
 
         const trainBtn = document.getElementById('train_btn');
         const logsDiv = document.getElementById('logs');
-        const statusDiv = document.getElementById('status_text');
-        const statusLabel = document.getElementById('status_label');
         const btnText = document.getElementById('btn_text');
         const currentLossEl = document.getElementById('current_loss_val');
 
         function appendLog(text, isError = false) {
             const time = new Date().toLocaleTimeString([], { hour12: false });
-            try {
-                const jsonMatch = text.match(/\{.*\}/);
-                if (jsonMatch) {
-                    const data = JSON.parse(jsonMatch[0]);
-                    if (data.loss) {
-                        const stepMatch = text.match(/Step (\d+):/);
-                        updateChart(stepMatch ? stepMatch[1] : (data.epoch || "??"), data.loss);
-                    }
-                }
-            } catch (e) {}
-
             const p = document.createElement('div');
-            p.className = `mb-1 ${isError ? 'text-red-500 font-bold' : ''}`;
-            p.innerHTML = `<span class="text-stone-700 font-mono">[${time}]</span> ${text}`;
+            p.className = `mb-1 ${isError ? 'text-red-500' : ''}`;
+            p.innerHTML = `<span class="text-stone-700">[${time}]</span> ${text}`;
             logsDiv.appendChild(p);
             logsDiv.scrollTop = logsDiv.scrollHeight;
-        }
 
-        function updateChart(step, loss) {
-            lossChart.data.labels.push(`S${step}`);
-            lossChart.data.datasets[0].data.push(loss);
-            if (lossChart.data.labels.length > 60) {
-                lossChart.data.labels.shift();
-                lossChart.data.datasets[0].data.shift();
+            // Simple loss parser
+            if (text.includes('"loss"')) {
+                try {
+                    const match = text.match(/"loss":\s*([\d.]+)/);
+                    if (match) {
+                        const loss = parseFloat(match[1]);
+                        lossChart.data.labels.push("");
+                        lossChart.data.datasets[0].data.push(loss);
+                        currentLossEl.innerText = loss.toFixed(4);
+                        lossChart.update('none');
+                    }
+                } catch(e) {}
             }
-            currentLossEl.innerText = parseFloat(loss).toFixed(4);
-            lossChart.update('none');
         }
 
         trainBtn.addEventListener('click', async () => {
-            const token = document.getElementById('hf_token').value;
-            const modelName = document.getElementById('model_name').value;
-            
-            lossChart.data.labels = [];
-            lossChart.data.datasets[0].data = [];
-            lossChart.update();
-            currentLossEl.innerText = "--";
+            // Check if the script module has loaded the client into window
+            if (!window.GradioClient) {
+                appendLog("Gradio SDK is still loading. Please wait a moment...", true);
+                return;
+            }
 
             trainBtn.disabled = true;
-            trainBtn.classList.add('opacity-50', 'cursor-wait');
-            btnText.innerHTML = `<div class="loader"></div> Processing Configuration...`;
-            statusLabel.innerText = "Active";
-            statusLabel.classList.replace('text-stone-600', 'text-accent');
-            
-            appendLog(`Initializing connection to Auto-PreTrain node...`);
-            
+            btnText.innerHTML = `<div class="loader"></div> Processing...`;
+            appendLog("Initializing Gradio connection...");
+
             try {
-                // Ensure the Gradio Client has loaded from the module script
-                if (!window.GradioClient) {
-                    throw new Error("Gradio SDK is still loading or failed to initialize. Please wait a moment and try again.");
-                }
+                const client = await window.GradioClient.connect("Auto-PreTrain/APT-product");
+                appendLog("Connected to backend. Submitting job...");
 
-                const Client = window.GradioClient;
-                const client = await Client.connect("https://flamef0x-apt-product.hf.space");
-
-                appendLog(`Handshake confirmed. Dispatching payload...`);
-
-                const params = { 		
-                    token: token || "", 
+                const payload = { 		
+                    token: document.getElementById('hf_token').value || "Hello!!", 		
                     dataset_id: document.getElementById('dataset_id').value, 		
-                    model_name: modelName, 		
+                    model_name: document.getElementById('model_name').value, 		
                     num_layers: parseInt(document.getElementById('num_layers').value), 		
                     n_embd: parseInt(document.getElementById('n_embd').value), 		
                     n_head: parseInt(document.getElementById('n_head').value), 		
                     context_length: parseInt(document.getElementById('context_length').value), 		
                     epochs: parseInt(document.getElementById('epochs').value), 		
                     lr: parseFloat(document.getElementById('lr').value), 		
-                    weight_decay: parseFloat(document.getElementById('weight_decay').value), 		
-                    warmup_steps: parseInt(document.getElementById('warmup_steps').value), 		
+                    weight_decay: 0.01, 		
+                    warmup_steps: 100, 		
                     batch_size: parseInt(document.getElementById('batch_size').value), 		
-                    grad_accumulation: parseInt(document.getElementById('grad_accumulation').value), 		
+                    grad_accumulation: 1, 		
                     sample_limit: parseInt(document.getElementById('sample_limit').value), 
                 };
 
-                const result = await client.predict("/train_and_push_generator", params);
+                const submission = client.submit("/train_and_push_generator", payload);
 
-                if (result.data) {
-                    const lines = result.data[0].split('\n');
-                    logsDiv.innerHTML = ''; 
-                    lines.forEach(line => {
-                        if (line.trim()) appendLog(line);
-                    });
-                    statusDiv.innerText = result.data[1] || "Process Complete.";
-                    appendLog("Cycle finalized. Weights synchronized.");
+                for await (const msg of submission) {
+                    if (msg.type === "data" && msg.data[0]) {
+                        msg.data[0].split('\n').forEach(line => appendLog(line));
+                    }
                 }
-
-            } catch (error) {
-                appendLog(`CRITICAL SYSTEM ERROR: ${error.message}`, true);
-                console.error(error);
+            } catch (err) {
+                appendLog(`Connection Error: ${err.message}`, true);
             } finally {
                 trainBtn.disabled = false;
-                trainBtn.classList.remove('opacity-50', 'cursor-wait');
-                btnText.innerHTML = `Initialize Training Sequence`;
-                statusLabel.innerText = "Idle";
-                statusLabel.classList.replace('text-accent', 'text-stone-600');
-                lucide.createIcons();
+                btnText.innerText = "Initialize Training Sequence";
             }
         });
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
