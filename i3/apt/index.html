@@ -9,14 +9,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     
-    <!-- Gradio Client CDN -->
+    <!-- Gradio Client CDN (Fix for SyntaxError: using namespace import) -->
     <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.0.0/dist/index.min.js";
         window.GradioClient = Client;
     </script>
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js for Loss Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
         tailwind.config = {
@@ -34,219 +37,244 @@
                         accent: '#ea580c',
                         'accent-dim': '#431407',
                         border: '#44403c',
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(rgba(231, 229, 228, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(231, 229, 228, 0.03) 1px, transparent 1px)",
                     }
                 }
             }
         }
     </script>
 
-    <style>
+    <style type="text/tailwindcss">
         body {
-            background-color: #0c0a09;
-            color: #e7e5e4;
-            font-family: 'Inter', sans-serif;
+            @apply bg-bg text-text selection:bg-accent selection:text-white antialiased overflow-x-hidden;
+            background-image: theme('backgroundImage.grid-pattern');
+            background-size: 40px 40px;
         }
+
         .glass-panel {
-            background: rgba(28, 25, 23, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid #44403c;
+            @apply bg-surface/40 backdrop-blur-md border border-border rounded-2xl transition-all duration-300;
         }
+
         .input-field {
-            background: #0c0a09;
-            border: 1px solid #44403c;
-            color: #e7e5e4;
-            transition: all 0.2s;
+            @apply bg-bg border border-border text-text rounded-xl px-4 py-3 text-sm font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/20 transition-all;
         }
-        .input-field:focus {
-            border-color: #ea580c;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2);
-        }
-        .step-content {
-            display: none;
-        }
-        .step-content.active {
-            display: block;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1c1917;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #44403c;
-            border-radius: 10px;
-        }
+
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+
         .loader {
-            border: 3px solid #44403c;
-            border-top: 3px solid #ea580c;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+            @apply border-2 border-border border-t-accent rounded-full w-4 h-4 animate-spin;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .bracket-box { position: relative; }
+        .bracket-box::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid theme('colors.accent'); border-left: 2px solid theme('colors.accent'); }
+        .bracket-box::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid theme('colors.accent'); border-right: 2px solid theme('colors.accent'); }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Navigation (Styled like your current site) -->
-    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center border-b border-border/50 bg-bg/80 backdrop-blur-md">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-bg/80 backdrop-blur-md border-b border-border">
+        <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-accent rounded flex items-center justify-center">
+                    <i data-lucide="cpu" class="text-white w-5 h-5"></i>
+                </div>
+                <span class="font-black tracking-tighter text-xl uppercase">Auto-PreTrain</span>
             </div>
-            <span class="font-black tracking-tighter text-xl">Auto-PreTrain</span>
-        </div>
-        <div class="flex gap-6 text-sm font-medium text-stone-400">
-            <a href="index.html" class="hover:text-accent transition-colors">Lab Home</a>
-            <a href="#" class="hover:text-accent transition-colors">Documentation</a>
+            <div class="flex items-center gap-8 font-mono text-[10px] font-bold uppercase tracking-widest text-stone-500">
+                <a href="https://flamefox.gattodev.tech/i3/" class="hover:text-accent transition-colors">Back to i3</a>
+            </div>
         </div>
     </nav>
 
-    <main class="pt-32 pb-20 px-6 max-w-5xl mx-auto">
+    <main class="flex-1 pt-32 pb-20 px-6 max-w-[1440px] mx-auto w-full">
         
-        <!-- Header Section -->
-        <header class="mb-12">
-            <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-4">Train. Push. <span class="text-accent">Iterate.</span></h1>
-            <p class="text-stone-400 text-lg max-w-2xl leading-relaxed font-light">
-                Configure custom Transformer architectures and train directly to the 
-                <span class="text-stone-200 font-mono bg-surface px-2 py-0.5 rounded border border-border">Auto-PreTrain</span> organization.
+        <!-- Header -->
+        <header class="mb-16 reveal active">
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-none uppercase mb-6">
+                Direct <span class="text-transparent" style="-webkit-text-stroke: 1px #44403c;">Pre-Training</span><br>
+                <span class="text-accent">To The Hub.</span>
+            </h1>
+            <p class="text-stone-400 text-lg max-w-3xl leading-relaxed font-light">
+                Utilize the <span class="text-white font-mono">Auto-PreTrain</span> automated synthesis engine. 
+                Backend authentication is handled via internal secrets. Just define your architecture and push.
             </p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- Left: Configuration Form -->
-            <div class="lg:col-span-7 space-y-6">
+            <!-- Left: Configuration Section -->
+            <div class="lg:col-span-7 space-y-8 reveal active" style="transition-delay: 0.1s;">
                 
-                <!-- Authentication & Meta -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="key" class="text-accent w-4 h-4"></i>
-                        <h3 class="font-semibold text-sm uppercase tracking-widest text-stone-400">Environment</h3>
+                <!-- 1. Identity & Repo -->
+                <div class="glass-panel p-8 bracket-box">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="zap" class="text-accent w-5 h-5"></i>
+                            <h3 class="font-bold text-sm uppercase tracking-widest text-stone-300">Workspace Identity</h3>
+                        </div>
+                        <span class="text-[9px] font-mono text-stone-500 uppercase tracking-widest bg-stone-900/50 px-2 py-1 rounded">Auth: Secret Managed</span>
                     </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-tight">Hugging Face Token</label>
-                            <input type="password" id="hf_token" placeholder="hf_..." class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            <p class="text-[10px] text-stone-500 mt-2">Required for write access to the Auto-PreTrain organization.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Repository Name</label>
+                            <input type="text" id="model_name" value="my-tiny-gpt2" class="input-field w-full">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-tight">Model Repository Name</label>
-                            <input type="text" id="model_name" value="my-tiny-gpt2" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabs Navigation -->
-                <div class="flex gap-2 p-1 bg-surface rounded-xl border border-border">
-                    <button onclick="switchTab(0)" class="tab-btn active flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-accent text-white" id="tab-0">1. DATA</button>
-                    <button onclick="switchTab(1)" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg transition-all text-stone-400" id="tab-1">2. ARCH</button>
-                    <button onclick="switchTab(2)" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg transition-all text-stone-400" id="tab-2">3. HYPER</button>
-                </div>
-
-                <div class="glass-panel p-6 rounded-2xl min-h-[300px]">
-                    <!-- Step 1: Data -->
-                    <div id="content-0" class="step-content active space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Dataset ID</label>
-                            <input type="text" id="dataset_id" value="roneneldan/TinyStories" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Sample Limit</label>
-                                <input type="number" id="sample_limit" value="1000" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Context Length</label>
-                                <select id="context_length" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                                    <option value="64">64</option>
-                                    <option value="128" selected>128</option>
-                                    <option value="256">256</option>
-                                    <option value="512">512</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Architecture -->
-                    <div id="content-1" class="step-content space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Num Layers</label>
-                                <input type="number" id="num_layers" value="4" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Embedding Dim</label>
-                                <input type="number" id="n_embd" value="256" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Attention Heads</label>
-                            <input type="number" id="n_head" value="8" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            <p class="text-[10px] text-accent mt-2">Rule: Embedding Dim must be divisible by Attention Heads.</p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Hyperparameters -->
-                    <div id="content-2" class="step-content space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Epochs</label>
-                                <input type="number" id="epochs" value="1" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Learning Rate</label>
-                                <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Batch Size</label>
-                                <input type="number" id="batch_size" value="8" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Weight Decay</label>
-                                <input type="number" id="weight_decay" value="0.01" step="0.01" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Warmup Steps</label>
-                                <input type="number" id="warmup_steps" value="100" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Grad Accumulation</label>
-                                <input type="number" id="grad_accumulation" value="1" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
-                            </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">HF Token (Optional)</label>
+                            <input type="password" id="hf_token" placeholder="Using backend secret..." class="input-field w-full opacity-60 focus:opacity-100 transition-opacity">
                         </div>
                     </div>
                 </div>
 
-                <button id="train_btn" class="w-full bg-accent hover:bg-orange-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-accent/20">
-                    <span id="btn_text">LAUNCH PRE-TRAINING</span>
-                    <i data-lucide="flame" class="w-5 h-5"></i>
+                <!-- 2. The Tabs Control -->
+                <div class="space-y-4">
+                    <div class="flex gap-4 border-b border-border">
+                        <button onclick="switchTab(0)" id="tab-0" class="tab-btn active pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-accent text-white">01. Data_Config</button>
+                        <button onclick="switchTab(1)" id="tab-1" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500 hover:text-stone-300 transition-all">02. Arch_Params</button>
+                        <button onclick="switchTab(2)" id="tab-2" class="tab-btn pb-4 px-2 text-xs font-bold uppercase tracking-widest border-b-2 border-transparent text-stone-500 hover:text-stone-300 transition-all">03. Train_Hyper</button>
+                    </div>
+
+                    <div class="glass-panel p-8 min-h-[340px]">
+                        <!-- Step 1: Data -->
+                        <div id="content-0" class="step-content active space-y-6">
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Dataset Identifier</label>
+                                <input type="text" id="dataset_id" value="roneneldan/TinyStories" class="input-field w-full">
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Sample Limit</label>
+                                    <input type="number" id="sample_limit" value="1000" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Context Window</label>
+                                    <select id="context_length" class="input-field w-full">
+                                        <option value="64">64 Tokens</option>
+                                        <option value="128" selected>128 Tokens</option>
+                                        <option value="256">256 Tokens</option>
+                                        <option value="512">512 Tokens</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Architecture -->
+                        <div id="content-1" class="step-content space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Hidden Layers</label>
+                                    <input type="number" id="num_layers" value="4" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Embedding Dim</label>
+                                    <input type="number" id="n_embd" value="256" class="input-field w-full">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Attention Heads</label>
+                                <input type="number" id="n_head" value="8" class="input-field w-full">
+                                <p class="text-[9px] text-accent/80 font-mono mt-2">// Division check: n_embd / n_head must be integer.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Hyperparameters -->
+                        <div id="content-2" class="step-content space-y-6">
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Epochs</label>
+                                    <input type="number" id="epochs" value="1" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Batch Size</label>
+                                    <input type="number" id="batch_size" value="8" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Learning Rate</label>
+                                    <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Weight Decay</label>
+                                    <input type="number" id="weight_decay" value="0.01" step="0.01" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Warmup</label>
+                                    <input type="number" id="warmup_steps" value="100" class="input-field w-full">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest">Grad_Accum</label>
+                                    <input type="number" id="grad_accumulation" value="1" class="input-field w-full">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="train_btn" class="w-full h-16 bg-accent hover:bg-white hover:text-bg text-white font-black uppercase tracking-widest flex items-center justify-center gap-4 transition-all transform hover:-translate-y-1 shadow-2xl shadow-accent/10">
+                    <span id="btn_text">Initialize Training Sequence</span>
+                    <i data-lucide="zap" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Right: Real-time Logs -->
-            <div class="lg:col-span-5 flex flex-col gap-6">
+            <!-- Right: Terminal & Status Section -->
+            <div class="lg:col-span-5 h-full flex flex-col gap-8 reveal active" style="transition-delay: 0.2s;">
                 
-                <div class="glass-panel rounded-2xl flex-1 flex flex-col overflow-hidden">
-                    <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-surface/50">
+                <!-- Loss Chart Panel -->
+                <div class="glass-panel p-6 border-stone-800 h-[280px]">
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Live Training Terminal</span>
+                            <i data-lucide="line-chart" class="text-accent w-4 h-4"></i>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">Live_Loss_Metrics</span>
                         </div>
-                        <i data-lucide="terminal" class="w-4 h-4 text-stone-500"></i>
+                        <span id="current_loss_val" class="font-mono text-xs text-accent font-bold">--</span>
                     </div>
-                    <div id="logs" class="flex-1 p-6 font-mono text-xs text-stone-300 overflow-y-auto custom-scrollbar bg-black/40 whitespace-pre-wrap leading-relaxed">
-                        [SYSTEM]: Ready for instructions...
+                    <div class="h-[180px] w-full">
+                        <canvas id="lossChart"></canvas>
                     </div>
-                    <div id="status" class="px-6 py-4 bg-surface/80 border-t border-border text-[10px] font-bold text-stone-500 italic">
-                        No active session
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="glass-panel flex-1 flex flex-col overflow-hidden min-h-[300px] border-stone-800">
+                    <div class="px-6 py-3 border-b border-border flex items-center justify-between bg-surface/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-stone-500">apt.process_stream</span>
+                        </div>
+                    </div>
+                    <div id="logs" class="flex-1 p-6 font-mono text-[11px] text-stone-400 overflow-y-auto custom-scrollbar bg-black/40 leading-relaxed scroll-smooth">
+                        <span class="text-stone-600 font-bold uppercase tracking-tighter">System Booted.</span><br>
+                        > Ready for automated dispatch.
+                    </div>
+                </div>
+
+                <!-- Footer Status Bar -->
+                <div class="glass-panel p-6 border-stone-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Sync Status</span>
+                        <span id="status_label" class="text-[10px] font-bold text-stone-600 uppercase">Idle</span>
+                    </div>
+                    <div id="status_text" class="text-xs font-mono text-stone-400 italic">
+                        No active job in progress.
                     </div>
                 </div>
 
@@ -254,57 +282,156 @@
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="border-t border-border py-12 bg-bg/50 backdrop-blur-sm">
+        <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-stone-600 font-mono text-[10px] uppercase tracking-widest">
+            <span>&copy; 2025 i3-lab // Auto-PreTrain Protocol</span>
+            <div class="flex gap-8 mt-4 md:mt-0">
+                <a href="https://huggingface.co/Auto-PreTrain" class="hover:text-accent transition-colors">Auto-PreTrain</a>
+                <a href="https://huggingface.co/i3-lab" class="hover:text-accent transition-colors">i3-lab</a>
+            </div>
+        </div>
+    </footer>
+
     <script>
         // Tab Management
         function switchTab(index) {
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('bg-accent', 'text-white');
-                b.classList.add('text-stone-400');
+                b.classList.remove('active', 'border-accent', 'text-white');
+                b.classList.add('border-transparent', 'text-stone-500');
             });
             
             document.getElementById(`content-${index}`).classList.add('active');
             const btn = document.getElementById(`tab-${index}`);
-            btn.classList.add('bg-accent', 'text-white');
-            btn.classList.remove('text-stone-400');
+            btn.classList.add('active', 'border-accent', 'text-white');
+            btn.classList.remove('border-transparent', 'text-stone-500');
         }
+
+        // Initialize Loss Chart
+        const ctx = document.getElementById('lossChart').getContext('2d');
+        const lossChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Training Loss',
+                    data: [],
+                    borderColor: '#ea580c',
+                    backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false }
+                    },
+                    y: {
+                        grid: { color: 'rgba(231, 229, 228, 0.05)' },
+                        ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } }
+                    }
+                }
+            }
+        });
 
         // Initialize Lucide
         lucide.createIcons();
 
         const trainBtn = document.getElementById('train_btn');
         const logsDiv = document.getElementById('logs');
-        const statusDiv = document.getElementById('status');
+        const statusDiv = document.getElementById('status_text');
+        const statusLabel = document.getElementById('status_label');
         const btnText = document.getElementById('btn_text');
+        const currentLossEl = document.getElementById('current_loss_val');
 
-        function appendLog(text) {
+        function appendLog(text, isError = false) {
             const time = new Date().toLocaleTimeString([], { hour12: false });
-            logsDiv.innerText += `\n[${time}] ${text}`;
+            
+            try {
+                const jsonMatch = text.match(/\{.*\}/);
+                if (jsonMatch) {
+                    const data = JSON.parse(jsonMatch[0]);
+                    if (data.loss) {
+                        const stepMatch = text.match(/Step (\d+):/);
+                        const step = stepMatch ? stepMatch[1] : data.epoch || "??";
+                        updateChart(step, data.loss);
+                    }
+                }
+            } catch (e) {}
+
+            const p = document.createElement('div');
+            p.className = `mb-1 ${isError ? 'text-red-500 font-bold' : ''}`;
+            p.innerHTML = `<span class="text-stone-700 font-mono">[${time}]</span> ${text}`;
+            logsDiv.appendChild(p);
             logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function updateChart(step, loss) {
+            lossChart.data.labels.push(`S${step}`);
+            lossChart.data.datasets[0].data.push(loss);
+            
+            if (lossChart.data.labels.length > 60) {
+                lossChart.data.labels.shift();
+                lossChart.data.datasets[0].data.shift();
+            }
+            
+            currentLossEl.innerText = parseFloat(loss).toFixed(4);
+            lossChart.update('none');
         }
 
         trainBtn.addEventListener('click', async () => {
             const token = document.getElementById('hf_token').value;
             const modelName = document.getElementById('model_name').value;
             
-            if (!token) {
-                appendLog("ERROR: Hugging Face Token is required.");
-                return;
-            }
+            lossChart.data.labels = [];
+            lossChart.data.datasets[0].data = [];
+            lossChart.update();
+            currentLossEl.innerText = "--";
 
-            // Disable UI
             trainBtn.disabled = true;
-            trainBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            btnText.innerHTML = `<div class="loader"></div> INITIALIZING...`;
+            trainBtn.classList.add('opacity-50', 'cursor-wait');
+            btnText.innerHTML = `<div class="loader"></div> Processing Configuration...`;
+            statusLabel.innerText = "Active";
+            statusLabel.classList.replace('text-stone-600', 'text-accent');
             
-            appendLog(`Connecting to APT-product backend...`);
+            appendLog(`Initializing connection to Auto-PreTrain node...`);
             
             try {
-                const client = await window.GradioClient.connect("FlameF0X/APT-product");
-                appendLog(`Connection established. Submitting job...`);
+                if (!window.GradioClient) {
+                    throw new Error("Gradio SDK failed to initialize. Please refresh the page.");
+                }
+
+                const Gradio = window.GradioClient;
+                // Use Client or default export as fallback
+                const ClientClass = typeof Gradio === 'function' ? Gradio : Gradio.Client;
+
+                if (!ClientClass || typeof ClientClass.connect !== 'function') {
+                    throw new Error("Gradio connection method not found. SDK version mismatch.");
+                }
+
+                let client;
+                try {
+                    client = await ClientClass.connect("https://flamef0x-apt-product.hf.space");
+                } catch (connErr) {
+                    console.error("Connection failed:", connErr);
+                    throw new Error("Could not connect to the training space. It may be offline or initializing.");
+                }
+
+                appendLog(`Handshake confirmed. Dispatching payload...`);
 
                 const params = { 		
-                    token: token, 		
+                    token: token || "", 
                     dataset_id: document.getElementById('dataset_id').value, 		
                     model_name: modelName, 		
                     num_layers: parseInt(document.getElementById('num_layers').value), 		
@@ -320,25 +447,37 @@
                     sample_limit: parseInt(document.getElementById('sample_limit').value), 
                 };
 
-                // Using submit for streaming logs if supported, otherwise predict
                 const result = await client.predict("/train_and_push_generator", params);
 
                 if (result.data) {
-                    logsDiv.innerText = result.data[0];
-                    statusDiv.innerText = result.data[1];
-                    appendLog("Process complete.");
+                    const lines = result.data[0].split('\n');
+                    logsDiv.innerHTML = ''; 
+                    lines.forEach(line => {
+                        if (line.trim()) appendLog(line);
+                    });
+                    
+                    statusDiv.innerText = result.data[1] || "Process Complete.";
+                    appendLog("Cycle finalized. Weights synchronized.");
                 }
 
             } catch (error) {
-                appendLog(`CRITICAL ERROR: ${error.message}`);
-                console.error(error);
+                appendLog(`CRITICAL SYSTEM ERROR: ${error.message}`, true);
             } finally {
                 trainBtn.disabled = false;
-                trainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnText.innerHTML = `LAUNCH PRE-TRAINING`;
+                trainBtn.classList.remove('opacity-50', 'cursor-wait');
+                btnText.innerHTML = `Initialize Training Sequence`;
+                statusLabel.innerText = "Idle";
+                statusLabel.classList.replace('text-accent', 'text-stone-600');
                 lucide.createIcons();
             }
         });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
