@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-PreTrain | i3-lab</title>
+    
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Gradio Client CDN -->
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+        window.GradioClient = Client;
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        bg: '#0c0a09',
+                        surface: '#1c1917',
+                        surface_hover: '#292524',
+                        text: '#e7e5e4',
+                        accent: '#ea580c',
+                        'accent-dim': '#431407',
+                        border: '#44403c',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0c0a09;
+            color: #e7e5e4;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(28, 25, 23, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #44403c;
+        }
+        .input-field {
+            background: #0c0a09;
+            border: 1px solid #44403c;
+            color: #e7e5e4;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            border-color: #ea580c;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2);
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1c1917;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #44403c;
+            border-radius: 10px;
+        }
+        .loader {
+            border: 3px solid #44403c;
+            border-top: 3px solid #ea580c;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation (Styled like your current site) -->
+    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center border-b border-border/50 bg-bg/80 backdrop-blur-md">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+            </div>
+            <span class="font-black tracking-tighter text-xl">Auto-PreTrain</span>
+        </div>
+        <div class="flex gap-6 text-sm font-medium text-stone-400">
+            <a href="index.html" class="hover:text-accent transition-colors">Lab Home</a>
+            <a href="#" class="hover:text-accent transition-colors">Documentation</a>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20 px-6 max-w-5xl mx-auto">
+        
+        <!-- Header Section -->
+        <header class="mb-12">
+            <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-4">Train. Push. <span class="text-accent">Iterate.</span></h1>
+            <p class="text-stone-400 text-lg max-w-2xl leading-relaxed font-light">
+                Configure custom Transformer architectures and train directly to the 
+                <span class="text-stone-200 font-mono bg-surface px-2 py-0.5 rounded border border-border">Auto-PreTrain</span> organization.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left: Configuration Form -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Authentication & Meta -->
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex items-center gap-2 mb-6">
+                        <i data-lucide="key" class="text-accent w-4 h-4"></i>
+                        <h3 class="font-semibold text-sm uppercase tracking-widest text-stone-400">Environment</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-tight">Hugging Face Token</label>
+                            <input type="password" id="hf_token" placeholder="hf_..." class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            <p class="text-[10px] text-stone-500 mt-2">Required for write access to the Auto-PreTrain organization.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-tight">Model Repository Name</label>
+                            <input type="text" id="model_name" value="my-tiny-gpt2" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="flex gap-2 p-1 bg-surface rounded-xl border border-border">
+                    <button onclick="switchTab(0)" class="tab-btn active flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-accent text-white" id="tab-0">1. DATA</button>
+                    <button onclick="switchTab(1)" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg transition-all text-stone-400" id="tab-1">2. ARCH</button>
+                    <button onclick="switchTab(2)" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg transition-all text-stone-400" id="tab-2">3. HYPER</button>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl min-h-[300px]">
+                    <!-- Step 1: Data -->
+                    <div id="content-0" class="step-content active space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Dataset ID</label>
+                            <input type="text" id="dataset_id" value="roneneldan/TinyStories" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Sample Limit</label>
+                                <input type="number" id="sample_limit" value="1000" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Context Length</label>
+                                <select id="context_length" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                                    <option value="64">64</option>
+                                    <option value="128" selected>128</option>
+                                    <option value="256">256</option>
+                                    <option value="512">512</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Architecture -->
+                    <div id="content-1" class="step-content space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Num Layers</label>
+                                <input type="number" id="num_layers" value="4" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Embedding Dim</label>
+                                <input type="number" id="n_embd" value="256" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Attention Heads</label>
+                            <input type="number" id="n_head" value="8" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            <p class="text-[10px] text-accent mt-2">Rule: Embedding Dim must be divisible by Attention Heads.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Hyperparameters -->
+                    <div id="content-2" class="step-content space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Epochs</label>
+                                <input type="number" id="epochs" value="1" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Learning Rate</label>
+                                <input type="number" id="lr" value="0.0005" step="0.0001" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Batch Size</label>
+                                <input type="number" id="batch_size" value="8" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Weight Decay</label>
+                                <input type="number" id="weight_decay" value="0.01" step="0.01" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Warmup Steps</label>
+                                <input type="number" id="warmup_steps" value="100" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 mb-2 uppercase">Grad Accumulation</label>
+                                <input type="number" id="grad_accumulation" value="1" class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="train_btn" class="w-full bg-accent hover:bg-orange-600 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-accent/20">
+                    <span id="btn_text">LAUNCH PRE-TRAINING</span>
+                    <i data-lucide="flame" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Right: Real-time Logs -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                
+                <div class="glass-panel rounded-2xl flex-1 flex flex-col overflow-hidden">
+                    <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-surface/50">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">Live Training Terminal</span>
+                        </div>
+                        <i data-lucide="terminal" class="w-4 h-4 text-stone-500"></i>
+                    </div>
+                    <div id="logs" class="flex-1 p-6 font-mono text-xs text-stone-300 overflow-y-auto custom-scrollbar bg-black/40 whitespace-pre-wrap leading-relaxed">
+                        [SYSTEM]: Ready for instructions...
+                    </div>
+                    <div id="status" class="px-6 py-4 bg-surface/80 border-t border-border text-[10px] font-bold text-stone-500 italic">
+                        No active session
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab Management
+        function switchTab(index) {
+            document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-accent', 'text-white');
+                b.classList.add('text-stone-400');
+            });
+            
+            document.getElementById(`content-${index}`).classList.add('active');
+            const btn = document.getElementById(`tab-${index}`);
+            btn.classList.add('bg-accent', 'text-white');
+            btn.classList.remove('text-stone-400');
+        }
+
+        // Initialize Lucide
+        lucide.createIcons();
+
+        const trainBtn = document.getElementById('train_btn');
+        const logsDiv = document.getElementById('logs');
+        const statusDiv = document.getElementById('status');
+        const btnText = document.getElementById('btn_text');
+
+        function appendLog(text) {
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            logsDiv.innerText += `\n[${time}] ${text}`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        trainBtn.addEventListener('click', async () => {
+            const token = document.getElementById('hf_token').value;
+            const modelName = document.getElementById('model_name').value;
+            
+            if (!token) {
+                appendLog("ERROR: Hugging Face Token is required.");
+                return;
+            }
+
+            // Disable UI
+            trainBtn.disabled = true;
+            trainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            btnText.innerHTML = `<div class="loader"></div> INITIALIZING...`;
+            
+            appendLog(`Connecting to APT-product backend...`);
+            
+            try {
+                const client = await window.GradioClient.connect("FlameF0X/APT-product");
+                appendLog(`Connection established. Submitting job...`);
+
+                const params = { 		
+                    token: token, 		
+                    dataset_id: document.getElementById('dataset_id').value, 		
+                    model_name: modelName, 		
+                    num_layers: parseInt(document.getElementById('num_layers').value), 		
+                    n_embd: parseInt(document.getElementById('n_embd').value), 		
+                    n_head: parseInt(document.getElementById('n_head').value), 		
+                    context_length: parseInt(document.getElementById('context_length').value), 		
+                    epochs: parseInt(document.getElementById('epochs').value), 		
+                    lr: parseFloat(document.getElementById('lr').value), 		
+                    weight_decay: parseFloat(document.getElementById('weight_decay').value), 		
+                    warmup_steps: parseInt(document.getElementById('warmup_steps').value), 		
+                    batch_size: parseInt(document.getElementById('batch_size').value), 		
+                    grad_accumulation: parseInt(document.getElementById('grad_accumulation').value), 		
+                    sample_limit: parseInt(document.getElementById('sample_limit').value), 
+                };
+
+                // Using submit for streaming logs if supported, otherwise predict
+                const result = await client.predict("/train_and_push_generator", params);
+
+                if (result.data) {
+                    logsDiv.innerText = result.data[0];
+                    statusDiv.innerText = result.data[1];
+                    appendLog("Process complete.");
+                }
+
+            } catch (error) {
+                appendLog(`CRITICAL ERROR: ${error.message}`);
+                console.error(error);
+            } finally {
+                trainBtn.disabled = false;
+                trainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnText.innerHTML = `LAUNCH PRE-TRAINING`;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
