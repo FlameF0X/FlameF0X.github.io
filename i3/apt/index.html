@@ -9,9 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     
-    <!-- Gradio Client CDN (Fix for SyntaxError: using namespace import) -->
+    <!-- Gradio Client CDN (Switched to esm.sh for better ESM compatibility) -->
     <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.0.0/dist/index.min.js";
+        import { Client } from "https://esm.sh/@gradio/client@0.12.0";
         window.GradioClient = Client;
     </script>
 
@@ -282,7 +282,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="border-t border-border py-12 bg-bg/50 backdrop-blur-sm">
         <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-stone-600 font-mono text-[10px] uppercase tracking-widest">
             <span>&copy; 2025 i3-lab // Auto-PreTrain Protocol</span>
@@ -294,7 +293,6 @@
     </footer>
 
     <script>
-        // Tab Management
         function switchTab(index) {
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => {
@@ -308,7 +306,6 @@
             btn.classList.remove('border-transparent', 'text-stone-500');
         }
 
-        // Initialize Loss Chart
         const ctx = document.getElementById('lossChart').getContext('2d');
         const lossChart = new Chart(ctx, {
             type: 'line',
@@ -329,23 +326,14 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { display: false }
-                    },
-                    y: {
-                        grid: { color: 'rgba(231, 229, 228, 0.05)' },
-                        ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } }
-                    }
+                    x: { grid: { display: false }, ticks: { display: false } },
+                    y: { grid: { color: 'rgba(231, 229, 228, 0.05)' }, ticks: { color: '#57534e', font: { family: 'JetBrains Mono', size: 9 } } }
                 }
             }
         });
 
-        // Initialize Lucide
         lucide.createIcons();
 
         const trainBtn = document.getElementById('train_btn');
@@ -357,15 +345,13 @@
 
         function appendLog(text, isError = false) {
             const time = new Date().toLocaleTimeString([], { hour12: false });
-            
             try {
                 const jsonMatch = text.match(/\{.*\}/);
                 if (jsonMatch) {
                     const data = JSON.parse(jsonMatch[0]);
                     if (data.loss) {
                         const stepMatch = text.match(/Step (\d+):/);
-                        const step = stepMatch ? stepMatch[1] : data.epoch || "??";
-                        updateChart(step, data.loss);
+                        updateChart(stepMatch ? stepMatch[1] : (data.epoch || "??"), data.loss);
                     }
                 }
             } catch (e) {}
@@ -380,12 +366,10 @@
         function updateChart(step, loss) {
             lossChart.data.labels.push(`S${step}`);
             lossChart.data.datasets[0].data.push(loss);
-            
             if (lossChart.data.labels.length > 60) {
                 lossChart.data.labels.shift();
                 lossChart.data.datasets[0].data.shift();
             }
-            
             currentLossEl.innerText = parseFloat(loss).toFixed(4);
             lossChart.update('none');
         }
@@ -408,25 +392,13 @@
             appendLog(`Initializing connection to Auto-PreTrain node...`);
             
             try {
+                // Ensure the Gradio Client has loaded from the module script
                 if (!window.GradioClient) {
-                    throw new Error("Gradio SDK failed to initialize. Please refresh the page.");
+                    throw new Error("Gradio SDK is still loading or failed to initialize. Please wait a moment and try again.");
                 }
 
-                const Gradio = window.GradioClient;
-                // Use Client or default export as fallback
-                const ClientClass = typeof Gradio === 'function' ? Gradio : Gradio.Client;
-
-                if (!ClientClass || typeof ClientClass.connect !== 'function') {
-                    throw new Error("Gradio connection method not found. SDK version mismatch.");
-                }
-
-                let client;
-                try {
-                    client = await ClientClass.connect("https://flamef0x-apt-product.hf.space");
-                } catch (connErr) {
-                    console.error("Connection failed:", connErr);
-                    throw new Error("Could not connect to the training space. It may be offline or initializing.");
-                }
+                const Client = window.GradioClient;
+                const client = await Client.connect("https://flamef0x-apt-product.hf.space");
 
                 appendLog(`Handshake confirmed. Dispatching payload...`);
 
@@ -455,13 +427,13 @@
                     lines.forEach(line => {
                         if (line.trim()) appendLog(line);
                     });
-                    
                     statusDiv.innerText = result.data[1] || "Process Complete.";
                     appendLog("Cycle finalized. Weights synchronized.");
                 }
 
             } catch (error) {
                 appendLog(`CRITICAL SYSTEM ERROR: ${error.message}`, true);
+                console.error(error);
             } finally {
                 trainBtn.disabled = false;
                 trainBtn.classList.remove('opacity-50', 'cursor-wait');
