@@ -254,7 +254,9 @@
             const p = document.createElement('div');
             
             const isStep = text.includes('Step');
-            p.className = `mb-1 ${isStep ? 'text-accent border-l-2 border-accent pl-2 bg-accent/5' : ''}`;
+            const isError = text.toLowerCase().includes('error') || text.toLowerCase().includes('exception');
+            
+            p.className = `mb-1 ${isStep ? 'text-accent border-l-2 border-accent pl-2 bg-accent/5' : ''} ${isError ? 'text-red-500 font-bold bg-red-500/10' : ''}`;
             p.innerHTML = `<span class="text-stone-700 font-bold mr-2">${time}</span>${text}`;
             
             logsDiv.appendChild(p);
@@ -341,19 +343,23 @@
                         const allLines = msg.data[0].split('\n').filter(l => l.trim() !== "");
                         if (allLines.length > displayedLinesCount) {
                             const newLines = allLines.slice(displayedLinesCount);
-                            newLines.forEach(line => {
+                            
+                            for (const line of newLines) {
                                 appendLog(line);
                                 
-                                // NEW: Check for the push-to-hub message specifically
+                                // STOP RUN ON ERROR
+                                if (line.toLowerCase().includes("error") || line.toLowerCase().includes("exception")) {
+                                    throw new Error("Critical execution error encountered in stream.");
+                                }
+
                                 if (line.includes("Pushing weights to")) {
                                     appendLog(">>> Detected model push. Finalizing interface for next run...");
                                     setTimeout(() => {
-                                        clearLogs();
                                         setButtonState('ready');
                                         appendLog("> Previous run pushed successfully. Ready for new dispatch.");
                                     }, 1000);
                                 }
-                            });
+                            }
                             displayedLinesCount = allLines.length;
                         }
                     }
@@ -364,11 +370,11 @@
                 }
 
             } catch (err) {
-                appendLog(`Error: ${err.message}`);
+                appendLog(`Fatal Stop: ${err.message}`);
+                // Ensure UI is reset even on crash
+                isTrainingActive = true; 
             } finally {
-                if (isTrainingActive) {
-                    setButtonState('ready');
-                }
+                setButtonState('ready');
             }
         });
     </script>
