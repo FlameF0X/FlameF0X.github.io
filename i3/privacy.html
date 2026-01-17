@@ -44,6 +44,7 @@
         #content p { @apply text-stone-400 leading-relaxed mb-4; }
         #content ul { @apply list-disc list-inside text-stone-400 mb-6 space-y-2; }
         #content strong { @apply text-stone-200 font-semibold; }
+        #content a { @apply text-accent hover:underline; }
     </style>
 </head>
 <body class="antialiased selection:bg-accent selection:text-white min-h-screen">
@@ -66,7 +67,7 @@
             <div id="content" class="font-sans">
                 <div class="flex flex-col items-center justify-center py-20 text-stone-600 font-mono text-sm">
                     <div class="animate-spin mb-4"><i data-lucide="loader-2"></i></div>
-                    FETCHING_POLICY.MD...
+                    FETCHING_LATEST_POLICY.MD...
                 </div>
             </div>
         </div>
@@ -77,11 +78,13 @@
 
         async function loadPrivacy() {
             try {
-                const response = await fetch('privacy.md');
+                // Add a cache-busting query parameter (timestamp) to force the latest version
+                const cacheBuster = new Date().getTime();
+                const response = await fetch(`privacy.md?v=${cacheBuster}`);
+                
                 if (!response.ok) throw new Error('File not found');
                 const text = await response.text();
                 
-                // Set options for marked
                 marked.setOptions({
                     gfm: true,
                     breaks: true
