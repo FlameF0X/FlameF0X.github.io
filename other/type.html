@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type | Minimalist AI Typing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --error: #ef4444;
+            --ai-accent: #06b6d4;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        #typing-area {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.75rem;
+            line-height: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 0.8em;
+            color: var(--text-dim);
+            transition: color 0.2s ease;
+        }
+
+        .letter {
+            position: relative;
+            transition: all 0.1s ease;
+        }
+
+        .letter.correct { color: var(--text-main); text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+        .letter.incorrect { color: var(--error); text-decoration: underline; }
+
+        .caret {
+            position: absolute;
+            width: 3px;
+            height: 1.4em;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            border-radius: 4px;
+            transition: left 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.15s ease;
+            z-index: 10;
+        }
+
+        .ai-caret {
+            position: absolute;
+            width: 3px;
+            height: 1.4em;
+            background: var(--ai-accent);
+            opacity: 0.5;
+            box-shadow: 0 0 10px var(--ai-accent);
+            border-radius: 4px;
+            transition: left 0.1s ease, top 0.15s ease;
+            z-index: 5;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: var(--text-dim);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .ai-btn-pill {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            background: rgba(255,255,255,0.02);
+            text-align: left;
+        }
+        .ai-btn-pill.active {
+            border-color: var(--ai-accent);
+            color: var(--ai-accent);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        #focus-error {
+            position: absolute; inset: 0; background: rgba(15, 23, 42, 0.7);
+            z-index: 50; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            border-radius: 24px;
+        }
+        body.unfocused #focus-error { opacity: 1; pointer-events: auto; }
+
+        .stats-pill {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Slide animation for settings */
+        #ai-sidebar {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-right: 0;
+        }
+        #ai-sidebar.open {
+            max-width: 300px;
+            opacity: 1;
+            margin-right: 2rem;
+        }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="w-full max-w-6xl flex flex-col gap-8">
+        <!-- TOP NAV -->
+        <header class="flex justify-between items-center z-[60]">
+            <div class="flex items-center gap-8">
+                <h1 class="text-4xl font-black tracking-tighter text-white">Type.</h1>
+                <nav class="glass-panel p-1 flex gap-1">
+                    <button onclick="setMode('standard')" id="mode-standard" class="nav-btn active">Standard</button>
+                    <button onclick="setMode('random')" id="mode-random" class="nav-btn">Random</button>
+                    <button onclick="setMode('pvai')" id="mode-pvai" class="nav-btn">Duel</button>
+                </nav>
+            </div>
+            
+            <div id="live-stats" class="flex gap-4 opacity-0 transition-all transform translate-y-2">
+                <div class="stats-pill text-center">
+                    <p class="text-[10px] uppercase tracking-widest text-slate-400">Speed</p>
+                    <p id="live-wpm" class="text-xl font-bold text-violet-400">0</p>
+                </div>
+                <div class="stats-pill text-center">
+                    <p class="text-[10px] uppercase tracking-widest text-slate-400">Accuracy</p>
+                    <p id="live-acc" class="text-xl font-bold text-fuchsia-400">100%</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <div class="flex items-start">
+            <aside id="ai-sidebar" class="flex flex-col gap-6 glass-panel p-6 h-fit z-[60]">
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Competitor Tier</h3>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="setAICategory('snail')" class="ai-btn-pill" id="cat-snail">Snail</button>
+                        <button onclick="setAICategory('easy')" class="ai-btn-pill" id="cat-easy">Easy</button>
+                        <button onclick="setAICategory('medium')" class="ai-btn-pill" id="cat-medium">Medium</button>
+                        <button onclick="setAICategory('pro')" class="ai-btn-pill" id="cat-pro">Pro</button>
+                        <button onclick="setAICategory('llm')" class="ai-btn-pill active" id="cat-llm">LLM Inference</button>
+                        <button onclick="setAICategory('god')" class="ai-btn-pill" id="cat-god">God</button>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Model Profile</h3>
+                    <select id="bot-selector" class="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-sm outline-none text-cyan-400 cursor-pointer" onchange="setBotProfile(this.value)"></select>
+                    <p id="bot-desc" class="text-[11px] text-slate-500 italic mt-3 leading-relaxed"></p>
+                </div>
+            </aside>
+
+            <main class="flex-grow relative">
+                <div id="duel-toggle-container" class="hidden mb-4">
+                    <button onclick="toggleSidebar()" class="text-[10px] uppercase font-bold tracking-[0.2em] text-slate-500 hover:text-cyan-400 transition-colors flex items-center gap-2">
+                        <svg id="toggle-icon" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        Bot Settings
+                    </button>
+                </div>
+
+                <div class="glass-panel p-12 min-h-[400px] flex flex-col justify-center relative overflow-hidden">
+                    <div id="focus-error" class="backdrop-blur-[2px]">
+                        <div class="text-center pointer-events-none">
+                            <div class="mb-2 animate-bounce">🖱️</div>
+                            <p class="text-xl font-semibold tracking-wide">Click to Focus</p>
+                        </div>
+                    </div>
+
+                    <input type="text" id="hidden-input" class="absolute opacity-0 pointer-events-none" autocomplete="off" autofocus>
+                    
+                    <div id="typing-area" class="relative select-none">
+                        <div id="caret" class="caret"></div>
+                        <div id="ai-caret" class="ai-caret hidden"></div>
+                        <div id="words-container" class="relative"></div>
+                    </div>
+
+                    <div class="absolute bottom-8 left-0 right-0 flex justify-center">
+                        <button onclick="resetGame()" class="group flex items-center gap-2 text-slate-500 hover:text-white transition-all">
+                            <span class="text-xs tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Quick Restart</span>
+                            <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- RESULTS MODAL -->
+    <div id="results-modal" class="fixed inset-0 bg-[#0f172a]/95 z-[2000] hidden flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="max-w-4xl w-full glass-panel p-12 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                <h1 class="text-9xl font-black">TYPE.</h1>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-12">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-[0.3em] text-violet-400 mb-2">Analysis</h2>
+                        <p id="pvai-outcome" class="text-3xl font-extrabold"></p>
+                    </div>
+                    <div class="flex gap-12">
+                        <div class="text-right">
+                            <p class="text-xs text-slate-500 uppercase tracking-widest">Speed</p>
+                            <p class="text-6xl font-black text-white"><span id="final-wpm">0</span><span class="text-lg font-light text-slate-500 ml-1">WPM</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-500 uppercase tracking-widest">Accuracy</p>
+                            <p class="text-6xl font-black text-white"><span id="final-acc">0</span><span class="text-lg font-light text-slate-500 ml-1">%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-64 mb-12">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+
+                <div class="flex justify-center">
+                    <button onclick="resetGame()" class="bg-violet-600 hover:bg-violet-500 text-white px-12 py-4 rounded-2xl font-bold tracking-widest transition-all shadow-lg shadow-violet-900/40">ANOTHER RUN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wordsBank = [
+            "algorithm", "bandwidth", "callback", "database", "encryption", "firewall", "gateway", "hardware", "interface", "javascript", "kernel", "latency", "metadata", "network", "open-source", "protocol", "quantum", "runtime", "security", "terminal", "utility", "virtualization", "web-socket",
+            "astronomy", "biology", "catalyst", "diffusion", "entropy", "fossil", "genetics", "horizon", "isotope", "jupiter", "kinetic", "luminescence", "molecule", "nebula", "osmosis", "particle", "quasar", "respiration", "spectrum", "tectonics", "universe", "velocity", "weather",
+            "aesthetic", "benevolent", "cacophony", "didactic", "eloquent", "fortitude", "gregarious", "hypothesis", "inevitable", "juxtapose", "knowledge", "labyrinth", "metaphor", "nostalgia", "oblivion", "paradigm", "quintessential", "rhetoric", "synergy", "transient", "ubiquitous", "venerate",
+            "async", "boolean", "compiler", "deploy", "extends", "function", "gradient", "header", "immutable", "json", "lambda", "module", "null", "object", "package", "query", "recursive", "syntax", "template", "undefined", "vector", "wrapper"
+        ];
+        
+        const AI_CATEGORIES = {
+            snail: [
+                { id: 'lazy_snail', name: 'Lazy Snail', wpm: 15, accuracy: 0.95, burst: 0.1, desc: 'Barely moving, often gets distracted.' },
+                { id: 'elderly_tortoise', name: 'Elderly Tortoise', wpm: 25, accuracy: 0.85, burst: 0.2, desc: 'Slow, steady, but vision is blurry.' }
+            ],
+            easy: [
+                { id: 'casual_surfer', name: 'Casual Surfer', wpm: 45, accuracy: 0.92, burst: 0.3, desc: 'Typing with one hand while drinking coffee.' }
+            ],
+            medium: [
+                { id: 'office_worker', name: 'Office Pro', wpm: 80, accuracy: 0.97, burst: 0.4, desc: 'Consistent professional speed.' }
+            ],
+            pro: [
+                { id: 'code_monkey', name: 'Code Monkey', wpm: 130, accuracy: 0.98, burst: 0.6, desc: 'Elite speed fueled by energy drinks.' }
+            ],
+            llm: [
+                { id: 'gpt_4o', name: 'GPT-4o (Omni)', wpm: 70, accuracy: 1.0, burst: 0.3, desc: 'Predictable, stable text generation.' },
+                { id: 'claude_35', name: 'Claude 3.5 Sonnet', wpm: 105, accuracy: 1.0, burst: 0.4, desc: 'Fast, intelligent token stream.' },
+                { id: 'llama_3_70b', name: 'Llama 3 (Groq)', wpm: 160, accuracy: 1.0, burst: 0.5, desc: 'Ultra-fast inference via LPU.' },
+                { id: 'gemini_flash', name: 'Gemini 1.5 Flash', wpm: 210, accuracy: 1.0, burst: 0.8, desc: 'Minimal latency throughput.' }
+            ],
+            god: [
+                { id: 'neural_link', name: 'Neural Link', wpm: 350, accuracy: 1.0, burst: 1.2, desc: 'Direct brain-to-text interface.' }
+            ]
+        };
+
+        let config = { mode: 'standard', wordCount: 25, randomLength: 150, aiCategory: 'llm', aiBot: AI_CATEGORIES['llm'][0] };
+        let state = { targetText: "", userInput: "", startTime: null, isFinished: false, errors: 0, history: [], aiProgress: 0, aiIsFixing: false, aiInterval: null, historyInterval: null };
+        let chart = null;
+
+        const inputEl = document.getElementById('hidden-input');
+        const containerEl = document.getElementById('words-container');
+        const caretEl = document.getElementById('caret');
+        const aiCaretEl = document.getElementById('ai-caret');
+        const wpmEl = document.getElementById('live-wpm');
+        const accEl = document.getElementById('live-acc');
+        const botSelector = document.getElementById('bot-selector');
+        const botDesc = document.getElementById('bot-desc');
+        const aiSidebar = document.getElementById('ai-sidebar');
+        const duelToggle = document.getElementById('duel-toggle-container');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        function toggleSidebar() {
+            aiSidebar.classList.toggle('open');
+            toggleIcon.style.transform = aiSidebar.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+
+        function setMode(mode) {
+            config.mode = mode;
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            
+            if (mode === 'pvai') {
+                duelToggle.classList.remove('hidden');
+                populateBotSelector();
+            } else {
+                duelToggle.classList.add('hidden');
+                aiSidebar.classList.remove('open');
+                toggleIcon.style.transform = 'rotate(0deg)';
+            }
+            resetGame();
+        }
+
+        function setAICategory(key) {
+            config.aiCategory = key;
+            document.querySelectorAll('.ai-btn-pill').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`cat-${key}`).classList.add('active');
+            populateBotSelector();
+            resetGame();
+        }
+
+        function populateBotSelector() {
+            const bots = AI_CATEGORIES[config.aiCategory];
+            botSelector.innerHTML = '';
+            bots.forEach(bot => {
+                const opt = document.createElement('option');
+                opt.value = bot.id;
+                opt.textContent = bot.name;
+                botSelector.appendChild(opt);
+            });
+            setBotProfile(bots[0].id);
+        }
+
+        function setBotProfile(botId) {
+            const bot = AI_CATEGORIES[config.aiCategory].find(b => b.id === botId);
+            if (bot) {
+                config.aiBot = bot;
+                botDesc.textContent = bot.desc;
+                resetGame();
+            }
+        }
+
+        function initWords() {
+            containerEl.innerHTML = '';
+            let text = "";
+            if (config.mode === 'random') {
+                text = Array.from({length: config.randomLength}, () => "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)]).join('');
+            } else {
+                text = [...wordsBank].sort(() => 0.5 - Math.random()).slice(0, config.wordCount).join(" ");
+            }
+            state.targetText = text;
+            
+            let currentWord = document.createElement('span');
+            currentWord.className = 'word';
+            text.split('').forEach((char) => {
+                if (char === ' ') {
+                    containerEl.appendChild(currentWord);
+                    const space = document.createElement('span');
+                    space.className = 'letter';
+                    space.innerHTML = '&nbsp;';
+                    containerEl.appendChild(space);
+                    currentWord = document.createElement('span');
+                    currentWord.className = 'word';
+                } else {
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = char;
+                    currentWord.appendChild(letter);
+                }
+            });
+            containerEl.appendChild(currentWord);
+            aiCaretEl.classList.toggle('hidden', config.mode !== 'pvai');
+            updateCaret();
+            updateAICaret();
+        }
+
+        function updateCaret() {
+            const letters = document.querySelectorAll('.letter');
+            const target = letters[state.userInput.length] || letters[letters.length-1];
+            if(!target) return;
+            const rect = target.getBoundingClientRect();
+            const containerRect = containerEl.getBoundingClientRect();
+            let offset = (state.userInput.length >= letters.length) ? rect.width : 0;
+            caretEl.style.left = `${rect.left - containerRect.left + offset}px`;
+            caretEl.style.top = `${rect.top - containerRect.top}px`;
+        }
+
+        function updateAICaret() {
+            const letters = document.querySelectorAll('.letter');
+            const idx = Math.max(0, Math.min(letters.length - 1, Math.floor(state.aiProgress)));
+            const target = letters[idx];
+            if(!target) return;
+            const rect = target.getBoundingClientRect();
+            const containerRect = containerEl.getBoundingClientRect();
+            let offset = (state.aiProgress >= letters.length) ? rect.width : 0;
+            aiCaretEl.style.left = `${rect.left - containerRect.left + offset}px`;
+            aiCaretEl.style.top = `${rect.top - containerRect.top}px`;
+        }
+
+        function handleInput(e) {
+            if (state.isFinished) return;
+            if (!state.startTime) {
+                state.startTime = Date.now();
+                document.getElementById('live-stats').style.opacity = '1';
+                document.getElementById('live-stats').style.transform = 'translateY(0)';
+                state.historyInterval = setInterval(() => {
+                    const stats = calculateCurrentStats();
+                    state.history.push(stats);
+                    wpmEl.textContent = stats.wpm;
+                    accEl.textContent = `${stats.acc}%`;
+                }, 1000);
+                if (config.mode === 'pvai') runAILoop();
+            }
+            state.userInput = e.target.value;
+            const letters = document.querySelectorAll('.letter');
+            state.errors = 0;
+            letters.forEach((span, i) => {
+                span.classList.remove('correct', 'incorrect');
+                if (i < state.userInput.length) {
+                    if (state.userInput[i] === state.targetText[i]) span.classList.add('correct');
+                    else { span.classList.add('incorrect'); state.errors++; }
+                }
+            });
+            updateCaret();
+            if (state.userInput.length >= state.targetText.length) finishGame();
+        }
+
+        function runAILoop() {
+            const profile = config.aiBot;
+            const baseCps = (profile.wpm * 5) / 60;
+            let errorStreak = 0;
+
+            state.aiInterval = setInterval(() => {
+                if (state.isFinished) return;
+
+                if (profile.accuracy < 1.0 && !state.aiIsFixing) {
+                    if (Math.random() > profile.accuracy && errorStreak < 3) {
+                        state.aiIsFixing = true;
+                        errorStreak++;
+                    }
+                }
+
+                if (state.aiIsFixing) {
+                    state.aiProgress -= (baseCps * 1.5) * (30 / 1000);
+                    if (state.aiProgress <= state.aiProgress - errorStreak || Math.random() > 0.7) {
+                        state.aiIsFixing = false;
+                        errorStreak = 0;
+                    }
+                } else {
+                    const burstFactor = (Math.sin(Date.now() / 150) * (profile.burst)) + 1;
+                    state.aiProgress += (baseCps * burstFactor) * (30 / 1000);
+                }
+
+                if (state.aiProgress < 0) state.aiProgress = 0;
+                updateAICaret();
+                
+                if (state.aiProgress >= state.targetText.length) {
+                    finishGame();
+                }
+            }, 30);
+        }
+
+        function calculateCurrentStats() {
+            const elapsed = (Date.now() - state.startTime) / 60000;
+            const wpm = Math.round((state.userInput.length / 5) / elapsed) || 0;
+            const acc = state.userInput.length > 0 ? Math.round(((state.userInput.length - state.errors) / state.userInput.length) * 100) : 100;
+            return { wpm, acc, time: Math.round(elapsed * 60) };
+        }
+
+        function finishGame() {
+            if (state.isFinished) return;
+            state.isFinished = true;
+            clearInterval(state.historyInterval);
+            if(state.aiInterval) clearInterval(state.aiInterval);
+            
+            const stats = calculateCurrentStats();
+            document.getElementById('final-wpm').textContent = stats.wpm;
+            document.getElementById('final-acc').textContent = stats.acc;
+            
+            if (config.mode === 'pvai') {
+                const userWon = state.userInput.length >= state.targetText.length && state.aiProgress < state.targetText.length;
+                const outcomeEl = document.getElementById('pvai-outcome');
+                outcomeEl.textContent = userWon ? `VICTORY` : `DEFEATED`;
+                outcomeEl.style.color = userWon ? "#8b5cf6" : "#ef4444";
+            } else {
+                document.getElementById('pvai-outcome').textContent = "COMPLETED";
+                document.getElementById('pvai-outcome').style.color = "#f8fafc";
+            }
+            
+            renderChart();
+            document.getElementById('results-modal').classList.remove('hidden');
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: state.history.map(h => h.time),
+                    datasets: [{
+                        label: 'WPM',
+                        data: state.history.map(h => h.wpm),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        fill: true, tension: 0.4, pointRadius: 0, borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        function resetGame() {
+            clearInterval(state.historyInterval);
+            if(state.aiInterval) clearInterval(state.aiInterval);
+            state = { targetText: "", userInput: "", startTime: null, isFinished: false, errors: 0, history: [], aiProgress: 0, aiIsFixing: false, aiInterval: null, historyInterval: null };
+            inputEl.value = "";
+            document.getElementById('live-stats').style.opacity = '0';
+            document.getElementById('results-modal').classList.add('hidden');
+            initWords();
+            setTimeout(() => inputEl.focus(), 50);
+        }
+
+        inputEl.addEventListener('input', handleInput);
+        window.addEventListener('keydown', (e) => { 
+            if (e.key === 'Tab') { 
+                e.preventDefault(); 
+                resetGame(); 
+            } 
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !state.isFinished) {
+                inputEl.focus();
+            }
+        });
+
+        inputEl.addEventListener('blur', () => { 
+            if(!state.isFinished) document.body.classList.add('unfocused'); 
+        });
+        inputEl.addEventListener('focus', () => {
+            document.body.classList.remove('unfocused');
+        });
+
+        document.getElementById('focus-error').addEventListener('click', () => {
+            inputEl.focus();
+        });
+
+        window.onload = () => { 
+            initWords(); 
+        };
+    </script>
+</body>
+</html>
