@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBCA — Bottom Certification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IM+Fell+English:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #070714;
+  --surface: #0f0f2a;
+  --gold: #d4a017;
+  --gold-light: #f0c040;
+  --text: #e8e0f0;
+  --text-muted: #8080a8;
+  --accent-pink: #ff6b9d;
+  --accent-blue: #6bc5ff;
+  --accent-purple: #b06bff;
+  --radius: 16px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(100,50,200,.15) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(255,100,150,.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 50% 50%, rgba(50,100,255,.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.star {
+  position: absolute; border-radius: 50%; background: white;
+  animation: twinkle var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes twinkle {
+  0%,100% { opacity: var(--min-op); transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+
+/* ───── SCREENS ───── */
+.screen { display: none; position: relative; z-index: 1; min-height: 100vh; padding: 2.5rem 1.5rem; flex-direction: column; align-items: center; justify-content: center; }
+.screen.active { display: flex; }
+
+/* ───── WELCOME ───── */
+.ibca-badge {
+  font-family: 'IM Fell English', serif;
+  font-size: clamp(.75rem, 2vw, .95rem);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+  opacity: .75;
+  text-align: center;
+}
+
+.welcome-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 10vw, 6.5rem);
+  font-weight: 900;
+  font-style: italic;
+  line-height: .95;
+  text-align: center;
+  margin-bottom: .6rem;
+  background: linear-gradient(135deg, #f0c040, #ff6b9d, #b06bff, #6bc5ff, #f0c040);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 5s ease infinite;
+}
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.welcome-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: clamp(.85rem, 2vw, 1.05rem);
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 480px;
+}
+
+.card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: 2rem 2.25rem;
+  width: 100%;
+  max-width: 560px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.card-label {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  color: var(--gold);
+  margin-bottom: .85rem;
+}
+
+.orientation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .65rem;
+  margin-bottom: 1.75rem;
+}
+
+.orient-btn {
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: .8rem .9rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  line-height: 1.3;
+}
+.orient-btn:hover { border-color: rgba(212,160,23,.5); background: rgba(212,160,23,.07); }
+.orient-btn.selected { border-color: var(--gold); background: rgba(212,160,23,.13); color: var(--gold-light); }
+
+.name-input {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: .85rem 1.2rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  outline: none;
+  transition: border-color .2s;
+}
+.name-input:focus { border-color: var(--gold); }
+.name-input::placeholder { color: var(--text-muted); }
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #d4a017, #e8c240);
+  border: none;
+  border-radius: 10px;
+  padding: 1rem;
+  color: #1a0c00;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .04em;
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,160,23,.35); }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ───── QUIZ ───── */
+.quiz-header { width: 100%; max-width: 640px; margin-bottom: 1.75rem; }
+.quiz-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; }
+.quiz-counter { font-size: .82rem; color: var(--text-muted); letter-spacing: .04em; }
+.quiz-track { width: 100%; height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+.quiz-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--accent-pink), var(--accent-purple));
+  border-radius: 2px;
+  transition: width .45s cubic-bezier(.4,0,.2,1);
+}
+
+.question-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: 2.25rem 2.5rem;
+  width: 100%;
+  max-width: 640px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeUp .3s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.q-num {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  color: var(--gold);
+  opacity: .65;
+  margin-bottom: .6rem;
+}
+
+.q-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 2rem;
+}
+
+.options { display: flex; flex-direction: column; gap: .65rem; }
+
+.opt-btn {
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.09);
+  border-radius: 11px;
+  padding: .95rem 1.15rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .92rem;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: left;
+  line-height: 1.45;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: .6rem;
+}
+.opt-letter {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 600;
+  flex-shrink: 0;
+  transition: all .2s;
+}
+.opt-btn:hover { border-color: var(--accent-pink); background: rgba(255,107,157,.08); transform: translateX(4px); }
+.opt-btn.selected { border-color: var(--gold); background: rgba(212,160,23,.12); color: var(--gold-light); }
+.opt-btn.selected .opt-letter { border-color: var(--gold); background: var(--gold); color: #1a0c00; }
+
+/* ───── RESULTS ───── */
+.results-wrap { width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+
+.result-hero { text-align: center; }
+.result-eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .28em; color: var(--text-muted); margin-bottom: .4rem; }
+.result-tier-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 900;
+  font-style: italic;
+  background: linear-gradient(135deg, #f0c040, #ff6b9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 4s ease infinite;
+  background-size: 200% 200%;
+}
+.result-desc { color: var(--text-muted); font-style: italic; font-size: .95rem; margin-top: .35rem; }
+
+.cert-wrap { width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 28px 72px rgba(0,0,0,.6); }
+.cert-wrap canvas { width: 100%; height: auto; display: block; }
+
+.results-actions { display: flex; gap: .85rem; width: 100%; max-width: 500px; }
+.btn-secondary {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: .9rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-secondary:hover { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.1); }
+
+.disclaimer { font-size: .72rem; color: var(--text-muted); opacity: .5; font-style: italic; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- ═══════════ WELCOME ═══════════ -->
+<div class="screen active" id="screen-welcome">
+  <div class="ibca-badge">✦ International Bottom Certification Authority ✦</div>
+  <h1 class="welcome-title">Bottom<br>Certification</h1>
+  <p class="welcome-sub">The world's most rigorous & completely official queer certification process.<br>14 questions. One destiny.</p>
+
+  <div class="card">
+    <div class="card-label">Step 1 — Select your orientation</div>
+    <div class="orientation-grid">
+      <button class="orient-btn" data-value="gay"      onclick="selectOrientation(this)">🏳️‍🌈 Gay / MLM</button>
+      <button class="orient-btn" data-value="lesbian"  onclick="selectOrientation(this)">🏳️‍🌈 Lesbian / WLW</button>
+      <button class="orient-btn" data-value="bi"       onclick="selectOrientation(this)">💜 Bisexual / Pan</button>
+      <button class="orient-btn" data-value="queer"    onclick="selectOrientation(this)">✨ Queer / Unlabeled</button>
+      <button class="orient-btn" data-value="straight" onclick="selectOrientation(this)">👀 Straight (Ally?)</button>
+      <button class="orient-btn" data-value="other"    onclick="selectOrientation(this)">🌈 Other / Vibes Only</button>
+    </div>
+
+    <div class="card-label">Step 2 — Your name (for the certificate)</div>
+    <input type="text" class="name-input" id="name-input" placeholder='e.g., Bartholomew J. Bottom III' maxlength="42" autocomplete="off">
+
+    <button class="btn-primary" id="start-btn" onclick="startQuiz()" disabled>
+      Begin Certification Process →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════ QUIZ ═══════════ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-header">
+    <div class="quiz-meta">
+      <span class="quiz-counter" id="q-counter">Question 1 of 14</span>
+      <span class="quiz-counter" id="q-pct">0%</span>
+    </div>
+    <div class="quiz-track">
+      <div class="quiz-fill" id="q-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="question-card" id="q-card"></div>
+</div>
+
+<!-- ═══════════ RESULTS ═══════════ -->
+<div class="screen" id="screen-results">
+  <div class="results-wrap">
+    <div class="result-hero">
+      <div class="result-eyebrow" id="r-eyebrow">✦ Certification Level ✦</div>
+      <div class="result-tier-name" id="r-tier">Certified Bottom</div>
+      <div class="result-desc" id="r-desc">Officially recognized by the IBCA.</div>
+    </div>
+
+    <div class="cert-wrap">
+      <canvas id="cert-canvas"></canvas>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn-primary" onclick="downloadCert()" style="flex:1.6">⬇ Download Certificate (.jpg)</button>
+      <button class="btn-secondary" onclick="restartQuiz()">↺ Retake</button>
+    </div>
+
+    <p class="disclaimer">
+      Certificate No. <span id="cert-num">—</span> &nbsp;•&nbsp; Spiritually valid, legally non-binding &nbsp;•&nbsp; <em>Semper Submissus</em>
+    </p>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+
+const QUESTIONS = [
+  {
+    text: "Someone cancels plans last minute. You:",
+    opts: [
+      { t: "Feel secretly relieved — you didn't want to go anyway", s: 3 },
+      { t: "Are devastated and need 3 full days to emotionally recover", s: 4 },
+      { t: "Immediately start planning some (very soft) revenge", s: 2 },
+      { t: "Already forgot you had plans in the first place", s: 1 }
+    ]
+  },
+  {
+    text: "Your role in every group project, honestly:",
+    opts: [
+      { t: "The idea person who ghosts after the brainstorm", s: 2 },
+      { t: "You do everything yourself and complain about it constantly", s: 3 },
+      { t: "The designated moral support / hype person", s: 4 },
+      { t: "You show up at the very end to add your name", s: 1 }
+    ]
+  },
+  {
+    text: "Your signature 'villain era' activity:",
+    opts: [
+      { t: "Rearranging your bookshelf alphabetically at 2am", s: 2 },
+      { t: "Sending a risky text and then throwing your phone across the room", s: 3 },
+      { t: "Crying in the shower, but like, dramatically", s: 4 },
+      { t: "Making a Pinterest board instead of addressing your feelings", s: 3 }
+    ]
+  },
+  {
+    text: "Comfort media when you're having A Day™:",
+    opts: [
+      { t: "Rewatching the same 3 shows on loop, forever, no new shows", s: 3 },
+      { t: "Enemies-to-lovers fanfiction (extremely extensive)", s: 4 },
+      { t: "A specific playlist made for an emotion you can't name", s: 3 },
+      { t: "Competitive cooking shows — they're calming and you stand by that", s: 1 }
+    ]
+  },
+  {
+    text: "How do you handle conflict?",
+    opts: [
+      { t: "Avoid it entirely until everything implodes at once", s: 4 },
+      { t: "Cry first, talk about it later (much, much later)", s: 4 },
+      { t: "Write a whole speech in your head that you never deliver", s: 3 },
+      { t: "Apologize even when it's very clearly not your fault", s: 4 }
+    ]
+  },
+  {
+    text: "Your texting style, be honest:",
+    opts: [
+      { t: "One 3-paragraph essay OR total radio silence. Zero middle ground.", s: 3 },
+      { t: "Double-texter. Triple-texter. You genuinely do not care.", s: 4 },
+      { t: "You type for 45 seconds, see three dots... send nothing", s: 2 },
+      { t: "Reply immediately then spend an hour regretting the wording", s: 3 }
+    ]
+  },
+  {
+    text: "Someone is rude to you. You:",
+    opts: [
+      { t: "Say 'no worries :)' and go home to spiral for three hours", s: 4 },
+      { t: "Make sustained, uncomfortable eye contact and say absolutely nothing", s: 2 },
+      { t: "Laugh it off in the moment, dissociate about it for weeks", s: 3 },
+      { t: "Tell every single one of your friends — but never the actual person", s: 3 }
+    ]
+  },
+  {
+    text: "Big spoon or little spoon?",
+    opts: [
+      { t: "Little spoon. Always. Non-negotiable. This is a boundary.", s: 4 },
+      { t: "Big spoon — I need to feel in control of something", s: 1 },
+      { t: "Separate blankets. Please don't touch me while I sleep.", s: 2 },
+      { t: "I just want to be held and I'm not even a little embarrassed", s: 4 }
+    ]
+  },
+  {
+    text: "Assembling IKEA furniture:",
+    opts: [
+      { t: "You supervise, provide snacks, and give encouraging feedback", s: 3 },
+      { t: "You read the instructions confidently and completely incorrectly", s: 2 },
+      { t: "You immediately call someone else. That's what relationships are for.", s: 4 },
+      { t: "You cry softly at it until somehow it is done", s: 4 }
+    ]
+  },
+  {
+    text: "Your most-used emoji right now is:",
+    opts: [
+      { t: "😭  (it's versatile)", s: 4 },
+      { t: "💀  (same energy)", s: 2 },
+      { t: "🥺  (it just works)", s: 4 },
+      { t: "❤️  (you're a lover)", s: 3 }
+    ]
+  },
+  {
+    text: "How do you flirt?",
+    opts: [
+      { t: "Compliment them genuinely and then immediately flee the premises", s: 4 },
+      { t: "Be slightly mean to them. You are working on this. Slowly.", s: 2 },
+      { t: "Send a meme and then stare at your phone for the next four hours", s: 3 },
+      { t: "Maintain deep, sustained eye contact and wait for them to figure it out", s: 3 }
+    ]
+  },
+  {
+    text: "Your dating app behavior:",
+    opts: [
+      { t: "Swipe right on everyone and then panic when they actually match", s: 3 },
+      { t: "Write the perfect opening message... and never, ever send it", s: 3 },
+      { t: "Have three incredible conversations and then vanish into the void", s: 2 },
+      { t: "Fall completely in love with them before the first date", s: 4 }
+    ]
+  },
+  {
+    text: "Your primary love language (receiving):",
+    opts: [
+      { t: "Words of affirmation — just tell me I'm doing great, please", s: 4 },
+      { t: "Physical touch. Unconditionally.", s: 4 },
+      { t: "Acts of service — just fix things for me, I'm tired", s: 3 },
+      { t: "Quality time, but not too much quality time, it's complicated", s: 2 }
+    ]
+  },
+  {
+    text: "Final question. Be honest. Are you a bottom?",
+    opts: [
+      { t: "Yes. Certified and proud. That is literally why I'm here.", s: 4 },
+      { t: "I mean... probably? The evidence strongly suggests yes.", s: 3 },
+      { t: "The quiz told me so and I've decided to accept it graciously", s: 3 },
+      { t: "I'm definitely a top (this is, statistically, a bottom answer)", s: 4 }
+    ]
+  }
+];
+
+const TIERS = [
+  { min: 14, max: 28, name: "Situational Bottom",   desc: "You contain multitudes. Chaotic neutral energy. The examiners are confused but intrigued." },
+  { min: 29, max: 38, name: "Certified Bottom",      desc: "Officially recognized. You meet all standard IBCA benchmarks." },
+  { min: 39, max: 47, name: "Distinguished Bottom",  desc: "Exemplary results. A pillar of the bottom community." },
+  { min: 48, max: 56, name: "Legendary Bottom",      desc: "An icon. A legacy. The IBCA has never seen scores like this." }
+];
+
+const ORIENT_LABELS = {
+  gay:      "Gay & Proudly So",
+  lesbian:  "Lesbian & Thriving",
+  bi:       "Bisexual & Chaotic",
+  queer:    "Queer & Gloriously Undefined",
+  straight: "Straight (Sure, Jan 👀)",
+  other:    "Vibes-Based Identity"
+};
+
+const ORIENT_SUBS = {
+  gay:      "in the Discipline of Homosexual Sciences",
+  lesbian:  "in the Field of Sapphic Studies",
+  bi:       "across All Applicable Genders (Simultaneously)",
+  queer:    "in the Emerging Field of Queer Theory & Practice",
+  straight: "under the Ally Exception Clause, Article VII",
+  other:    "per the Official Vibes Determination Protocol"
+};
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+
+let orientation = null;
+let userName = '';
+let qIndex = 0;
+let scores = [];
+let certNum = '';
+
+// ══════════════════════════════════════════════
+//  WELCOME
+// ══════════════════════════════════════════════
+
+function selectOrientation(btn) {
+  document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  orientation = btn.dataset.value;
+  checkReady();
+}
+
+document.getElementById('name-input').addEventListener('input', checkReady);
+
+function checkReady() {
+  const name = document.getElementById('name-input').value.trim();
+  document.getElementById('start-btn').disabled = !orientation || !name;
+}
+
+function startQuiz() {
+  userName = document.getElementById('name-input').value.trim();
+  qIndex = 0; scores = [];
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════════
+
+const LETTERS = ['A', 'B', 'C', 'D'];
+
+function renderQuestion() {
+  const q = QUESTIONS[qIndex];
+  const pct = Math.round((qIndex / QUESTIONS.length) * 100);
+  document.getElementById('q-counter').textContent = `Question ${qIndex + 1} of ${QUESTIONS.length}`;
+  document.getElementById('q-pct').textContent = pct + '%';
+  document.getElementById('q-fill').style.width = pct + '%';
+
+  document.getElementById('q-card').innerHTML = `
+    <div class="q-num">Question ${qIndex + 1}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options">
+      ${q.opts.map((o, i) => `
+        <button class="opt-btn" onclick="pickOption(this, ${i})">
+          <span class="opt-letter">${LETTERS[i]}</span>
+          <span>${o.t}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function pickOption(btn, idx) {
+  if (btn.classList.contains('animating')) return;
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected', 'animating');
+
+  setTimeout(() => {
+    scores.push(QUESTIONS[qIndex].opts[idx].s);
+    qIndex++;
+    if (qIndex >= QUESTIONS.length) showResults();
+    else renderQuestion();
+  }, 350);
+}
+
+// ══════════════════════════════════════════════
+//  RESULTS
+// ══════════════════════════════════════════════
+
+function showResults() {
+  const total = scores.reduce((a, b) => a + b, 0);
+  const tier = TIERS.find(t => total >= t.min && total <= t.max) || TIERS[TIERS.length - 1];
+
+  document.getElementById('r-tier').textContent = tier.name;
+  document.getElementById('r-desc').textContent = tier.desc;
+
+  certNum = 'IBCA-' + Math.random().toString(36).toUpperCase().slice(2, 10);
+  document.getElementById('cert-num').textContent = certNum;
+
+  showScreen('screen-results');
+  setTimeout(() => drawCert(tier, total), 150);
+}
+
+// ══════════════════════════════════════════════
+//  CERTIFICATE DRAWING
+// ══════════════════════════════════════════════
+
+function drawCert(tier, score) {
+  const cv = document.getElementById('cert-canvas');
+  const W = 1200, H = 860;
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+
+  // Parchment background
+  c.fillStyle = '#fdf8ef';
+  c.fillRect(0, 0, W, H);
+
+  // Subtle dot texture
+  for (let x = 0; x < W; x += 10)
+    for (let y = 0; y < H; y += 10)
+      if ((x + y) % 20 === 0) {
+        c.fillStyle = 'rgba(160,120,40,.025)';
+        c.fillRect(x, y, 3, 3);
+      }
+
+  // Outer border
+  c.strokeStyle = '#7a5c0e';
+  c.lineWidth = 9;
+  strokeRRect(c, 28, 28, W - 56, H - 56, 4);
+
+  // Inner border
+  c.strokeStyle = '#c9a030';
+  c.lineWidth = 2.5;
+  strokeRRect(c, 44, 44, W - 88, H - 88, 2);
+
+  // Corner ornaments
+  [
+    [28, 28, 1, 1],
+    [W - 28, 28, -1, 1],
+    [28, H - 28, 1, -1],
+    [W - 28, H - 28, -1, -1]
+  ].forEach(([x, y, sx, sy]) => corner(c, x, y, sx, sy));
+
+  // Rainbow stripe
+  const rainbow = ['#ff6b6b','#ff9e4a','#ffd93d','#6bcb77','#4d96ff','#b06bff'];
+  const sw = (W - 100) / rainbow.length;
+  rainbow.forEach((col, i) => {
+    c.fillStyle = col;
+    c.fillRect(50 + i * sw, 53, sw, 7);
+  });
+
+  // Header
+  c.textAlign = 'center';
+  c.fillStyle = '#4a3200';
+  c.font = 'bold 17px Georgia, serif';
+  c.fillText('✦   INTERNATIONAL BOTTOM CERTIFICATION AUTHORITY   ✦', W / 2, 118);
+
+  // Divider
+  hLine(c, 80, W - 80, 133, '#c9a030', 1);
+
+  // "This is to certify that"
+  c.fillStyle = '#7a5c0e';
+  c.font = 'italic 21px Georgia, serif';
+  c.fillText('This is to officially certify that', W / 2, 186);
+
+  // Name
+  c.fillStyle = '#1e1000';
+  c.font = 'bold italic 56px Georgia, serif';
+  c.fillText(userName, W / 2, 266);
+
+  // Name underline
+  const nw = c.measureText(userName).width;
+  hLine(c, W / 2 - nw / 2, W / 2 + nw / 2, 280, '#c9a030', 1.5);
+
+  // "has been evaluated and recognized as a"
+  c.fillStyle = '#7a5c0e';
+  c.font = 'italic 20px Georgia, serif';
+  c.fillText('has been officially evaluated, assessed, and recognized as a', W / 2, 328);
+
+  // Tier name
+  c.fillStyle = '#1e1000';
+  c.font = 'bold 66px Georgia, serif';
+  c.fillText(tier.name.toUpperCase(), W / 2, 418);
+
+  // Orientation subtitle
+  c.fillStyle = '#5a3e00';
+  c.font = 'italic 21px Georgia, serif';
+  c.fillText(ORIENT_SUBS[orientation], W / 2, 464);
+
+  // Divider
+  hLine(c, 80, W - 80, 498, '#c9a030', 1);
+
+  // Score row
+  c.fillStyle = '#7a5c0e';
+  c.font = '15px Georgia, serif';
+  c.fillText(`Official Score: ${score} / 56 points`, W / 2, 526);
+
+  // Score bar
+  const bx = W / 2 - 220, by = 534, bw = 440, bh = 11;
+  c.fillStyle = 'rgba(139,100,20,.18)';
+  rRect(c, bx, by, bw, bh, 5.5); c.fill();
+  const fg = c.createLinearGradient(bx, 0, bx + bw, 0);
+  fg.addColorStop(0, '#d4a017');
+  fg.addColorStop(.5, '#ff6b9d');
+  fg.addColorStop(1, '#b06bff');
+  c.fillStyle = fg;
+  rRect(c, bx, by, (score / 56) * bw, bh, 5.5); c.fill();
+
+  // ── Three-column footer ──
+  const footY = H - 155;
+
+  // Left — Chief Examiner
+  hLine(c, 120, 340, footY, '#8b6914', 1);
+  c.fillStyle = '#5a3e00';
+  c.font = 'italic 13.5px Georgia, serif';
+  c.fillText('Dr. Gay Bottomsworth, Ph.D.', 230, footY + 19);
+  c.font = '12px Georgia, serif';
+  c.fillText('Chief Bottom Examiner, IBCA', 230, footY + 36);
+
+  // Center — Seal
+  seal(c, W / 2, footY - 12);
+
+  // Right — Date
+  hLine(c, W - 340, W - 120, footY, '#8b6914', 1);
+  const d = new Date();
+  const ds = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  c.fillStyle = '#5a3e00';
+  c.font = 'italic 13.5px Georgia, serif';
+  c.fillText(ds, W - 230, footY + 19);
+  c.font = '12px Georgia, serif';
+  c.fillText('Date of Certification', W - 230, footY + 36);
+
+  // Orientation badge (bottom left)
+  c.fillStyle = '#fdf0d5';
+  c.strokeStyle = '#c9a030';
+  c.lineWidth = 1.5;
+  rRect(c, 48, H - 96, 210, 50, 8); c.fill(); c.stroke();
+  c.fillStyle = '#3a2800';
+  c.font = 'bold 13px Georgia, serif';
+  c.fillText(ORIENT_LABELS[orientation], 153, H - 70);
+  c.fillStyle = '#7a5c0e';
+  c.font = '11px Georgia, serif';
+  c.fillText('Orientation Classification', 153, H - 55);
+
+  // Bottom fine print
+  c.fillStyle = '#9a7828';
+  c.font = 'italic 12px Georgia, serif';
+  c.fillText(`${certNum}  •  This certification is spiritually valid and legally non-binding  •  Semper Submissus`, W / 2, H - 52);
+
+  c.textAlign = 'left';
+}
+
+// ── Drawing helpers ──
+
+function hLine(c, x1, x2, y, col, lw) {
+  c.save();
+  c.strokeStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+  c.restore();
+}
+
+function rRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y); c.arcTo(x + w, y, x + w, y + r, r);
+  c.lineTo(x + w, y + h - r); c.arcTo(x + w, y + h, x + w - r, y + h, r);
+  c.lineTo(x + r, y + h); c.arcTo(x, y + h, x, y + h - r, r);
+  c.lineTo(x, y + r); c.arcTo(x, y, x + r, y, r);
+  c.closePath();
+}
+
+function strokeRRect(c, x, y, w, h, r) {
+  rRect(c, x, y, w, h, r); c.stroke();
+}
+
+function corner(c, x, y, sx, sy) {
+  c.save(); c.translate(x, y); c.scale(sx, sy);
+  c.strokeStyle = '#8b6914'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(0, 0); c.lineTo(42, 0); c.stroke();
+  c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 42); c.stroke();
+  c.fillStyle = '#c9a030';
+  c.beginPath(); c.arc(0, 0, 5, 0, Math.PI * 2); c.fill();
+  c.restore();
+}
+
+function seal(c, cx, cy) {
+  // Glow
+  const g = c.createRadialGradient(cx, cy, 0, cx, cy, 65);
+  g.addColorStop(0, 'rgba(212,160,23,.18)');
+  g.addColorStop(1, 'rgba(212,160,23,0)');
+  c.fillStyle = g;
+  c.beginPath(); c.arc(cx, cy, 65, 0, Math.PI * 2); c.fill();
+
+  // Outer ring
+  c.strokeStyle = '#c9a030'; c.lineWidth = 2.5;
+  c.beginPath(); c.arc(cx, cy, 58, 0, Math.PI * 2); c.stroke();
+  c.strokeStyle = '#d4b03a'; c.lineWidth = 1;
+  c.beginPath(); c.arc(cx, cy, 48, 0, Math.PI * 2); c.stroke();
+
+  // Tick marks
+  for (let i = 0; i < 36; i++) {
+    const a = (i / 36) * Math.PI * 2;
+    const r1 = 48, r2 = i % 3 === 0 ? 57 : 53;
+    c.beginPath();
+    c.moveTo(cx + r1 * Math.cos(a), cy + r1 * Math.sin(a));
+    c.lineTo(cx + r2 * Math.cos(a), cy + r2 * Math.sin(a));
+    c.strokeStyle = '#c9a030'; c.lineWidth = i % 3 === 0 ? 1.5 : .8;
+    c.stroke();
+  }
+
+  // Text
+  c.fillStyle = '#7a5c0e';
+  c.textAlign = 'center';
+  c.font = 'bold 13px Georgia, serif';
+  c.fillText('I B C A', cx, cy - 10);
+  c.font = 'bold 11px Georgia, serif';
+  c.fillText('CERTIFIED', cx, cy + 5);
+  c.font = '10px Georgia, serif';
+  c.fillText('✦ OFFICIAL ✦', cx, cy + 20);
+}
+
+// ══════════════════════════════════════════════
+//  DOWNLOAD
+// ══════════════════════════════════════════════
+
+function downloadCert() {
+  const cv = document.getElementById('cert-canvas');
+  const a = document.createElement('a');
+  a.download = `bottom-certification-${userName.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+  a.href = cv.toDataURL('image/jpeg', .95);
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  orientation = null;
+  document.querySelectorAll('.orient-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('name-input').value = '';
+  document.getElementById('start-btn').disabled = true;
+  showScreen('screen-welcome');
+}
+
+// ══════════════════════════════════════════════
+//  STARS
+// ══════════════════════════════════════════════
+
+(function () {
+  const cont = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.2 + .4;
+    s.style.cssText = `
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      width:${sz}px;height:${sz}px;
+      --dur:${2+Math.random()*5}s;
+      --delay:${Math.random()*5}s;
+      --min-op:${.08+Math.random()*.3};
+    `;
+    cont.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
