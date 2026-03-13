@@ -33,7 +33,7 @@
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            padding: 20px 0; /* Changed padding to allow scrolling space */
+            padding: 20px 0;
         }
 
         .chess-layout {
@@ -42,7 +42,6 @@
             width: 100%;
             max-width: 1100px;
             padding: 0 20px;
-            /* Default to desktop horizontal layout */
             flex-direction: row;
         }
 
@@ -71,7 +70,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+            touch-action: manipulation;
         }
         .square.light { background-color: var(--board-light); }
         .square.dark { background-color: var(--board-dark); }
@@ -87,7 +86,6 @@
             z-index: 5;
         }
 
-        /* Move Hint Dots */
         .hint-dot {
             width: 24%;
             height: 24%;
@@ -98,7 +96,6 @@
             pointer-events: none;
         }
 
-        /* Hint for Captures (Large Ring) */
         .hint-capture {
             width: 80%;
             height: 80%;
@@ -160,6 +157,17 @@
         .bot-badge {
             background-color: #a49f96;
             color: #262421;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+
+        /* New badge style for the RL model */
+        .rl-badge {
+            background-color: #6a9fd8;
+            color: #1a1f2e;
             font-size: 9px;
             padding: 1px 4px;
             border-radius: 2px;
@@ -322,11 +330,8 @@
             font-weight: 600;
         }
 
-        /* Responsive Mobile Layout Adjustments */
         @media (max-width: 850px) {
-            body {
-                padding-top: 10px;
-            }
+            body { padding-top: 10px; }
 
             .chess-layout {
                 flex-direction: column;
@@ -340,9 +345,7 @@
                 max-width: 600px;
             }
 
-            .side-panel {
-                height: 420px; /* Adjust height so it easily fits on scroll */
-            }
+            .side-panel { height: 420px; }
         }
     </style>
 </head>
@@ -352,7 +355,7 @@
         <div class="board-section">
             <div class="player-profile opponent">
                 <div class="avatar">🤖</div>
-                <span class="player-name">ChessSLM (1000) <span class="bot-badge">BOT</span></span>
+                <span class="player-name" id="bot-name">ChessSLM (1000) <span class="bot-badge" id="bot-badge">BOT</span></span>
             </div>
 
             <div id="chess-board"></div>
@@ -378,6 +381,11 @@
                     </div>
 
                     <div class="controls-grid">
+                        <div class="game-info-label">Model</div>
+                        <select id="model-select" class="dropdown-select">
+                            <option value="FlameF0X/ChessSLM">ChessSLM</option>
+                            <option value="FlameF0X/ChessSLM-RL">ChessSLM-RL</option>
+                        </select>
                         <div class="game-info-label">Color</div>
                         <select id="color-select" class="dropdown-select">
                             <option value="⬜ White (move first)">White</option>
@@ -405,14 +413,31 @@
         const statusFooterEl = document.getElementById('game-status-footer');
         const historyEl = document.getElementById('move-history');
         const newGameBtn = document.getElementById('new-game-btn');
+        const modelSelect = document.getElementById('model-select');
+        const botNameEl = document.getElementById('bot-name');
+        const botBadgeEl = document.getElementById('bot-badge');
         
         let client;
+        let currentModel = 'FlameF0X/ChessSLM';
         let game = new Chess();
         let playerColor = 'w';
         let selectedSquare = null;
         let isProcessing = false;
         let lastFullState = null;
         let legalMovesFromSelected = [];
+
+        const MODEL_INFO = {
+            'FlameF0X/ChessSLM': {
+                name: 'ChessSLM (1000)',
+                badgeText: 'LM',
+                badgeClass: 'bot-badge'
+            },
+            'FlameF0X/ChessSLM-RL': {
+                name: 'ChessSLM-RL (1000)',
+                badgeText: 'LM + RL',
+                badgeClass: 'rl-badge'
+            }
+        };
 
         const PIECES = {
             'P': 'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
@@ -432,19 +457,30 @@
         window.switchTab = (tabName) => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             document.getElementById(`btn-${tabName}`).classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
         };
 
-        async function init() {
+        function updateBotLabel(modelId) {
+            const info = MODEL_INFO[modelId];
+            botNameEl.innerHTML = `${info.name} <span class="${info.badgeClass}" id="bot-badge">${info.badgeText}</span>`;
+        }
+
+        async function connectClient(modelId) {
+            statusFooterEl.innerText = "Connecting...";
             try {
-                client = await Client.connect("FlameF0X/ChessSLM");
+                client = await Client.connect(modelId);
+                currentModel = modelId;
                 statusFooterEl.innerText = "Engine Ready";
-                render();
             } catch (err) {
                 statusFooterEl.innerText = "Connection Failed";
+                client = null;
             }
+        }
+
+        async function init() {
+            render(); // Render board immediately so pieces are always interactive
+            await connectClient('FlameF0X/ChessSLM');
         }
 
         function parseFenFromData(data) {
@@ -478,9 +514,7 @@
             const moves = tempGame.moves();
             for (let move of moves) {
                 tempGame.move(move);
-                if (tempGame.fen().split(' ')[0] === newFen.split(' ')[0]) {
-                    return move;
-                }
+                if (tempGame.fen().split(' ')[0] === newFen.split(' ')[0]) return move;
                 tempGame.undo();
             }
             return null;
@@ -517,11 +551,9 @@
                     if (j === 0) sq.innerHTML += `<span class="coord rank">${8-row}</span>`;
                     if (i === 7) sq.innerHTML += `<span class="coord file">${String.fromCharCode(97+col)}</span>`;
 
-                    // Move Hints (Dots)
                     const moveHint = legalMovesFromSelected.find(m => m.to === squareName);
                     if (moveHint) {
                         const hint = document.createElement('div');
-                        // Use big ring for capture, small dot for empty
                         hint.className = piece ? 'hint-capture' : 'hint-dot';
                         sq.appendChild(hint);
                     }
@@ -547,7 +579,6 @@
                 const whiteMove = moves[i];
                 const blackMove = moves[i+1] || '';
                 const isAlt = (i / 2) % 2 !== 0;
-
                 html += `
                     <div class="move-row ${isAlt ? 'alt' : ''}">
                         <div class="move-num">${moveNum}</div>
@@ -564,25 +595,18 @@
             if (isProcessing) return;
             const piece = game.get(square);
             
-            // If clicking the already selected square, deselect
             if (selectedSquare === square) {
                 selectedSquare = null;
                 legalMovesFromSelected = [];
-            } 
-            // If clicking a square with a move hint, execute that move
-            else if (legalMovesFromSelected.some(m => m.to === square)) {
+            } else if (legalMovesFromSelected.some(m => m.to === square)) {
                 const moveObj = legalMovesFromSelected.find(m => m.to === square);
                 selectedSquare = null;
                 legalMovesFromSelected = [];
                 await handleMove(moveObj.san);
-            }
-            // If clicking your own piece, select it and show legal moves
-            else if (piece && piece.color === playerColor) {
+            } else if (piece && piece.color === playerColor) {
                 selectedSquare = square;
                 legalMovesFromSelected = game.moves({ square: square, verbose: true });
-            } 
-            // Otherwise, clear selection
-            else {
+            } else {
                 selectedSquare = null;
                 legalMovesFromSelected = [];
             }
@@ -603,11 +627,8 @@
                 
                 if (newFen) {
                     const aiMove = findAiMove(game.fen(), newFen);
-                    if (aiMove) {
-                        game.move(aiMove);
-                    } else {
-                        game.load(newFen);
-                    }
+                    if (aiMove) game.move(aiMove);
+                    else game.load(newFen);
                 }
                 
                 const statusStr = result.data[2] || "Your Turn";
@@ -624,8 +645,11 @@
 
         newGameBtn.onclick = async () => {
             if (isProcessing) return;
+
+            const selectedModel = modelSelect.value;
             const colorText = document.getElementById('color-select').value;
             playerColor = colorText.includes("White") ? 'w' : 'b';
+
             isProcessing = true;
             statusEl.innerText = "Game Started";
             statusFooterEl.innerText = "Initializing...";
@@ -633,6 +657,19 @@
             selectedSquare = null;
             legalMovesFromSelected = [];
             render();
+
+            // Reconnect to new model if it changed
+            if (selectedModel !== currentModel) {
+                updateBotLabel(selectedModel);
+                await connectClient(selectedModel);
+            }
+
+            if (!client) {
+                statusFooterEl.innerText = "No engine connected";
+                isProcessing = false;
+                return;
+            }
+
             try {
                 const result = await client.predict("/new_game", [colorText]);
                 lastFullState = result.data[1];
@@ -648,8 +685,12 @@
                 }
                 statusFooterEl.innerText = result.data[2] || "Good luck!";
                 switchTab('details');
-            } catch (err) { statusFooterEl.innerText = "Error starting game"; }
-            finally { isProcessing = false; render(); }
+            } catch (err) {
+                statusFooterEl.innerText = "Error starting game";
+            } finally {
+                isProcessing = false;
+                render();
+            }
         };
 
         init();
