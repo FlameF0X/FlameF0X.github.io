@@ -24,11 +24,13 @@
             --hint-color: rgba(0, 0, 0, 0.14);
         }
 
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Helvetica, Arial, sans-serif;
-            margin: 0; 
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -36,6 +38,7 @@
             padding: 20px 0;
         }
 
+        /* ── Desktop layout ── */
         .chess-layout {
             display: flex;
             gap: 20px;
@@ -73,13 +76,12 @@
             touch-action: manipulation;
         }
         .square.light { background-color: var(--board-light); }
-        .square.dark { background-color: var(--board-dark); }
-        .square.selected { background-color: rgba(255, 255, 51, 0.5) !important; }
-        .square.last-move { background-color: rgba(255, 255, 51, 0.4) !important; }
-        
+        .square.dark  { background-color: var(--board-dark); }
+        .square.selected  { background-color: rgba(255,255,51,0.5) !important; }
+        .square.last-move { background-color: rgba(255,255,51,0.4) !important; }
+
         .piece {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -87,36 +89,31 @@
         }
 
         .hint-dot {
-            width: 24%;
-            height: 24%;
+            width: 24%; height: 24%;
             background-color: var(--hint-color);
             border-radius: 50%;
-            position: absolute;
-            z-index: 10;
+            position: absolute; z-index: 10;
             pointer-events: none;
         }
-
         .hint-capture {
-            width: 80%;
-            height: 80%;
+            width: 80%; height: 80%;
             border: 6px solid var(--hint-color);
             border-radius: 50%;
-            position: absolute;
-            z-index: 10;
+            position: absolute; z-index: 10;
             pointer-events: none;
         }
 
         .coord {
             position: absolute;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 11px; font-weight: 700;
             pointer-events: none;
         }
         .rank { left: 3px; top: 2px; }
-        .file { right: 3px; bottom: 0px; }
+        .file { right: 3px; bottom: 0; }
         .light .coord { color: var(--board-dark); }
-        .dark .coord { color: var(--board-light); }
+        .dark  .coord { color: var(--board-light); }
 
+        /* ── Side panel (desktop) ── */
         .side-panel {
             width: 360px;
             background-color: var(--bg-panel);
@@ -129,6 +126,7 @@
             flex-shrink: 0;
         }
 
+        /* ── Player profiles ── */
         .player-profile {
             display: flex;
             align-items: center;
@@ -136,62 +134,37 @@
             background-color: var(--bg-panel-darker);
             gap: 12px;
         }
-
         .avatar {
-            width: 32px;
-            height: 32px;
+            width: 32px; height: 32px;
             background-color: #403d39;
             border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 20px;
         }
-
-        .player-name {
-            font-weight: 700;
-            color: var(--text-light);
-            font-size: 13px;
-        }
-
+        .player-name { font-weight: 700; color: var(--text-light); font-size: 13px; }
         .bot-badge {
-            background-color: #a49f96;
-            color: #262421;
-            font-size: 9px;
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-weight: 800;
-            margin-left: 4px;
+            background-color: #a49f96; color: #262421;
+            font-size: 9px; padding: 1px 4px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
         }
-
-        /* New badge style for the RL model */
         .rl-badge {
-            background-color: #6a9fd8;
-            color: #1a1f2e;
-            font-size: 9px;
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-weight: 800;
-            margin-left: 4px;
+            background-color: #6a9fd8; color: #1a1f2e;
+            font-size: 9px; padding: 1px 4px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
         }
 
+        /* ── Tabs ── */
         .tabs {
             display: flex;
             background-color: #2a2825;
             border-bottom: 2px solid #1f1e1b;
+            flex-shrink: 0;
         }
-
         .tab {
-            flex: 1;
-            padding: 12px 0;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #8b8987;
-            cursor: pointer;
-            transition: color 0.2s;
+            flex: 1; padding: 12px 0;
+            text-align: center; font-size: 13px; font-weight: 700;
+            color: #8b8987; cursor: pointer; transition: color 0.2s;
         }
-
         .tab.active {
             color: var(--text-light);
             background-color: var(--bg-panel);
@@ -199,501 +172,518 @@
             margin-bottom: -2px;
         }
 
-        .tab-content {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
+        /* ── Tab content ── */
+        .tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .tab-content.active { display: flex; }
 
         .play-tab-inner {
             padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            height: 100%;
+            display: flex; flex-direction: column;
+            gap: 20px; height: 100%;
+            overflow-y: auto;
         }
-
         .game-setup-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            gap: 16px;
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; gap: 12px;
         }
-
         .game-info-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8b8987;
-            margin-bottom: 4px;
-            font-weight: 700;
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 1px; color: #8b8987;
+            margin-bottom: 2px; font-weight: 700;
         }
-
         .controls-grid {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: auto;
+            width: 100%; display: flex; flex-direction: column;
+            gap: 10px; margin-top: auto;
         }
 
         .dropdown-select {
-            background-color: #3c3934;
-            color: var(--text-light);
-            border: none;
-            padding: 14px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: left;
-            appearance: none;
+            background-color: #3c3934; color: var(--text-light);
+            border: none; padding: 14px; border-radius: 4px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            text-align: left; appearance: none; width: 100%;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 14px center;
         }
 
         .btn-primary {
-            background-color: var(--accent);
-            color: #fff;
-            font-weight: 800;
-            font-size: 18px;
-            padding: 16px;
-            border-radius: 6px;
-            text-align: center;
-            cursor: pointer;
+            background-color: var(--accent); color: #fff;
+            font-weight: 800; font-size: 18px; padding: 16px;
+            border-radius: 6px; text-align: center; cursor: pointer;
             box-shadow: 0 4px 0 0 var(--accent-shadow);
-            border: none;
-            transition: background-color 0.1s;
+            border: none; transition: background-color 0.1s; width: 100%;
         }
+        .btn-primary:hover  { background-color: var(--accent-hover); }
+        .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 0 var(--accent-shadow); }
 
-        .btn-primary:hover { background-color: var(--accent-hover); }
-        .btn-primary:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 0 var(--accent-shadow);
-        }
-
-        .moves-container {
-            flex: 1;
-            overflow-y: auto;
-            background-color: var(--bg-panel);
-        }
-
+        /* ── Move history ── */
+        .moves-container { flex: 1; overflow-y: auto; background-color: var(--bg-panel); }
         .move-row {
-            display: flex;
-            font-size: 13px;
-            line-height: 28px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex; font-size: 13px;
+            line-height: 28px; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        
         .move-row.alt { background-color: var(--move-bg-alt); }
-
         .move-num {
-            width: 44px;
-            text-align: center;
-            color: #8b8987;
-            background-color: rgba(0,0,0,0.15);
-            font-weight: 600;
+            width: 44px; text-align: center;
+            color: #8b8987; background-color: rgba(0,0,0,0.15); font-weight: 600;
         }
-
         .move-san {
-            flex: 1;
-            padding-left: 12px;
-            color: var(--text-light);
-            font-weight: 600;
-            cursor: pointer;
+            flex: 1; padding-left: 12px;
+            color: var(--text-light); font-weight: 600; cursor: pointer;
         }
-
         .move-san:hover { background-color: rgba(255,255,255,0.05); }
-
-        .move-san.active {
-            background-color: var(--move-bg-active);
-            color: #fff;
-        }
-
+        .move-san.active { background-color: var(--move-bg-active); color: #fff; }
         .empty-move { color: transparent; cursor: default; }
 
         .status-footer {
-            padding: 10px;
-            background: var(--bg-panel-darker);
+            padding: 10px; background: var(--bg-panel-darker);
             border-top: 1px solid #3d3b38;
-            font-size: 12px;
-            text-align: center;
-            font-weight: 600;
+            font-size: 12px; text-align: center; font-weight: 600;
+            flex-shrink: 0;
         }
 
+        /* ── Bottom sheet handle (hidden on desktop) ── */
+        .panel-handle-bar { display: none; }
+
+        /* ══════════════════════════════════════════
+           MOBILE (≤ 850px) — bottom sheet
+        ══════════════════════════════════════════ */
         @media (max-width: 850px) {
-            body { padding-top: 10px; }
+            body { padding: 0; overflow-x: hidden; }
 
             .chess-layout {
                 flex-direction: column;
-                align-items: center;
-                gap: 16px;
-                padding: 0 10px;
+                align-items: stretch;
+                gap: 0;
+                padding: 0;
+                max-width: 100%;
             }
 
-            .board-section, .side-panel {
+            /* Board centered in the space above the collapsed sheet */
+            .board-section {
+                max-width: 100%;
+                padding: 8px;
+                min-height: calc(100vh - 74px - env(safe-area-inset-bottom, 0px));
+                justify-content: center;
+            }
+
+            .player-profile { padding: 6px 12px; }
+            .avatar { width: 28px; height: 28px; font-size: 17px; }
+            .player-name { font-size: 12px; }
+
+            /* The sheet */
+            .side-panel {
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
                 width: 100%;
-                max-width: 600px;
+                height: 74px;   /* collapsed: handle + tabs only */
+                border-radius: 16px 16px 0 0;
+                border-top: 1px solid #3d3b38;
+                box-shadow: 0 -4px 24px rgba(0,0,0,0.55);
+                z-index: 200;
+                transition: height 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+                overflow: hidden;
             }
 
-            .side-panel { height: 420px; }
+            .side-panel.sheet-open {
+                height: min(530px, 75vh);
+            }
+
+            /* Drag handle pill */
+            .panel-handle-bar {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 10px 0 2px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .panel-handle-bar::before {
+                content: '';
+                width: 36px; height: 4px;
+                background-color: #5a5856;
+                border-radius: 2px;
+            }
+
+            .tab-content { overflow: hidden; }
+            .moves-container { overflow-y: auto; }
+
+            .play-tab-inner { padding: 14px; gap: 12px; }
+            .game-setup-container { gap: 6px; flex: none; }
+            .game-setup-container .text-5xl { font-size: 2rem; margin-bottom: 0; }
+            .controls-grid { gap: 8px; margin-top: 0; }
+            .dropdown-select { padding: 11px 14px; font-size: 13px; }
+            .btn-primary { font-size: 16px; padding: 13px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="chess-layout">
-        <div class="board-section">
-            <div class="player-profile opponent">
-                <div class="avatar">🤖</div>
-                <span class="player-name" id="bot-name">ChessSLM (1000) <span class="bot-badge" id="bot-badge">BOT</span></span>
-            </div>
-
-            <div id="chess-board"></div>
-
-            <div class="player-profile you">
-                <div class="avatar">👤</div>
-                <span class="player-name">Guest Player</span>
-            </div>
+<div class="chess-layout">
+    <!-- Board column -->
+    <div class="board-section">
+        <div class="player-profile opponent">
+            <div class="avatar">🤖</div>
+            <span class="player-name" id="bot-name">ChessSLM (1000) <span class="bot-badge">BOT</span></span>
         </div>
-
-        <div class="side-panel">
-            <div class="tabs">
-                <div class="tab active" id="btn-play" onclick="switchTab('play')">Play</div>
-                <div class="tab" id="btn-details" onclick="switchTab('details')">Details</div>
-            </div>
-
-            <div id="tab-play" class="tab-content active">
-                <div class="play-tab-inner">
-                    <div class="game-setup-container">
-                        <div id="game-status-icon" class="text-5xl mb-2">♟️</div>
-                        <div class="current-status text-xl" id="status-text">Play vs AI</div>
-                        <p class="text-sm text-[#8b8987]">Challenge the ChessSLM model.</p>
-                    </div>
-
-                    <div class="controls-grid">
-                        <div class="game-info-label">Model</div>
-                        <select id="model-select" class="dropdown-select">
-                            <option value="FlameF0X/ChessSLM">ChessSLM</option>
-                            <option value="FlameF0X/ChessSLM-RL">ChessSLM-RL</option>
-                        </select>
-                        <div class="game-info-label">Color</div>
-                        <select id="color-select" class="dropdown-select">
-                            <option value="⬜ White (move first)">White</option>
-                            <option value="⬛ Black (move second)">Black</option>
-                        </select>
-                        <button id="new-game-btn" class="btn-primary">Play</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-details" class="tab-content">
-                <div class="moves-container" id="move-history"></div>
-                <div class="status-footer" id="game-status-footer">
-                    No game in progress
-                </div>
-            </div>
+        <div id="chess-board"></div>
+        <div class="player-profile you">
+            <div class="avatar">👤</div>
+            <span class="player-name">Guest Player</span>
         </div>
     </div>
 
-    <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+    <!-- Side panel / bottom sheet -->
+    <div class="side-panel" id="side-panel">
+        <div class="panel-handle-bar" id="panel-handle"></div>
 
-        const boardEl = document.getElementById('chess-board');
-        const statusEl = document.getElementById('status-text');
-        const statusFooterEl = document.getElementById('game-status-footer');
-        const historyEl = document.getElementById('move-history');
-        const newGameBtn = document.getElementById('new-game-btn');
-        const modelSelect = document.getElementById('model-select');
-        const botNameEl = document.getElementById('bot-name');
-        const botBadgeEl = document.getElementById('bot-badge');
-        
-        let client;
-        let currentModel = 'FlameF0X/ChessSLM';
-        let game = new Chess();
-        let playerColor = 'w';
-        let selectedSquare = null;
-        let isProcessing = false;
-        let lastFullState = null;
-        let legalMovesFromSelected = [];
+        <div class="tabs">
+            <div class="tab active" id="btn-play"    onclick="switchTab('play')">Play</div>
+            <div class="tab"        id="btn-details" onclick="switchTab('details')">Details</div>
+        </div>
 
-        const MODEL_INFO = {
-            'FlameF0X/ChessSLM': {
-                name: 'ChessSLM (1000)',
-                badgeText: 'LM',
-                badgeClass: 'bot-badge'
-            },
-            'FlameF0X/ChessSLM-RL': {
-                name: 'ChessSLM-RL (1000)',
-                badgeText: 'LM + RL',
-                badgeClass: 'rl-badge'
-            }
-        };
+        <!-- Play tab -->
+        <div id="tab-play" class="tab-content active">
+            <div class="play-tab-inner">
+                <div class="game-setup-container">
+                    <div class="text-5xl mb-1">♟️</div>
+                    <div class="text-xl" id="status-text">Play vs AI</div>
+                    <p class="text-sm text-[#8b8987]">Challenge the ChessSLM model.</p>
+                </div>
+                <div class="controls-grid">
+                    <div class="game-info-label">Model</div>
+                    <select id="model-select" class="dropdown-select">
+                        <option value="FlameF0X/ChessSLM">ChessSLM</option>
+                        <option value="FlameF0X/ChessSLM-RL">ChessSLM-RL</option>
+                    </select>
+                    <div class="game-info-label">Color</div>
+                    <select id="color-select" class="dropdown-select">
+                        <option value="⬜ White (move first)">White</option>
+                        <option value="⬛ Black (move second)">Black</option>
+                    </select>
+                    <button id="new-game-btn" class="btn-primary">Play</button>
+                </div>
+            </div>
+        </div>
 
-        const PIECES = {
-            'P': 'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
-            'N': 'https://www.chess.com/chess-themes/pieces/neo/150/wn.png',
-            'B': 'https://www.chess.com/chess-themes/pieces/neo/150/wb.png',
-            'R': 'https://www.chess.com/chess-themes/pieces/neo/150/wr.png',
-            'Q': 'https://www.chess.com/chess-themes/pieces/neo/150/wq.png',
-            'K': 'https://www.chess.com/chess-themes/pieces/neo/150/wk.png',
-            'p': 'https://www.chess.com/chess-themes/pieces/neo/150/bp.png',
-            'n': 'https://www.chess.com/chess-themes/pieces/neo/150/bn.png',
-            'b': 'https://www.chess.com/chess-themes/pieces/neo/150/bb.png',
-            'r': 'https://www.chess.com/chess-themes/pieces/neo/150/br.png',
-            'q': 'https://www.chess.com/chess-themes/pieces/neo/150/bq.png',
-            'k': 'https://www.chess.com/chess-themes/pieces/neo/150/bk.png'
-        };
+        <!-- Details tab -->
+        <div id="tab-details" class="tab-content">
+            <div class="moves-container" id="move-history"></div>
+            <div class="status-footer" id="game-status-footer">No game in progress</div>
+        </div>
+    </div>
+</div>
 
-        window.switchTab = (tabName) => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`btn-${tabName}`).classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-        };
+<script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-        function updateBotLabel(modelId) {
-            const info = MODEL_INFO[modelId];
-            botNameEl.innerHTML = `${info.name} <span class="${info.badgeClass}" id="bot-badge">${info.badgeText}</span>`;
+    const boardEl        = document.getElementById('chess-board');
+    const statusEl       = document.getElementById('status-text');
+    const statusFooterEl = document.getElementById('game-status-footer');
+    const historyEl      = document.getElementById('move-history');
+    const newGameBtn     = document.getElementById('new-game-btn');
+    const modelSelect    = document.getElementById('model-select');
+    const botNameEl      = document.getElementById('bot-name');
+    const sidePanel      = document.getElementById('side-panel');
+    const panelHandle    = document.getElementById('panel-handle');
+
+    let client;
+    let currentModel = 'FlameF0X/ChessSLM';
+    let game = new Chess();
+    let playerColor = 'w';
+    let selectedSquare = null;
+    let isProcessing = false;
+    let lastFullState = null;
+    let legalMovesFromSelected = [];
+
+    const MODEL_INFO = {
+        'FlameF0X/ChessSLM':    { name: 'ChessSLM (1000)',    badgeText: 'LM', badgeClass: 'bot-badge' },
+        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (???)', badgeText: 'LM+RL',  badgeClass: 'rl-badge'  }
+    };
+
+    const PIECES = {
+        'P':'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
+        'N':'https://www.chess.com/chess-themes/pieces/neo/150/wn.png',
+        'B':'https://www.chess.com/chess-themes/pieces/neo/150/wb.png',
+        'R':'https://www.chess.com/chess-themes/pieces/neo/150/wr.png',
+        'Q':'https://www.chess.com/chess-themes/pieces/neo/150/wq.png',
+        'K':'https://www.chess.com/chess-themes/pieces/neo/150/wk.png',
+        'p':'https://www.chess.com/chess-themes/pieces/neo/150/bp.png',
+        'n':'https://www.chess.com/chess-themes/pieces/neo/150/bn.png',
+        'b':'https://www.chess.com/chess-themes/pieces/neo/150/bb.png',
+        'r':'https://www.chess.com/chess-themes/pieces/neo/150/br.png',
+        'q':'https://www.chess.com/chess-themes/pieces/neo/150/bq.png',
+        'k':'https://www.chess.com/chess-themes/pieces/neo/150/bk.png'
+    };
+
+    /* ── Mobile bottom sheet ── */
+    const isMobile = () => window.innerWidth <= 850;
+    const openSheet   = () => sidePanel.classList.add('sheet-open');
+    const closeSheet  = () => sidePanel.classList.remove('sheet-open');
+    const toggleSheet = () => sidePanel.classList.toggle('sheet-open');
+
+    panelHandle.addEventListener('click', toggleSheet);
+    document.querySelectorAll('.tab').forEach(tab =>
+        tab.addEventListener('click', () => { if (isMobile()) openSheet(); })
+    );
+
+    /* ── Tab switching ── */
+    window.switchTab = (tabName) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`btn-${tabName}`).classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        if (isMobile()) openSheet();
+    };
+
+    function updateBotLabel(modelId) {
+        const info = MODEL_INFO[modelId];
+        botNameEl.innerHTML = `${info.name} <span class="${info.badgeClass}">${info.badgeText}</span>`;
+    }
+
+    async function connectClient(modelId) {
+        statusFooterEl.innerText = "Connecting...";
+        try {
+            client = await Client.connect(modelId);
+            currentModel = modelId;
+            statusFooterEl.innerText = "Engine Ready";
+        } catch (err) {
+            statusFooterEl.innerText = "Connection Failed";
+            client = null;
         }
+    }
 
-        async function connectClient(modelId) {
-            statusFooterEl.innerText = "Connecting...";
-            try {
-                client = await Client.connect(modelId);
-                currentModel = modelId;
-                statusFooterEl.innerText = "Engine Ready";
-            } catch (err) {
-                statusFooterEl.innerText = "Connection Failed";
-                client = null;
-            }
-        }
+    async function init() {
+        render(); // render immediately — don't block on network
+        await connectClient('FlameF0X/ChessSLM');
+    }
 
-        async function init() {
-            render(); // Render board immediately so pieces are always interactive
-            await connectClient('FlameF0X/ChessSLM');
-        }
-
-        function parseFenFromData(data) {
-            try {
-                const boardHtml = data[0];
-                const preMatch = boardHtml.match(/<pre>([\s\S]*?)<\/pre>/);
-                if (!preMatch) return null;
-                const lines = preMatch[1].trim().split('\n');
-                let fenRows = [];
-                for (let i = 0; i < 8; i++) {
-                    let row = lines[i].trim().replace(/\s+/g, '');
-                    let fenRow = "", emptyCount = 0;
-                    for (let char of row) {
-                        if (char === '.') emptyCount++;
-                        else {
-                            if (emptyCount > 0) { fenRow += emptyCount; emptyCount = 0; }
-                            fenRow += char;
-                        }
-                    }
-                    if (emptyCount > 0) fenRow += emptyCount;
-                    fenRows.push(fenRow);
-                }
-                const turnStr = (data[2] || "").toLowerCase();
-                const turn = turnStr.includes("black") ? 'b' : 'w';
-                return fenRows.join('/') + ` ${turn} - - 0 1`;
-            } catch (e) { return null; }
-        }
-
-        function findAiMove(oldFen, newFen) {
-            const tempGame = new Chess(oldFen);
-            const moves = tempGame.moves();
-            for (let move of moves) {
-                tempGame.move(move);
-                if (tempGame.fen().split(' ')[0] === newFen.split(' ')[0]) return move;
-                tempGame.undo();
-            }
-            return null;
-        }
-
-        function render() {
-            boardEl.innerHTML = '';
-            const fen = game.fen().split(' ')[0];
-            const board = [];
-            let r = 0, c = 0;
-            for (let char of fen) {
-                if (char === '/') { r++; c = 0; }
-                else if (isNaN(char)) { if (!board[r]) board[r] = []; board[r][c] = char; c++; }
-                else { for (let i = 0; i < parseInt(char); i++) { if (!board[r]) board[r] = []; board[r][c] = null; c++; } }
-            }
-
-            const history = game.history({ verbose: true });
-            const lastMove = history[history.length - 1];
-            const flipped = playerColor === 'b';
-
+    /* ── Parse only the board rows from the API response.
+       We NEVER use this FEN for castling rights — chess.js
+       tracks those correctly via game.move() calls.        ── */
+    function parseBoardRows(data) {
+        try {
+            const boardHtml = data[0];
+            const preMatch = boardHtml.match(/<pre>([\s\S]*?)<\/pre>/);
+            if (!preMatch) return null;
+            const lines = preMatch[1].trim().split('\n');
+            let fenRows = [];
             for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const row = flipped ? 7 - i : i;
-                    const col = flipped ? 7 - j : j;
-                    const squareName = String.fromCharCode(97 + col) + (8 - row);
-                    const piece = board[row][col];
-                    
-                    const sq = document.createElement('div');
-                    sq.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-                    
-                    if (selectedSquare === squareName) sq.classList.add('selected');
-                    if (lastMove && (squareName === lastMove.from || squareName === lastMove.to)) sq.classList.add('last-move');
-
-                    if (j === 0) sq.innerHTML += `<span class="coord rank">${8-row}</span>`;
-                    if (i === 7) sq.innerHTML += `<span class="coord file">${String.fromCharCode(97+col)}</span>`;
-
-                    const moveHint = legalMovesFromSelected.find(m => m.to === squareName);
-                    if (moveHint) {
-                        const hint = document.createElement('div');
-                        hint.className = piece ? 'hint-capture' : 'hint-dot';
-                        sq.appendChild(hint);
-                    }
-
-                    if (piece) {
-                        const pEl = document.createElement('div');
-                        pEl.className = 'piece';
-                        pEl.style.backgroundImage = `url(${PIECES[piece]})`;
-                        sq.appendChild(pEl);
-                    }
-                    sq.onclick = () => onSquareClick(squareName);
-                    boardEl.appendChild(sq);
-                }
-            }
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const moves = game.history();
-            let html = '';
-            for (let i = 0; i < moves.length; i += 2) {
-                const moveNum = (i / 2) + 1;
-                const whiteMove = moves[i];
-                const blackMove = moves[i+1] || '';
-                const isAlt = (i / 2) % 2 !== 0;
-                html += `
-                    <div class="move-row ${isAlt ? 'alt' : ''}">
-                        <div class="move-num">${moveNum}</div>
-                        <div class="move-san ${i === moves.length - 1 ? 'active' : ''}">${whiteMove}</div>
-                        <div class="move-san ${blackMove ? (i + 1 === moves.length - 1 ? 'active' : '') : 'empty-move'}">${blackMove || ''}</div>
-                    </div>
-                `;
-            }
-            historyEl.innerHTML = html;
-            historyEl.scrollTop = historyEl.scrollHeight;
-        }
-
-        async function onSquareClick(square) {
-            if (isProcessing) return;
-            const piece = game.get(square);
-            
-            if (selectedSquare === square) {
-                selectedSquare = null;
-                legalMovesFromSelected = [];
-            } else if (legalMovesFromSelected.some(m => m.to === square)) {
-                const moveObj = legalMovesFromSelected.find(m => m.to === square);
-                selectedSquare = null;
-                legalMovesFromSelected = [];
-                await handleMove(moveObj.san);
-            } else if (piece && piece.color === playerColor) {
-                selectedSquare = square;
-                legalMovesFromSelected = game.moves({ square: square, verbose: true });
-            } else {
-                selectedSquare = null;
-                legalMovesFromSelected = [];
-            }
-            render();
-        }
-
-        async function handleMove(san) {
-            isProcessing = true;
-            statusFooterEl.innerText = "Engine thinking...";
-            
-            game.move(san);
-            render();
-            
-            try {
-                const result = await client.predict("/make_player_move", [san, lastFullState]);
-                lastFullState = result.data[1];
-                const newFen = parseFenFromData(result.data);
-                
-                if (newFen) {
-                    const aiMove = findAiMove(game.fen(), newFen);
-                    if (aiMove) game.move(aiMove);
-                    else game.load(newFen);
-                }
-                
-                const statusStr = result.data[2] || "Your Turn";
-                statusFooterEl.innerText = statusStr;
-                statusEl.innerText = statusStr.includes("White") ? "White's Turn" : "Black's Turn";
-            } catch (err) {
-                statusFooterEl.innerText = "Invalid Move";
-                game.undo();
-            } finally {
-                isProcessing = false;
-                render();
-            }
-        }
-
-        newGameBtn.onclick = async () => {
-            if (isProcessing) return;
-
-            const selectedModel = modelSelect.value;
-            const colorText = document.getElementById('color-select').value;
-            playerColor = colorText.includes("White") ? 'w' : 'b';
-
-            isProcessing = true;
-            statusEl.innerText = "Game Started";
-            statusFooterEl.innerText = "Initializing...";
-            game.reset();
-            selectedSquare = null;
-            legalMovesFromSelected = [];
-            render();
-
-            // Reconnect to new model if it changed
-            if (selectedModel !== currentModel) {
-                updateBotLabel(selectedModel);
-                await connectClient(selectedModel);
-            }
-
-            if (!client) {
-                statusFooterEl.innerText = "No engine connected";
-                isProcessing = false;
-                return;
-            }
-
-            try {
-                const result = await client.predict("/new_game", [colorText]);
-                lastFullState = result.data[1];
-                const newFen = parseFenFromData(result.data);
-                if (newFen) {
-                    if (playerColor === 'b') {
-                        const aiMove = findAiMove(new Chess().fen(), newFen);
-                        if (aiMove) game.move(aiMove);
-                        else game.load(newFen);
-                    } else {
-                        game.load(newFen);
+                let row = lines[i].trim().replace(/\s+/g, '');
+                let fenRow = '', emptyCount = 0;
+                for (let char of row) {
+                    if (char === '.') { emptyCount++; }
+                    else {
+                        if (emptyCount > 0) { fenRow += emptyCount; emptyCount = 0; }
+                        fenRow += char;
                     }
                 }
-                statusFooterEl.innerText = result.data[2] || "Good luck!";
-                switchTab('details');
-            } catch (err) {
-                statusFooterEl.innerText = "Error starting game";
-            } finally {
-                isProcessing = false;
-                render();
+                if (emptyCount > 0) fenRow += emptyCount;
+                fenRows.push(fenRow);
             }
-        };
+            return fenRows.join('/');
+        } catch (e) { return null; }
+    }
 
-        init();
-    </script>
+    /* ── Find the AI's move by comparing board positions.
+       currentGameFen comes from game.fen() so castling
+       rights are always correct.                          ── */
+    function findAiMove(currentGameFen, newBoardRows) {
+        const tempGame = new Chess(currentGameFen);
+        const moves = tempGame.moves({ verbose: true });
+        for (const move of moves) {
+            tempGame.move(move.san);
+            if (tempGame.fen().split(' ')[0] === newBoardRows) {
+                tempGame.undo();
+                return move.san;
+            }
+            tempGame.undo();
+        }
+        return null;
+    }
+
+    /* ── Render board ── */
+    function render() {
+        boardEl.innerHTML = '';
+        const board = [];
+        let r = 0, c = 0;
+        for (const char of game.fen().split(' ')[0]) {
+            if (char === '/') { r++; c = 0; }
+            else if (isNaN(char)) { if (!board[r]) board[r] = []; board[r][c] = char; c++; }
+            else { for (let i = 0; i < parseInt(char); i++) { if (!board[r]) board[r] = []; board[r][c] = null; c++; } }
+        }
+
+        const history  = game.history({ verbose: true });
+        const lastMove = history[history.length - 1];
+        const flipped  = playerColor === 'b';
+
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                const row = flipped ? 7 - i : i;
+                const col = flipped ? 7 - j : j;
+                const squareName = String.fromCharCode(97 + col) + (8 - row);
+                const piece = board[row][col];
+
+                const sq = document.createElement('div');
+                sq.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                if (selectedSquare === squareName) sq.classList.add('selected');
+                if (lastMove && (squareName === lastMove.from || squareName === lastMove.to)) sq.classList.add('last-move');
+
+                if (j === 0) sq.innerHTML += `<span class="coord rank">${8 - row}</span>`;
+                if (i === 7) sq.innerHTML += `<span class="coord file">${String.fromCharCode(97 + col)}</span>`;
+
+                const moveHint = legalMovesFromSelected.find(m => m.to === squareName);
+                if (moveHint) {
+                    const hint = document.createElement('div');
+                    hint.className = piece ? 'hint-capture' : 'hint-dot';
+                    sq.appendChild(hint);
+                }
+
+                if (piece) {
+                    const pEl = document.createElement('div');
+                    pEl.className = 'piece';
+                    pEl.style.backgroundImage = `url(${PIECES[piece]})`;
+                    sq.appendChild(pEl);
+                }
+                sq.onclick = () => onSquareClick(squareName);
+                boardEl.appendChild(sq);
+            }
+        }
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const moves = game.history();
+        let html = '';
+        for (let i = 0; i < moves.length; i += 2) {
+            const moveNum  = (i / 2) + 1;
+            const wMove    = moves[i];
+            const bMove    = moves[i + 1] || '';
+            const isAlt    = (i / 2) % 2 !== 0;
+            const wActive  = i === moves.length - 1 ? 'active' : '';
+            const bActive  = bMove && (i + 1 === moves.length - 1) ? 'active' : '';
+            html += `
+                <div class="move-row ${isAlt ? 'alt' : ''}">
+                    <div class="move-num">${moveNum}</div>
+                    <div class="move-san ${wActive}">${wMove}</div>
+                    <div class="move-san ${bMove ? bActive : 'empty-move'}">${bMove}</div>
+                </div>`;
+        }
+        historyEl.innerHTML = html;
+        historyEl.scrollTop = historyEl.scrollHeight;
+    }
+
+    /* ── Square click ── */
+    async function onSquareClick(square) {
+        if (isProcessing) return;
+        const piece = game.get(square);
+
+        if (selectedSquare === square) {
+            selectedSquare = null; legalMovesFromSelected = [];
+        } else if (legalMovesFromSelected.some(m => m.to === square)) {
+            const moveObj = legalMovesFromSelected.find(m => m.to === square);
+            selectedSquare = null; legalMovesFromSelected = [];
+            await handleMove(moveObj.san);
+        } else if (piece && piece.color === playerColor) {
+            selectedSquare = square;
+            legalMovesFromSelected = game.moves({ square, verbose: true });
+        } else {
+            selectedSquare = null; legalMovesFromSelected = [];
+        }
+        render();
+    }
+
+    /* ── Handle a player move then wait for the AI ── */
+    async function handleMove(san) {
+        isProcessing = true;
+        statusFooterEl.innerText = "Engine thinking...";
+
+        game.move(san);
+        render();
+
+        // Snapshot *after* player move — chess.js has correct castling rights
+        const fenAfterPlayerMove = game.fen();
+
+        try {
+            const result = await client.predict("/make_player_move", [san, lastFullState]);
+            lastFullState = result.data[1];
+
+            const newBoardRows = parseBoardRows(result.data);
+            if (newBoardRows) {
+                const aiSan = findAiMove(fenAfterPlayerMove, newBoardRows);
+                if (aiSan) {
+                    game.move(aiSan); // always via game.move() — history & castling rights preserved
+                }
+                // If aiSan is null (shouldn't happen) we simply don't update,
+                // avoiding game.load() which would wipe the history
+            }
+
+            const statusStr = result.data[2] || "Your Turn";
+            statusFooterEl.innerText = statusStr;
+            statusEl.innerText = statusStr.includes("White") ? "White's Turn" : "Black's Turn";
+        } catch (err) {
+            statusFooterEl.innerText = "Connection error";
+            game.undo();
+        } finally {
+            isProcessing = false;
+            render();
+        }
+    }
+
+    /* ── New game ── */
+    newGameBtn.onclick = async () => {
+        if (isProcessing) return;
+
+        const selectedModel = modelSelect.value;
+        const colorText = document.getElementById('color-select').value;
+        playerColor = colorText.includes("White") ? 'w' : 'b';
+
+        isProcessing = true;
+        statusEl.innerText = "Game Started";
+        statusFooterEl.innerText = "Initializing...";
+        game.reset(); // full castling rights restored by chess.js
+        selectedSquare = null;
+        legalMovesFromSelected = [];
+        render();
+
+        if (selectedModel !== currentModel) {
+            updateBotLabel(selectedModel);
+            await connectClient(selectedModel);
+        }
+
+        if (!client) {
+            statusFooterEl.innerText = "No engine connected";
+            isProcessing = false;
+            return;
+        }
+
+        try {
+            const result = await client.predict("/new_game", [colorText]);
+            lastFullState = result.data[1];
+
+            if (playerColor === 'b') {
+                // AI plays white first — find its move using game.fen()
+                // (starting position, full castling rights KQkq)
+                const newBoardRows = parseBoardRows(result.data);
+                if (newBoardRows) {
+                    const aiSan = findAiMove(game.fen(), newBoardRows);
+                    if (aiSan) game.move(aiSan); // preserves rights for future castling
+                }
+            }
+            // For white: game.reset() is already correct, nothing to load
+
+            statusFooterEl.innerText = result.data[2] || "Good luck!";
+            switchTab('details');
+        } catch (err) {
+            statusFooterEl.innerText = "Error starting game";
+        } finally {
+            isProcessing = false;
+            render();
+        }
+    };
+
+    init();
+</script>
 </body>
 </html>
