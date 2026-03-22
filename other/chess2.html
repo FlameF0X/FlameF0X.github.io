@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Play Chess vs ChessSLM-RL+SF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #302e2b;
+            --bg-panel: #262421;
+            --bg-panel-darker: #21201d;
+            --board-light: #ebecd0;
+            --board-dark: #739552;
+            --accent: #81b64c;
+            --accent-shadow: #457536;
+            --accent-hover: #a3d160;
+            --text-main: #bababa;
+            --text-light: #ffffff;
+            --move-bg-alt: #2b2927;
+            --move-bg-active: #484644;
+            --hint-color: rgba(0,0,0,0.14);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .chess-layout {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+            padding: 0 20px;
+            flex-direction: row;
+        }
+
+        .board-section {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            aspect-ratio: 1/1;
+            width: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .square {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .square.light { background-color: var(--board-light); }
+        .square.dark  { background-color: var(--board-dark); }
+        .square.selected  { background-color: rgba(255,255,51,0.5) !important; }
+        .square.last-move { background-color: rgba(255,255,51,0.4) !important; }
+
+        .piece {
+            width: 100%; height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 5;
+        }
+
+        .hint-dot {
+            width: 24%; height: 24%;
+            background-color: var(--hint-color);
+            border-radius: 50%;
+            position: absolute; z-index: 10;
+            pointer-events: none;
+        }
+        .hint-capture {
+            width: 80%; height: 80%;
+            border: 6px solid var(--hint-color);
+            border-radius: 50%;
+            position: absolute; z-index: 10;
+            pointer-events: none;
+        }
+
+        .coord {
+            position: absolute;
+            font-size: 11px; font-weight: 700;
+            pointer-events: none;
+        }
+        .rank { left: 3px; top: 2px; }
+        .file { right: 3px; bottom: 0; }
+        .light .coord { color: var(--board-dark); }
+        .dark  .coord { color: var(--board-light); }
+
+        /* ── Side panel ── */
+        .side-panel {
+            width: 360px;
+            background-color: var(--bg-panel);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* ── Player profiles ── */
+        .player-profile {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background-color: var(--bg-panel-darker);
+            gap: 12px;
+        }
+        .avatar {
+            width: 32px; height: 32px;
+            background-color: #403d39;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .player-name { font-weight: 700; color: var(--text-light); font-size: 13px; }
+        .sf-badge {
+            background-color: #6a9fd8; color: #0e1a2e;
+            font-size: 9px; padding: 1px 5px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
+        }
+        .rl-badge {
+            background-color: #a49f96; color: #262421;
+            font-size: 9px; padding: 1px 4px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            background-color: #2a2825;
+            border-bottom: 2px solid #1f1e1b;
+            flex-shrink: 0;
+        }
+        .tab {
+            flex: 1; padding: 12px 0;
+            text-align: center; font-size: 13px; font-weight: 700;
+            color: #8b8987; cursor: pointer; transition: color 0.2s;
+        }
+        .tab.active {
+            color: var(--text-light);
+            background-color: var(--bg-panel);
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: -2px;
+        }
+
+        /* ── Tab content ── */
+        .tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .tab-content.active { display: flex; }
+
+        .play-tab-inner {
+            padding: 24px;
+            display: flex; flex-direction: column;
+            gap: 20px; height: 100%;
+            overflow-y: auto;
+        }
+        .game-setup-container {
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; gap: 10px;
+        }
+        .game-info-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 1px; color: #8b8987;
+            margin-bottom: 2px; font-weight: 700;
+        }
+        .controls-grid {
+            width: 100%; display: flex; flex-direction: column;
+            gap: 10px; margin-top: auto;
+        }
+
+        .dropdown-select {
+            background-color: #3c3934; color: var(--text-light);
+            border: none; padding: 14px; border-radius: 4px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            text-align: left; appearance: none; width: 100%;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        .btn-primary {
+            background-color: var(--accent); color: #fff;
+            font-weight: 800; font-size: 18px; padding: 16px;
+            border-radius: 6px; text-align: center; cursor: pointer;
+            box-shadow: 0 4px 0 0 var(--accent-shadow);
+            border: none; transition: background-color 0.1s; width: 100%;
+        }
+        .btn-primary:hover  { background-color: var(--accent-hover); }
+        .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 0 var(--accent-shadow); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── Details tab ── */
+        .details-inner {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .moves-container {
+            overflow-y: auto;
+            background-color: var(--bg-panel);
+            flex: 1;
+        }
+        .move-row {
+            display: flex; font-size: 13px;
+            line-height: 28px; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .move-row.alt { background-color: var(--move-bg-alt); }
+        .move-num {
+            width: 44px; text-align: center;
+            color: #8b8987; background-color: rgba(0,0,0,0.15); font-weight: 600;
+        }
+        .move-san {
+            flex: 1; padding-left: 12px;
+            color: var(--text-light); font-weight: 600;
+        }
+        .move-san.active { background-color: var(--move-bg-active); }
+        .empty-move { color: transparent; }
+
+        /* ── Candidates panel ── */
+        .candidates-panel {
+            background-color: var(--bg-panel-darker);
+            border-top: 2px solid #3d3b38;
+            padding: 10px 14px 12px;
+            font-size: 12px;
+            flex-shrink: 0;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .cand-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8b8987;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #candidates-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        #candidates-table td { padding: 2px 6px; line-height: 1.8; }
+        .cand-best { background-color: rgba(129,182,76,0.08); border-radius: 3px; }
+        .cand-name-best   { color: #e8d5a3; font-weight: 700; }
+        .cand-name-normal { color: #9a8a6a; font-weight: 400; }
+        .score-pos  { color: #a8d88a; }
+        .score-neg  { color: #d88a8a; }
+        .score-neu  { color: #888; }
+        .score-mw   { color: #6cf06c; }
+        .score-ml   { color: #f06c6c; }
+        .sf-ok   { color: #6c9; font-size: 10px; font-weight: 700; }
+        .sf-warn { color: #c84; font-size: 10px; font-weight: 700; }
+
+        /* ── Status footer ── */
+        .status-footer {
+            padding: 10px;
+            background: var(--bg-panel-darker);
+            border-top: 1px solid #3d3b38;
+            font-size: 12px; text-align: center; font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Thinking dots */
+        .thinking-dot {
+            display: inline-block;
+            width: 5px; height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: blink 1.2s infinite;
+        }
+        .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40%           { opacity: 1;   transform: scale(1.1); }
+        }
+
+        .panel-handle-bar { display: none; }
+
+        @media (max-width: 850px) {
+            body { padding: 0; overflow-x: hidden; }
+            .chess-layout {
+                flex-direction: column; align-items: stretch;
+                gap: 0; padding: 0; max-width: 100%;
+            }
+            .board-section {
+                max-width: 100%; padding: 8px;
+                min-height: calc(100vh - 74px - env(safe-area-inset-bottom, 0px));
+                justify-content: center;
+            }
+            .player-profile { padding: 6px 12px; }
+            .avatar { width: 28px; height: 28px; font-size: 17px; }
+            .player-name { font-size: 12px; }
+            .side-panel {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                width: 100%; height: 74px;
+                border-radius: 16px 16px 0 0;
+                border-top: 1px solid #3d3b38;
+                box-shadow: 0 -4px 24px rgba(0,0,0,0.55);
+                z-index: 200;
+                transition: height 0.3s cubic-bezier(0.32,0.72,0,1);
+                overflow: hidden;
+            }
+            .side-panel.sheet-open { height: min(600px, 82vh); }
+            .panel-handle-bar {
+                display: flex; justify-content: center; align-items: center;
+                padding: 10px 0 2px; cursor: pointer; flex-shrink: 0;
+            }
+            .panel-handle-bar::before {
+                content: ''; width: 36px; height: 4px;
+                background-color: #5a5856; border-radius: 2px;
+            }
+            .tab-content { overflow: hidden; }
+            .moves-container { overflow-y: auto; }
+            .play-tab-inner { padding: 14px; gap: 12px; }
+            .game-setup-container { gap: 6px; flex: none; }
+            .game-setup-container .text-5xl { font-size: 2rem; margin-bottom: 0; }
+            .controls-grid { gap: 8px; margin-top: 0; }
+            .dropdown-select { padding: 11px 14px; font-size: 13px; }
+            .btn-primary { font-size: 16px; padding: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chess-layout">
+
+    <!-- Board column -->
+    <div class="board-section">
+        <div class="player-profile">
+            <div class="avatar">🤖</div>
+            <span class="player-name">
+                ChessSLM-RL
+                <span class="rl-badge">RL</span>
+                <span class="sf-badge">+SF</span>
+            </span>
+        </div>
+        <div id="chess-board"></div>
+        <div class="player-profile">
+            <div class="avatar">👤</div>
+            <span class="player-name">Guest Player</span>
+        </div>
+    </div>
+
+    <!-- Side panel / bottom sheet -->
+    <div class="side-panel" id="side-panel">
+        <div class="panel-handle-bar" id="panel-handle"></div>
+
+        <div class="tabs">
+            <div class="tab active" id="btn-play"    onclick="switchTab('play')">Play</div>
+            <div class="tab"        id="btn-details" onclick="switchTab('details')">Details</div>
+        </div>
+
+        <!-- Play tab -->
+        <div id="tab-play" class="tab-content active">
+            <div class="play-tab-inner">
+                <div class="game-setup-container">
+                    <div class="text-5xl mb-1">♟️</div>
+                    <div class="text-xl font-bold" id="status-text">Play vs ChessSLM-RL+SF</div>
+                    <p style="color:#8b8987; font-size:13px; text-align:center; line-height:1.6; margin:0">
+                        GPT-2 generates <strong style="color:#bababa">5 candidate moves</strong>,<br>
+                        Stockfish (depth&nbsp;12) picks the strongest.
+                    </p>
+                </div>
+                <div class="controls-grid">
+                    <div class="game-info-label">Play as</div>
+                    <select id="color-select" class="dropdown-select">
+                        <option value="⬜ White (move first)">White (move first)</option>
+                        <option value="⬛ Black (move second)">Black (move second)</option>
+                    </select>
+                    <button id="new-game-btn" class="btn-primary">▶ New Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details tab -->
+        <div id="tab-details" class="tab-content">
+            <div class="details-inner">
+
+                <!-- Move history -->
+                <div class="moves-container" id="move-history"></div>
+
+                <!-- ChessSLM candidate moves + Stockfish evaluation -->
+                <div class="candidates-panel">
+                    <div class="cand-header">
+                        ChessSLM Candidates
+                        <span id="sf-indicator" style="color:#555">— start a game</span>
+                    </div>
+                    <div id="candidates-table">
+                        <span style="color:#555; font-size:11px">No moves evaluated yet.</span>
+                    </div>
+                </div>
+
+                <div class="status-footer" id="game-status-footer">No game in progress</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+/* ── Config ── */
+const SPACE_ID = "FlameF0X/ChessSLM-RL-SF";
+
+const PIECES = {
+    'P':'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
+    'N':'https://www.chess.com/chess-themes/pieces/neo/150/wn.png',
+    'B':'https://www.chess.com/chess-themes/pieces/neo/150/wb.png',
+    'R':'https://www.chess.com/chess-themes/pieces/neo/150/wr.png',
+    'Q':'https://www.chess.com/chess-themes/pieces/neo/150/wq.png',
+    'K':'https://www.chess.com/chess-themes/pieces/neo/150/wk.png',
+    'p':'https://www.chess.com/chess-themes/pieces/neo/150/bp.png',
+    'n':'https://www.chess.com/chess-themes/pieces/neo/150/bn.png',
+    'b':'https://www.chess.com/chess-themes/pieces/neo/150/bb.png',
+    'r':'https://www.chess.com/chess-themes/pieces/neo/150/br.png',
+    'q':'https://www.chess.com/chess-themes/pieces/neo/150/bq.png',
+    'k':'https://www.chess.com/chess-themes/pieces/neo/150/bk.png'
+};
+
+/* ── DOM refs ── */
+const boardEl         = document.getElementById('chess-board');
+const statusEl        = document.getElementById('status-text');
+const statusFooterEl  = document.getElementById('game-status-footer');
+const historyEl       = document.getElementById('move-history');
+const candidatesTable = document.getElementById('candidates-table');
+const sfIndicator     = document.getElementById('sf-indicator');
+const newGameBtn      = document.getElementById('new-game-btn');
+const sidePanel       = document.getElementById('side-panel');
+const panelHandle     = document.getElementById('panel-handle');
+
+/* ── App state ── */
+let client         = null;
+let game           = new Chess();
+let playerColor    = 'w';
+let selectedSquare = null;
+let legalMovesFrom = [];
+let isProcessing   = false;
+let serverState    = null;   // gr.State lives at data[5] in every API response
+
+/* ── Mobile bottom sheet ── */
+const isMobile    = () => window.innerWidth <= 850;
+const openSheet   = () => sidePanel.classList.add('sheet-open');
+const toggleSheet = () => sidePanel.classList.toggle('sheet-open');
+
+panelHandle.addEventListener('click', toggleSheet);
+document.querySelectorAll('.tab').forEach(t =>
+    t.addEventListener('click', () => { if (isMobile()) openSheet(); })
+);
+
+window.switchTab = (name) => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`btn-${name}`).classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+    if (isMobile()) openSheet();
+};
+
+/* ══════════════════════════════════════════════
+   ENGINE CONNECTION
+══════════════════════════════════════════════ */
+async function connectClient() {
+    statusFooterEl.innerText = "Connecting to ChessSLM-RL-SF…";
+    try {
+        client = await Client.connect(SPACE_ID);
+        statusFooterEl.innerText = "Engine ready ✓";
+    } catch (e) {
+        statusFooterEl.innerText = "Connection failed — press New Game to retry";
+        client = null;
+    }
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSE PARSERS
+══════════════════════════════════════════════ */
+
+/**
+ * Extract the AI's SAN from the server log HTML.
+ * Log contains: "ChessSLM plays <strong>Nf3</strong>"
+ *           or  "ChessSLM opens with <strong>e4</strong>"
+ */
+function parseAiSan(logHtml) {
+    const m = logHtml.match(/(?:plays|opens with)\s*<strong>(.*?)<\/strong>/i);
+    return m ? m[1].trim() : null;
+}
+
+/**
+ * Parse the candidate table emitted by format_candidates_html()
+ * and render a clean version into #candidates-table / #sf-indicator.
+ *
+ * Server table structure per row:
+ *   <td>⭐ </td>  <td style="font-weight:700;...">Nf3</td>  <td>+0.32</td>
+ */
+function renderCandidates(logHtml) {
+    /* ── Stockfish indicator ── */
+    if (logHtml.includes("✔ Stockfish")) {
+        sfIndicator.className = "sf-ok";
+        sfIndicator.textContent = "✔ Stockfish depth 12";
+    } else if (logHtml.includes("Stockfish N/A")) {
+        sfIndicator.className = "sf-warn";
+        sfIndicator.textContent = "⚠ Stockfish unavailable";
+    } else {
+        sfIndicator.className = "";
+        sfIndicator.style.color = "#555";
+        sfIndicator.textContent = "—";
+    }
+
+    /* ── Extract table rows ── */
+    const tableMatch = logHtml.match(/<table[\s\S]*?>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) {
+        candidatesTable.innerHTML = '<span style="color:#555;font-size:11px">Candidates not available.</span>';
+        return;
+    }
+
+    const rows = [...tableMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)];
+    if (!rows.length) {
+        candidatesTable.innerHTML = '<span style="color:#555;font-size:11px">No candidates.</span>';
+        return;
+    }
+
+    let html = '<table>';
+    for (const rowMatch of rows) {
+        // Extract raw text from each <td>
+        const cells = [...rowMatch[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)]
+            .map(c => c[1].replace(/<[^>]+>/g, '').trim());
+
+        if (cells.length < 3) continue;
+
+        const isBest  = cells[0].includes("⭐");
+        const moveName = cells[1];
+        const rawScore = cells[2];
+
+        // Score colour class
+        let scoreClass = 'score-neu';
+        if (rawScore.includes('+M') || rawScore === '+M')         scoreClass = 'score-mw';
+        else if (rawScore.includes('−M') || rawScore.includes('-M')) scoreClass = 'score-ml';
+        else if (rawScore.startsWith('+'))                         scoreClass = 'score-pos';
+        else if (rawScore.startsWith('-') || rawScore.startsWith('−')) scoreClass = 'score-neg';
+
+        const rowClass  = isBest ? 'cand-best' : '';
+        const nameClass = isBest ? 'cand-name-best' : 'cand-name-normal';
+        const star      = isBest
+            ? '<span style="color:#f0c060">★</span>'
+            : '<span style="opacity:0">★</span>';
+
+        html += `
+          <tr class="${rowClass}">
+            <td style="width:16px;padding:1px 4px">${star}</td>
+            <td class="${nameClass}" style="padding:1px 8px">${moveName}</td>
+            <td class="${scoreClass}" style="text-align:right;padding:1px 6px">${rawScore}</td>
+          </tr>`;
+    }
+    html += '</table>';
+    candidatesTable.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════
+   BOARD RENDERING
+══════════════════════════════════════════════ */
+function render() {
+    boardEl.innerHTML = '';
+    const board = [];
+    let r = 0, c = 0;
+    for (const ch of game.fen().split(' ')[0]) {
+        if (ch === '/') { r++; c = 0; }
+        else if (isNaN(ch)) { if (!board[r]) board[r] = []; board[r][c] = ch; c++; }
+        else { for (let i = 0; i < +ch; i++) { if (!board[r]) board[r] = []; board[r][c] = null; c++; } }
+    }
+
+    const history  = game.history({ verbose: true });
+    const lastMove = history[history.length - 1];
+    const flipped  = playerColor === 'b';
+
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            const row = flipped ? 7 - i : i;
+            const col = flipped ? 7 - j : j;
+            const sqName = String.fromCharCode(97 + col) + (8 - row);
+            const piece  = board[row] ? board[row][col] : null;
+
+            const sq = document.createElement('div');
+            sq.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+            if (selectedSquare === sqName) sq.classList.add('selected');
+            if (lastMove && (sqName === lastMove.from || sqName === lastMove.to))
+                sq.classList.add('last-move');
+
+            if (j === 0) sq.innerHTML += `<span class="coord rank">${8 - row}</span>`;
+            if (i === 7) sq.innerHTML += `<span class="coord file">${String.fromCharCode(97 + col)}</span>`;
+
+            const hint = legalMovesFrom.find(m => m.to === sqName);
+            if (hint) {
+                const dot = document.createElement('div');
+                dot.className = piece ? 'hint-capture' : 'hint-dot';
+                sq.appendChild(dot);
+            }
+            if (piece) {
+                const p = document.createElement('div');
+                p.className = 'piece';
+                p.style.backgroundImage = `url(${PIECES[piece]})`;
+                sq.appendChild(p);
+            }
+
+            sq.onclick = () => onSquareClick(sqName);
+            boardEl.appendChild(sq);
+        }
+    }
+    renderHistory();
+}
+
+function renderHistory() {
+    const moves = game.history();
+    let html = '';
+    for (let i = 0; i < moves.length; i += 2) {
+        const n      = i / 2 + 1;
+        const w      = moves[i];
+        const b      = moves[i + 1] || '';
+        const alt    = (i / 2) % 2 !== 0 ? 'alt' : '';
+        const wAct   = i === moves.length - 1 ? 'active' : '';
+        const bAct   = b && i + 1 === moves.length - 1 ? 'active' : '';
+        html += `
+          <div class="move-row ${alt}">
+            <div class="move-num">${n}</div>
+            <div class="move-san ${wAct}">${w}</div>
+            <div class="move-san ${b ? bAct : 'empty-move'}">${b}</div>
+          </div>`;
+    }
+    historyEl.innerHTML = html;
+    historyEl.scrollTop = historyEl.scrollHeight;
+}
+
+function setThinking(on) {
+    if (on) {
+        statusFooterEl.innerHTML =
+            'Evaluating candidates\u2009'
+            + '<span class="thinking-dot"></span>'
+            + '<span class="thinking-dot"></span>'
+            + '<span class="thinking-dot"></span>';
+        newGameBtn.disabled = true;
+    } else {
+        newGameBtn.disabled = false;
+    }
+}
+
+/* ══════════════════════════════════════════════
+   SQUARE CLICK HANDLER
+══════════════════════════════════════════════ */
+async function onSquareClick(sq) {
+    if (isProcessing) return;
+    const piece = game.get(sq);
+
+    if (selectedSquare === sq) {
+        selectedSquare = null; legalMovesFrom = [];
+    } else if (legalMovesFrom.some(m => m.to === sq)) {
+        const mv = legalMovesFrom.find(m => m.to === sq);
+        selectedSquare = null; legalMovesFrom = [];
+        await handleMove(mv.san);
+        return;
+    } else if (piece && piece.color === playerColor) {
+        selectedSquare = sq;
+        legalMovesFrom = game.moves({ square: sq, verbose: true });
+    } else {
+        selectedSquare = null; legalMovesFrom = [];
+    }
+    render();
+}
+
+/* ══════════════════════════════════════════════
+   MAKE PLAYER MOVE  →  GET AI RESPONSE
+══════════════════════════════════════════════ */
+async function handleMove(san) {
+    if (!client) {
+        statusFooterEl.innerText = "Not connected — start a New Game.";
+        return;
+    }
+    isProcessing = true;
+    setThinking(true);
+
+    // Apply player move immediately for responsiveness
+    game.move(san);
+    render();
+
+    try {
+        // API: /make_player_move
+        //   in[0] = move_san  (string)
+        //   in[1] = state     (gr.State dict — hidden from API docs but required)
+        //  out[0] = board HTML (SVG)
+        //  out[1] = dropdown choices
+        //  out[2] = status text (HTML)
+        //  out[3] = history HTML
+        //  out[4] = log HTML  (played move + candidates table)
+        //  out[5] = gr.State
+        const result = await client.predict("/make_player_move", [san, serverState]);
+        const data   = result.data;
+
+        serverState = data[5];
+
+        const logHtml = typeof data[4] === 'string' ? data[4] : '';
+        const aiSan   = parseAiSan(logHtml);
+
+        if (aiSan) {
+            const ok = game.move(aiSan);
+            if (!ok) {
+                // Fallback: search legal moves for matching SAN
+                const legal = game.moves({ verbose: true });
+                const alt   = legal.find(m => m.san === aiSan);
+                if (alt) game.move(alt.san);
+            }
+        }
+
+        if (logHtml) renderCandidates(logHtml);
+
+        const rawStatus = typeof data[2] === 'string'
+            ? data[2].replace(/<[^>]+>/g, '').trim()
+            : '';
+        statusFooterEl.innerText = rawStatus || "Your turn";
+        statusEl.innerText       = rawStatus || "Your turn";
+
+    } catch (err) {
+        console.error("handleMove error:", err);
+        game.undo();
+        statusFooterEl.innerText = "Network error — try again";
+    } finally {
+        isProcessing = false;
+        setThinking(false);
+        render();
+    }
+}
+
+/* ══════════════════════════════════════════════
+   NEW GAME
+══════════════════════════════════════════════ */
+newGameBtn.onclick = async () => {
+    if (isProcessing) return;
+
+    const colorText = document.getElementById('color-select').value;
+    playerColor = colorText.includes("White") ? 'w' : 'b';
+
+    isProcessing = true;
+    setThinking(true);
+    statusEl.innerText       = "Starting…";
+    statusFooterEl.innerText = "Initializing…";
+
+    game.reset();
+    selectedSquare = null; legalMovesFrom = [];
+    candidatesTable.innerHTML = '<span style="color:#555;font-size:11px">Waiting for first move…</span>';
+    sfIndicator.className = "";
+    sfIndicator.style.color = "#555";
+    sfIndicator.textContent = "—";
+    render();
+
+    if (!client) await connectClient();
+    if (!client) {
+        statusFooterEl.innerText = "Engine unavailable — check the HF Space.";
+        isProcessing = false; setThinking(false);
+        return;
+    }
+
+    try {
+        // API: /new_game
+        //   in[0] = color choice string
+        //  out[0..4] same layout as make_player_move
+        //  out[5]   = gr.State
+        const result = await client.predict("/new_game", [colorText]);
+        const data   = result.data;
+
+        serverState = data[5];
+
+        if (playerColor === 'b') {
+            // AI played White's first move; apply it locally
+            const logHtml = typeof data[4] === 'string' ? data[4] : '';
+            const aiSan   = parseAiSan(logHtml);
+            if (aiSan) game.move(aiSan);
+            if (logHtml) renderCandidates(logHtml);
+        }
+
+        const rawStatus = typeof data[2] === 'string'
+            ? data[2].replace(/<[^>]+>/g, '').trim()
+            : '';
+        statusFooterEl.innerText = rawStatus || "Good luck!";
+        statusEl.innerText       = playerColor === 'w'
+            ? "You play White — your turn!"
+            : "You play Black — AI opens…";
+
+        switchTab('details');
+    } catch (err) {
+        console.error("newGame error:", err);
+        statusFooterEl.innerText = "Error starting game — is the Space awake?";
+    } finally {
+        isProcessing = false; setThinking(false);
+        render();
+    }
+};
+
+/* ── Boot ── */
+render();
+connectClient();
+</script>
+</body>
+</html>
