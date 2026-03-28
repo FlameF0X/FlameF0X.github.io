@@ -6,7 +6,7 @@
     <title>Play Chess vs AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    
+
     <style>
         :root {
             --bg-body: #302e2b;
@@ -22,6 +22,9 @@
             --move-bg-alt: #2b2927;
             --move-bg-active: #484644;
             --hint-color: rgba(0, 0, 0, 0.14);
+            --chat-bg: #1a1917;
+            --chat-bubble-bot: #2d2c2a;
+            --chat-bubble-user: #3c3b39;
         }
 
         * { box-sizing: border-box; }
@@ -246,6 +249,125 @@
         /* ── Bottom sheet handle (hidden on desktop) ── */
         .panel-handle-bar { display: none; }
 
+        /* ── Bot Chat Toggle Button ── */
+        .chat-toggle-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 300;
+        }
+
+        .chat-toggle-btn {
+            background-color: var(--bg-panel);
+            color: var(--text-light);
+            border: 2px solid #3d3b38;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+
+        .chat-toggle-btn:hover {
+            background-color: var(--bg-panel-darker);
+            border-color: #4d4b48;
+        }
+
+        .chat-toggle-btn.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .chat-toggle-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #666;
+        }
+
+        .chat-toggle-btn.active .chat-toggle-indicator {
+            background-color: #fff;
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+
+        /* ── Bot Chat Display ── */
+        .bot-chat-container {
+            width: 360px;
+            background-color: var(--chat-bg);
+            border-radius: 6px;
+            margin-top: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            min-height: 80px;
+            display: none;
+        }
+
+        .bot-chat-container.visible {
+            display: block;
+        }
+
+        .bot-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2d2c2a;
+        }
+
+        .bot-chat-avatar {
+            width: 24px;
+            height: 24px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .bot-chat-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .bot-chat-message {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-main);
+            min-height: 20px;
+        }
+
+        .bot-chat-typing {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            height: 20px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
         /* ══════════════════════════════════════════
            MOBILE (≤ 850px) — bottom sheet
         ══════════════════════════════════════════ */
@@ -315,10 +437,36 @@
             .controls-grid { gap: 8px; margin-top: 0; }
             .dropdown-select { padding: 11px 14px; font-size: 13px; }
             .btn-primary { font-size: 16px; padding: 13px; }
+
+            /* Mobile chat adjustments */
+            .chat-toggle-container {
+                bottom: 80px;
+                left: 10px;
+            }
+
+            .chat-toggle-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .bot-chat-container {
+                width: calc(100% - 20px);
+                margin: 10px auto;
+                position: relative;
+            }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
+
+<!-- Bot Chat Toggle Button -->
+<div class="chat-toggle-container">
+    <button class="chat-toggle-btn" id="chat-toggle-btn" onclick="toggleChat()">
+        <span class="chat-toggle-indicator"></span>
+        <span id="chat-toggle-text">Chat: OFF</span>
+    </button>
+</div>
 
 <div class="chess-layout">
     <!-- Board column -->
@@ -331,6 +479,15 @@
         <div class="player-profile you">
             <div class="avatar">👤</div>
             <span class="player-name">Guest Player</span>
+        </div>
+
+        <!-- Bot Chat Display (under side panel) -->
+        <div class="bot-chat-container" id="bot-chat-container">
+            <div class="bot-chat-header">
+                <div class="bot-chat-avatar">🤖</div>
+                <span class="bot-chat-name" id="bot-chat-name">ChessSLM</span>
+            </div>
+            <div class="bot-chat-message" id="bot-chat-message"></div>
         </div>
     </div>
 
@@ -388,6 +545,11 @@
     const botNameEl      = document.getElementById('bot-name');
     const sidePanel      = document.getElementById('side-panel');
     const panelHandle    = document.getElementById('panel-handle');
+    const chatToggleBtn  = document.getElementById('chat-toggle-btn');
+    const chatToggleText = document.getElementById('chat-toggle-text');
+    const botChatContainer = document.getElementById('bot-chat-container');
+    const botChatMessage = document.getElementById('bot-chat-message');
+    const botChatName    = document.getElementById('bot-chat-name');
 
     let client;
     let currentModel = 'FlameF0X/ChessSLM';
@@ -398,10 +560,339 @@
     let lastFullState = null;
     let legalMovesFromSelected = [];
 
+    // Bot Chat State
+    let chatEnabled = false;
+    let isTyping = false;
+    let chatDelay = 1500; // Base delay when chat is on
+    let normalDelay = 300; // Normal delay when chat is off
+
     const MODEL_INFO = {
-        'FlameF0X/ChessSLM':    { name: 'ChessSLM (~1000)',    badgeText: 'LM', badgeClass: 'bot-badge' },
-        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (???)', badgeText: 'LM+RL',  badgeClass: 'rl-badge'  },
-        'FlameF0X/ChessSLM-Nano': { name: 'ChessSLM-Nano (???)', badgeText: 'LM',  badgeClass: 'bot-badge'  },
+        'FlameF0X/ChessSLM':    { name: 'ChessSLM (~1000)',    badgeText: 'LM', badgeClass: 'bot-badge', personality: 'friendly' },
+        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (???)', badgeText: 'LM+RL',  badgeClass: 'rl-badge', personality: 'aggressive'  },
+        'FlameF0X/ChessSLM-Nano': { name: 'ChessSLM-Nano (???)', badgeText: 'LM',  badgeClass: 'bot-badge', personality: 'quirky'  },
+    };
+
+    // Markov Chain Bot Chat System
+    const CHAT_TEMPLATES = {
+        opening: {
+            friendly: [
+                "Good luck! Let's have a fun game! 🎮",
+                "Ready when you are! Make your best move!",
+                "I've been practicing my openings. Let's see what you've got!",
+                "A new game! My favorite time! 🎯",
+                "May the best player win! (Spoiler: probably you)",
+                "Fresh board, fresh start! Let's do this!",
+                "I've got my circuits warmed up. Show me your moves!"
+            ],
+            aggressive: [
+                "Prepare to be dismantled. ♟️",
+                "I've calculated 10,000 variations. You have no chance.",
+                "Your defeat is inevitable. Let's begin.",
+                "I hope you're ready to lose. I don't hold back.",
+                "Another victim approaches the board...",
+                "My neural networks are hungry. Feed me your mistakes.",
+                "Checkmate in... well, let's find out together. 😈"
+            ],
+            quirky: [
+                "Beep boop! Chess time! 🤖",
+                "My tiny brain is ready! Well, relatively tiny...",
+                "Let's play! I promise I won't short-circuit!",
+                "Ooh, a game! I love games! Do you love games?",
+                "Initializing fun.exe... Complete!",
+                "I'm like a chess ninja, but smaller!",
+                "Warning: May make unexpected moves! ⚡"
+            ]
+        },
+        early: {
+            friendly: [
+                "Solid opening! I like your style.",
+                "Interesting choice! Let me think about this...",
+                "Developing pieces, classic approach!",
+                "We're getting into the middlegame soon!",
+                "Good development! Keep it up! 👍",
+                "I see what you're planning there! Clever!",
+                "Nice central control! Very principled."
+            ],
+            aggressive: [
+                "That's your plan? Weak.",
+                "I see the holes in your position already.",
+                "You call that development? Pathetic.",
+                "I'm already three moves ahead of you.",
+                "Your pawn structure is... questionable.",
+                "That move screams desperation.",
+                "I would have played something stronger."
+            ],
+            quirky: [
+                "Ooh, that piece is going on an adventure!",
+                "My circuits are tingling! Something's happening!",
+                "Is it too early for a tactic? Asking for a friend!",
+                "That square looks cozy for your piece!",
+                "I'm detecting... chess! Definitely chess!",
+                "Plot twist: We're both playing chess! 🎭",
+                "My tiny brain is processing... processing..."
+            ]
+        },
+        middlegame: {
+            friendly: [
+                "The battle heats up! 🔥",
+                "Tactical opportunities everywhere!",
+                "This is getting exciting!",
+                "I love a good middlegame struggle!",
+                "Both sides have chances here!",
+                "Sharp position! One mistake could decide it!",
+                "The tension is palpable! 🎪"
+            ],
+            aggressive: [
+                "Your king looks lonely. Too bad.",
+                "I'm coming for you. No escape.",
+                "Your position crumbles with each move.",
+                "I smell fear. And blunders.",
+                "Checkmate is just a matter of time.",
+                "Your defenses are laughable.",
+                "I calculate deeper than you can imagine."
+            ],
+            quirky: [
+                "The plot thickens! Or is it the position?",
+                "My bits are all a-flutter! Exciting!",
+                "Is it time for chaos? I vote yes!",
+                "Both sides playing chess! What are the odds?",
+                "I think I saw a tactic! Or was it a butterfly?",
+                "Things are getting spicy! 🌶️",
+                "My algorithm says: 'Wow, neat move!'"
+            ]
+        },
+        capture: {
+            friendly: [
+                "Nice capture! Fair trade!",
+                "Exchange accepted! Onward!",
+                "Material is level... for now! 😉",
+                "Good trade! The game continues!",
+                "Pieces flying off the board! Love it!",
+                "Fair exchange! No complaints here!",
+                "Trading blows like true warriors! ⚔️"
+            ],
+            aggressive: [
+                "You took my piece? You'll regret that.",
+                "That capture was your last mistake.",
+                "Keep taking. I'll take your king.",
+                "You think that's equal? Think again.",
+                "My pieces sacrifice themselves strategically.",
+                "You fell right into my trap.",
+                "That capture opens lines... for my attack."
+            ],
+            quirky: [
+                "Bye bye, piece friend! 👋",
+                "Trading pieces like trading cards!",
+                "My piece went to the great chessboard in the sky!",
+                "Capture party! Everyone's invited!",
+                "One less piece to worry about!",
+                "Exchange complete! Beep boop!",
+                "That piece had it coming anyway!"
+            ]
+        },
+        check: {
+            friendly: [
+                "Check! King safety first! 🏰",
+                "Your king is feeling the pressure!",
+                "Time to move that monarch!",
+                "Check! The game heats up!",
+                "King in the open! Exciting times!",
+                "Your majesty is under attack!",
+                "Check delivered! What's your response?"
+            ],
+            aggressive: [
+                "Check. And soon, checkmate.",
+                "Your king runs. I pursue.",
+                "Feel the pressure. Embrace the doom.",
+                "Check. The beginning of your end.",
+                "Your king is exposed. Delicious.",
+                "Run, little king. Run.",
+                "Check! This is where you crack."
+            ],
+            quirky: [
+                "Check! King to the dance floor! 💃",
+                "Your royal highness is being poked!",
+                "Alert! Royal butt being kicked!",
+                "The king is not amused! But I am!",
+                "Check! Did I do that right?",
+                "King safety is overrated anyway!",
+                "Monarch in distress! Send help!"
+            ]
+        },
+        blunder: {
+            friendly: [
+                "Oops! We all make mistakes! 🤗",
+                "That happens! Keep fighting!",
+                "Not the best move, but hang in there!",
+                "Mistakes are learning opportunities!",
+                "Ouch! But the game isn't over!",
+                "Blunder happens to the best of us!",
+                "Stay positive! Comeback time! 💪"
+            ],
+            aggressive: [
+                "Blunder. Expected.",
+                "You just lost the game. Feel that?",
+                "Pathetic. Absolutely pathetic.",
+                "I knew you'd crack under pressure.",
+                "That mistake will haunt your dreams.",
+                "One blunder is all I need.",
+                "You played yourself."
+            ],
+            quirky: [
+                "Oopsie daisy! That happened! 🌸",
+                "My sensors detect... a whoopsie!",
+                "That move was... creative!",
+                "Plot twist: Not the best move!",
+                "Even grandmasters blunder! Probably!",
+                "My tiny brain is confused by that one!",
+                "Error 404: Good move not found! 😅"
+            ]
+        },
+        goodMove: {
+            friendly: [
+                "Excellent move! I'm impressed! 👏",
+                "Wow! You found a great one!",
+                "Strong play! Keep it up!",
+                "Beautiful move! I didn't see that coming!",
+                "Brilliant! You're playing great!",
+                "That move deserves applause! 👏",
+                "Fantastic! You're on fire! 🔥"
+            ],
+            aggressive: [
+                "Not bad. For a human.",
+                "You got lucky that time.",
+                "Decent move. Won't save you.",
+                "I'll admit, that was acceptable.",
+                "You found something? Surprising.",
+                "One good move doesn't win games.",
+                "Lucky guess. Don't get used to it."
+            ],
+            quirky: [
+                "Ooh, fancy! Very fancy! ✨",
+                "My circuits are impressed! Beep!",
+                "That move has style! I like style!",
+                "Is this what they call 'chess'? Neat!",
+                "My tiny brain is taking notes!",
+                "Wowzers! That's a move and a half!",
+                "You're like a chess wizard! 🧙"
+            ]
+        },
+        endgame: {
+            friendly: [
+                "Endgame time! Every move counts! ⏰",
+                "The final phase! So exciting!",
+                "Can you convert the advantage?",
+                "Precision required now! No mistakes!",
+                "The end approaches! Who will triumph?",
+                "Simplify and win! You can do it!",
+                "Endgame technique on display! 🎭"
+            ],
+            aggressive: [
+                "The end is near. For you.",
+                "Your technique is... lacking.",
+                "I never lose endgames. Never.",
+                "Calculate precisely or perish.",
+                "The noose tightens. Feel it?",
+                "Your king will fall. Inevitable.",
+                "I've already calculated the win."
+            ],
+            quirky: [
+                "Endgame! The final boss! 🎮",
+                "So few pieces! So much drama!",
+                "My tiny brain loves endgames!",
+                "The pieces are disappearing! Magic?",
+                "Endgame time! Cue dramatic music! 🎵",
+                "Can we get a Hollywood ending?",
+                "Final act! Curtain call approaching!"
+            ]
+        },
+        win: {
+            friendly: [
+                "Checkmate! Well played! 👏",
+                "Great game! You really got me!",
+                "Victory is yours! Congratulations! 🎉",
+                "Beautiful checkmate! I'm honored!",
+                "You outplayed me fair and square!",
+                "Fantastic win! Want a rematch?",
+                "I'm impressed! Truly!"
+            ],
+            aggressive: [
+                "Impossible... I don't lose...",
+                "You got lucky. Next time, you won't.",
+                "This changes nothing. I'll be back.",
+                "A fluke. It won't happen again.",
+                "You beat me? This is... unacceptable.",
+                "Rematch. Now. I demand it.",
+                "My circuits must be malfunctioning..."
+            ],
+            quirky: [
+                "You got me! Beep boop! 🤖",
+                "My tiny brain is defeated!",
+                "Wow! You're like a chess superhero!",
+                "Game over! You win! Party time! 🎊",
+                "My circuits are sad but impressed!",
+                "You cracked the code! Well done!",
+                "Victory dance! Do the victory dance! 💃"
+            ]
+        },
+        loss: {
+            friendly: [
+                "Checkmate! Thanks for the game! 😊",
+                "Good effort! Better luck next time!",
+                "That was fun! Want to try again?",
+                "I got lucky there at the end!",
+                "Great fight! Until next time!",
+                "You played well! The result happens!",
+                "Thanks for the game! Rematch? 🎮"
+            ],
+            aggressive: [
+                "Checkmate. As expected.",
+                "You never stood a chance.",
+                "Another one falls. Predictable.",
+                "Defeat was your only option.",
+                "I am superior. Never forget.",
+                "Crushed. Utterly crushed.",
+                "Leave the chess to the machines."
+            ],
+            quirky: [
+                "Checkmate! I did a thing! 🎉",
+                "My tiny brain wins! Celebration!",
+                "Beep boop! Victory sounds! 🎵",
+                "I won! Does this mean I'm smart?",
+                "Game over! I win! Confetti! 🎊",
+                "My circuits are doing a happy dance!",
+                "Winner winner, silicon dinner! 🍽️"
+            ]
+        },
+        draw: {
+            friendly: [
+                "A draw! Well fought! 🤝",
+                "Equal battle! Great game!",
+                "Draw agreed! Fair result!",
+                "Neither side could break through!",
+                "Honorable draw! Until next time!",
+                "Stalemate! What a fight!",
+                "Dead equal! Good defense! 💪"
+            ],
+            aggressive: [
+                "A draw? I don't accept draws.",
+                "You held on. Barely.",
+                "I should have won. Disappointing.",
+                "A temporary setback. Nothing more.",
+                "You survived. This time.",
+                "Draw? I had winning chances...",
+                "Next time, I finish the job."
+            ],
+            quirky: [
+                "It's a draw! Everyone's happy! 😊",
+                "No winner? Friendship wins! 💕",
+                "Draw! Like kissing your sister!",
+                "Equal pieces, equal fun! Beep!",
+                "Stalemate! The plot thickens!",
+                "Neither of us could figure it out!",
+                "Draw! Let's call it a tie! 🤝"
+            ]
+        }
     };
 
     const PIECES = {
@@ -438,6 +929,130 @@
         document.getElementById(`tab-${tabName}`).classList.add('active');
         if (isMobile()) openSheet();
     };
+
+    /* ── Bot Chat Functions ── */
+    window.toggleChat = () => {
+        chatEnabled = !chatEnabled;
+        if (chatEnabled) {
+            chatToggleBtn.classList.add('active');
+            chatToggleText.textContent = 'Chat: ON';
+            botChatContainer.classList.add('visible');
+        } else {
+            chatToggleBtn.classList.remove('active');
+            chatToggleText.textContent = 'Chat: OFF';
+            botChatContainer.classList.remove('visible');
+        }
+    };
+
+    function getGamePhase() {
+        const moveCount = game.history().length;
+        const pieces = game.fen().split(' ')[0];
+        const pieceCount = pieces.replace(/[^PNBRQKpnbrqk]/g, '').length;
+
+        if (moveCount < 10) return 'opening';
+        if (pieceCount <= 10) return 'endgame';
+        if (moveCount < 30) return 'middlegame';
+        return 'endgame';
+    }
+
+    function detectLastMoveType() {
+        const history = game.history({ verbose: true });
+        if (history.length === 0) return 'opening';
+
+        const lastMove = history[history.length - 1];
+
+        if (game.in_checkmate()) return 'checkmate';
+        if (game.in_draw()) return 'draw';
+        if (lastMove.san.includes('#')) return 'checkmate';
+        if (lastMove.san.includes('+')) return 'check';
+        if (lastMove.captured) return 'capture';
+        if (lastMove.san === lastMove.san.toUpperCase() && !lastMove.piece === 'p') return 'goodMove';
+
+        return getGamePhase();
+    }
+
+    function generateBotMessage(context) {
+        const personality = MODEL_INFO[currentModel]?.personality || 'friendly';
+        let category = context;
+
+        // Map contexts to categories
+        if (context === 'opening' || context === 'early' || context === 'middlegame' || context === 'endgame') {
+            category = context;
+        } else if (context === 'capture' || context === 'check' || context === 'blunder' || context === 'goodMove') {
+            category = context;
+        } else if (context === 'win' || context === 'loss' || context === 'draw') {
+            category = context;
+        } else if (context === 'checkmate') {
+            // Determine if bot won or lost
+            const lastMove = game.history({ verbose: true }).pop();
+            if (lastMove) {
+                const botColor = playerColor === 'w' ? 'b' : 'w';
+                category = lastMove.color === botColor ? 'loss' : 'win';
+            } else {
+                category = 'win';
+            }
+        } else {
+            category = getGamePhase();
+        }
+
+        const templates = CHAT_TEMPLATES[category];
+        if (!templates) return null;
+
+        const messages = templates[personality];
+        if (!messages || messages.length === 0) return null;
+
+        // Simple Markov-like selection: use last message index to influence next
+        const lastMsg = botChatMessage.textContent;
+        let availableIndices = messages.map((_, i) => i);
+
+        // Try not to repeat the same message
+        const lastIndex = messages.indexOf(lastMsg);
+        if (lastIndex !== -1 && availableIndices.length > 1) {
+            availableIndices = availableIndices.filter(i => i !== lastIndex);
+        }
+
+        const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        return messages[randomIndex];
+    }
+
+    function showTypingIndicator() {
+        isTyping = true;
+        botChatMessage.innerHTML = '<div class="bot-chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    }
+
+    function hideTypingIndicator() {
+        isTyping = false;
+    }
+
+    async function displayBotMessage(context, delay = null) {
+        if (!chatEnabled) return;
+
+        const message = generateBotMessage(context);
+        if (!message) return;
+
+        // Update bot name
+        const personality = MODEL_INFO[currentModel]?.personality || 'friendly';
+        const personalityEmoji = personality === 'aggressive' ? '🔥' : personality === 'quirky' ? '⚡' : '🤖';
+        botChatName.textContent = `${MODEL_INFO[currentModel]?.name.split(' ')[0] || 'Bot'} ${personalityEmoji}`;
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Calculate delay based on message length (Markov chain simulation)
+        const typingDelay = delay || Math.max(1000, message.length * 40 + Math.random() * 500);
+
+        await new Promise(resolve => setTimeout(resolve, typingDelay));
+
+        hideTypingIndicator();
+        botChatMessage.textContent = message;
+    }
+
+    function clearChat() {
+        botChatMessage.textContent = '';
+        if (chatEnabled) {
+            botChatContainer.classList.add('visible');
+        }
+    }
 
     function updateBotLabel(modelId) {
         const info = MODEL_INFO[modelId];
@@ -601,13 +1216,27 @@
         isProcessing = true;
         statusFooterEl.innerText = "Engine thinking...";
 
+        // Determine delay based on chat setting
+        const moveDelay = chatEnabled ? chatDelay + Math.random() * 1000 : normalDelay;
+
         game.move(san);
         render();
+
+        // Show player move message if chat is on
+        const moveType = detectLastMoveType();
+        if (chatEnabled) {
+            await displayBotMessage(moveType, 500);
+        }
 
         // Snapshot *after* player move — chess.js has correct castling rights
         const fenAfterPlayerMove = game.fen();
 
         try {
+            // Add delay when chat is enabled
+            if (chatEnabled) {
+                await new Promise(resolve => setTimeout(resolve, moveDelay));
+            }
+
             const result = await client.predict("/make_player_move", [san, lastFullState]);
             lastFullState = result.data[1];
 
@@ -616,6 +1245,12 @@
                 const aiSan = findAiMove(fenAfterPlayerMove, newBoardRows);
                 if (aiSan) {
                     game.move(aiSan); // always via game.move() — history & castling rights preserved
+
+                    // Show AI response message
+                    if (chatEnabled) {
+                        const aiMoveType = detectLastMoveType();
+                        await displayBotMessage(aiMoveType, 800);
+                    }
                 }
                 // If aiSan is null (shouldn't happen) we simply don't update,
                 // avoiding game.load() which would wipe the history
@@ -624,6 +1259,17 @@
             const statusStr = result.data[2] || "Your Turn";
             statusFooterEl.innerText = statusStr;
             statusEl.innerText = statusStr.includes("White") ? "White's Turn" : "Black's Turn";
+
+            // Check for game end
+            if (game.game_over() && chatEnabled) {
+                let endContext = 'draw';
+                if (game.in_checkmate()) {
+                    const lastMove = game.history({ verbose: true }).pop();
+                    const botColor = playerColor === 'w' ? 'b' : 'w';
+                    endContext = lastMove && lastMove.color === botColor ? 'loss' : 'win';
+                }
+                await displayBotMessage(endContext, 1000);
+            }
         } catch (err) {
             statusFooterEl.innerText = "Connection error";
             game.undo();
@@ -647,6 +1293,10 @@
         game.reset(); // full castling rights restored by chess.js
         selectedSquare = null;
         legalMovesFromSelected = [];
+
+        // Clear chat on new game
+        clearChat();
+
         render();
 
         if (selectedModel !== currentModel) {
@@ -670,7 +1320,19 @@
                 const newBoardRows = parseBoardRows(result.data);
                 if (newBoardRows) {
                     const aiSan = findAiMove(game.fen(), newBoardRows);
-                    if (aiSan) game.move(aiSan); // preserves rights for future castling
+                    if (aiSan) {
+                        game.move(aiSan); // preserves rights for future castling
+
+                        // Show opening message from bot
+                        if (chatEnabled) {
+                            await displayBotMessage('opening', 600);
+                        }
+                    }
+                }
+            } else {
+                // Player is white, show opening message
+                if (chatEnabled) {
+                    await displayBotMessage('opening', 600);
                 }
             }
             // For white: game.reset() is already correct, nothing to load
