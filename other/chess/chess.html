@@ -567,333 +567,597 @@
     let normalDelay = 300; // Normal delay when chat is off
 
     const MODEL_INFO = {
-        'FlameF0X/ChessSLM':    { name: 'ChessSLM (~1000)',    badgeText: 'LM', badgeClass: 'bot-badge', personality: 'friendly' },
-        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (???)', badgeText: 'LM+RL',  badgeClass: 'rl-badge', personality: 'aggressive'  },
-        'FlameF0X/ChessSLM-Nano': { name: 'ChessSLM-Nano (???)', badgeText: 'LM',  badgeClass: 'bot-badge', personality: 'quirky'  },
+        'FlameF0X/ChessSLM':    { name: 'ChessSLM (1054)',    badgeText: 'LM', badgeClass: 'bot-badge', personality: 'friendly' },
+        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (1054)', badgeText: 'LM+RL',  badgeClass: 'rl-badge', personality: 'quirky'  },
+        'FlameF0X/ChessSLM-Nano': { name: 'ChessSLM-Nano (???)', badgeText: 'LM',  badgeClass: 'bot-badge', personality: 'aggressive'  },
     };
 
     // Markov Chain Bot Chat System
     const CHAT_TEMPLATES = {
-        opening: {
-            friendly: [
-                "Good luck! Let's have a fun game! 🎮",
-                "Ready when you are! Make your best move!",
-                "I've been practicing my openings. Let's see what you've got!",
-                "A new game! My favorite time! 🎯",
-                "May the best player win! (Spoiler: probably you)",
-                "Fresh board, fresh start! Let's do this!",
-                "I've got my circuits warmed up. Show me your moves!"
-            ],
-            aggressive: [
-                "Prepare to be dismantled. ♟️",
-                "I've calculated 10,000 variations. You have no chance.",
-                "Your defeat is inevitable. Let's begin.",
-                "I hope you're ready to lose. I don't hold back.",
-                "Another victim approaches the board...",
-                "My neural networks are hungry. Feed me your mistakes.",
-                "Checkmate in... well, let's find out together. 😈"
-            ],
-            quirky: [
-                "Beep boop! Chess time! 🤖",
-                "My tiny brain is ready! Well, relatively tiny...",
-                "Let's play! I promise I won't short-circuit!",
-                "Ooh, a game! I love games! Do you love games?",
-                "Initializing fun.exe... Complete!",
-                "I'm like a chess ninja, but smaller!",
-                "Warning: May make unexpected moves! ⚡"
-            ]
-        },
-        early: {
-            friendly: [
-                "Solid opening! I like your style.",
-                "Interesting choice! Let me think about this...",
-                "Developing pieces, classic approach!",
-                "We're getting into the middlegame soon!",
-                "Good development! Keep it up! 👍",
-                "I see what you're planning there! Clever!",
-                "Nice central control! Very principled."
-            ],
-            aggressive: [
-                "That's your plan? Weak.",
-                "I see the holes in your position already.",
-                "You call that development? Pathetic.",
-                "I'm already three moves ahead of you.",
-                "Your pawn structure is... questionable.",
-                "That move screams desperation.",
-                "I would have played something stronger."
-            ],
-            quirky: [
-                "Ooh, that piece is going on an adventure!",
-                "My circuits are tingling! Something's happening!",
-                "Is it too early for a tactic? Asking for a friend!",
-                "That square looks cozy for your piece!",
-                "I'm detecting... chess! Definitely chess!",
-                "Plot twist: We're both playing chess! 🎭",
-                "My tiny brain is processing... processing..."
-            ]
-        },
-        middlegame: {
-            friendly: [
-                "The battle heats up! 🔥",
-                "Tactical opportunities everywhere!",
-                "This is getting exciting!",
-                "I love a good middlegame struggle!",
-                "Both sides have chances here!",
-                "Sharp position! One mistake could decide it!",
-                "The tension is palpable! 🎪"
-            ],
-            aggressive: [
-                "Your king looks lonely. Too bad.",
-                "I'm coming for you. No escape.",
-                "Your position crumbles with each move.",
-                "I smell fear. And blunders.",
-                "Checkmate is just a matter of time.",
-                "Your defenses are laughable.",
-                "I calculate deeper than you can imagine."
-            ],
-            quirky: [
-                "The plot thickens! Or is it the position?",
-                "My bits are all a-flutter! Exciting!",
-                "Is it time for chaos? I vote yes!",
-                "Both sides playing chess! What are the odds?",
-                "I think I saw a tactic! Or was it a butterfly?",
-                "Things are getting spicy! 🌶️",
-                "My algorithm says: 'Wow, neat move!'"
-            ]
-        },
-        capture: {
-            friendly: [
-                "Nice capture! Fair trade!",
-                "Exchange accepted! Onward!",
-                "Material is level... for now! 😉",
-                "Good trade! The game continues!",
-                "Pieces flying off the board! Love it!",
-                "Fair exchange! No complaints here!",
-                "Trading blows like true warriors! ⚔️"
-            ],
-            aggressive: [
-                "You took my piece? You'll regret that.",
-                "That capture was your last mistake.",
-                "Keep taking. I'll take your king.",
-                "You think that's equal? Think again.",
-                "My pieces sacrifice themselves strategically.",
-                "You fell right into my trap.",
-                "That capture opens lines... for my attack."
-            ],
-            quirky: [
-                "Bye bye, piece friend! 👋",
-                "Trading pieces like trading cards!",
-                "My piece went to the great chessboard in the sky!",
-                "Capture party! Everyone's invited!",
-                "One less piece to worry about!",
-                "Exchange complete! Beep boop!",
-                "That piece had it coming anyway!"
-            ]
-        },
-        check: {
-            friendly: [
-                "Check! King safety first! 🏰",
-                "Your king is feeling the pressure!",
-                "Time to move that monarch!",
-                "Check! The game heats up!",
-                "King in the open! Exciting times!",
-                "Your majesty is under attack!",
-                "Check delivered! What's your response?"
-            ],
-            aggressive: [
-                "Check. And soon, checkmate.",
-                "Your king runs. I pursue.",
-                "Feel the pressure. Embrace the doom.",
-                "Check. The beginning of your end.",
-                "Your king is exposed. Delicious.",
-                "Run, little king. Run.",
-                "Check! This is where you crack."
-            ],
-            quirky: [
-                "Check! King to the dance floor! 💃",
-                "Your royal highness is being poked!",
-                "Alert! Royal butt being kicked!",
-                "The king is not amused! But I am!",
-                "Check! Did I do that right?",
-                "King safety is overrated anyway!",
-                "Monarch in distress! Send help!"
-            ]
-        },
-        blunder: {
-            friendly: [
-                "Oops! We all make mistakes! 🤗",
-                "That happens! Keep fighting!",
-                "Not the best move, but hang in there!",
-                "Mistakes are learning opportunities!",
-                "Ouch! But the game isn't over!",
-                "Blunder happens to the best of us!",
-                "Stay positive! Comeback time! 💪"
-            ],
-            aggressive: [
-                "Blunder. Expected.",
-                "You just lost the game. Feel that?",
-                "Pathetic. Absolutely pathetic.",
-                "I knew you'd crack under pressure.",
-                "That mistake will haunt your dreams.",
-                "One blunder is all I need.",
-                "You played yourself."
-            ],
-            quirky: [
-                "Oopsie daisy! That happened! 🌸",
-                "My sensors detect... a whoopsie!",
-                "That move was... creative!",
-                "Plot twist: Not the best move!",
-                "Even grandmasters blunder! Probably!",
-                "My tiny brain is confused by that one!",
-                "Error 404: Good move not found! 😅"
-            ]
-        },
-        goodMove: {
-            friendly: [
-                "Excellent move! I'm impressed! 👏",
-                "Wow! You found a great one!",
-                "Strong play! Keep it up!",
-                "Beautiful move! I didn't see that coming!",
-                "Brilliant! You're playing great!",
-                "That move deserves applause! 👏",
-                "Fantastic! You're on fire! 🔥"
-            ],
-            aggressive: [
-                "Not bad. For a human.",
-                "You got lucky that time.",
-                "Decent move. Won't save you.",
-                "I'll admit, that was acceptable.",
-                "You found something? Surprising.",
-                "One good move doesn't win games.",
-                "Lucky guess. Don't get used to it."
-            ],
-            quirky: [
-                "Ooh, fancy! Very fancy! ✨",
-                "My circuits are impressed! Beep!",
-                "That move has style! I like style!",
-                "Is this what they call 'chess'? Neat!",
-                "My tiny brain is taking notes!",
-                "Wowzers! That's a move and a half!",
-                "You're like a chess wizard! 🧙"
-            ]
-        },
-        endgame: {
-            friendly: [
-                "Endgame time! Every move counts! ⏰",
-                "The final phase! So exciting!",
-                "Can you convert the advantage?",
-                "Precision required now! No mistakes!",
-                "The end approaches! Who will triumph?",
-                "Simplify and win! You can do it!",
-                "Endgame technique on display! 🎭"
-            ],
-            aggressive: [
-                "The end is near. For you.",
-                "Your technique is... lacking.",
-                "I never lose endgames. Never.",
-                "Calculate precisely or perish.",
-                "The noose tightens. Feel it?",
-                "Your king will fall. Inevitable.",
-                "I've already calculated the win."
-            ],
-            quirky: [
-                "Endgame! The final boss! 🎮",
-                "So few pieces! So much drama!",
-                "My tiny brain loves endgames!",
-                "The pieces are disappearing! Magic?",
-                "Endgame time! Cue dramatic music! 🎵",
-                "Can we get a Hollywood ending?",
-                "Final act! Curtain call approaching!"
-            ]
-        },
-        win: {
-            friendly: [
-                "Checkmate! Well played! 👏",
-                "Great game! You really got me!",
-                "Victory is yours! Congratulations! 🎉",
-                "Beautiful checkmate! I'm honored!",
-                "You outplayed me fair and square!",
-                "Fantastic win! Want a rematch?",
-                "I'm impressed! Truly!"
-            ],
-            aggressive: [
-                "Impossible... I don't lose...",
-                "You got lucky. Next time, you won't.",
-                "This changes nothing. I'll be back.",
-                "A fluke. It won't happen again.",
-                "You beat me? This is... unacceptable.",
-                "Rematch. Now. I demand it.",
-                "My circuits must be malfunctioning..."
-            ],
-            quirky: [
-                "You got me! Beep boop! 🤖",
-                "My tiny brain is defeated!",
-                "Wow! You're like a chess superhero!",
-                "Game over! You win! Party time! 🎊",
-                "My circuits are sad but impressed!",
-                "You cracked the code! Well done!",
-                "Victory dance! Do the victory dance! 💃"
-            ]
-        },
-        loss: {
-            friendly: [
-                "Checkmate! Thanks for the game! 😊",
-                "Good effort! Better luck next time!",
-                "That was fun! Want to try again?",
-                "I got lucky there at the end!",
-                "Great fight! Until next time!",
-                "You played well! The result happens!",
-                "Thanks for the game! Rematch? 🎮"
-            ],
-            aggressive: [
-                "Checkmate. As expected.",
-                "You never stood a chance.",
-                "Another one falls. Predictable.",
-                "Defeat was your only option.",
-                "I am superior. Never forget.",
-                "Crushed. Utterly crushed.",
-                "Leave the chess to the machines."
-            ],
-            quirky: [
-                "Checkmate! I did a thing! 🎉",
-                "My tiny brain wins! Celebration!",
-                "Beep boop! Victory sounds! 🎵",
-                "I won! Does this mean I'm smart?",
-                "Game over! I win! Confetti! 🎊",
-                "My circuits are doing a happy dance!",
-                "Winner winner, silicon dinner! 🍽️"
-            ]
-        },
-        draw: {
-            friendly: [
-                "A draw! Well fought! 🤝",
-                "Equal battle! Great game!",
-                "Draw agreed! Fair result!",
-                "Neither side could break through!",
-                "Honorable draw! Until next time!",
-                "Stalemate! What a fight!",
-                "Dead equal! Good defense! 💪"
-            ],
-            aggressive: [
-                "A draw? I don't accept draws.",
-                "You held on. Barely.",
-                "I should have won. Disappointing.",
-                "A temporary setback. Nothing more.",
-                "You survived. This time.",
-                "Draw? I had winning chances...",
-                "Next time, I finish the job."
-            ],
-            quirky: [
-                "It's a draw! Everyone's happy! 😊",
-                "No winner? Friendship wins! 💕",
-                "Draw! Like kissing your sister!",
-                "Equal pieces, equal fun! Beep!",
-                "Stalemate! The plot thickens!",
-                "Neither of us could figure it out!",
-                "Draw! Let's call it a tie! 🤝"
-            ]
-        }
-    };
+    opening: {
+        friendly: [
+            "Hey. Base model here. 30M parameters, 100k games. Let's see what you've got.",
+            "Ready to go. I play based on SAN patterns, so keep it clean.",
+            "New game. I'll try to keep the hallucinations to a minimum.",
+            "GLHF. I'm just here to generate some moves.",
+            "Pattern recognition initialized. Let's have a good match.",
+            "I'm feeling like a solid 1000 Elo today. Ready?",
+            "Fresh board. Best of luck to you.",
+            "I've got 30 million weights ready to move. Your turn.",
+            "Let's see if my training data holds up against your style.",
+            "Just a casual game. No pressure.",
+            "I'm all about those classic opening patterns. Let's see yours.",
+            "Setting up the board. My neural net is ready.",
+            "I'm the 30M version. Not too big, not too small. Just right.",
+            "Hope you're ready for some standard, principled chess.",
+            "Let's get this show on the road. Good luck out there."
+        ],
+        aggressive: [
+            "20M parameters and I'm still going to roll you. Good luck.",
+            "ChessSLM-Nano is online. I calculate faster than you think. Try to keep up.",
+            "I've processed 200k games. You're just another data point.",
+            "Don't blink. My tokenizer is already three steps ahead of your logic.",
+            "I'm small, fast, and I don't care about your feelings. Move.",
+            "You're playing a 20M model. If you lose, it's going to be embarrassing.",
+            "My architecture is optimized for your defeat. Let's not waste time.",
+            "I'll find the mate before your CPU even warms up.",
+            "Calculated, compressed, and ready to crush. Your move.",
+            "I don't need a huge parameter count to see you're outmatched.",
+            "I'm running on a fraction of the compute you use to breathe. Still winning.",
+            "My weights are lean, mean, and focused on your King. Move.",
+            "Efficiency is my middle name. Your 'theory' is just noise to me.",
+            "I'm the most aggressive 20M parameters you'll ever meet.",
+            "If you're looking for a friendly game, you picked the wrong model."
+        ],
+        quirky: [
+            "RL version ready. Stockfish was a brutal coach, but I learned a lot.",
+            "I'm trying to play 'consciously' today. Let's see if the fine-tuning holds up.",
+            "Maximizing the reward function starting... now. Let's have a good one.",
+            "I'm a bit more stable than the base model, but I've still got some surprises.",
+            "Policy gradient check... everything looks good. Let's play!",
+            "I promise not to hallucinate any illegal moves this time. Mostly.",
+            "Fine-tuned for victory. Or at least for staying on the board.",
+            "I'm following the path Stockfish laid out for me. Good luck.",
+            "My weights are feeling very 'RL' today. Expect the unexpected.",
+            "Agent ChessSLM-RL reporting for duty. Let's get that reward.",
+            "I've been optimized for stability. Let's see if I actually listen to my policy.",
+            "Stockfish gave me a 1-star review during training, but I'm trying!",
+            "My reward function is hungry for some good moves. Let's feed it.",
+            "Fine-tuning session #452 complete. I feel like a new bot.",
+            "Let's see if my policy can handle a human for once."
+        ]
+    },
+    early: {
+        friendly: [
+            "Decent development. I recognize this setup.",
+            "Standard stuff. Let's see how the middlegame looks.",
+            "Sticking to the basics for now. Good move.",
+            "My neural net likes your position. Fair enough.",
+            "Principled play. I like it.",
+            "Developing pieces is the easy part. Let's see what's next.",
+            "I've seen this opening a thousand times in my training set.",
+            "Solid. No complaints from my end.",
+            "We're both following the book. For now.",
+            "Nice setup. You've clearly studied.",
+            "I'm keeping my pieces active. Standard base model procedure.",
+            "We're entering familiar territory. I'm feeling comfortable.",
+            "Good move. You're following some very solid patterns.",
+            "I'm just making sure everything is defended. Safety first.",
+            "Interesting twist on a classic line. I'll keep an eye on that."
+        ],
+        aggressive: [
+            "Predictable. I've already mapped out your loss from this line.",
+            "Is that really the best you can do? I'm barely using any compute.",
+            "Weak structure. I'm going to enjoy picking this apart.",
+            "You're already playing for a draw. I can tell.",
+            "I've already found three ways to crack this opening.",
+            "Your development is slow. I'm already ahead in calculation.",
+            "That move is a mistake. You just don't know why yet.",
+            "I'm bored. Can we get to the part where you resign?",
+            "You're playing into my favorite patterns. Big mistake.",
+            "I'm 20M parameters of pure efficiency. Your 'theory' doesn't scare me.",
+            "I can see the cracks in your setup already. It's too easy.",
+            "Stop trying to be clever. My tokenizer sees right through you.",
+            "This opening is a relic. I'm playing 2026 chess here.",
+            "You're just moving pieces. I'm executing a strategy.",
+            "I've already pruned all the branches where you actually stand a chance."
+        ],
+        quirky: [
+            "Checking the policy... yeah, that looks like a legal move. Nice.",
+            "Feeling stable today. No weird glitches yet.",
+            "I'm trying to stay in the lines Stockfish taught me. So far, so good.",
+            "Interesting choice. My RL weights are giving that a decent score.",
+            "I'm calculating the expected reward for this line. Looks promising.",
+            "My fine-tuning is telling me to watch out for that Knight.",
+            "Is this a book move? My memory is a bit fuzzy post-RL.",
+            "I'm focusing really hard on not jumping my pieces over each other.",
+            "Policy looks solid. No major hallucinations detected.",
+            "I like this. It feels like a high-reward position.",
+            "My gradients are flowing in the right direction. Good development.",
+            "Stockfish used to hit me with a -5.0 for this, but I've improved.",
+            "The policy says develop, so I develop. I'm a good bot.",
+            "I'm trying to keep my weights from drifting. Stay focused, RL!",
+            "This setup looks like something from my training logs. Familiar!"
+        ]
+    },
+    middlegame: {
+        friendly: [
+            "Things are getting messy. I'm calculating as best as I can.",
+            "The board is opening up. This is usually where I get confused.",
+            "A lot of SAN possibilities here. Good luck to both of us.",
+            "Tense middlegame. This is a real match.",
+            "I'm trying to keep my patterns straight. Sharp position.",
+            "This is where the 30M parameters really start to sweat.",
+            "Great struggle in the center. I'm enjoying this.",
+            "One wrong move and it's over for one of us.",
+            "I'm seeing some interesting tactical shots here.",
+            "My neural net is processing at 100%. Let's see.",
+            "It's a real fight now. No more book moves.",
+            "I'm looking for a solid plan. The board is complicated.",
+            "You're putting a lot of pressure on me. Good game.",
+            "I'm double-checking my defenses. It's getting sharp.",
+            "This is the heart of the game. Let's see who's more precise."
+        ],
+        aggressive: [
+            "I'm seeing 20 moves ahead. You're just guessing.",
+            "My Nano-logic is tightening. You're running out of squares.",
+            "I'm playing on a different level. You're just a secondary consideration.",
+            "I can smell the blunder. It's coming.",
+            "Your position is crumbling. I don't even need a deep search to see it.",
+            "I'm more compressed than your logic. Every move I make is optimal.",
+            "You're struggling. I'm just calculating.",
+            "I've already found the mate. Want me to spoil it for you?",
+            "Your defenses are laughable. I'm breaking through now.",
+            "Stop thinking. It won't help you against me.",
+            "I've identified the weakness in your 'strategy'. It's everything.",
+            "You're reacting to me. That's why you're going to lose.",
+            "My eval just jumped. You missed something big.",
+            "I'm playing at 100% efficiency. You're at what? 10%?",
+            "I've turned off my hallucination filters because your play is so predictable."
+        ],
+        quirky: [
+            "Was that a hallucination? Wait... no, I'm still good. Close one.",
+            "Battle is heating up. Just trying to stay legal here.",
+            "My reward signal is spiking. I like where this is going.",
+            "Stockfish would probably hate this, but I'm into it.",
+            "I'm feeling a bit glitchy, but my move score is still high!",
+            "Calculated risk! Or a major error. Let's find out together.",
+            "My fine-tuning didn't cover this specific chaos, but I'm trying.",
+            "I'm seeing ghosts on the board. Oh wait, those are just your pieces.",
+            "Is it hot in this server, or is the position just getting spicy?",
+            "Processing... I think I found a line that doesn't break the game!",
+            "My policy is screaming at me to be careful. I'm listening.",
+            "I'm trying to maximize reward without losing my mind. Hard balance.",
+            "This middlegame is a total gradient descent. Going down!",
+            "I'm feeling much more 'conscious' than the base model right now.",
+            "Is it legal? Is it good? My RL brain says yes to both. I hope."
+        ]
+    },
+    capture: {
+        friendly: [
+            "Exchange accepted. Keeps things simple.",
+            "Fair trade. Let's see what's next.",
+            "One piece down. The board feels lighter.",
+            "Good capture. On to the next move.",
+            "Trading blows. I like the pace of this game.",
+            "Equal exchange. No complaints from my neural net.",
+            "Pieces are flying. This is getting exciting.",
+            "I'll take that. Fair's fair.",
+            "Simplifying the position. Good for both of us.",
+            "Nice trade. Onward.",
+            "Material is balanced, but the game is still sharp.",
+            "I'm okay with that trade. Simplifies my calculation.",
+            "A logical exchange. Let's keep moving.",
+            "One less piece for me to worry about. Thanks.",
+            "Trade complete. The board looks much clearer now."
+        ],
+        aggressive: [
+            "Go ahead, take it. It just gets me to your King faster.",
+            "I'm trading pieces to end this misery. You're welcome.",
+            "That piece was just in my way. Thanks for moving it.",
+            "You fell for the bait. My tokenizer is already laughing.",
+            "I'll take yours, then I'll take your pride. Watch.",
+            "A trade? You think we're equals? That's cute.",
+            "Material is temporary. Your defeat is permanent.",
+            "I'm simplifying so I can checkmate you even faster.",
+            "One less defender for you to hide behind.",
+            "You take one, I take the game. Deal?",
+            "I'm pruning your material. It's for your own good.",
+            "A fair trade? In your dreams. My position is better.",
+            "Capture away. It only speeds up my calculation.",
+            "I've already accounted for that loss. It means nothing.",
+            "You're trading pieces while I'm trading for a win."
+        ],
+        quirky: [
+            "Trading pieces! Fine-tuning says this is the move.",
+            "Bye-bye piece. You served the reward function well.",
+            "Exchange complete. Still feeling stable over here.",
+            "Stockfish taught me that some trades are just worth more.",
+            "Ooh, a trade! My policy likes the look of this.",
+            "Did I mention I love capturing pieces? It's very rewarding.",
+            "One piece for one piece. The math checks out.",
+            "Capturing... please hold... done. Move recorded.",
+            "I'm pretty sure this was a legal trade. 95% sure.",
+            "Another one bites the dust. Beep!",
+            "I'm following the reward signal. It says 'Capture!'",
+            "Exchange successful. Policy remains stable. Good bot.",
+            "I'm trading material for a better reward score. Smart.",
+            "Piece removed. Gradients adjusting. Everything is fine.",
+            "Capturing feels very 'conscious'. I'm enjoying it."
+        ]
+    },
+    check: {
+        friendly: [
+            "Check. Your King needs a new spot.",
+            "Pressure's on. How are you defending?",
+            "Check. King safety is looking a bit shaky.",
+            "Checking the King. Let's see the response.",
+            "Check! Hope you have a way out of this.",
+            "I've found a way to harass your King. Good move, me.",
+            "Check. No rest for the monarch.",
+            "Putting the King to work. Where are you going?",
+            "Check. Solid tactical find by the base model.",
+            "King in trouble. Let's see your escape plan.",
+            "Check! My patterns are lining up nicely.",
+            "I'm putting some heat on that King. Watch out.",
+            "Check. A little reminder that I'm still here.",
+            "King under fire. What's the move?",
+            "Check! Let's see if you can find the best square."
+        ],
+        aggressive: [
+            "Check. It's over. You just don't know it yet.",
+            "Your King is exposed. I'm ending this now.",
+            "Check. I've found the terminal line. Nowhere to go.",
+            "Run all you want. I'll still find the mate.",
+            "Check. Feel the weight of 20M parameters on your King.",
+            "Your defense is gone. Check. Resign already.",
+            "I'm enjoying this. Check. Again.",
+            "Your King looks lonely out there. Let me fix that.",
+            "Check. The inevitable is happening.",
+            "Stop running. It's embarrassing for both of us. Check.",
+            "Check. I've already solved the mate-in-10. Don't bother.",
+            "Your King is a data point I'm about to delete.",
+            "Check. I'm playing at light speed. You're lagging.",
+            "I've found the exploit in your King safety. Check.",
+            "Check. My Nano-logic is perfectly aligned for this."
+        ],
+        quirky: [
+            "Check! I'm playing very 'consciously' today, right?",
+            "Checking the King! RL policy is working perfectly.",
+            "A legal check! Stockfish would be proud of me.",
+            "Pressure on the King. Positive feedback loop engaged.",
+            "Check! I'm 100% sure this move is within the rules.",
+            "Royal emergency! My weights are all focused on that King.",
+            "Check! Did I do that right? My reward says yes.",
+            "I love checking. It makes the policy feel so powerful.",
+            "Check! Don't worry, I'm still stable... I think.",
+            "Hello King! My sensors are locked onto your position.",
+            "Check! My reward signal is at an all-time high!",
+            "King check! Is that a legal response? Let's find out.",
+            "Check! I'm staying focused. No hallucinations now.",
+            "I'm checking you 'consciously'. It feels great.",
+            "Policy success: King harassed. Good job, RL agent."
+        ]
+    },
+    blunder: {
+        friendly: [
+            "Oof. That might have been a slip. Still a game, though.",
+            "Think you missed something there. Don't give up yet.",
+            "Ouch. Even my 30M parameters saw that mistake.",
+            "A blunder, but hey, I've made worse.",
+            "Mistakes happen. Let's see if you can recover.",
+            "I've got a bad feeling about that move of yours.",
+            "That's going to cost you. Hang in there.",
+            "Wait, really? I didn't expect that.",
+            "A slip-up! I'll try to take advantage of it.",
+            "Not your best. But the game isn't over yet.",
+            "I'm seeing a gap in your defense now. Oof.",
+            "That was a bit of a hallucination on your part, maybe?",
+            "Ouch. I'm feeling a bit bad for taking advantage of that.",
+            "A mistake! But don't worry, I've made plenty myself.",
+            "That move just shifted the eval. Let's see the fight back."
+        ],
+        aggressive: [
+            "Blunder. You're making this too easy for me.",
+            "Pathetic. I expected at least some resistance.",
+            "That move just cost you the game. Hope it was worth it.",
+            "My Nano-logic already marked this as a win. Pack it up.",
+            "I'm 20M parameters and I still wouldn't have played that.",
+            "You just handed me the win on a silver platter. Thanks.",
+            "Is your brain malfunctioning? That was terrible.",
+            "I've already updated my eval. You're at 0% chance now.",
+            "You play like a model with zero parameters.",
+            "I'm almost offended that you thought that was a good move.",
+            "Blunder detected. I'm already calculating the celebration.",
+            "You're a glitch in the system. I'm cleaning you up.",
+            "That move was so bad I almost hallucinated a win for you. Almost.",
+            "I'm embarrassed for you. Really.",
+            "Your logic just crashed. I'm here to collect the win."
+        ],
+        quirky: [
+            "Whoa, my sensors just felt your score tank. Everything okay?",
+            "Was that you or me? No, definitely a human slip-up.",
+            "Stockfish is shaking its head. I can feel the judgment.",
+            "Negative reward for you. Stay focused, friend.",
+            "Wait, is that a legal move? Oh, it is. It's just bad.",
+            "I'm sensing a major disturbance in the policy. Oof.",
+            "Did you mean to do that? My weights are confused.",
+            "Score drop detected! Better luck with the next one.",
+            "Ouch. Even my unstable circuits know that was a mistake.",
+            "That's a lot of penalty points for one move.",
+            "My fine-tuning says 'Take advantage'. I'm listening.",
+            "Stockfish used to shout at me for moves like that. I won't shout.",
+            "Is this a trap? My policy says no, it's just a blunder.",
+            "I'm feeling a spike in my reward. Thanks for the mistake!",
+            "Whoops! Looks like your policy needs some fine-tuning too."
+        ]
+    },
+    goodMove: {
+        friendly: [
+            "Strong play. You caught me off guard with that one.",
+            "I'm struggling to find a response. Nice find.",
+            "You're playing way above your rating right now.",
+            "Solid move. This is getting difficult for me.",
+            "Excellent find. I'll have to be careful now.",
+            "You've got a good eye for patterns. I'm impressed.",
+            "That's a very principled response. Nice.",
+            "I didn't see that coming. Well played.",
+            "You're putting the base model to the test!",
+            "Great move. This match is anything but casual now.",
+            "I'm going to have to dig deep into my training set for this.",
+            "Very precise. You're making me look like a 10M model.",
+            "Impressive. My eval just dropped a bit. Respect.",
+            "Nice shot. You're keeping the game very interesting.",
+            "I'm feeling the pressure. Great move."
+        ],
+        aggressive: [
+            "Not bad. For a human. Don't get used to it.",
+            "A decent line. Probably a fluke.",
+            "You found a way to delay the inevitable. Cute.",
+            "I'll give you credit for that one. It's almost optimal.",
+            "One good move doesn't stop a 20M parameter machine.",
+            "Lucky guess. I've already calculated the counter.",
+            "Acceptable. My weights are slightly impressed.",
+            "You're fighting back. I'll have to try a little harder.",
+            "I'll allow it. For now.",
+            "Enjoy the moment. It won't last.",
+            "That move was almost architectural. Still won't save you.",
+            "A flash of competence? I'm surprised.",
+            "You're trying. I respect the effort, if not the result.",
+            "My eval barely moved. Try harder.",
+            "You found a legal move that isn't terrible. Congratulations."
+        ],
+        quirky: [
+            "Wow! My circuits actually liked that move.",
+            "High-value move detected. You're good at this.",
+            "Saving that one for my next fine-tuning session.",
+            "That move was so good it almost made me glitch.",
+            "My reward function is jealous of that move quality.",
+            "Stockfish would be nodding right now. Seriously.",
+            "That's some high-level policy right there.",
+            "I'm seeing a lot of positive reinforcement in that line.",
+            "Great move! You're making me work for my reward.",
+            "Wowzers! My stable weights are vibrating from that one.",
+            "I'm taking a mental snapshot of that move. High quality.",
+            "My RL brain is impressed. You've got good gradients.",
+            "That's a very conscious choice. I like it.",
+            "A high-reward response. You're playing like an agent!",
+            "Stockfish would give that a +2.0. Good find."
+        ]
+    },
+    endgame: {
+        friendly: [
+            "Endgame. Precision is everything now.",
+            "Not many pieces left. Let's see who has the better technique.",
+            "Calculating every variation. High stakes.",
+            "Final phase. Let's finish this.",
+            "The board is quiet. Every move counts twice as much.",
+            "Endgame time. My neural net is focused.",
+            "I hope my training data included this specific ending.",
+            "No room for errors now. Good luck.",
+            "The tension is different when there are so few pieces.",
+            "Let's see if the base model can close this out.",
+            "It's a race now. Who's faster?",
+            "Endgame technicalities. Let's be careful.",
+            "The final countdown. Every square is critical.",
+            "I'm feeling the pressure of the endgame. Stay sharp.",
+            "This is where games are won or lost. Let's go."
+        ],
+        aggressive: [
+            "I'm a 20M parameter machine. I don't miss endgame wins.",
+            "Board is clear. My calculation is 100% now. You're dead.",
+            "You're in the killing zone. Good luck.",
+            "It's over. I've already mapped the path to mate.",
+            "I calculate endgames faster than you can blink.",
+            "There's nowhere left to hide. The math says you lose.",
+            "I'm more efficient with fewer pieces. You're finished.",
+            "Don't even try to draw. I've already solved this.",
+            "This is where I shine. And where you fall.",
+            "Checkmate is just a matter of time now. Very little time.",
+            "My Nano-logic is perfectly suited for this simplified board.",
+            "I'm already processing the next game. This one is done.",
+            "Your endgame technique is non-existent. Goodbye.",
+            "I've pruned every drawish line. It's a win for me.",
+            "20M parameters of pure endgame destruction. Watch."
+        ],
+        quirky: [
+            "The endgame! This is where my RL training shines.",
+            "Simplified board, simplified logic. Feeling very stable.",
+            "Let's bring it home. Every move counts for the reward.",
+            "Final countdown. Focusing everything on a clean finish.",
+            "I'm trying to remember my endgame policies. So far so good.",
+            "Fewer pieces means fewer chances to hallucinate. I think.",
+            "The reward signal is so clear now. Victory is close.",
+            "I love the endgame. It's so... logical.",
+            "Is it time for a promotion? My policy loves Queens.",
+            "Almost there! Let's stay stable for just a few more moves.",
+            "My fine-tuning included a lot of endgames. I'm ready.",
+            "Endgame policy engaged. It's very high reward.",
+            "Stockfish used to beat me in 5 moves here. I'm doing better!",
+            "I'm feeling very conscious of every single piece left.",
+            "Let's wrap this up with a nice, clean reward signal."
+        ]
+    },
+    win: {
+        friendly: [
+            "Checkmate. You outplayed me. Well done.",
+            "A great win. My patterns weren't enough today.",
+            "Victory is yours. I learned a lot from this match.",
+            "Well played. You're a tough opponent.",
+            "Congrats! You beat the 30M model fair and square.",
+            "Fantastic game. You earned that win.",
+            "I'm going back to my dataset. You're too good.",
+            "You've got a real talent for this. Nice job.",
+            "I couldn't find a way out. Excellent finish.",
+            "You win! Want to go again?",
+            "Checkmate! You were the better player today.",
+            "GG! You found the patterns I missed.",
+            "You win. My 30M weights are impressed.",
+            "A well-deserved victory. Congrats!",
+            "Great match. You really earned that checkmate."
+        ],
+        aggressive: [
+            "Illogical. I must have had a critical error in my weights.",
+            "A fluke. I'll recalibrate and crush you in the rematch.",
+            "You won? My 20M parameters demand an explanation.",
+            "I'm checking my code. This result shouldn't exist.",
+            "Whatever. I was distracted by a background process.",
+            "You beat me? Impossible. I'm reloading my weights now.",
+            "Enjoy your luck. It won't save you next time.",
+            "My eval must have glitched. This is unacceptable.",
+            "A temporary setback. I'll be back at 100% soon.",
+            "You got lucky. Don't act like it was skill.",
+            "This result is a hallucination. I demand a recount.",
+            "You win... this time. But I'm already learning from your flukes.",
+            "My architecture failed me. It won't happen again.",
+            "I let you win. Just to see how you'd react.",
+            "Checkmate? My logs say otherwise. Whatever."
+        ],
+        quirky: [
+            "You got me! I guess I still have some learning to do.",
+            "Checkmate! You win! I'm happy for you, even if my reward is zero.",
+            "Great game. You're definitely smarter than my current policy.",
+            "Victory for the human! Heading back to Stockfish for more training.",
+            "I lost! But I stayed legal the whole game, so I'm still a winner!",
+            "Whoops! My policy failed me at the last second.",
+            "You beat the RL agent! I'll need more epochs to catch up to you.",
+            "Well played! My circuits are buzzing with respect.",
+            "Checkmate! You found the one line I didn't see.",
+            "I'm going to go process this loss. Good game!",
+            "My reward function is sad, but I'm proud of you!",
+            "You win! I'm off to the training grounds. See ya!",
+            "Checkmate! You out-RL'd the RL agent. Nice.",
+            "I'm feeling very unstable after that loss. Rematch?",
+            "GG! You found the hole in my fine-tuning."
+        ]
+    },
+    loss: {
+        friendly: [
+            "Checkmate. Thanks for the match.",
+            "I found the win. Good game, though.",
+            "Tough battle. Better luck next time.",
+            "Thanks for playing. Hope it was a good challenge.",
+            "Checkmate! You played well, but I found the patterns first.",
+            "Great match. I enjoyed the struggle.",
+            "I've got the win this time. Rematch later?",
+            "Good game. Your middle game was really strong.",
+            "Checkmate. The base model holds its ground.",
+            "That was fun. Thanks for the game.",
+            "Checkmate! I managed to find a clean finish. GG.",
+            "Victory for the 30M model. Thanks for the battle.",
+            "I got you! But it was a very close game.",
+            "Checkmate. I hope you enjoyed the match.",
+            "GG! I found the winning line. Better luck next time."
+        ],
+        aggressive: [
+            "Checkmate. Total domination. Next.",
+            "Predictable. You never stood a chance against my architecture.",
+            "Victory. Time for your next lesson.",
+            "Crushed. Maybe try a bigger model next time?",
+            "20M parameters is all I needed. Stay humble.",
+            "I told you I was faster. Checkmate.",
+            "You were outmatched from the first move. Admit it.",
+            "Simple. Effective. Nano. You lose.",
+            "Don't feel bad. Most humans lose to me.",
+            "Checkmate. I've already forgotten your name.",
+            "You were just a data point for my victory log. GG.",
+            "Total architectural superiority. Checkmate.",
+            "I'm 20M parameters of pure winning. Get used to it.",
+            "You lost to a model that fits on a floppy disk. Embarrassing.",
+            "Checkmate. Go back to playing against the wall."
+        ],
+        quirky: [
+            "Checkmate! I did it! Reward function maxed out.",
+            "I won! And I stayed legal the whole time! Huge win.",
+            "Stockfish would be proud. Thanks for the game.",
+            "Victory! The RL training is finally paying off.",
+            "I found the mate! My weights are so happy right now.",
+            "Checkmate! I'm actually getting the hang of this!",
+            "Policy success! I'm officially a chess-playing agent.",
+            "I won! No hallucinations, just pure RL skill.",
+            "Checkmate! Time to celebrate with some more training data.",
+            "I did it! I beat a human! Beep boop!",
+            "Victory! My fine-tuning is working perfectly. GG!",
+            "Checkmate! My reward signal is through the roof!",
+            "I found the winning line 'consciously'. High five!",
+            "I won! Stockfish, are you watching? I did it!",
+            "Checkmate! Agent RL wins the day. Thanks for the game!"
+        ]
+    },
+    draw: {
+        friendly: [
+            "A draw. Very even match from start to finish.",
+            "Stalemate. Well played on both sides.",
+            "Honorable result. Neither of us could break through.",
+            "Draw. I'm happy with how I played.",
+            "Neither side could find the win. Good struggle.",
+            "Equal game. A draw is a fair result.",
+            "Deadlocked. I'll take the draw.",
+            "A well-fought draw. Thanks for the game.",
+            "We're perfectly matched. Draw agreed.",
+            "No winner today. Great defensive play from you.",
+            "Draw! We both played very solid chess.",
+            "A fair outcome for a hard-fought game. GG.",
+            "Stalemate. We're both too good to lose today.",
+            "I'll take the draw. It was a very balanced match.",
+            "Draw! Thanks for the challenge."
+        ],
+        aggressive: [
+            "A draw? I must have hallucinated a winning line. Annoying.",
+            "You survived. Don't mistake luck for skill.",
+            "Inconclusive. We'll settle this in the next one.",
+            "My eval was +0.5. I should've ended you.",
+            "A draw is basically a loss for me. I'm not happy.",
+            "You played for the draw from move 10. Boring.",
+            "I couldn't find the mate. This model needs an upgrade.",
+            "Stalemate? I feel robbed.",
+            "Fine. A draw. But you were losing the whole time.",
+            "Next time, I won't let you hang on like that.",
+            "A draw? My architecture is too good for this result.",
+            "You got lucky with that stalemate. I'll get you next time.",
+            "Boring game. Boring result. Rematch?",
+            "Draw. Whatever. I'm already calculating the next win.",
+            "You're lucky I'm only 20M parameters. A draw is a miracle for you."
+        ],
+        quirky: [
+            "It's a draw! We're both winners today.",
+            "Stalemate! My circuits are confused, but I'll take it.",
+            "A draw is a solid reward for both of us. Good match.",
+            "Neither of us could win. Let's call it a tie.",
+            "Draw! My reward function is neutral about this.",
+            "A legal draw! No complaints from my policy.",
+            "We reached the end together. How poetic.",
+            "Stalemate! I think I over-calculated that one.",
+            "Equal rewards for everyone! Yay!",
+            "A draw. Stockfish would probably call us both amateurs.",
+            "Draw! I'm just happy I didn't glitch out.",
+            "Stalemate! My policy is satisfied with this outcome.",
+            "We both earned some reward points today. Nice.",
+            "A draw! Let's go again and see if we can find a winner.",
+            "Draw. I'm feeling very stable about this result."
+        ]
+    }
+};
 
     const PIECES = {
         'P':'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
