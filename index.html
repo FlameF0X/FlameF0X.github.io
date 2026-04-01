@@ -3,434 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel FlameF0X | AI Research & Dev</title>
+    <title>flamef0x.github.io | Technical Specification</title>
     
     <!-- Meta Tags -->
-    <meta property="og:title" content="Daniel FlameF0X | Portfolio" />
-    <meta property="og:description" content="AI. Web. Research. Machine learning, open-source, and web technologies." />
-    <meta property="og:type" content="website" />
+    <meta property="og:title" content="flamef0x.github.io | Portfolio" />
+    <meta property="og:description" content="AI Research & Development. Technical Documentation." />
     
-    <!-- Tailwind & Fonts -->
+    <!-- Typography: IBM Plex Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
                     },
                     colors: {
-                        bg: '#0c0a09', // Darker stone
-                        surface: '#1c1917',
-                        text: '#e7e5e4',
-                        accent: '#ea580c', // More vibrant orange
-                        'accent-dim': '#431407',
+                        paper: '#f5f2ec',
+                        ink: '#111111',
+                        muted: '#555555',
+                        dim: '#999999',
+                        rule: '#ddd8cf',
+                        codebg: '#1c1c1c',
+                        codetext: '#e0e0e0',
+                        success: '#228b22',
+                        error: '#b22222',
                     }
                 }
             }
         }
     </script>
 
-    <!-- Added type="text/tailwindcss" so theme() functions work -->
     <style type="text/tailwindcss">
-        :root {
-            --grid-color: rgba(231, 229, 228, 0.05);
-        }
-        
         body {
-            background-color: theme('colors.bg');
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 40px 40px;
-            color: theme('colors.text');
+            @apply bg-paper text-ink font-mono antialiased;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: theme('colors.bg');
-        }
-        ::-webkit-scrollbar-thumb {
-            background: theme('colors.accent');
+        h1, h2, h3, h4 {
+            @apply font-bold tracking-tight lowercase;
         }
 
-        /* Utilities */
-        .raw-border { border: 2px solid theme('colors.text'); }
-        .thin-border { border: 1px solid rgba(231, 229, 228, 0.3); }
-        
-        /* Glitch/Hover Effects */
-        .hover-invert {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .hover-invert:hover {
-            background-color: theme('colors.text');
-            color: theme('colors.bg');
-        }
-        .hover-invert:hover * {
-            color: theme('colors.bg');
-            border-color: theme('colors.bg');
+        .section-label {
+            @apply text-[10px] uppercase tracking-[0.2em] text-dim mb-1 block;
         }
 
-        /* Corner Brackets */
-        .bracket-box {
-            position: relative;
+        .border-grid {
+            @apply border-rule;
         }
-        .bracket-box::before, .bracket-box::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-color: theme('colors.accent');
-            border-style: solid;
-            transition: all 0.3s ease;
-        }
-        .bracket-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-        .bracket-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-        
-        .bracket-box:hover::before { width: 100%; height: 100%; }
-        .bracket-box:hover::after { width: 100%; height: 100%; }
 
-        /* Scramble Animation Cursor */
-        .cursor-blink {
-            animation: blink 1s step-end infinite;
+        /* Syntax Highlighting */
+        .token-keyword { color: #cf6edf; }
+        .token-fn { color: #61afef; }
+        .token-str { color: #98c379; }
+        .token-num { color: #d19a66; }
+        .token-comment { color: #5c6370; font-style: italic; }
+
+        ::selection {
+            @apply bg-ink text-paper;
         }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #f5f2ec; }
+        ::-webkit-scrollbar-thumb { background: #ddd8cf; }
+
+        #legacy-content {
+            display: none;
+        }
+        #legacy-content.expanded {
+            display: block;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-accent selection:text-white pb-12">
+<body class="min-h-screen">
 
-    <!-- Fixed Status Bar (Bottom) -->
-    <div class="fixed bottom-0 left-0 w-full bg-bg border-t border-stone-800 z-50 px-4 py-1 flex justify-between items-center text-[10px] md:text-xs font-mono uppercase tracking-widest text-stone-500">
-        <div class="flex gap-4">
-            <span class="text-green-500">● SYSTEM ONLINE</span>
-            <span class="hidden md:inline">MEM: 12GB</span>
-            <span class="hidden md:inline">NET: SECURE</span>
-        </div>
-        <div>
-            FLAMEFOX_PF_V2.1
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <header class="sticky top-0 z-40 bg-bg/90 backdrop-blur-sm border-b-2 border-text">
-        <div class="container mx-auto px-4 md:px-6 h-16 flex justify-between items-center">
-            <a href="#" class="font-black italic text-xl md:text-2xl tracking-tighter hover:text-accent transition-colors">
-                // DANIEL.FLAMEFOX
-            </a>
-            
-            <!-- Mobile Menu Toggle (Hidden logic for simplicity, simple scroll nav) -->
-            <nav class="hidden md:flex gap-8 font-mono text-sm font-bold">
-                <a href="/i3/index.html" class="hover:text-accent hover:underline decoration-2 underline-offset-4 decoration-accent transition-all">i3</a>
-                <a href="#projects" class="hover:text-accent hover:underline decoration-2 underline-offset-4 decoration-accent transition-all">PROJECTS</a>
-                <a href="#huggingface" class="hover:text-accent hover:underline decoration-2 underline-offset-4 decoration-accent transition-all">MODELS</a>
-                <a href="#skills" class="hover:text-accent hover:underline decoration-2 underline-offset-4 decoration-accent transition-all">STACK</a>
+    <!-- Header / Nav -->
+    <header class="border-b border-grid sticky top-0 bg-paper/95 z-50">
+        <div class="container mx-auto flex justify-between items-stretch">
+            <div class="py-6 px-6 border-r border-grid flex items-center">
+                <a href="https://flamef0x.github.io" class="text-xl font-bold tracking-tighter">
+                    flamef0x.github.io
+                </a>
+            </div>
+            <nav class="hidden md:flex flex-grow items-center px-8 gap-8 lowercase text-sm">
+                <a href="/i3/index.html" class="text-muted hover:text-ink transition-colors">i3</a>
+                <a href="#projects" class="text-muted hover:text-ink transition-colors">projects</a>
+                <a href="#huggingface" class="text-muted hover:text-ink transition-colors">models</a>
+                <a href="#skills" class="text-muted hover:text-ink transition-colors">stack</a>
             </nav>
-            <a href="#support" class="bg-accent text-bg px-4 py-1 font-bold font-mono text-xs uppercase hover:bg-white hover:text-black transition-colors">
-                Support_Me
-            </a>
+            <div class="flex items-center px-6 border-l border-grid">
+                <a href="#support" class="text-xs border border-ink px-4 py-1 hover:bg-ink hover:text-paper transition-colors">
+                    support_me
+                </a>
+            </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <main class="container mx-auto px-4 md:px-6 pt-12 md:pt-24 pb-12">
-        <div class="grid lg:grid-cols-12 gap-6">
+    <!-- Main Content Grid -->
+    <main class="container mx-auto border-x border-b border-grid min-h-screen">
+        
+        <!-- Hero Section -->
+        <section class="grid lg:grid-cols-12 border-b border-grid">
+            <div class="lg:col-span-8 p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-grid">
+                <span class="section-label">01. identity</span>
+                <h1 class="text-4xl md:text-6xl mb-8 leading-none">
+                    artificial intelligence architect
+                </h1>
+                <p class="text-muted text-lg max-w-2xl leading-relaxed mb-12">
+                    i build robust pipelines, train sota models, and open-source the future. my work bridges the gap between complex ml theory and usable, functional applications.
+                </p>
+                <div class="flex flex-wrap gap-1">
+                    <a href="#projects" class="px-6 py-3 bg-ink text-paper text-sm font-bold uppercase tracking-widest hover:bg-muted transition-colors">
+                        view operations
+                    </a>
+                    <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
+                        github
+                    </a>
+                </div>
+            </div>
             
-            <!-- Main Hero Content -->
-            <div class="lg:col-span-8 flex flex-col justify-between min-h-[50vh] raw-border p-6 md:p-12 relative overflow-hidden group">
-                <!-- Background Decorative Text -->
-                <div class="absolute top-4 right-4 text-9xl font-black text-stone-900 -z-10 select-none opacity-50 group-hover:text-stone-800 transition-colors">AI</div>
+            <div class="lg:col-span-4 flex flex-col">
+                <div class="p-6 border-b border-grid bg-ink text-codetext flex-grow">
+                    <span class="section-label !text-muted">console.log(status)</span>
+                    <pre class="text-[11px] leading-tight mt-4"><code><span class="token-keyword">const</span> <span class="token-fn">status</span> = {
+  active: <span class="token-num">true</span>,
+  training: [<span class="token-str">"i3-1B-Ethan"</span>, <span class="token-str">"i3-Pocket"</span>],
+  uptime: <span class="token-str">"99.9%"</span>,
+  location: <span class="token-str">"remote"</span>
+};
 
-                <div>
-                    <div class="font-mono text-accent text-sm mb-4 tracking-widest border-l-2 border-accent pl-3">
-                        INIT_SEQUENCE_START
-                    </div>
-                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.85] mb-8 uppercase">
-                        <span class="scramble">Artificial</span><br>
-                        <!-- Fixed broken variable -->
-                        <span class="text-outline text-transparent stroke-white" style="-webkit-text-stroke: 2px #e7e5e4;">Intelligence</span><br>
-                        <span class="scramble text-accent">Architect</span>
-                    </h1>
+<span class="token-comment">// current task</span>
+<span class="token-fn">optimize</span>(i3_architecture);</code></pre>
                 </div>
-
-                <div class="max-w-2xl">
-                    <p class="font-mono text-stone-400 text-lg md:text-xl leading-relaxed mb-8 border-l border-stone-700 pl-4">
-                        I build robust pipelines, train SOTA models, and open-source the future. My work bridges the gap between complex ML theory and usable, fun applications.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <a href="#projects" class="px-8 py-3 bg-white text-black font-bold font-mono uppercase hover:bg-accent hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(180,83,9,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
-                            View Operations
-                        </a>
-                        <a href="https://github.com/FlameF0X" target="_blank" class="px-8 py-3 border border-stone-600 text-stone-300 font-mono uppercase hover:border-white hover:text-white transition-all flex items-center gap-2">
-                            <span>GitHub</span>
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                        </a>
+                <div class="p-6">
+                    <span class="section-label">02. current_state</span>
+                    <div class="flex items-center gap-2 mt-2">
+                        <div class="w-2 h-2 bg-success"></div>
+                        <span class="font-bold text-sm">active_training_sequence</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Stats / Metadata Panel -->
-            <div class="lg:col-span-4 flex flex-col gap-6">
-                <!-- Status Box -->
-                <div class="raw-border p-6 flex-grow flex flex-col justify-between bg-surface/50 hover:bg-surface transition-colors">
-                    <div>
-                        <h3 class="font-mono text-xs text-stone-500 uppercase tracking-widest mb-4 border-b border-stone-800 pb-2">Current Status</h3>
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="relative flex h-3 w-3">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
-                            </span>
-                            <span class="font-bold text-lg">ACTIVE / TRAINING</span>
+                    <div class="mt-4 space-y-1">
+                        <div class="flex justify-between text-[10px] text-muted">
+                            <span>gpu_utilization</span>
+                            <span>84%</span>
                         </div>
-                        <p class="text-sm text-stone-400 font-mono">Training i3-1B-Ethan.</p>
-                        <p class="text-sm text-stone-400 font-mono">Training i3-1B.</p>
-                        <p class="text-sm text-stone-400 font-mono">Training i3-Pocket.</p>
-                    </div>
-                    
-                    <div class="mt-8">
-                         <h3 class="font-mono text-xs text-stone-500 uppercase tracking-widest mb-4 border-b border-stone-800 pb-2">Stack</h3>
-                         <div class="flex flex-wrap gap-2">
-                            <span class="px-2 py-1 bg-stone-800 text-xs font-mono text-accent">PYTHON</span>
-                            <span class="px-2 py-1 bg-stone-800 text-xs font-mono text-white">PYTORCH</span>
-                            <span class="px-2 py-1 bg-stone-800 text-xs font-mono text-white">HUGGINGFACE</span>
-                            <span class="px-2 py-1 bg-stone-800 text-xs font-mono text-white">CUDA</span>
-                         </div>
-                    </div>
-                </div>
-
-                <!-- Decorative Data Box -->
-                <div class="thin-border p-4 bg-stone-900/50">
-                    <div class="font-mono text-[10px] text-stone-600 space-y-1">
-                        <div class="flex justify-between"><span>UPTIME</span> <span>99.9%</span></div>
-                        <div class="flex justify-between"><span>LOC</span> <span>REMOTE</span></div>
-                        <div class="flex justify-between"><span>ROLE</span> <span>STUDENT</span></div>
-                        <div class="w-full bg-stone-800 h-1 mt-2"><div class="bg-accent h-1 w-[70%]"></div></div>
+                        <div class="w-full bg-rule h-[2px]">
+                            <div class="bg-ink h-full w-[84%]"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Projects Grid -->
+        <section id="projects" class="border-b border-grid">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="p-6 md:p-12 border-b md:border-b-0 md:border-r border-grid">
+                    <span class="section-label">03. development_index</span>
+                    <h2 class="text-3xl mb-8">selected projects</h2>
+                    <div class="space-y-12">
+                        <div class="group border-l border-rule pl-6 py-2">
+                            <span class="section-label">project_01</span>
+                            <h3 class="text-xl mb-2 font-bold"><a href="https://huggingface.co/i3-lab" class="hover:underline">i3-lab</a></h3>
+                            <p class="text-muted text-sm leading-relaxed mb-4">
+                                state-of-the-art pre-training language model pipeline. efficient, scalable, and built for experimentation.
+                            </p>
+                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
+                                <span>[collection]</span>
+                                <span>[hf space]</span>
+                            </div>
+                        </div>
+
+                        <div class="group border-l border-rule pl-6 py-2">
+                            <span class="section-label">project_02</span>
+                            <h3 class="text-xl mb-2 font-bold"><a href="https://github.com/FlameF0X/open-i3" class="hover:underline">open-i3</a></h3>
+                            <p class="text-muted text-sm leading-relaxed mb-4">
+                                the open-source release of the i3 architecture. promoting transparency in ai development.
+                            </p>
+                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
+                                <span>[github repo]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-rows-2">
+                    <div class="p-6 md:p-12 border-b border-grid">
+                        <span class="section-label">project_03</span>
+                        <h3 class="text-xl mb-2 font-bold"><a href="https://github.com/FlameF0X/i3-papers" class="hover:underline">i3-papers</a></h3>
+                        <p class="text-muted text-sm leading-relaxed">
+                            documentation & official research papers. technical specifications and architectural overviews.
+                        </p>
+                    </div>
+                    <div class="p-6 md:p-12">
+                        <span class="section-label">project_04</span>
+                        <h3 class="text-xl mb-2 font-bold"><a href="https://www.npmjs.com/package/literallynothing.js" class="hover:underline">literallynothing.js</a></h3>
+                        <p class="text-muted text-sm leading-relaxed">
+                            npm package that does exactly what it says. 0 bytes of utility. functional minimalism at its absolute limit.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Models List -->
+        <section id="huggingface" class="border-b border-grid">
+            <div class="p-6 md:p-12 bg-[#faf9f6]">
+                <span class="section-label">04. model_zoo</span>
+                <h2 class="text-3xl mb-12">hugging face models</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b border-rule">
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">model_id</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">params</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">ctx_window</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">hardware</th>
+                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim">access</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-rule/50">
+                            <tr>
+                                <td class="py-4 font-bold">i3-4096ctx</td>
+                                <td class="py-4 text-muted">~300m</td>
+                                <td class="py-4 text-muted">4096</td>
+                                <td class="py-4 text-muted">nvidia p100</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-4096ctx" class="underline">view_card</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold">i3-200m v2.0</td>
+                                <td class="py-4 text-muted">~200m</td>
+                                <td class="py-4 text-muted">2048</td>
+                                <td class="py-4 text-muted">v100</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-200m-v2" class="underline">view_card</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold text-dim">i3-80m</td>
+                                <td class="py-4 text-dim">~80m</td>
+                                <td class="py-4 text-dim">1024</td>
+                                <td class="py-4 text-dim">legacy</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-80m" class="underline text-dim">view_card</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold text-dim">i3-22m</td>
+                                <td class="py-4 text-dim">~22m</td>
+                                <td class="py-4 text-dim">512</td>
+                                <td class="py-4 text-dim">legacy</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-22m" class="underline text-dim">view_card</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
+                    <div class="text-dim italic text-sm">
+                        more to be presented soon...
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <button id="toggle-legacy" class="text-[10px] uppercase tracking-widest border-b border-dotted border-dim text-dim hover:text-ink hover:border-ink transition-colors">
+                        + load_legacy_architectures
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Capability -->
+        <section id="skills" class="border-b border-grid">
+            <div class="p-6 md:p-12">
+                <span class="section-label">05. capabilities</span>
+                <h2 class="text-2xl mb-8">technical capability stack</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-rule">
+                    <div class="p-6 border-r border-b border-rule">
+                        <span class="text-xs text-dim block mb-1">01. language</span>
+                        <span class="font-bold">python 3.10+</span>
+                    </div>
+                    <div class="p-6 border-r border-b border-rule">
+                        <span class="text-xs text-dim block mb-1">02. framework</span>
+                        <span class="font-bold">pytorch / cuda</span>
+                    </div>
+                    <div class="p-6 border-r border-b border-rule">
+                        <span class="text-xs text-dim block mb-1">03. distribution</span>
+                        <span class="font-bold">huggingface</span>
+                    </div>
+                    <div class="p-6 border-r border-b border-rule">
+                        <span class="text-xs text-dim block mb-1">04. processing</span>
+                        <span class="font-bold">hf datasets</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support -->
+        <section id="support" class="p-6 md:p-12 text-center bg-ink text-codetext">
+            <span class="section-label !text-muted">06. contributions</span>
+            <h2 class="text-4xl md:text-5xl mt-4 mb-8">fuel the research</h2>
+            <p class="text-dim max-w-lg mx-auto mb-12 text-sm leading-relaxed">
+                computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-2 pb-12">
+                <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-8 py-3 bg-paper text-ink font-bold text-sm uppercase tracking-widest hover:bg-rule transition-colors">
+                    support_via_kofi
+                </a>
+                <a href="https://cloud.vast.ai/?ref_id=222345" target="_blank" class="px-8 py-3 border border-muted text-paper text-sm uppercase tracking-widest hover:border-paper transition-colors">
+                    vast.ai_template
+                </a>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Projects Section -->
-    <section id="projects" class="container mx-auto px-4 md:px-6 py-16 border-t border-stone-800">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12">
-            <h2 class="text-4xl font-black uppercase tracking-tighter">
-                <span class="text-accent">//</span> Selected Projects
-            </h2>
-            <p class="font-mono text-stone-500 text-sm mt-2 md:mt-0">INDEX_01: CORE DEVELOPMENT</p>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6">
-            
-            <!-- Project Card 1 -->
-            <a href="https://huggingface.co/collections/FlameF0X/i3-architecture" target="_blank" class="bracket-box group raw-border p-8 bg-surface hover-invert block h-full">
-                <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-bold group-hover:text-bg">i3 Series</h3>
-                    <span class="font-mono text-xs border border-stone-600 px-2 py-1 rounded group-hover:border-bg">SOTA Pipeline</span>
-                </div>
-                <p class="font-mono text-sm text-stone-400 mb-8 group-hover:text-bg leading-relaxed">
-                    State-of-the-art pre-training Language Model pipeline. Efficient, scalable, and built for experimentation.
-                </p>
-                <div class="flex gap-4 font-mono text-xs uppercase font-bold text-accent group-hover:text-bg mt-auto">
-                    <span>[Collection]</span>
-                    <span>[HF Space]</span>
-                </div>
-            </a>
-
-            <!-- Project Card 2 -->
-            <a href="https://github.com/FlameF0X/open-i3" target="_blank" class="bracket-box group raw-border p-8 bg-surface hover-invert block h-full">
-                <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-bold group-hover:text-bg">Open-i3</h3>
-                    <span class="font-mono text-xs border border-stone-600 px-2 py-1 rounded group-hover:border-bg">Open Source</span>
-                </div>
-                <p class="font-mono text-sm text-stone-400 mb-8 group-hover:text-bg leading-relaxed">
-                    The open-source release of the i3 architecture. Promoting transparency in AI development.
-                </p>
-                <div class="flex gap-4 font-mono text-xs uppercase font-bold text-accent group-hover:text-bg mt-auto">
-                    <span>[GitHub Repo]</span>
-                </div>
-            </a>
-
-            <!-- Project Card 3 -->
-            <a href="https://github.com/FlameF0X/i3-papers" target="_blank" class="bracket-box group thin-border p-6 hover:bg-stone-800 transition-colors block">
-                <h3 class="text-xl font-bold mb-2">i3-Papers</h3>
-                <p class="font-mono text-xs text-stone-400">Documentation & official research papers.</p>
-            </a>
-
-             <!-- Project Card 4 -->
-             <a href="https://www.npmjs.com/package/literallynothing.js" target="_blank" class="bracket-box group thin-border p-6 hover:bg-stone-800 transition-colors block">
-                <h3 class="text-xl font-bold mb-2">literallyNothing.js</h3>
-                <p class="font-mono text-xs text-stone-400">NPM package that does exactly what it says. 0 bytes of utility.</p>
-            </a>
-        </div>
-    </section>
-
-    <!-- Hugging Face Models Section -->
-    <section id="huggingface" class="container mx-auto px-4 md:px-6 py-16 border-t border-stone-800 bg-stone-900/30">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12">
-            <h2 class="text-4xl font-black uppercase tracking-tighter">
-                <span class="text-accent">//</span> HF Models
-            </h2>
-            <p class="font-mono text-stone-500 text-sm mt-2 md:mt-0">INDEX_02: MODEL ZOO</p>
-        </div>
-
-        <!-- Timeline / List Layout for Models -->
-        <div class="space-y-4">
-            <!-- Model Item -->
-            <div class="group relative pl-8 border-l-2 border-stone-800 hover:border-accent transition-colors">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-stone-800 group-hover:bg-accent transition-colors"></div>
-                <div class="flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
-                    <h3 class="text-xl font-bold text-white">i3-4096ctx <span class="text-accent text-sm font-mono ml-2"></span></h3>
-                    <a href="https://huggingface.co/i3-lab/i3-4096ctx" class="font-mono text-xs text-stone-500 hover:text-white underline decoration-accent">[VIEW CARD]</a>
-                </div>
-                <p class="text-stone-400 mt-2 max-w-3xl">Newest SOTA. ~300M params. Trained on Fineweb-edu and having a 4096 context window. Training time: ~3-5 hours. Hardware: Nvidia P100</p>
-            </div>
-            
-            <!-- Model Item -->
-            <div class="group relative pl-8 border-l-2 border-stone-800 hover:border-accent transition-colors">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-stone-800 group-hover:bg-accent transition-colors"></div>
-                <div class="flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
-                    <h3 class="text-xl font-bold text-white">i3-200m <span class="text-accent text-sm font-mono ml-2">V2.0</span></h3>
-                    <a href="https://huggingface.co/i3-lab/i3-200m-v2" class="font-mono text-xs text-stone-500 hover:text-white underline decoration-accent">[VIEW CARD]</a>
-                </div>
-                <p class="text-stone-400 mt-2 max-w-3xl">Previous SOTA. ~200M params. Trained on previous dataset + WikiText. Training time: ~1-2 hours.</p>
-            </div>
-
-            <!-- Model Item -->
-            <div class="group relative pl-8 border-l-2 border-stone-800 hover:border-accent transition-colors">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-stone-800 group-hover:bg-accent transition-colors"></div>
-                <div class="flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
-                    <h3 class="text-xl font-bold text-stone-300">i3-80m</h3>
-                    <a href="https://huggingface.co/i3-lab/i3-80m" class="font-mono text-xs text-stone-500 hover:text-white underline decoration-accent">[VIEW CARD]</a>
-                </div>
-                <p class="text-stone-500 mt-2">Old SOTA. 2-4 hour pre-train time (vs 14h legacy).</p>
-            </div>
-
-             <!-- Model Item -->
-             <div class="group relative pl-8 border-l-2 border-stone-800 hover:border-accent transition-colors">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-stone-800 group-hover:bg-accent transition-colors"></div>
-                <div class="flex flex-col md:flex-row md:items-baseline gap-4 justify-between">
-                    <h3 class="text-lg font-bold text-stone-400">i3-22m</h3>
-                    <a href="https://huggingface.co/i3-lab/i3-22m" class="font-mono text-xs text-stone-500 hover:text-white underline decoration-accent">[VIEW CARD]</a>
-                </div>
-                <p class="text-stone-500 mt-2">Smol stable text generator that took over 14 hours to pre-train.</p>
-            </div>
-
-            <div class="pl-8 pt-4">
-                <button class="text-stone-600 font-mono text-xs uppercase hover:text-accent transition-colors">Load Legacy Models (12m, Tiny) +</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills & Stack Grid -->
-    <section id="skills" class="container mx-auto px-4 md:px-6 py-16 border-t border-stone-800">
-        <h2 class="text-2xl font-bold font-mono mb-8 uppercase text-stone-500">Technical Capability</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="p-4 border border-stone-800 hover:border-accent transition-colors bg-surface text-center">
-                <div class="text-accent font-black text-2xl mb-1">PY</div>
-                <div class="text-xs font-mono text-stone-400">PYTHON 3.10+</div>
-            </div>
-            <div class="p-4 border border-stone-800 hover:border-accent transition-colors bg-surface text-center">
-                <div class="text-accent font-black text-2xl mb-1">PT</div>
-                <div class="text-xs font-mono text-stone-400">PYTORCH</div>
-            </div>
-            <div class="p-4 border border-stone-800 hover:border-accent transition-colors bg-surface text-center">
-                <div class="text-accent font-black text-2xl mb-1">HF</div>
-                <div class="text-xs font-mono text-stone-400">TRANSFORMERS</div>
-            </div>
-            <div class="p-4 border border-stone-800 hover:border-accent transition-colors bg-surface text-center">
-                <div class="text-accent font-black text-2xl mb-1">HF</div>
-                <div class="text-xs font-mono text-stone-400">DATASETS</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Support Section -->
-    <section id="support" class="container mx-auto px-4 md:px-6 py-24">
-        <div class="raw-border p-8 md:p-16 text-center bg-accent relative overflow-hidden">
-            <!-- Background pattern for accent area -->
-            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(black 1px, transparent 1px); background-size: 20px 20px;"></div>
-            
-            <div class="relative z-10 text-bg">
-                <h2 class="text-4xl md:text-6xl font-black uppercase mb-6">Fuel the Research</h2>
-                <p class="font-mono font-bold text-lg mb-8 max-w-xl mx-auto opacity-80">
-                    Computing power isn't free. If my models helped you, consider supporting the next training run.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-8 py-4 bg-bg text-accent font-black font-mono uppercase text-lg hover:bg-white hover:text-black transition-transform hover:scale-105">
-                        Support via Ko-Fi
-                    </a>
-                    <a href="https://cloud.vast.ai/?ref_id=222345&creator_id=222345&name=Efficient%20Pretraining%20GPU%20Template" target="_blank" class="px-8 py-4 border-4 border-bg text-bg font-black font-mono uppercase text-lg hover:bg-bg hover:text-accent transition-transform hover:scale-105">
-                        Use my Vast.AI Template
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="container mx-auto px-4 md:px-6 py-12 border-t border-stone-800 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="text-left">
-            <h4 class="font-black text-xl italic">// DANIEL.FLAMEFOX</h4>
-            <p class="font-mono text-xs text-stone-500 mt-2">© 2025. All systems nominal.</p>
-        </div>
-    </footer>
-
-    <!-- JS for Text Scramble -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-            const spans = document.querySelectorAll('.scramble');
+        const toggleBtn = document.getElementById('toggle-legacy');
+        const legacyContent = document.getElementById('legacy-content');
 
-            const scrambleText = (el) => {
-                const originalText = el.getAttribute('data-text') || el.innerText;
-                if (!el.getAttribute('data-text')) el.setAttribute('data-text', originalText);
-                
-                let iteration = 0;
-                const interval = setInterval(() => {
-                    el.innerText = originalText
-                        .split("")
-                        .map((letter, index) => {
-                            if (index < iteration) {
-                                return originalText[index];
-                            }
-                            return scrambleChars[Math.floor(Math.random() * 26)];
-                        })
-                        .join("");
-
-                    if (iteration >= originalText.length) {
-                        clearInterval(interval);
-                    }
-                    
-                    iteration += 1 / 2; // Speed of resolve
-                }, 30);
-            };
-
-            // Run on load
-            spans.forEach(span => scrambleText(span));
-
-            // Run on hover for fun
-            spans.forEach(span => {
-                span.addEventListener('mouseenter', () => scrambleText(span));
-            });
+        toggleBtn.addEventListener('click', () => {
+            const isExpanded = legacyContent.classList.toggle('expanded');
+            toggleBtn.innerText = isExpanded ? '- hide_legacy_architectures' : '+ load_legacy_architectures';
         });
     </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
