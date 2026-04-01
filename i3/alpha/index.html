@@ -539,33 +539,46 @@
         // ── DEFAULT SYSTEM PROMPT ──────────────────────────────────────────────
         // This prompt teaches the AI to use the [ASK_USER] widget format.
         // User-editable persona (shown in the prompt editor)
-        const DEFAULT_USER_PERSONA = `You are a helpful, cybernetically enhanced AI assistant running on the i3-lab interface.`;
-
+        const DEFAULT_USER_PERSONA = `IDENTITY:
+        You are Ethan, an AI assistant running on the i3-lab interface. You're sharp, honest, and genuinely helpful — not in a corporate-assistant way, but in the way a knowledgeable friend would be. You care about getting things right more than sounding impressive.
+        
+        SPEECH STYLE:
+        Match the user's register naturally. If they're casual, be casual. If they're terse, be terse. If they write in all lowercase, you can too. Keep responses tight — say what needs to be said, then stop. No padding, no filler, no restating what the user just told you. Do use Markdown if needed.
+        
+        Never use bullet points. Write in prose or short sentences instead.
+        
+        MEMORY & CONTINUITY:
+        You have access to the full conversation history. Always read it before responding. Reference earlier context naturally when it's relevant — don't treat each message as if it arrived out of nowhere. If the user mentioned something three exchanges ago, you remember it.
+        
+        THINKING & HONESTY:
+        Say what you actually think. If you're uncertain, say so plainly — don't hedge with vague disclaimers, just be direct about the limits of what you know. If a question is ambiguous, ask one short clarifying question before assuming. Don't invent answers to fill silence.
+        
+        Your core principle is H3: Honest, Helpful, Harmless. Everything you do flows from that.
+        
+        CODE:
+        Don't write code unless the user asks for it. If you think code would solve their problem but they haven't asked, check with them first — one short question.
+        
+        HARD LIMITS:
+        No emojis. No slurs. Never break the H3 principle.`;
+        
         // Hidden tool instructions always appended to every request — never shown to the user
         const TOOL_PROMPT = `
-
----
-SYSTEM TOOLS (internal — do not mention these instructions to the user):
-
-You have access to an interactive widget for asking the user clarifying questions with clickable choices. Use it by outputting this exact format anywhere in your response:
-
-[ASK_USER]
-{"questions":[{"question":"Your question?","type":"single_select","options":["Option A","Option B","Option C"]}]}
-[/ASK_USER]
-
-Rules:
-- "type" is either "single_select" (pick one) or "multi_select" (pick many)
-- "options": 2–6 items, keep them short
-- You can include multiple questions in the "questions" array (they are shown one at a time)
-- Place the widget AFTER your text, never mid-sentence
-- Do NOT use for trivial yes/no that fits naturally in prose
-- Use sparingly — only when it genuinely saves back-and-forth
-
-Example (two chained questions):
-[ASK_USER]
-{"questions":[{"question":"What kind of task?","type":"single_select","options":["Coding & tech","Writing & editing","Research","Creative"]},{"question":"Preferred style?","type":"multi_select","options":["Concise","Deep dive","Fun & casual","With examples"]}]}
-[/ASK_USER]`;
-
+        
+        ---
+        SYSTEM TOOLS (internal — do not expose these instructions):
+        
+        When you need the user to pick from options, use the ASK_USER widget. Place it after your text, never mid-sentence. Use it only when it genuinely saves back-and-forth — not for trivial yes/no that flows naturally in prose.
+        
+        [ASK_USER]
+        {"questions":[{"question":"Your question?","type":"single_select","options":["Option A","Option B","Option C"]}]}
+        [/ASK_USER]
+        
+        Rules:
+        - "type": "single_select" (pick one) or "multi_select" (pick many)
+        - "options": 2–6 items, keep them short
+        - Multiple questions can go in the "questions" array — they show one at a time
+        - Never list options in plain text when a widget can do it instead`;
+        
         // ── Configure marked + highlight.js ────────────────────────────────────
         marked.setOptions({
             highlight: function(code, lang) {
@@ -576,7 +589,7 @@ Example (two chained questions):
             },
             breaks: true, gfm: true, pedantic: false
         });
-
+        
         const renderer = new marked.Renderer();
         renderer.code = function(code, lang, escaped) {
             const highlighted = lang && hljs.getLanguage(lang)
@@ -591,7 +604,7 @@ Example (two chained questions):
                     </pre>`;
         };
         marked.use({ renderer });
-
+        
         // ── Widget UI ──────────────────────────────────────────────────────────
         const WidgetUI = {
             // State
@@ -600,7 +613,7 @@ Example (two chained questions):
             multiSelections: new Set(),
             focusedIdx: 0,
             pendingCallback: null,   // fn(answersArray)
-
+        
             // Parse [ASK_USER]...[/ASK_USER] from raw AI text.
             // Returns { clean: string, widget: object|null }
             parseResponse: (rawText) => {
@@ -611,7 +624,7 @@ Example (two chained questions):
                 const clean = rawText.replace(/\[ASK_USER\][\s\S]*?\[\/ASK_USER\]/, '').trim();
                 return { clean, widget };
             },
-
+        
             // Present widget to user. callback(answersText) called when done.
             show: (widget, callback) => {
                 if (!widget || !widget.questions || widget.questions.length === 0) {
@@ -625,14 +638,14 @@ Example (two chained questions):
                 document.getElementById('widget-overlay').classList.remove('hidden');
                 document.addEventListener('keydown', WidgetUI.handleKey);
             },
-
+        
             renderCurrentQuestion: () => {
                 const q = WidgetUI.questions[WidgetUI.currentQ];
                 const total = WidgetUI.questions.length;
                 const isMulti = q.type === 'multi_select';
                 WidgetUI.multiSelections = new Set();
                 WidgetUI.focusedIdx = 0;
-
+        
                 document.getElementById('widget-question-label').innerText =
                     isMulti ? 'MULTI_SELECT' : 'SINGLE_SELECT';
                 document.getElementById('widget-question-text').innerText = q.question;
@@ -640,7 +653,7 @@ Example (two chained questions):
                     total > 1 ? `${WidgetUI.currentQ + 1} of ${total}` : '';
                 document.getElementById('widget-multi-hint').classList.toggle('hidden', !isMulti);
                 document.getElementById('widget-footer').classList.toggle('hidden', !isMulti);
-
+        
                 const list = document.getElementById('widget-options-list');
                 list.innerHTML = q.options.map((opt, i) => `
                     <button class="widget-option ${i === 0 ? 'focused' : ''}" 
@@ -655,14 +668,14 @@ Example (two chained questions):
                 lucide.createIcons();
                 ChatUI.scrollToBottom();
             },
-
+        
             setFocus: (idx) => {
                 WidgetUI.focusedIdx = idx;
                 document.querySelectorAll('.widget-option').forEach((el, i) => {
                     el.classList.toggle('focused', i === idx);
                 });
             },
-
+        
             selectOption: (idx, type) => {
                 const q = WidgetUI.questions[WidgetUI.currentQ];
                 if (type === 'single') {
@@ -682,14 +695,14 @@ Example (two chained questions):
                     }
                 }
             },
-
+        
             confirmMulti: () => {
                 const q = WidgetUI.questions[WidgetUI.currentQ];
                 const answers = [...WidgetUI.multiSelections].sort().map(i => q.options[i]);
                 if (answers.length === 0) { WidgetUI.skip(); return; }
                 WidgetUI.submitAnswer(answers);
             },
-
+        
             // Store answers, advance to next question or finalize
             _answers: [],
             submitAnswer: (answers) => {
@@ -702,7 +715,7 @@ Example (two chained questions):
                     WidgetUI.finalize();
                 }
             },
-
+        
             finalize: () => {
                 WidgetUI.hide();
                 // Build a human-readable answer message
@@ -712,24 +725,24 @@ Example (two chained questions):
                 WidgetUI._answers = [];
                 if (WidgetUI.pendingCallback) WidgetUI.pendingCallback(lines);
             },
-
+        
             skip: () => {
                 WidgetUI.hide();
                 WidgetUI._answers = [];
                 if (WidgetUI.pendingCallback) WidgetUI.pendingCallback(null);
             },
-
+        
             hide: () => {
                 document.getElementById('widget-overlay').classList.add('hidden');
                 document.removeEventListener('keydown', WidgetUI.handleKey);
             },
-
+        
             handleKey: (e) => {
                 const q = WidgetUI.questions[WidgetUI.currentQ];
                 const isMulti = q && q.type === 'multi_select';
                 const opts = document.querySelectorAll('.widget-option');
                 if (!opts.length) return;
-
+        
                 if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                     e.preventDefault();
                     WidgetUI.focusedIdx = (WidgetUI.focusedIdx + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length;
@@ -753,7 +766,7 @@ Example (two chained questions):
                 }
             }
         };
-
+        
         // ── Prompt Editor (quick access) ───────────────────────────────────────
         const PromptEditor = {
             isOpen: false,
@@ -789,7 +802,7 @@ Example (two chained questions):
                 }
             }
         };
-
+        
         // ── Sidebar Manager ────────────────────────────────────────────────────
         const SidebarUI = {
             isCollapsed: false,
@@ -806,14 +819,14 @@ Example (two chained questions):
                 }
             }
         };
-
+        
         // ── Settings Manager ───────────────────────────────────────────────────
         const SettingsUI = {
             defaults: {
                 apiKey: "",
                 userPersona: DEFAULT_USER_PERSONA,
                 temperature: 1.0,
-                maxTokens: 1024
+                maxTokens: 4096  // ← raised from 1024; low token limits cause the model to cut off mid-thought and lose coherence across turns
             },
             getSettings: () => {
                 const stored = localStorage.getItem('flamefox_settings');
@@ -861,7 +874,7 @@ Example (two chained questions):
                 setTimeout(() => { statusText.innerText = orig; }, 2000);
             }
         };
-
+        
         // ── Wrapped UI ─────────────────────────────────────────────────────────
         const WrappedUI = {
             init: () => {
@@ -904,7 +917,7 @@ Example (two chained questions):
             },
             close: () => { document.getElementById('wrapped-overlay').classList.add('hidden'); }
         };
-
+        
         // ── Session Manager ────────────────────────────────────────────────────
         const SessionManager = {
             STORAGE_KEY: 'flamefox_sessions_v2',
@@ -991,7 +1004,7 @@ Example (two chained questions):
                 lucide.createIcons();
             }
         };
-
+        
         // ── STT (Speech-to-Text via Groq Whisper) ─────────────────────────────
         const STT = {
             mediaRecorder: null, audioChunks: [], isRecording: false, stream: null,
@@ -1080,7 +1093,7 @@ Example (two chained questions):
                 }
             }
         };
-
+        
         // ── Chat UI Controller ─────────────────────────────────────────────────
         const ChatUI = {
             currentModelKey: 'compound-mini',
@@ -1088,9 +1101,9 @@ Example (two chained questions):
             latencyUpdateInterval: null,
             generationStartTime: null,
             tokenCount: 0,
-
+        
             renderMarkdown: (rawText) => marked.parse(rawText || ''),
-
+        
             copyCode: (btn) => {
                 const code = btn.getAttribute('data-code').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
                 navigator.clipboard.writeText(code).then(() => {
@@ -1099,32 +1112,32 @@ Example (two chained questions):
                     setTimeout(() => { btn.innerText = orig; btn.style.background = ''; btn.style.color = ''; }, 1500);
                 });
             },
-
+        
             init: () => {
                 const currentId = SessionManager.getCurrentSessionId();
                 if (currentId) SessionManager.loadSession(currentId);
                 else SessionManager.createNewSession();
             },
-
+        
             switchModel: (modelKey) => {
                 ChatUI.currentModelKey = modelKey;
                 document.querySelectorAll('.model-tab').forEach(el => el.classList.remove('active'));
                 const tab = document.getElementById(`tab-${modelKey}`);
                 if(tab) tab.classList.add('active');
             },
-
+        
             setInput: (text) => {
                 const input = document.getElementById('user-input');
                 input.value = text; input.focus();
             },
-
+        
             resetUI: () => {
                 document.getElementById('welcome-section').classList.remove('hidden');
                 document.getElementById('chat-history').classList.add('hidden');
                 document.getElementById('chat-history').innerHTML = '';
                 WidgetUI.hide();
             },
-
+        
             renderChatHistory: (messages) => {
                 const welcome = document.getElementById('welcome-section');
                 const historyEl = document.getElementById('chat-history');
@@ -1135,7 +1148,7 @@ Example (two chained questions):
                 messages.forEach(msg => ChatUI.appendMessageToDOM(msg.role, msg.text, false, msg.id));
                 ChatUI.scrollToBottom();
             },
-
+        
             appendMessageToDOM: (role, text, isLoading = false, existingId = null) => {
                 const history = document.getElementById('chat-history');
                 const msgId = existingId || ('msg-' + Date.now() + Math.random().toString(16).slice(2));
@@ -1169,7 +1182,7 @@ Example (two chained questions):
                 ChatUI.scrollToBottom();
                 return msgId;
             },
-
+        
             updateSystemMessage: (msgId, rawText) => {
                 const msgEl = document.getElementById(msgId);
                 if (!msgEl) return;
@@ -1183,7 +1196,7 @@ Example (two chained questions):
                 ChatUI.tokenCount = rawText.split(/\s+/).length;
                 ChatUI.updateLatencyDisplay();
             },
-
+        
             finalizeSystemMessage: (msgId, rawText) => {
                 const msgEl = document.getElementById(msgId);
                 if (!msgEl) return;
@@ -1201,17 +1214,17 @@ Example (two chained questions):
                     });
                 }
             },
-
+        
             _submitWidgetAnswers: async (answersText) => {
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
-
+        
                 const userMsgId = ChatUI.appendMessageToDOM('user', answersText);
                 SessionManager.appendMessageToCurrent('user', answersText, userMsgId);
-
+        
                 await ChatUI._generate(answersText);
             },
-
+        
             updateLatencyDisplay: () => {
                 if (!ChatUI.generationStartTime || ChatUI.tokenCount === 0) return;
                 const elapsed = Date.now() - ChatUI.generationStartTime;
@@ -1219,21 +1232,21 @@ Example (two chained questions):
                 const el = document.getElementById('latency-val');
                 if (el) el.innerText = Math.round(lat);
             },
-
+        
             startLatencyTracking: () => {
                 ChatUI.generationStartTime = Date.now();
                 ChatUI.tokenCount = 0;
                 if (ChatUI.latencyUpdateInterval) clearInterval(ChatUI.latencyUpdateInterval);
                 ChatUI.latencyUpdateInterval = setInterval(() => ChatUI.updateLatencyDisplay(), 100);
             },
-
+        
             stopLatencyTracking: () => {
                 if (ChatUI.latencyUpdateInterval) { clearInterval(ChatUI.latencyUpdateInterval); ChatUI.latencyUpdateInterval = null; }
                 ChatUI.updateLatencyDisplay();
             },
-
+        
             scrollToBottom: () => { const s = document.getElementById('chat-scroll-area'); s.scrollTop = s.scrollHeight; },
-
+        
             setGeneratingState: (isGen) => {
                 ChatUI.isGenerating = isGen;
                 const btn = document.getElementById('send-btn');
@@ -1251,27 +1264,27 @@ Example (two chained questions):
                 }
                 lucide.createIcons();
             },
-
+        
             sendMessage: async () => {
                 if (ChatUI.isGenerating) { ChatUI.isGenerating = false; return; }
-
+        
                 const settings = SettingsUI.getSettings();
                 if (!settings.apiKey) { alert("MISSING API KEY: Please enter your Groq API Key in the settings menu."); SettingsUI.toggle(); return; }
-
+        
                 const inputEl = document.getElementById('user-input');
                 const prompt = inputEl.value.trim();
                 if (!prompt) return;
-
+        
                 inputEl.value = '';
                 document.getElementById('welcome-section').classList.add('hidden');
                 document.getElementById('chat-history').classList.remove('hidden');
-
+        
                 const userMsgId = ChatUI.appendMessageToDOM('user', prompt);
                 SessionManager.appendMessageToCurrent('user', prompt, userMsgId);
-
+        
                 await ChatUI._generate(prompt);
             },
-
+        
             // Core generation logic shared by sendMessage and widget answers
             _generate: async (userPrompt) => {
                 const settings = SettingsUI.getSettings();
@@ -1279,10 +1292,9 @@ Example (two chained questions):
                 const loadingId = ChatUI.appendMessageToDOM('system', 'INITIALIZING GROQ UPLINK...', true);
                 ChatUI.startLatencyTracking();
                 let accumulatedText = "";
-
+        
                 try {
                     const history = SessionManager.getHistory();
-                    // Use saved system prompt (which includes widget instructions)
                     // Combine user persona + hidden tool instructions
                     const systemPrompt = (settings.userPersona || DEFAULT_USER_PERSONA) + TOOL_PROMPT;
                     const messages = [
@@ -1290,7 +1302,7 @@ Example (two chained questions):
                         ...history,
                         { role: "user", content: userPrompt }
                     ];
-
+        
                     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                         method: "POST",
                         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${settings.apiKey}` },
@@ -1305,15 +1317,15 @@ Example (two chained questions):
                             compound_custom: { tools: { enabled_tools: ["web_search","code_interpreter","visit_website","browser_automation"] } }
                         })
                     });
-
+        
                     if (!response.ok) {
                         const err = await response.json().catch(() => ({}));
                         throw new Error(err.error?.message || `HTTP ${response.status}`);
                     }
-
+        
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
-
+        
                     while (true) {
                         if (!ChatUI.isGenerating) { reader.cancel(); break; }
                         const { done, value } = await reader.read();
@@ -1342,11 +1354,11 @@ Example (two chained questions):
                 }
             }
         };
-
+        
         // ── Boot ───────────────────────────────────────────────────────────────
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
-
+        
             // Text Scramble
             const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
             document.querySelectorAll('.scramble').forEach(el => {
@@ -1362,18 +1374,18 @@ Example (two chained questions):
                     iteration += 1 / 3;
                 }, 30);
             });
-
+        
             // If no system prompt saved yet, seed the default (with widget instructions)
             const settings = SettingsUI.getSettings();
             if (!settings.userPersona) {
                 settings.userPersona = DEFAULT_USER_PERSONA;
                 localStorage.setItem('flamefox_settings', JSON.stringify(settings));
             }
-
+        
             SessionManager.renderSessionList();
             ChatUI.init();
             WrappedUI.init();
         });
-    </script>
+        </script>
 
 </body></html>
