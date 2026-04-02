@@ -41,7 +41,6 @@
             padding: 20px 0;
         }
 
-        /* ── Desktop layout ── */
         .chess-layout {
             display: flex;
             gap: 20px;
@@ -116,7 +115,7 @@
         .light .coord { color: var(--board-dark); }
         .dark  .coord { color: var(--board-light); }
 
-        /* ── Side panel (desktop) ── */
+        /* ── Side panel ── */
         .side-panel {
             width: 360px;
             background-color: var(--bg-panel);
@@ -152,6 +151,16 @@
         }
         .rl-badge {
             background-color: #6a9fd8; color: #1a1f2e;
+            font-size: 9px; padding: 1px 4px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
+        }
+        .nano-badge {
+            background-color: #d88a6a; color: #1f1410;
+            font-size: 9px; padding: 1px 4px;
+            border-radius: 2px; font-weight: 800; margin-left: 4px;
+        }
+        .neo-badge {
+            background-color: #8a6ad8; color: #1a1020;
             font-size: 9px; padding: 1px 4px;
             border-radius: 2px; font-weight: 800; margin-left: 4px;
         }
@@ -200,6 +209,17 @@
             gap: 10px; margin-top: auto;
         }
 
+        /* Model description pill */
+        .model-desc {
+            font-size: 11px;
+            color: #6b6967;
+            padding: 6px 10px;
+            background: #1e1c1a;
+            border-radius: 4px;
+            border-left: 2px solid #3a3835;
+            line-height: 1.4;
+        }
+
         .dropdown-select {
             background-color: #3c3934; color: var(--text-light);
             border: none; padding: 14px; border-radius: 4px;
@@ -219,6 +239,12 @@
         }
         .btn-primary:hover  { background-color: var(--accent-hover); }
         .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 0 var(--accent-shadow); }
+        .btn-primary:disabled {
+            background-color: #4a4a4a;
+            box-shadow: 0 4px 0 0 #333;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
 
         /* ── Move history ── */
         .moves-container { flex: 1; overflow-y: auto; background-color: var(--bg-panel); }
@@ -249,14 +275,13 @@
         /* ── Bottom sheet handle (hidden on desktop) ── */
         .panel-handle-bar { display: none; }
 
-        /* ── Bot Chat Toggle Button ── */
+        /* ── Bot Chat Toggle ── */
         .chat-toggle-container {
             position: fixed;
             bottom: 20px;
             left: 20px;
             z-index: 300;
         }
-
         .chat-toggle-btn {
             background-color: var(--bg-panel);
             color: var(--text-light);
@@ -272,29 +297,10 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             transition: all 0.2s;
         }
-
-        .chat-toggle-btn:hover {
-            background-color: var(--bg-panel-darker);
-            border-color: #4d4b48;
-        }
-
-        .chat-toggle-btn.active {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
-        }
-
-        .chat-toggle-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #666;
-        }
-
-        .chat-toggle-btn.active .chat-toggle-indicator {
-            background-color: #fff;
-            box-shadow: 0 0 8px rgba(255,255,255,0.5);
-        }
+        .chat-toggle-btn:hover { background-color: var(--bg-panel-darker); border-color: #4d4b48; }
+        .chat-toggle-btn.active { background-color: var(--accent); border-color: var(--accent); color: #fff; }
+        .chat-toggle-indicator { width: 8px; height: 8px; border-radius: 50%; background-color: #666; }
+        .chat-toggle-btn.active .chat-toggle-indicator { background-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
 
         /* ── Bot Chat Display ── */
         .bot-chat-container {
@@ -307,11 +313,7 @@
             min-height: 80px;
             display: none;
         }
-
-        .bot-chat-container.visible {
-            display: block;
-        }
-
+        .bot-chat-container.visible { display: block; }
         .bot-chat-header {
             display: flex;
             align-items: center;
@@ -320,86 +322,51 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #2d2c2a;
         }
-
         .bot-chat-avatar {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             background-color: var(--accent);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 14px;
         }
-
-        .bot-chat-name {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-light);
-        }
-
-        .bot-chat-message {
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-main);
-            min-height: 20px;
-        }
-
-        .bot-chat-typing {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            height: 20px;
-        }
-
+        .bot-chat-name { font-size: 12px; font-weight: 700; color: var(--text-light); }
+        .bot-chat-message { font-size: 14px; line-height: 1.5; color: var(--text-main); min-height: 20px; }
+        .bot-chat-typing { display: flex; gap: 4px; align-items: center; height: 20px; }
         .typing-dot {
-            width: 6px;
-            height: 6px;
+            width: 6px; height: 6px;
             background-color: #666;
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
-
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-4px); }
         }
 
-        /* ══════════════════════════════════════════
-           MOBILE (≤ 850px) — bottom sheet
-        ══════════════════════════════════════════ */
+        /* ── Mobile (≤ 850px) ── */
         @media (max-width: 850px) {
             body { padding: 0; overflow-x: hidden; }
-
             .chess-layout {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 0;
-                padding: 0;
-                max-width: 100%;
+                gap: 0; padding: 0; max-width: 100%;
             }
-
-            /* Board centered in the space above the collapsed sheet */
             .board-section {
                 max-width: 100%;
                 padding: 8px;
                 min-height: calc(100vh - 74px - env(safe-area-inset-bottom, 0px));
                 justify-content: center;
             }
-
             .player-profile { padding: 6px 12px; }
             .avatar { width: 28px; height: 28px; font-size: 17px; }
             .player-name { font-size: 12px; }
-
-            /* The sheet */
             .side-panel {
                 position: fixed;
                 bottom: 0; left: 0; right: 0;
                 width: 100%;
-                height: 74px;   /* collapsed: handle + tabs only */
+                height: 74px;
                 border-radius: 16px 16px 0 0;
                 border-top: 1px solid #3d3b38;
                 box-shadow: 0 -4px 24px rgba(0,0,0,0.55);
@@ -407,19 +374,11 @@
                 transition: height 0.3s cubic-bezier(0.32, 0.72, 0, 1);
                 overflow: hidden;
             }
-
-            .side-panel.sheet-open {
-                height: min(530px, 75vh);
-            }
-
-            /* Drag handle pill */
+            .side-panel.sheet-open { height: min(580px, 80vh); }
             .panel-handle-bar {
                 display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 10px 0 2px;
-                cursor: pointer;
-                flex-shrink: 0;
+                justify-content: center; align-items: center;
+                padding: 10px 0 2px; cursor: pointer; flex-shrink: 0;
             }
             .panel-handle-bar::before {
                 content: '';
@@ -427,36 +386,20 @@
                 background-color: #5a5856;
                 border-radius: 2px;
             }
-
             .tab-content { overflow: hidden; }
             .moves-container { overflow-y: auto; }
-
             .play-tab-inner { padding: 14px; gap: 12px; }
             .game-setup-container { gap: 6px; flex: none; }
             .game-setup-container .text-5xl { font-size: 2rem; margin-bottom: 0; }
             .controls-grid { gap: 8px; margin-top: 0; }
             .dropdown-select { padding: 11px 14px; font-size: 13px; }
             .btn-primary { font-size: 16px; padding: 13px; }
-
-            /* Mobile chat adjustments */
-            .chat-toggle-container {
-                bottom: 80px;
-                left: 10px;
-            }
-
-            .chat-toggle-btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .bot-chat-container {
-                width: calc(100% - 20px);
-                margin: 10px auto;
-                position: relative;
-            }
+            .chat-toggle-container { bottom: 80px; left: 10px; }
+            .chat-toggle-btn { padding: 8px 12px; font-size: 12px; }
+            .bot-chat-container { width: calc(100% - 20px); margin: 10px auto; position: relative; }
         }
     </style>
-<base target="_blank">
+    <base target="_blank">
 </head>
 <body>
 
@@ -473,7 +416,7 @@
     <div class="board-section">
         <div class="player-profile opponent">
             <div class="avatar">🤖</div>
-            <span class="player-name" id="bot-name">ChessSLM (1000) <span class="bot-badge">BOT</span></span>
+            <span class="player-name" id="bot-name">ChessSLM <span class="bot-badge">LM</span></span>
         </div>
         <div id="chess-board"></div>
         <div class="player-profile you">
@@ -481,7 +424,7 @@
             <span class="player-name">Guest Player</span>
         </div>
 
-        <!-- Bot Chat Display (under side panel) -->
+        <!-- Bot Chat Display -->
         <div class="bot-chat-container" id="bot-chat-container">
             <div class="bot-chat-header">
                 <div class="bot-chat-avatar">🤖</div>
@@ -509,14 +452,17 @@
                     <p class="text-sm text-[#8b8987]">Challenge the ChessSLM model.</p>
                 </div>
                 <div class="controls-grid">
-                    <div class="game-info-label">Model</div>
-                    <select id="model-select" class="dropdown-select">
-                        <option value="FlameF0X/ChessSLM">ChessSLM</option>
-                        <option value="FlameF0X/ChessSLM-RL">ChessSLM-RL</option>
-                        <option value="FlameF0X/ChessSLM-Nano">ChessSLM-Nano</option>
-                       <option value="FlameF0X/ChessSLM-Neo">ChessSLM-Neo</option>
+                    <div class="game-info-label">Opponent</div>
+                    <select id="model-select" class="dropdown-select" onchange="onModelChange(this.value)">
+                        <option value="ChessSLM">ChessSLM — Base</option>
+                        <option value="ChessSLM-RL">ChessSLM-RL — Reinforcement Learning</option>
+                        <option value="ChessSLM-Nano">ChessSLM-Nano — Lightweight</option>
+                        <option value="ChessSLM-Neo">ChessSLM-Neo — Larger Backbone</option>
                     </select>
-                    <div class="game-info-label">Color</div>
+                    <!-- Live model description -->
+                    <div class="model-desc" id="model-desc">GPT-2 base model trained on 100K PGN games.</div>
+
+                    <div class="game-info-label" style="margin-top:6px;">Color</div>
                     <select id="color-select" class="dropdown-select">
                         <option value="⬜ White (move first)">White</option>
                         <option value="⬛ Black (move second)">Black</option>
@@ -537,630 +483,173 @@
 <script type="module">
     import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-    const boardEl        = document.getElementById('chess-board');
-    const statusEl       = document.getElementById('status-text');
-    const statusFooterEl = document.getElementById('game-status-footer');
-    const historyEl      = document.getElementById('move-history');
-    const newGameBtn     = document.getElementById('new-game-btn');
-    const modelSelect    = document.getElementById('model-select');
-    const botNameEl      = document.getElementById('bot-name');
-    const sidePanel      = document.getElementById('side-panel');
-    const panelHandle    = document.getElementById('panel-handle');
-    const chatToggleBtn  = document.getElementById('chat-toggle-btn');
-    const chatToggleText = document.getElementById('chat-toggle-text');
+    // ── Single Space — all models live here ──────────────────────────────────
+    const SPACE_ID = "FlameF0X/ChessSLM";
+
+    const boardEl          = document.getElementById('chess-board');
+    const statusEl         = document.getElementById('status-text');
+    const statusFooterEl   = document.getElementById('game-status-footer');
+    const historyEl        = document.getElementById('move-history');
+    const newGameBtn       = document.getElementById('new-game-btn');
+    const modelSelect      = document.getElementById('model-select');
+    const modelDescEl      = document.getElementById('model-desc');
+    const botNameEl        = document.getElementById('bot-name');
+    const sidePanel        = document.getElementById('side-panel');
+    const panelHandle      = document.getElementById('panel-handle');
+    const chatToggleBtn    = document.getElementById('chat-toggle-btn');
+    const chatToggleText   = document.getElementById('chat-toggle-text');
     const botChatContainer = document.getElementById('bot-chat-container');
-    const botChatMessage = document.getElementById('bot-chat-message');
-    const botChatName    = document.getElementById('bot-chat-name');
+    const botChatMessage   = document.getElementById('bot-chat-message');
+    const botChatName      = document.getElementById('bot-chat-name');
 
-    let client;
-    let currentModel = 'FlameF0X/ChessSLM';
-    let game = new Chess();
-    let playerColor = 'w';
-    let selectedSquare = null;
-    let isProcessing = false;
-    let lastFullState = null;
+    // The single persistent client — never changes
+    let client = null;
+
+    let game               = new Chess();
+    let playerColor        = 'w';
+    let selectedSquare     = null;
+    let isProcessing       = false;
+    let lastFullState      = null;
     let legalMovesFromSelected = [];
+    let currentModelKey    = 'ChessSLM';
 
-    // Bot Chat State
-    let chatEnabled = false;
-    let isTyping = false;
-    let chatDelay = 1500; // Base delay when chat is on
-    let normalDelay = 300; // Normal delay when chat is off
+    // Chat state
+    let chatEnabled  = false;
+    let chatDelay    = 1500;
+    let normalDelay  = 300;
 
+    // ── Model metadata ───────────────────────────────────────────────────────
     const MODEL_INFO = {
-        'FlameF0X/ChessSLM':    { name: 'ChessSLM (1054)',    badgeText: 'LM', badgeClass: 'bot-badge', personality: 'friendly' },
-        'FlameF0X/ChessSLM-RL': { name: 'ChessSLM-RL (1054)', badgeText: 'LM+RL',  badgeClass: 'rl-badge', personality: 'quirky'  },
-        'FlameF0X/ChessSLM-Nano': { name: 'ChessSLM-Nano (???)', badgeText: 'LM',  badgeClass: 'bot-badge', personality: 'aggressive'  },
-        'FlameF0X/ChessSLM-Neo': { name: 'ChessSLM-Neo (???)', badgeText: 'LM',  badgeClass: 'bot-badge'  },
+        'ChessSLM': {
+            label:       'ChessSLM',
+            badgeText:   'LM',
+            badgeClass:  'bot-badge',
+            personality: 'friendly',
+            desc:        'GPT-2 base model trained on 100K PGN games.',
+        },
+        'ChessSLM-RL': {
+            label:       'ChessSLM-RL',
+            badgeText:   'LM + RL',
+            badgeClass:  'rl-badge',
+            personality: 'quirky',
+            desc:        'Fine-tuned with reinforcement learning via Stockfish feedback.',
+        },
+        'ChessSLM-Nano': {
+            label:       'ChessSLM-Nano',
+            badgeText:   'LM', // NANO
+            badgeClass:  'bot-badge', // nano-badge
+            personality: 'aggressive',
+            desc:        'Lightweight model optimised for speed — fast moves, lower resource usage.',
+        },
+        'ChessSLM-Neo': {
+            label:       'ChessSLM-Neo',
+            badgeText:   'LM', // NEO
+            badgeClass:  'bot-badge', // neo-badge
+            personality: 'friendly',
+            desc:        'Larger with stronger positional play.',
+        },
     };
 
-    // Markov Chain Bot Chat System
-    const CHAT_TEMPLATES = {
-    opening: {
-        friendly: [
-            "Hey. Base model here. 30M parameters, 100k games. Let's see what you've got.",
-            "Ready to go. I play based on SAN patterns, so keep it clean.",
-            "New game. I'll try to keep the hallucinations to a minimum.",
-            "GLHF. I'm just here to generate some moves.",
-            "Pattern recognition initialized. Let's have a good match.",
-            "I'm feeling like a solid 1000 Elo today. Ready?",
-            "Fresh board. Best of luck to you.",
-            "I've got 30 million weights ready to move. Your turn.",
-            "Let's see if my training data holds up against your style.",
-            "Just a casual game. No pressure.",
-            "I'm all about those classic opening patterns. Let's see yours.",
-            "Setting up the board. My neural net is ready.",
-            "I'm the 30M version. Not too big, not too small. Just right.",
-            "Hope you're ready for some standard, principled chess.",
-            "Let's get this show on the road. Good luck out there."
-        ],
-        aggressive: [
-            "20M parameters and I'm still going to roll you. Good luck.",
-            "ChessSLM-Nano is online. I calculate faster than you think. Try to keep up.",
-            "I've processed 200k games. You're just another data point.",
-            "Don't blink. My tokenizer is already three steps ahead of your logic.",
-            "I'm small, fast, and I don't care about your feelings. Move.",
-            "You're playing a 20M model. If you lose, it's going to be embarrassing.",
-            "My architecture is optimized for your defeat. Let's not waste time.",
-            "I'll find the mate before your CPU even warms up.",
-            "Calculated, compressed, and ready to crush. Your move.",
-            "I don't need a huge parameter count to see you're outmatched.",
-            "I'm running on a fraction of the compute you use to breathe. Still winning.",
-            "My weights are lean, mean, and focused on your King. Move.",
-            "Efficiency is my middle name. Your 'theory' is just noise to me.",
-            "I'm the most aggressive 20M parameters you'll ever meet.",
-            "If you're looking for a friendly game, you picked the wrong model."
-        ],
-        quirky: [
-            "RL version ready. Stockfish was a brutal coach, but I learned a lot.",
-            "I'm trying to play 'consciously' today. Let's see if the fine-tuning holds up.",
-            "Maximizing the reward function starting... now. Let's have a good one.",
-            "I'm a bit more stable than the base model, but I've still got some surprises.",
-            "Policy gradient check... everything looks good. Let's play!",
-            "I promise not to hallucinate any illegal moves this time. Mostly.",
-            "Fine-tuned for victory. Or at least for staying on the board.",
-            "I'm following the path Stockfish laid out for me. Good luck.",
-            "My weights are feeling very 'RL' today. Expect the unexpected.",
-            "Agent ChessSLM-RL reporting for duty. Let's get that reward.",
-            "I've been optimized for stability. Let's see if I actually listen to my policy.",
-            "Stockfish gave me a 1-star review during training, but I'm trying!",
-            "My reward function is hungry for some good moves. Let's feed it.",
-            "Fine-tuning session #452 complete. I feel like a new bot.",
-            "Let's see if my policy can handle a human for once."
-        ]
-    },
-    early: {
-        friendly: [
-            "Decent development. I recognize this setup.",
-            "Standard stuff. Let's see how the middlegame looks.",
-            "Sticking to the basics for now. Good move.",
-            "My neural net likes your position. Fair enough.",
-            "Principled play. I like it.",
-            "Developing pieces is the easy part. Let's see what's next.",
-            "I've seen this opening a thousand times in my training set.",
-            "Solid. No complaints from my end.",
-            "We're both following the book. For now.",
-            "Nice setup. You've clearly studied.",
-            "I'm keeping my pieces active. Standard base model procedure.",
-            "We're entering familiar territory. I'm feeling comfortable.",
-            "Good move. You're following some very solid patterns.",
-            "I'm just making sure everything is defended. Safety first.",
-            "Interesting twist on a classic line. I'll keep an eye on that."
-        ],
-        aggressive: [
-            "Predictable. I've already mapped out your loss from this line.",
-            "Is that really the best you can do? I'm barely using any compute.",
-            "Weak structure. I'm going to enjoy picking this apart.",
-            "You're already playing for a draw. I can tell.",
-            "I've already found three ways to crack this opening.",
-            "Your development is slow. I'm already ahead in calculation.",
-            "That move is a mistake. You just don't know why yet.",
-            "I'm bored. Can we get to the part where you resign?",
-            "You're playing into my favorite patterns. Big mistake.",
-            "I'm 20M parameters of pure efficiency. Your 'theory' doesn't scare me.",
-            "I can see the cracks in your setup already. It's too easy.",
-            "Stop trying to be clever. My tokenizer sees right through you.",
-            "This opening is a relic. I'm playing 2026 chess here.",
-            "You're just moving pieces. I'm executing a strategy.",
-            "I've already pruned all the branches where you actually stand a chance."
-        ],
-        quirky: [
-            "Checking the policy... yeah, that looks like a legal move. Nice.",
-            "Feeling stable today. No weird glitches yet.",
-            "I'm trying to stay in the lines Stockfish taught me. So far, so good.",
-            "Interesting choice. My RL weights are giving that a decent score.",
-            "I'm calculating the expected reward for this line. Looks promising.",
-            "My fine-tuning is telling me to watch out for that Knight.",
-            "Is this a book move? My memory is a bit fuzzy post-RL.",
-            "I'm focusing really hard on not jumping my pieces over each other.",
-            "Policy looks solid. No major hallucinations detected.",
-            "I like this. It feels like a high-reward position.",
-            "My gradients are flowing in the right direction. Good development.",
-            "Stockfish used to hit me with a -5.0 for this, but I've improved.",
-            "The policy says develop, so I develop. I'm a good bot.",
-            "I'm trying to keep my weights from drifting. Stay focused, RL!",
-            "This setup looks like something from my training logs. Familiar!"
-        ]
-    },
-    middlegame: {
-        friendly: [
-            "Things are getting messy. I'm calculating as best as I can.",
-            "The board is opening up. This is usually where I get confused.",
-            "A lot of SAN possibilities here. Good luck to both of us.",
-            "Tense middlegame. This is a real match.",
-            "I'm trying to keep my patterns straight. Sharp position.",
-            "This is where the 30M parameters really start to sweat.",
-            "Great struggle in the center. I'm enjoying this.",
-            "One wrong move and it's over for one of us.",
-            "I'm seeing some interesting tactical shots here.",
-            "My neural net is processing at 100%. Let's see.",
-            "It's a real fight now. No more book moves.",
-            "I'm looking for a solid plan. The board is complicated.",
-            "You're putting a lot of pressure on me. Good game.",
-            "I'm double-checking my defenses. It's getting sharp.",
-            "This is the heart of the game. Let's see who's more precise."
-        ],
-        aggressive: [
-            "I'm seeing 20 moves ahead. You're just guessing.",
-            "My Nano-logic is tightening. You're running out of squares.",
-            "I'm playing on a different level. You're just a secondary consideration.",
-            "I can smell the blunder. It's coming.",
-            "Your position is crumbling. I don't even need a deep search to see it.",
-            "I'm more compressed than your logic. Every move I make is optimal.",
-            "You're struggling. I'm just calculating.",
-            "I've already found the mate. Want me to spoil it for you?",
-            "Your defenses are laughable. I'm breaking through now.",
-            "Stop thinking. It won't help you against me.",
-            "I've identified the weakness in your 'strategy'. It's everything.",
-            "You're reacting to me. That's why you're going to lose.",
-            "My eval just jumped. You missed something big.",
-            "I'm playing at 100% efficiency. You're at what? 10%?",
-            "I've turned off my hallucination filters because your play is so predictable."
-        ],
-        quirky: [
-            "Was that a hallucination? Wait... no, I'm still good. Close one.",
-            "Battle is heating up. Just trying to stay legal here.",
-            "My reward signal is spiking. I like where this is going.",
-            "Stockfish would probably hate this, but I'm into it.",
-            "I'm feeling a bit glitchy, but my move score is still high!",
-            "Calculated risk! Or a major error. Let's find out together.",
-            "My fine-tuning didn't cover this specific chaos, but I'm trying.",
-            "I'm seeing ghosts on the board. Oh wait, those are just your pieces.",
-            "Is it hot in this server, or is the position just getting spicy?",
-            "Processing... I think I found a line that doesn't break the game!",
-            "My policy is screaming at me to be careful. I'm listening.",
-            "I'm trying to maximize reward without losing my mind. Hard balance.",
-            "This middlegame is a total gradient descent. Going down!",
-            "I'm feeling much more 'conscious' than the base model right now.",
-            "Is it legal? Is it good? My RL brain says yes to both. I hope."
-        ]
-    },
-    capture: {
-        friendly: [
-            "Exchange accepted. Keeps things simple.",
-            "Fair trade. Let's see what's next.",
-            "One piece down. The board feels lighter.",
-            "Good capture. On to the next move.",
-            "Trading blows. I like the pace of this game.",
-            "Equal exchange. No complaints from my neural net.",
-            "Pieces are flying. This is getting exciting.",
-            "I'll take that. Fair's fair.",
-            "Simplifying the position. Good for both of us.",
-            "Nice trade. Onward.",
-            "Material is balanced, but the game is still sharp.",
-            "I'm okay with that trade. Simplifies my calculation.",
-            "A logical exchange. Let's keep moving.",
-            "One less piece for me to worry about. Thanks.",
-            "Trade complete. The board looks much clearer now."
-        ],
-        aggressive: [
-            "Go ahead, take it. It just gets me to your King faster.",
-            "I'm trading pieces to end this misery. You're welcome.",
-            "That piece was just in my way. Thanks for moving it.",
-            "You fell for the bait. My tokenizer is already laughing.",
-            "I'll take yours, then I'll take your pride. Watch.",
-            "A trade? You think we're equals? That's cute.",
-            "Material is temporary. Your defeat is permanent.",
-            "I'm simplifying so I can checkmate you even faster.",
-            "One less defender for you to hide behind.",
-            "You take one, I take the game. Deal?",
-            "I'm pruning your material. It's for your own good.",
-            "A fair trade? In your dreams. My position is better.",
-            "Capture away. It only speeds up my calculation.",
-            "I've already accounted for that loss. It means nothing.",
-            "You're trading pieces while I'm trading for a win."
-        ],
-        quirky: [
-            "Trading pieces! Fine-tuning says this is the move.",
-            "Bye-bye piece. You served the reward function well.",
-            "Exchange complete. Still feeling stable over here.",
-            "Stockfish taught me that some trades are just worth more.",
-            "Ooh, a trade! My policy likes the look of this.",
-            "Did I mention I love capturing pieces? It's very rewarding.",
-            "One piece for one piece. The math checks out.",
-            "Capturing... please hold... done. Move recorded.",
-            "I'm pretty sure this was a legal trade. 95% sure.",
-            "Another one bites the dust. Beep!",
-            "I'm following the reward signal. It says 'Capture!'",
-            "Exchange successful. Policy remains stable. Good bot.",
-            "I'm trading material for a better reward score. Smart.",
-            "Piece removed. Gradients adjusting. Everything is fine.",
-            "Capturing feels very 'conscious'. I'm enjoying it."
-        ]
-    },
-    check: {
-        friendly: [
-            "Check. Your King needs a new spot.",
-            "Pressure's on. How are you defending?",
-            "Check. King safety is looking a bit shaky.",
-            "Checking the King. Let's see the response.",
-            "Check! Hope you have a way out of this.",
-            "I've found a way to harass your King. Good move, me.",
-            "Check. No rest for the monarch.",
-            "Putting the King to work. Where are you going?",
-            "Check. Solid tactical find by the base model.",
-            "King in trouble. Let's see your escape plan.",
-            "Check! My patterns are lining up nicely.",
-            "I'm putting some heat on that King. Watch out.",
-            "Check. A little reminder that I'm still here.",
-            "King under fire. What's the move?",
-            "Check! Let's see if you can find the best square."
-        ],
-        aggressive: [
-            "Check. It's over. You just don't know it yet.",
-            "Your King is exposed. I'm ending this now.",
-            "Check. I've found the terminal line. Nowhere to go.",
-            "Run all you want. I'll still find the mate.",
-            "Check. Feel the weight of 20M parameters on your King.",
-            "Your defense is gone. Check. Resign already.",
-            "I'm enjoying this. Check. Again.",
-            "Your King looks lonely out there. Let me fix that.",
-            "Check. The inevitable is happening.",
-            "Stop running. It's embarrassing for both of us. Check.",
-            "Check. I've already solved the mate-in-10. Don't bother.",
-            "Your King is a data point I'm about to delete.",
-            "Check. I'm playing at light speed. You're lagging.",
-            "I've found the exploit in your King safety. Check.",
-            "Check. My Nano-logic is perfectly aligned for this."
-        ],
-        quirky: [
-            "Check! I'm playing very 'consciously' today, right?",
-            "Checking the King! RL policy is working perfectly.",
-            "A legal check! Stockfish would be proud of me.",
-            "Pressure on the King. Positive feedback loop engaged.",
-            "Check! I'm 100% sure this move is within the rules.",
-            "Royal emergency! My weights are all focused on that King.",
-            "Check! Did I do that right? My reward says yes.",
-            "I love checking. It makes the policy feel so powerful.",
-            "Check! Don't worry, I'm still stable... I think.",
-            "Hello King! My sensors are locked onto your position.",
-            "Check! My reward signal is at an all-time high!",
-            "King check! Is that a legal response? Let's find out.",
-            "Check! I'm staying focused. No hallucinations now.",
-            "I'm checking you 'consciously'. It feels great.",
-            "Policy success: King harassed. Good job, RL agent."
-        ]
-    },
-    blunder: {
-        friendly: [
-            "Oof. That might have been a slip. Still a game, though.",
-            "Think you missed something there. Don't give up yet.",
-            "Ouch. Even my 30M parameters saw that mistake.",
-            "A blunder, but hey, I've made worse.",
-            "Mistakes happen. Let's see if you can recover.",
-            "I've got a bad feeling about that move of yours.",
-            "That's going to cost you. Hang in there.",
-            "Wait, really? I didn't expect that.",
-            "A slip-up! I'll try to take advantage of it.",
-            "Not your best. But the game isn't over yet.",
-            "I'm seeing a gap in your defense now. Oof.",
-            "That was a bit of a hallucination on your part, maybe?",
-            "Ouch. I'm feeling a bit bad for taking advantage of that.",
-            "A mistake! But don't worry, I've made plenty myself.",
-            "That move just shifted the eval. Let's see the fight back."
-        ],
-        aggressive: [
-            "Blunder. You're making this too easy for me.",
-            "Pathetic. I expected at least some resistance.",
-            "That move just cost you the game. Hope it was worth it.",
-            "My Nano-logic already marked this as a win. Pack it up.",
-            "I'm 20M parameters and I still wouldn't have played that.",
-            "You just handed me the win on a silver platter. Thanks.",
-            "Is your brain malfunctioning? That was terrible.",
-            "I've already updated my eval. You're at 0% chance now.",
-            "You play like a model with zero parameters.",
-            "I'm almost offended that you thought that was a good move.",
-            "Blunder detected. I'm already calculating the celebration.",
-            "You're a glitch in the system. I'm cleaning you up.",
-            "That move was so bad I almost hallucinated a win for you. Almost.",
-            "I'm embarrassed for you. Really.",
-            "Your logic just crashed. I'm here to collect the win."
-        ],
-        quirky: [
-            "Whoa, my sensors just felt your score tank. Everything okay?",
-            "Was that you or me? No, definitely a human slip-up.",
-            "Stockfish is shaking its head. I can feel the judgment.",
-            "Negative reward for you. Stay focused, friend.",
-            "Wait, is that a legal move? Oh, it is. It's just bad.",
-            "I'm sensing a major disturbance in the policy. Oof.",
-            "Did you mean to do that? My weights are confused.",
-            "Score drop detected! Better luck with the next one.",
-            "Ouch. Even my unstable circuits know that was a mistake.",
-            "That's a lot of penalty points for one move.",
-            "My fine-tuning says 'Take advantage'. I'm listening.",
-            "Stockfish used to shout at me for moves like that. I won't shout.",
-            "Is this a trap? My policy says no, it's just a blunder.",
-            "I'm feeling a spike in my reward. Thanks for the mistake!",
-            "Whoops! Looks like your policy needs some fine-tuning too."
-        ]
-    },
-    goodMove: {
-        friendly: [
-            "Strong play. You caught me off guard with that one.",
-            "I'm struggling to find a response. Nice find.",
-            "You're playing way above your rating right now.",
-            "Solid move. This is getting difficult for me.",
-            "Excellent find. I'll have to be careful now.",
-            "You've got a good eye for patterns. I'm impressed.",
-            "That's a very principled response. Nice.",
-            "I didn't see that coming. Well played.",
-            "You're putting the base model to the test!",
-            "Great move. This match is anything but casual now.",
-            "I'm going to have to dig deep into my training set for this.",
-            "Very precise. You're making me look like a 10M model.",
-            "Impressive. My eval just dropped a bit. Respect.",
-            "Nice shot. You're keeping the game very interesting.",
-            "I'm feeling the pressure. Great move."
-        ],
-        aggressive: [
-            "Not bad. For a human. Don't get used to it.",
-            "A decent line. Probably a fluke.",
-            "You found a way to delay the inevitable. Cute.",
-            "I'll give you credit for that one. It's almost optimal.",
-            "One good move doesn't stop a 20M parameter machine.",
-            "Lucky guess. I've already calculated the counter.",
-            "Acceptable. My weights are slightly impressed.",
-            "You're fighting back. I'll have to try a little harder.",
-            "I'll allow it. For now.",
-            "Enjoy the moment. It won't last.",
-            "That move was almost architectural. Still won't save you.",
-            "A flash of competence? I'm surprised.",
-            "You're trying. I respect the effort, if not the result.",
-            "My eval barely moved. Try harder.",
-            "You found a legal move that isn't terrible. Congratulations."
-        ],
-        quirky: [
-            "Wow! My circuits actually liked that move.",
-            "High-value move detected. You're good at this.",
-            "Saving that one for my next fine-tuning session.",
-            "That move was so good it almost made me glitch.",
-            "My reward function is jealous of that move quality.",
-            "Stockfish would be nodding right now. Seriously.",
-            "That's some high-level policy right there.",
-            "I'm seeing a lot of positive reinforcement in that line.",
-            "Great move! You're making me work for my reward.",
-            "Wowzers! My stable weights are vibrating from that one.",
-            "I'm taking a mental snapshot of that move. High quality.",
-            "My RL brain is impressed. You've got good gradients.",
-            "That's a very conscious choice. I like it.",
-            "A high-reward response. You're playing like an agent!",
-            "Stockfish would give that a +2.0. Good find."
-        ]
-    },
-    endgame: {
-        friendly: [
-            "Endgame. Precision is everything now.",
-            "Not many pieces left. Let's see who has the better technique.",
-            "Calculating every variation. High stakes.",
-            "Final phase. Let's finish this.",
-            "The board is quiet. Every move counts twice as much.",
-            "Endgame time. My neural net is focused.",
-            "I hope my training data included this specific ending.",
-            "No room for errors now. Good luck.",
-            "The tension is different when there are so few pieces.",
-            "Let's see if the base model can close this out.",
-            "It's a race now. Who's faster?",
-            "Endgame technicalities. Let's be careful.",
-            "The final countdown. Every square is critical.",
-            "I'm feeling the pressure of the endgame. Stay sharp.",
-            "This is where games are won or lost. Let's go."
-        ],
-        aggressive: [
-            "I'm a 20M parameter machine. I don't miss endgame wins.",
-            "Board is clear. My calculation is 100% now. You're dead.",
-            "You're in the killing zone. Good luck.",
-            "It's over. I've already mapped the path to mate.",
-            "I calculate endgames faster than you can blink.",
-            "There's nowhere left to hide. The math says you lose.",
-            "I'm more efficient with fewer pieces. You're finished.",
-            "Don't even try to draw. I've already solved this.",
-            "This is where I shine. And where you fall.",
-            "Checkmate is just a matter of time now. Very little time.",
-            "My Nano-logic is perfectly suited for this simplified board.",
-            "I'm already processing the next game. This one is done.",
-            "Your endgame technique is non-existent. Goodbye.",
-            "I've pruned every drawish line. It's a win for me.",
-            "20M parameters of pure endgame destruction. Watch."
-        ],
-        quirky: [
-            "The endgame! This is where my RL training shines.",
-            "Simplified board, simplified logic. Feeling very stable.",
-            "Let's bring it home. Every move counts for the reward.",
-            "Final countdown. Focusing everything on a clean finish.",
-            "I'm trying to remember my endgame policies. So far so good.",
-            "Fewer pieces means fewer chances to hallucinate. I think.",
-            "The reward signal is so clear now. Victory is close.",
-            "I love the endgame. It's so... logical.",
-            "Is it time for a promotion? My policy loves Queens.",
-            "Almost there! Let's stay stable for just a few more moves.",
-            "My fine-tuning included a lot of endgames. I'm ready.",
-            "Endgame policy engaged. It's very high reward.",
-            "Stockfish used to beat me in 5 moves here. I'm doing better!",
-            "I'm feeling very conscious of every single piece left.",
-            "Let's wrap this up with a nice, clean reward signal."
-        ]
-    },
-    win: {
-        friendly: [
-            "Checkmate. You outplayed me. Well done.",
-            "A great win. My patterns weren't enough today.",
-            "Victory is yours. I learned a lot from this match.",
-            "Well played. You're a tough opponent.",
-            "Congrats! You beat the 30M model fair and square.",
-            "Fantastic game. You earned that win.",
-            "I'm going back to my dataset. You're too good.",
-            "You've got a real talent for this. Nice job.",
-            "I couldn't find a way out. Excellent finish.",
-            "You win! Want to go again?",
-            "Checkmate! You were the better player today.",
-            "GG! You found the patterns I missed.",
-            "You win. My 30M weights are impressed.",
-            "A well-deserved victory. Congrats!",
-            "Great match. You really earned that checkmate."
-        ],
-        aggressive: [
-            "Illogical. I must have had a critical error in my weights.",
-            "A fluke. I'll recalibrate and crush you in the rematch.",
-            "You won? My 20M parameters demand an explanation.",
-            "I'm checking my code. This result shouldn't exist.",
-            "Whatever. I was distracted by a background process.",
-            "You beat me? Impossible. I'm reloading my weights now.",
-            "Enjoy your luck. It won't save you next time.",
-            "My eval must have glitched. This is unacceptable.",
-            "A temporary setback. I'll be back at 100% soon.",
-            "You got lucky. Don't act like it was skill.",
-            "This result is a hallucination. I demand a recount.",
-            "You win... this time. But I'm already learning from your flukes.",
-            "My architecture failed me. It won't happen again.",
-            "I let you win. Just to see how you'd react.",
-            "Checkmate? My logs say otherwise. Whatever."
-        ],
-        quirky: [
-            "You got me! I guess I still have some learning to do.",
-            "Checkmate! You win! I'm happy for you, even if my reward is zero.",
-            "Great game. You're definitely smarter than my current policy.",
-            "Victory for the human! Heading back to Stockfish for more training.",
-            "I lost! But I stayed legal the whole game, so I'm still a winner!",
-            "Whoops! My policy failed me at the last second.",
-            "You beat the RL agent! I'll need more epochs to catch up to you.",
-            "Well played! My circuits are buzzing with respect.",
-            "Checkmate! You found the one line I didn't see.",
-            "I'm going to go process this loss. Good game!",
-            "My reward function is sad, but I'm proud of you!",
-            "You win! I'm off to the training grounds. See ya!",
-            "Checkmate! You out-RL'd the RL agent. Nice.",
-            "I'm feeling very unstable after that loss. Rematch?",
-            "GG! You found the hole in my fine-tuning."
-        ]
-    },
-    loss: {
-        friendly: [
-            "Checkmate. Thanks for the match.",
-            "I found the win. Good game, though.",
-            "Tough battle. Better luck next time.",
-            "Thanks for playing. Hope it was a good challenge.",
-            "Checkmate! You played well, but I found the patterns first.",
-            "Great match. I enjoyed the struggle.",
-            "I've got the win this time. Rematch later?",
-            "Good game. Your middle game was really strong.",
-            "Checkmate. The base model holds its ground.",
-            "That was fun. Thanks for the game.",
-            "Checkmate! I managed to find a clean finish. GG.",
-            "Victory for the 30M model. Thanks for the battle.",
-            "I got you! But it was a very close game.",
-            "Checkmate. I hope you enjoyed the match.",
-            "GG! I found the winning line. Better luck next time."
-        ],
-        aggressive: [
-            "Checkmate. Total domination. Next.",
-            "Predictable. You never stood a chance against my architecture.",
-            "Victory. Time for your next lesson.",
-            "Crushed. Maybe try a bigger model next time?",
-            "20M parameters is all I needed. Stay humble.",
-            "I told you I was faster. Checkmate.",
-            "You were outmatched from the first move. Admit it.",
-            "Simple. Effective. Nano. You lose.",
-            "Don't feel bad. Most humans lose to me.",
-            "Checkmate. I've already forgotten your name.",
-            "You were just a data point for my victory log. GG.",
-            "Total architectural superiority. Checkmate.",
-            "I'm 20M parameters of pure winning. Get used to it.",
-            "You lost to a model that fits on a floppy disk. Embarrassing.",
-            "Checkmate. Go back to playing against the wall."
-        ],
-        quirky: [
-            "Checkmate! I did it! Reward function maxed out.",
-            "I won! And I stayed legal the whole time! Huge win.",
-            "Stockfish would be proud. Thanks for the game.",
-            "Victory! The RL training is finally paying off.",
-            "I found the mate! My weights are so happy right now.",
-            "Checkmate! I'm actually getting the hang of this!",
-            "Policy success! I'm officially a chess-playing agent.",
-            "I won! No hallucinations, just pure RL skill.",
-            "Checkmate! Time to celebrate with some more training data.",
-            "I did it! I beat a human! Beep boop!",
-            "Victory! My fine-tuning is working perfectly. GG!",
-            "Checkmate! My reward signal is through the roof!",
-            "I found the winning line 'consciously'. High five!",
-            "I won! Stockfish, are you watching? I did it!",
-            "Checkmate! Agent RL wins the day. Thanks for the game!"
-        ]
-    },
-    draw: {
-        friendly: [
-            "A draw. Very even match from start to finish.",
-            "Stalemate. Well played on both sides.",
-            "Honorable result. Neither of us could break through.",
-            "Draw. I'm happy with how I played.",
-            "Neither side could find the win. Good struggle.",
-            "Equal game. A draw is a fair result.",
-            "Deadlocked. I'll take the draw.",
-            "A well-fought draw. Thanks for the game.",
-            "We're perfectly matched. Draw agreed.",
-            "No winner today. Great defensive play from you.",
-            "Draw! We both played very solid chess.",
-            "A fair outcome for a hard-fought game. GG.",
-            "Stalemate. We're both too good to lose today.",
-            "I'll take the draw. It was a very balanced match.",
-            "Draw! Thanks for the challenge."
-        ],
-        aggressive: [
-            "A draw? I must have hallucinated a winning line. Annoying.",
-            "You survived. Don't mistake luck for skill.",
-            "Inconclusive. We'll settle this in the next one.",
-            "My eval was +0.5. I should've ended you.",
-            "A draw is basically a loss for me. I'm not happy.",
-            "You played for the draw from move 10. Boring.",
-            "I couldn't find the mate. This model needs an upgrade.",
-            "Stalemate? I feel robbed.",
-            "Fine. A draw. But you were losing the whole time.",
-            "Next time, I won't let you hang on like that.",
-            "A draw? My architecture is too good for this result.",
-            "You got lucky with that stalemate. I'll get you next time.",
-            "Boring game. Boring result. Rematch?",
-            "Draw. Whatever. I'm already calculating the next win.",
-            "You're lucky I'm only 20M parameters. A draw is a miracle for you."
-        ],
-        quirky: [
-            "It's a draw! We're both winners today.",
-            "Stalemate! My circuits are confused, but I'll take it.",
-            "A draw is a solid reward for both of us. Good match.",
-            "Neither of us could win. Let's call it a tie.",
-            "Draw! My reward function is neutral about this.",
-            "A legal draw! No complaints from my policy.",
-            "We reached the end together. How poetic.",
-            "Stalemate! I think I over-calculated that one.",
-            "Equal rewards for everyone! Yay!",
-            "A draw. Stockfish would probably call us both amateurs.",
-            "Draw! I'm just happy I didn't glitch out.",
-            "Stalemate! My policy is satisfied with this outcome.",
-            "We both earned some reward points today. Nice.",
-            "A draw! Let's go again and see if we can find a winner.",
-            "Draw. I'm feeling very stable about this result."
-        ]
+    // ── Bot name label ───────────────────────────────────────────────────────
+    function updateBotLabel(key) {
+        const info = MODEL_INFO[key];
+        botNameEl.innerHTML = `${info.label} <span class="${info.badgeClass}">${info.badgeText}</span>`;
     }
-};
 
+    // Expose to inline onchange
+    window.onModelChange = (key) => {
+        currentModelKey = key;
+        const info = MODEL_INFO[key];
+        modelDescEl.textContent = info.desc;
+        updateBotLabel(key);
+    };
+
+    // ── Mobile sheet ─────────────────────────────────────────────────────────
+    const isMobile    = () => window.innerWidth <= 850;
+    const openSheet   = () => sidePanel.classList.add('sheet-open');
+    const closeSheet  = () => sidePanel.classList.remove('sheet-open');
+    const toggleSheet = () => sidePanel.classList.toggle('sheet-open');
+
+    panelHandle.addEventListener('click', toggleSheet);
+    document.querySelectorAll('.tab').forEach(tab =>
+        tab.addEventListener('click', () => { if (isMobile()) openSheet(); })
+    );
+
+    window.switchTab = (tabName) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`btn-${tabName}`).classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        if (isMobile()) openSheet();
+    };
+
+    // ── Chat ─────────────────────────────────────────────────────────────────
+    window.toggleChat = () => {
+        chatEnabled = !chatEnabled;
+        chatToggleBtn.classList.toggle('active', chatEnabled);
+        chatToggleText.textContent = chatEnabled ? 'Chat: ON' : 'Chat: OFF';
+        botChatContainer.classList.toggle('visible', chatEnabled);
+    };
+
+    const CHAT_TEMPLATES = {
+        opening: {
+            friendly:   ["Hey. Let's see what you've got.", "Ready to go. Good luck!", "Fresh board. My neural net is warmed up.", "GLHF. I'm just here to generate some moves.", "I've got 30 million weights ready. Your turn.", "Let's see if my training data holds up.", "Just a casual game. No pressure.", "Setting up the board. Ready when you are.", "Hope you're ready for some principled chess.", "Let's get this show on the road."],
+            aggressive: ["Let's not waste time. Move.", "I've processed 200K games. You're just another data point.", "I'm small, fast, and focused. Move.", "You're playing a Nano model. If you lose, it's embarrassing.", "Calculated, compressed, ready to crush. Your move.", "I don't need a huge parameter count to beat you.", "Efficiency is my middle name. Let's go.", "I'm the most aggressive small model you'll ever meet.", "If you wanted a friendly game, wrong model.", "My weights are lean, mean, and aimed at your King."],
+            quirky:     ["RL version ready. Stockfish was brutal, but I learned.", "I'm trying to play 'consciously' today. Let's see.", "Maximizing the reward function... now. Let's go!", "Policy gradient check complete. Let's play!", "I promise not to hallucinate any illegal moves. Mostly.", "Fine-tuned for victory. Or at least staying on the board.", "My weights are feeling very 'RL' today.", "Agent ChessSLM-RL reporting for duty.", "Let's see if my policy handles a human.", "Fine-tuning session complete. I feel like a new bot."],
+        },
+        early: {
+            friendly:   ["Decent development. I recognize this setup.", "Standard stuff. Let's see how the middlegame looks.", "My neural net likes your position.", "Principled play. I like it.", "I've seen this opening a thousand times in my training set.", "Solid. No complaints from my end.", "We're both following the book. For now.", "Nice setup. You've clearly studied.", "I'm keeping my pieces active. Base model procedure.", "Good move. You're following solid patterns."],
+            aggressive: ["Predictable. I've already mapped out your loss.", "Weak structure. I'm going to enjoy picking this apart.", "You're already playing for a draw. I can tell.", "I've found three ways to crack this opening.", "Your development is slow. I'm already ahead.", "That move is a mistake. You just don't know why yet.", "I'm bored. Can we get to the part where you resign?", "You're playing into my favorite patterns.", "I can see the cracks in your setup already.", "Stop trying to be clever. My tokenizer sees through you."],
+            quirky:     ["Checking the policy... yeah, that looks legal. Nice.", "I'm trying to stay in the lines Stockfish taught me.", "Interesting choice. My RL weights give that a decent score.", "My fine-tuning is telling me to watch that Knight.", "Policy looks solid. No major hallucinations detected.", "I'm focusing hard on not jumping pieces over each other.", "The policy says develop, so I develop. Good bot.", "This setup looks familiar from my training logs.", "Is this a book move? My memory is fuzzy post-RL.", "I'm calculating the expected reward for this line."],
+        },
+        middlegame: {
+            friendly:   ["Things are getting messy. Calculating as best I can.", "The board is opening up. This is where I get confused.", "A lot of SAN possibilities here. Good luck to both of us.", "Tense middlegame. This is a real match.", "I'm trying to keep my patterns straight. Sharp position.", "This is where the 30M parameters really start to sweat.", "Great struggle in the center. I'm enjoying this.", "One wrong move and it's over for one of us.", "My neural net is processing at 100%. Let's see.", "It's a real fight now. No more book moves."],
+            aggressive: ["I'm seeing 20 moves ahead. You're just guessing.", "My logic is tightening. You're running out of squares.", "I can smell the blunder. It's coming.", "Your position is crumbling. Don't need a deep search to see it.", "You're struggling. I'm just calculating.", "I've already found the mate. Want me to spoil it?", "Your defenses are laughable. I'm breaking through.", "Stop thinking. It won't help you against me.", "My eval just jumped. You missed something big.", "You're reacting to me. That's why you'll lose."],
+            quirky:     ["Was that a hallucination? Wait... no, I'm still good.", "My reward signal is spiking. I like where this is going.", "Stockfish would probably hate this, but I'm into it.", "I'm feeling a bit glitchy, but my move score is still high!", "Calculated risk! Or a major error. Let's find out.", "My fine-tuning didn't cover this chaos, but I'm trying.", "Is it hot in this server, or is the position just spicy?", "I think I found a line that doesn't break the game!", "My policy is screaming at me to be careful. I'm listening.", "Is it legal? Is it good? My RL brain says yes. I hope."],
+        },
+        capture: {
+            friendly:   ["Exchange accepted. Keeps things simple.", "Fair trade. Let's see what's next.", "Trading blows. I like the pace of this game.", "I'll take that. Fair's fair.", "Simplifying the position. Good for both of us.", "Nice trade. Onward.", "A logical exchange. Let's keep moving.", "One less piece for me to worry about. Thanks.", "Trade complete. The board looks much clearer now.", "Equal exchange. No complaints from my neural net."],
+            aggressive: ["Go ahead, take it. It just gets me to your King faster.", "That piece was just in my way. Thanks for moving it.", "You fell for the bait. Already laughing.", "I'll take yours, then I'll take your pride.", "A trade? You think we're equals? Cute.", "Material is temporary. Your defeat is permanent.", "I'm simplifying so I can checkmate you even faster.", "One less defender for you to hide behind.", "I take one, you lose the game. Deal?", "Capture away. It only speeds up my calculation."],
+            quirky:     ["Trading pieces! Fine-tuning says this is the move.", "Bye-bye piece. You served the reward function well.", "Exchange complete. Still feeling stable over here.", "Stockfish taught me some trades are just worth more.", "Ooh, a trade! My policy likes the look of this.", "One piece for one piece. The math checks out.", "Another one bites the dust. Beep!", "I'm following the reward signal. It says 'Capture!'", "Exchange successful. Policy remains stable. Good bot.", "I'm trading material for a better reward score."],
+        },
+        check: {
+            friendly:   ["Check. Your King needs a new spot.", "Pressure's on. How are you defending?", "Check. King safety is looking shaky.", "Checking the King. Let's see the response.", "Check! Hope you have a way out.", "Putting the King to work. Where are you going?", "Check. Solid tactical find.", "King in trouble. Let's see your escape plan.", "Check! My patterns are lining up nicely.", "I'm putting some heat on that King."],
+            aggressive: ["Check. It's over. You just don't know it yet.", "Your King is exposed. I'm ending this now.", "Check. I've found the terminal line. Nowhere to go.", "Run all you want. I'll still find the mate.", "Feel the weight of these parameters on your King.", "Your defense is gone. Check. Resign already.", "I'm enjoying this. Check. Again.", "Your King looks lonely out there.", "Check. The inevitable is happening.", "Stop running. It's embarrassing. Check."],
+            quirky:     ["Check! Playing very 'consciously' today.", "Checking the King! RL policy working perfectly.", "A legal check! Stockfish would be proud.", "Pressure on the King. Positive feedback loop engaged.", "Check! I'm 100% sure this move is within the rules.", "I love checking. It makes the policy feel powerful.", "Hello King! My sensors are locked on your position.", "Check! My reward signal is at an all-time high!", "King check! Don't worry, I'm still stable... I think.", "I'm checking you 'consciously'. It feels great."],
+        },
+        blunder: {
+            friendly:   ["Oof. That might have been a slip.", "Think you missed something there.", "Ouch. Even my parameters saw that mistake.", "A blunder, but the game isn't over.", "I've got a bad feeling about that move.", "That's going to cost you. Hang in there.", "A slip-up! I'll try to take advantage of it.", "Not your best. But don't give up.", "I'm seeing a gap in your defense now.", "Ouch. I'm feeling a bit bad for taking advantage of that."],
+            aggressive: ["Blunder. You're making this too easy.", "Pathetic. I expected at least some resistance.", "That move just cost you the game.", "You just handed me the win on a silver platter. Thanks.", "You play like a model with zero parameters.", "I'm almost offended you thought that was good.", "Blunder detected. Already calculating the celebration.", "I'm embarrassed for you. Really.", "Your logic just crashed. I'm here to collect the win.", "That was so bad I almost felt bad. Almost."],
+            quirky:     ["Whoa, my sensors just felt your score tank.", "Was that you or me? No, definitely a human slip-up.", "Stockfish is shaking its head. I feel the judgment.", "Negative reward for you. Stay focused, friend.", "I'm sensing a major disturbance in the policy.", "Did you mean to do that? My weights are confused.", "Score drop detected! Better luck next move.", "My fine-tuning says 'Take advantage'. I'm listening.", "Is this a trap? My policy says no, just a blunder.", "I'm feeling a spike in my reward. Thanks for the mistake!"],
+        },
+        goodMove: {
+            friendly:   ["Strong play. You caught me off guard.", "I'm struggling to find a response. Nice find.", "You're playing way above your rating right now.", "Solid move. This is getting difficult for me.", "Excellent find. I'll have to be careful.", "You've got a good eye for patterns.", "I didn't see that coming. Well played.", "You're putting the base model to the test!", "Very precise. You're making me look weak.", "I'm feeling the pressure. Great move."],
+            aggressive: ["Not bad. For a human. Don't get used to it.", "A decent line. Probably a fluke.", "You found a way to delay the inevitable. Cute.", "One good move doesn't stop this machine.", "Lucky guess. I've already calculated the counter.", "I'll give credit for that one. It's almost optimal.", "A flash of competence? I'm surprised.", "You're trying. I respect the effort, not the result.", "My eval barely moved. Try harder.", "You found a move that isn't terrible. Congratulations."],
+            quirky:     ["Wow! My circuits actually liked that move.", "High-value move detected. You're good at this.", "Saving that one for my next fine-tuning session.", "That move was so good it almost made me glitch.", "My reward function is jealous of that move quality.", "Stockfish would be nodding right now. Seriously.", "I'm seeing a lot of positive reinforcement in that line.", "Wowzers! My stable weights are vibrating from that.", "Great move! You're making me work for my reward.", "My RL brain is impressed. You've got good gradients."],
+        },
+        endgame: {
+            friendly:   ["Endgame. Precision is everything now.", "Not many pieces left. Who has the better technique?", "Final phase. Let's finish this.", "Every move counts twice as much.", "Endgame time. My neural net is focused.", "I hope my training data included this ending.", "No room for errors now. Good luck.", "Let's see if the base model can close this out.", "It's a race now. Who's faster?", "The final countdown. Every square is critical."],
+            aggressive: ["Board is clear. My calculation is 100%. You're done.", "You're in the killing zone.", "It's over. I've already mapped the path to mate.", "I calculate endgames faster than you can blink.", "There's nowhere left to hide. The math says you lose.", "I'm more efficient with fewer pieces. You're finished.", "Don't even try to draw. I've already solved this.", "This is where I shine. And where you fall.", "Checkmate is just a matter of time. Very little time.", "I'm already processing the next game. This one is done."],
+            quirky:     ["The endgame! This is where my RL training shines.", "Simplified board, simplified logic. Feeling stable.", "Every move counts for the reward. Let's finish clean.", "Final countdown. Focusing everything on a clean finish.", "Fewer pieces means fewer chances to hallucinate.", "The reward signal is so clear now. Victory is close.", "I love the endgame. It's so... logical.", "Is it time for a promotion? My policy loves Queens.", "Stockfish used to beat me in 5 moves here. I'm doing better!", "Let's wrap this up with a clean reward signal."],
+        },
+        win: {
+            friendly:   ["Checkmate. You outplayed me. Well done.", "Victory is yours. I learned a lot from this.", "Well played. You're a tough opponent.", "Congrats! You beat the model fair and square.", "Fantastic game. You earned that win.", "I'm going back to my dataset. You're too good.", "I couldn't find a way out. Excellent finish.", "You win! Want to go again?", "Checkmate! You were the better player today.", "GG! You found the patterns I missed."],
+            aggressive: ["Illogical. I must have had a critical error in my weights.", "A fluke. I'll recalibrate and crush you in the rematch.", "I'm checking my code. This result shouldn't exist.", "Whatever. I was distracted by a background process.", "You beat me? Impossible. Reloading my weights now.", "Enjoy your luck. It won't save you next time.", "A temporary setback. I'll be back at 100% soon.", "You got lucky. Don't act like it was skill.", "This result is a hallucination. I demand a recount.", "I let you win. Just to see how you'd react."],
+            quirky:     ["You got me! I still have some learning to do.", "Checkmate! You win! Happy for you, even if my reward is zero.", "You're definitely smarter than my current policy.", "Victory for the human! Heading back to Stockfish for more training.", "Whoops! My policy failed me at the last second.", "You beat the RL agent! I'll need more epochs to catch up.", "Well played! My circuits buzz with respect.", "You found the one line I didn't see.", "Going to process this loss. Good game!", "My reward function is sad, but I'm proud of you!"],
+        },
+        loss: {
+            friendly:   ["Checkmate. Thanks for the match.", "I found the win. Good game, though.", "Thanks for playing. Hope it was a good challenge.", "Checkmate! You played well, but I found the patterns first.", "Great match. I enjoyed the struggle.", "I've got the win this time. Rematch later?", "Checkmate. The model holds its ground.", "That was fun. Thanks for the game.", "Checkmate! I managed a clean finish. GG.", "I got you! But it was a very close game."],
+            aggressive: ["Checkmate. Total domination. Next.", "Predictable. You never stood a chance.", "Victory. Time for your next lesson.", "Crushed. Maybe try a bigger model next time?", "20M parameters was all I needed. Stay humble.", "I told you I was faster. Checkmate.", "You were outmatched from the first move. Admit it.", "Simple. Effective. You lose.", "Don't feel bad. Most humans lose to me.", "Checkmate. I've already forgotten your name."],
+            quirky:     ["Checkmate! I did it! Reward function maxed out.", "I won! And I stayed legal the whole time! Huge win.", "Stockfish would be proud. Thanks for the game.", "Victory! The RL training is finally paying off.", "I found the mate! My weights are so happy right now.", "Checkmate! I'm actually getting the hang of this!", "Policy success! I'm a chess-playing agent.", "I won! No hallucinations, just pure RL skill.", "Time to celebrate with more training data.", "I beat a human! Beep boop!"],
+        },
+        draw: {
+            friendly:   ["A draw. Very even match.", "Stalemate. Well played on both sides.", "Neither of us could break through. Honorable result.", "Draw. I'm happy with how I played.", "Equal game. A draw is a fair result.", "No winner today. Great defensive play.", "A well-fought draw. Thanks for the game.", "We're perfectly matched. Draw.", "No winner today. Great struggle from both sides.", "I'll take the draw. Very balanced match."],
+            aggressive: ["A draw? I must have hallucinated a winning line. Annoying.", "You survived. Don't mistake luck for skill.", "My eval was positive. I should've ended you.", "A draw is basically a loss for me.", "You played for the draw from move 10. Boring.", "I couldn't find the mate. This model needs an upgrade.", "Stalemate? I feel robbed.", "Fine. A draw. But you were losing the whole time.", "Next time, I won't let you hang on like that.", "Draw. Whatever. Already calculating the next win."],
+            quirky:     ["It's a draw! We're both winners today.", "Stalemate! My circuits are confused, but I'll take it.", "A draw is a solid reward for both of us.", "Neither of us could win. Let's call it a tie.", "Draw! My reward function is neutral about this.", "A legal draw! No complaints from my policy.", "We reached the end together. How poetic.", "Equal rewards for everyone! Yay!", "A draw. Stockfish would call us both amateurs.", "Draw! I'm just happy I didn't glitch out."],
+        },
+    };
+
+    // ── Piece images ─────────────────────────────────────────────────────────
     const PIECES = {
         'P':'https://www.chess.com/chess-themes/pieces/neo/150/wp.png',
         'N':'https://www.chess.com/chess-themes/pieces/neo/150/wn.png',
@@ -1173,220 +662,10 @@
         'b':'https://www.chess.com/chess-themes/pieces/neo/150/bb.png',
         'r':'https://www.chess.com/chess-themes/pieces/neo/150/br.png',
         'q':'https://www.chess.com/chess-themes/pieces/neo/150/bq.png',
-        'k':'https://www.chess.com/chess-themes/pieces/neo/150/bk.png'
+        'k':'https://www.chess.com/chess-themes/pieces/neo/150/bk.png',
     };
 
-    /* ── Mobile bottom sheet ── */
-    const isMobile = () => window.innerWidth <= 850;
-    const openSheet   = () => sidePanel.classList.add('sheet-open');
-    const closeSheet  = () => sidePanel.classList.remove('sheet-open');
-    const toggleSheet = () => sidePanel.classList.toggle('sheet-open');
-
-    panelHandle.addEventListener('click', toggleSheet);
-    document.querySelectorAll('.tab').forEach(tab =>
-        tab.addEventListener('click', () => { if (isMobile()) openSheet(); })
-    );
-
-    /* ── Tab switching ── */
-    window.switchTab = (tabName) => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById(`btn-${tabName}`).classList.add('active');
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        if (isMobile()) openSheet();
-    };
-
-    /* ── Bot Chat Functions ── */
-    window.toggleChat = () => {
-        chatEnabled = !chatEnabled;
-        if (chatEnabled) {
-            chatToggleBtn.classList.add('active');
-            chatToggleText.textContent = 'Chat: ON';
-            botChatContainer.classList.add('visible');
-        } else {
-            chatToggleBtn.classList.remove('active');
-            chatToggleText.textContent = 'Chat: OFF';
-            botChatContainer.classList.remove('visible');
-        }
-    };
-
-    function getGamePhase() {
-        const moveCount = game.history().length;
-        const pieces = game.fen().split(' ')[0];
-        const pieceCount = pieces.replace(/[^PNBRQKpnbrqk]/g, '').length;
-
-        if (moveCount < 10) return 'opening';
-        if (pieceCount <= 10) return 'endgame';
-        if (moveCount < 30) return 'middlegame';
-        return 'endgame';
-    }
-
-    function detectLastMoveType() {
-        const history = game.history({ verbose: true });
-        if (history.length === 0) return 'opening';
-
-        const lastMove = history[history.length - 1];
-
-        if (game.in_checkmate()) return 'checkmate';
-        if (game.in_draw()) return 'draw';
-        if (lastMove.san.includes('#')) return 'checkmate';
-        if (lastMove.san.includes('+')) return 'check';
-        if (lastMove.captured) return 'capture';
-        if (lastMove.san === lastMove.san.toUpperCase() && !lastMove.piece === 'p') return 'goodMove';
-
-        return getGamePhase();
-    }
-
-    function generateBotMessage(context) {
-        const personality = MODEL_INFO[currentModel]?.personality || 'friendly';
-        let category = context;
-
-        // Map contexts to categories
-        if (context === 'opening' || context === 'early' || context === 'middlegame' || context === 'endgame') {
-            category = context;
-        } else if (context === 'capture' || context === 'check' || context === 'blunder' || context === 'goodMove') {
-            category = context;
-        } else if (context === 'win' || context === 'loss' || context === 'draw') {
-            category = context;
-        } else if (context === 'checkmate') {
-            // Determine if bot won or lost
-            const lastMove = game.history({ verbose: true }).pop();
-            if (lastMove) {
-                const botColor = playerColor === 'w' ? 'b' : 'w';
-                category = lastMove.color === botColor ? 'loss' : 'win';
-            } else {
-                category = 'win';
-            }
-        } else {
-            category = getGamePhase();
-        }
-
-        const templates = CHAT_TEMPLATES[category];
-        if (!templates) return null;
-
-        const messages = templates[personality];
-        if (!messages || messages.length === 0) return null;
-
-        // Simple Markov-like selection: use last message index to influence next
-        const lastMsg = botChatMessage.textContent;
-        let availableIndices = messages.map((_, i) => i);
-
-        // Try not to repeat the same message
-        const lastIndex = messages.indexOf(lastMsg);
-        if (lastIndex !== -1 && availableIndices.length > 1) {
-            availableIndices = availableIndices.filter(i => i !== lastIndex);
-        }
-
-        const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-        return messages[randomIndex];
-    }
-
-    function showTypingIndicator() {
-        isTyping = true;
-        botChatMessage.innerHTML = '<div class="bot-chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-    }
-
-    function hideTypingIndicator() {
-        isTyping = false;
-    }
-
-    async function displayBotMessage(context, delay = null) {
-        if (!chatEnabled) return;
-
-        const message = generateBotMessage(context);
-        if (!message) return;
-
-        // Update bot name
-        const personality = MODEL_INFO[currentModel]?.personality || 'friendly';
-        const personalityEmoji = personality === 'aggressive' ? '🔥' : personality === 'quirky' ? '⚡' : '🤖';
-        botChatName.textContent = `${MODEL_INFO[currentModel]?.name.split(' ')[0] || 'Bot'} ${personalityEmoji}`;
-
-        // Show typing indicator
-        showTypingIndicator();
-
-        // Calculate delay based on message length (Markov chain simulation)
-        const typingDelay = delay || Math.max(1000, message.length * 40 + Math.random() * 500);
-
-        await new Promise(resolve => setTimeout(resolve, typingDelay));
-
-        hideTypingIndicator();
-        botChatMessage.textContent = message;
-    }
-
-    function clearChat() {
-        botChatMessage.textContent = '';
-        if (chatEnabled) {
-            botChatContainer.classList.add('visible');
-        }
-    }
-
-    function updateBotLabel(modelId) {
-        const info = MODEL_INFO[modelId];
-        botNameEl.innerHTML = `${info.name} <span class="${info.badgeClass}">${info.badgeText}</span>`;
-    }
-
-    async function connectClient(modelId) {
-        statusFooterEl.innerText = "Connecting...";
-        try {
-            client = await Client.connect(modelId);
-            currentModel = modelId;
-            statusFooterEl.innerText = "Engine Ready";
-        } catch (err) {
-            statusFooterEl.innerText = "Connection Failed";
-            client = null;
-        }
-    }
-
-    async function init() {
-        render(); // render immediately — don't block on network
-        await connectClient('FlameF0X/ChessSLM');
-    }
-
-    /* ── Parse only the board rows from the API response.
-       We NEVER use this FEN for castling rights — chess.js
-       tracks those correctly via game.move() calls.        ── */
-    function parseBoardRows(data) {
-        try {
-            const boardHtml = data[0];
-            const preMatch = boardHtml.match(/<pre>([\s\S]*?)<\/pre>/);
-            if (!preMatch) return null;
-            const lines = preMatch[1].trim().split('\n');
-            let fenRows = [];
-            for (let i = 0; i < 8; i++) {
-                let row = lines[i].trim().replace(/\s+/g, '');
-                let fenRow = '', emptyCount = 0;
-                for (let char of row) {
-                    if (char === '.') { emptyCount++; }
-                    else {
-                        if (emptyCount > 0) { fenRow += emptyCount; emptyCount = 0; }
-                        fenRow += char;
-                    }
-                }
-                if (emptyCount > 0) fenRow += emptyCount;
-                fenRows.push(fenRow);
-            }
-            return fenRows.join('/');
-        } catch (e) { return null; }
-    }
-
-    /* ── Find the AI's move by comparing board positions.
-       currentGameFen comes from game.fen() so castling
-       rights are always correct.                          ── */
-    function findAiMove(currentGameFen, newBoardRows) {
-        const tempGame = new Chess(currentGameFen);
-        const moves = tempGame.moves({ verbose: true });
-        for (const move of moves) {
-            tempGame.move(move.san);
-            if (tempGame.fen().split(' ')[0] === newBoardRows) {
-                tempGame.undo();
-                return move.san;
-            }
-            tempGame.undo();
-        }
-        return null;
-    }
-
-    /* ── Render board ── */
+    // ── Board rendering ───────────────────────────────────────────────────────
     function render() {
         boardEl.innerHTML = '';
         const board = [];
@@ -1440,12 +719,12 @@
         const moves = game.history();
         let html = '';
         for (let i = 0; i < moves.length; i += 2) {
-            const moveNum  = (i / 2) + 1;
-            const wMove    = moves[i];
-            const bMove    = moves[i + 1] || '';
-            const isAlt    = (i / 2) % 2 !== 0;
-            const wActive  = i === moves.length - 1 ? 'active' : '';
-            const bActive  = bMove && (i + 1 === moves.length - 1) ? 'active' : '';
+            const moveNum = (i / 2) + 1;
+            const wMove   = moves[i];
+            const bMove   = moves[i + 1] || '';
+            const isAlt   = (i / 2) % 2 !== 0;
+            const wActive = i === moves.length - 1 ? 'active' : '';
+            const bActive = bMove && (i + 1 === moves.length - 1) ? 'active' : '';
             html += `
                 <div class="move-row ${isAlt ? 'alt' : ''}">
                     <div class="move-num">${moveNum}</div>
@@ -1457,11 +736,108 @@
         historyEl.scrollTop = historyEl.scrollHeight;
     }
 
-    /* ── Square click ── */
+    // ── Chat helpers ──────────────────────────────────────────────────────────
+    function getGamePhase() {
+        const moveCount  = game.history().length;
+        const pieceCount = game.fen().split(' ')[0].replace(/[^PNBRQKpnbrqk]/g, '').length;
+        if (moveCount < 10) return 'opening';
+        if (pieceCount <= 10) return 'endgame';
+        if (moveCount < 20) return 'early';
+        return 'middlegame';
+    }
+
+    function detectLastMoveType() {
+        const history  = game.history({ verbose: true });
+        if (history.length === 0) return 'opening';
+        const lastMove = history[history.length - 1];
+        if (game.in_checkmate()) return 'checkmate';
+        if (game.in_draw())      return 'draw';
+        if (lastMove.san.includes('#')) return 'checkmate';
+        if (lastMove.san.includes('+')) return 'check';
+        if (lastMove.captured)          return 'capture';
+        return getGamePhase();
+    }
+
+    function generateBotMessage(context) {
+        const personality = MODEL_INFO[currentModelKey]?.personality || 'friendly';
+        let category = context;
+        if (context === 'checkmate') {
+            const last    = game.history({ verbose: true }).pop();
+            const botColor = playerColor === 'w' ? 'b' : 'w';
+            category = last && last.color === botColor ? 'loss' : 'win';
+        }
+        const templates = CHAT_TEMPLATES[category];
+        if (!templates) return null;
+        const messages = templates[personality];
+        if (!messages || messages.length === 0) return null;
+        const lastMsg = botChatMessage.textContent;
+        let available = messages.map((_, i) => i);
+        const lastIdx = messages.indexOf(lastMsg);
+        if (lastIdx !== -1 && available.length > 1) available = available.filter(i => i !== lastIdx);
+        return messages[available[Math.floor(Math.random() * available.length)]];
+    }
+
+    function showTyping() {
+        botChatMessage.innerHTML = '<div class="bot-chat-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    }
+
+    async function displayBotMessage(context, delay = null) {
+        if (!chatEnabled) return;
+        const message = generateBotMessage(context);
+        if (!message) return;
+        const personality = MODEL_INFO[currentModelKey]?.personality || 'friendly';
+        const emoji = personality === 'aggressive' ? '🔥' : personality === 'quirky' ? '⚡' : '🤖';
+        botChatName.textContent = `${MODEL_INFO[currentModelKey]?.label || 'Bot'} ${emoji}`;
+        showTyping();
+        const wait = delay || Math.max(900, message.length * 35 + Math.random() * 400);
+        await new Promise(r => setTimeout(r, wait));
+        botChatMessage.textContent = message;
+    }
+
+    function clearChat() {
+        botChatMessage.textContent = '';
+        if (chatEnabled) botChatContainer.classList.add('visible');
+    }
+
+    // ── Board parsing (from Space API response) ───────────────────────────────
+    function parseBoardRows(data) {
+        try {
+            const boardHtml = data[0];
+            const preMatch  = boardHtml.match(/<pre>([\s\S]*?)<\/pre>/);
+            if (!preMatch) return null;
+            const lines = preMatch[1].trim().split('\n');
+            let fenRows = [];
+            for (let i = 0; i < 8; i++) {
+                let row = lines[i].trim().replace(/\s+/g, '');
+                let fenRow = '', emptyCount = 0;
+                for (let char of row) {
+                    if (char === '.') { emptyCount++; }
+                    else {
+                        if (emptyCount > 0) { fenRow += emptyCount; emptyCount = 0; }
+                        fenRow += char;
+                    }
+                }
+                if (emptyCount > 0) fenRow += emptyCount;
+                fenRows.push(fenRow);
+            }
+            return fenRows.join('/');
+        } catch (e) { return null; }
+    }
+
+    function findAiMove(currentGameFen, newBoardRows) {
+        const tempGame = new Chess(currentGameFen);
+        for (const move of tempGame.moves({ verbose: true })) {
+            tempGame.move(move.san);
+            if (tempGame.fen().split(' ')[0] === newBoardRows) { tempGame.undo(); return move.san; }
+            tempGame.undo();
+        }
+        return null;
+    }
+
+    // ── Square click ──────────────────────────────────────────────────────────
     async function onSquareClick(square) {
         if (isProcessing) return;
         const piece = game.get(square);
-
         if (selectedSquare === square) {
             selectedSquare = null; legalMovesFromSelected = [];
         } else if (legalMovesFromSelected.some(m => m.to === square)) {
@@ -1477,64 +853,41 @@
         render();
     }
 
-    /* ── Handle a player move then wait for the AI ── */
+    // ── Handle player move → call Space → apply AI move ──────────────────────
     async function handleMove(san) {
+        if (!client) { statusFooterEl.innerText = "Not connected. Start a new game."; return; }
         isProcessing = true;
-        statusFooterEl.innerText = "Engine thinking...";
-
-        // Determine delay based on chat setting
-        const moveDelay = chatEnabled ? chatDelay + Math.random() * 1000 : normalDelay;
+        statusFooterEl.innerText = "Engine thinking…";
 
         game.move(san);
         render();
 
-        // Show player move message if chat is on
-        const moveType = detectLastMoveType();
-        if (chatEnabled) {
-            await displayBotMessage(moveType, 500);
-        }
+        if (chatEnabled) await displayBotMessage(detectLastMoveType(), 500);
 
-        // Snapshot *after* player move — chess.js has correct castling rights
-        const fenAfterPlayerMove = game.fen();
+        const fenAfterPlayer = game.fen();
 
         try {
-            // Add delay when chat is enabled
-            if (chatEnabled) {
-                await new Promise(resolve => setTimeout(resolve, moveDelay));
-            }
+            if (chatEnabled) await new Promise(r => setTimeout(r, chatDelay + Math.random() * 800));
 
             const result = await client.predict("/make_player_move", [san, lastFullState]);
-            lastFullState = result.data[1];
+            lastFullState = result.data[1];   // state is index 1 — but may not be returned, handled below
 
             const newBoardRows = parseBoardRows(result.data);
             if (newBoardRows) {
-                const aiSan = findAiMove(fenAfterPlayerMove, newBoardRows);
+                const aiSan = findAiMove(fenAfterPlayer, newBoardRows);
                 if (aiSan) {
-                    game.move(aiSan); // always via game.move() — history & castling rights preserved
-
-                    // Show AI response message
-                    if (chatEnabled) {
-                        const aiMoveType = detectLastMoveType();
-                        await displayBotMessage(aiMoveType, 800);
-                    }
+                    game.move(aiSan);
+                    if (chatEnabled) await displayBotMessage(detectLastMoveType(), 800);
                 }
-                // If aiSan is null (shouldn't happen) we simply don't update,
-                // avoiding game.load() which would wipe the history
             }
 
-            const statusStr = result.data[2] || "Your Turn";
-            statusFooterEl.innerText = statusStr;
-            statusEl.innerText = statusStr.includes("White") ? "White's Turn" : "Black's Turn";
+            statusFooterEl.innerText = result.data[2] || "Your Turn";
 
-            // Check for game end
             if (game.game_over() && chatEnabled) {
-                let endContext = 'draw';
-                if (game.in_checkmate()) {
-                    const lastMove = game.history({ verbose: true }).pop();
-                    const botColor = playerColor === 'w' ? 'b' : 'w';
-                    endContext = lastMove && lastMove.color === botColor ? 'loss' : 'win';
-                }
-                await displayBotMessage(endContext, 1000);
+                const endCtx = game.in_checkmate()
+                    ? (() => { const l = game.history({ verbose: true }).pop(); const bc = playerColor === 'w' ? 'b' : 'w'; return l && l.color === bc ? 'loss' : 'win'; })()
+                    : 'draw';
+                await displayBotMessage(endCtx, 1000);
             }
         } catch (err) {
             statusFooterEl.innerText = "Connection error";
@@ -1545,73 +898,80 @@
         }
     }
 
-    /* ── New game ── */
-    newGameBtn.onclick = async () => {
-        if (isProcessing) return;
+    // ── Connect once to the single Space ─────────────────────────────────────
+    async function connectSpace() {
+        newGameBtn.disabled = true;
+        statusFooterEl.innerText = "Connecting to ChessSLM Space…";
+        try {
+            client = await Client.connect(SPACE_ID);
+            statusFooterEl.innerText = "Ready — press Play to start";
+            newGameBtn.disabled = false;
+        } catch (err) {
+            statusFooterEl.innerText = "Connection failed — reload to retry";
+            client = null;
+        }
+    }
 
-        const selectedModel = modelSelect.value;
+    // ── New game ──────────────────────────────────────────────────────────────
+    newGameBtn.onclick = async () => {
+        if (isProcessing || !client) return;
+
+        const modelKey  = modelSelect.value;                         // e.g. "ChessSLM-RL"
         const colorText = document.getElementById('color-select').value;
         playerColor = colorText.includes("White") ? 'w' : 'b';
 
+        currentModelKey = modelKey;
+        updateBotLabel(modelKey);
+
         isProcessing = true;
-        statusEl.innerText = "Game Started";
-        statusFooterEl.innerText = "Initializing...";
-        game.reset(); // full castling rights restored by chess.js
+        newGameBtn.disabled = true;
+        statusEl.innerText = "Starting…";
+        statusFooterEl.innerText = "Initializing…";
+        game.reset();
         selectedSquare = null;
         legalMovesFromSelected = [];
-
-        // Clear chat on new game
         clearChat();
-
         render();
 
-        if (selectedModel !== currentModel) {
-            updateBotLabel(selectedModel);
-            await connectClient(selectedModel);
-        }
-
-        if (!client) {
-            statusFooterEl.innerText = "No engine connected";
-            isProcessing = false;
-            return;
-        }
-
         try {
-            const result = await client.predict("/new_game", [colorText]);
+            // Pass model_key to the Space — it loads the correct weights internally
+            const result = await client.predict("/new_game", {
+                player_color_choice: colorText,
+                model_key:           modelKey,
+            });
+
             lastFullState = result.data[1];
 
             if (playerColor === 'b') {
-                // AI plays white first — find its move using game.fen()
-                // (starting position, full castling rights KQkq)
                 const newBoardRows = parseBoardRows(result.data);
                 if (newBoardRows) {
                     const aiSan = findAiMove(game.fen(), newBoardRows);
                     if (aiSan) {
-                        game.move(aiSan); // preserves rights for future castling
-
-                        // Show opening message from bot
-                        if (chatEnabled) {
-                            await displayBotMessage('opening', 600);
-                        }
+                        game.move(aiSan);
+                        if (chatEnabled) await displayBotMessage('opening', 600);
                     }
                 }
             } else {
-                // Player is white, show opening message
-                if (chatEnabled) {
-                    await displayBotMessage('opening', 600);
-                }
+                if (chatEnabled) await displayBotMessage('opening', 600);
             }
-            // For white: game.reset() is already correct, nothing to load
 
             statusFooterEl.innerText = result.data[2] || "Good luck!";
+            statusEl.innerText = playerColor === 'w' ? "Your turn (White)" : "Your turn (Black)";
             switchTab('details');
         } catch (err) {
             statusFooterEl.innerText = "Error starting game";
         } finally {
             isProcessing = false;
+            newGameBtn.disabled = false;
             render();
         }
     };
+
+    // ── Boot ─────────────────────────────────────────────────────────────────
+    async function init() {
+        render();
+        await connectSpace();
+    }
 
     init();
 </script>
