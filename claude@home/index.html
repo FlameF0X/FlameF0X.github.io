@@ -239,10 +239,10 @@
                 if (response.ok) {
                     SYSTEM_PROMPT = await response.text();
                 } else {
-                    SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
+                    SYSTEM_PROMPT = "You are Claude, a helpful AI assistant. You are conversational, honest, and genuinely helpful while maintaining appropriate limits. DO NOT USE EMOJIS.";
                 }
             } catch (err) {
-                SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
+                SYSTEM_PROMPT = "You are Claude, a helpful AI assistant. You are conversational, honest, and genuinely helpful while maintaining appropriate limits. DO NOT USE EMOJIS.";
             }
         }
 
