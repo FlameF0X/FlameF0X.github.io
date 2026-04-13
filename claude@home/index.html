@@ -33,7 +33,6 @@
             overflow: hidden;
         }
 
-        .uncanny-skew { transform: skewX(-0.05deg); }
         .sans-font { font-family: 'Outfit', sans-serif; }
         .star-icon { transform: rotate(12deg); color: var(--accent-color); }
 
@@ -41,7 +40,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
-        /* Chat States */
         #chat-container.landing-mode {
             display: flex;
             align-items: center;
@@ -72,12 +70,10 @@
             color: #ffffff !important;
         }
 
-        /* Markdown Styles */
         .markdown-body p { margin-bottom: 0.75em; }
         .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; font-family: monospace; }
         .markdown-body pre { background-color: #000; border: 1px solid var(--border-color); color: #ccc; padding: 1em; border-radius: 5px; overflow-x: auto; margin-bottom: 1em; }
         
-        /* Think Block UI */
         .think-block { margin-bottom: 1rem; }
         .think-header {
             color: var(--think-text);
@@ -126,6 +122,54 @@
         main { border-color: var(--border-color); }
         textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
         .border-sep { border-color: var(--border-color); }
+
+        #quota-banner {
+            background-color: #121211;
+            border-bottom-left-radius: 1.25rem;
+            border-bottom-right-radius: 1.25rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: top;
+            animation: slideDown 0.5s ease-out;
+            margin-top: -24px;
+            padding-top: 28px;
+            z-index: 0;
+            opacity: 0.9;
+        }
+
+        @keyframes slideDown {
+            from { transform: scaleY(0); opacity: 0; }
+            to { transform: scaleY(1); opacity: 1; }
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(90deg, #d98866, #b56545);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        #send-btn {
+            bottom: 12px;
+            right: 12px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(14px); }
     </style>
 </head>
 <body class="h-screen flex">
@@ -160,20 +204,35 @@
     </aside>
 
     <!-- Main -->
-    <main class="flex-1 flex flex-col relative uncanny-skew h-full">
+    <main class="flex-1 flex flex-col relative h-full">
         
         <!-- Settings Modal -->
-        <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#222] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
+        <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#1a1a18] p-6 rounded-xl border border-sep shadow-2xl w-[20rem] sans-font">
             <h3 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-[var(--text-main)]">System Settings</h3>
+            
             <div class="space-y-4 mb-6">
+                <!-- Quota Toggle -->
+                <div class="flex items-center justify-between p-3 bg-[#111] rounded-lg border border-sep">
+                    <div>
+                        <div class="text-[13px] font-medium text-[var(--text-main)]">Cosmetic Quota</div>
+                        <div class="text-[10px] text-[var(--text-muted)]">Show "Compute Usage" banner</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="quota-toggle" checked onchange="handleQuotaToggle(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
                 <button onclick="clearAllChats()" class="w-full p-2 text-xs border border-red-900 text-red-500 rounded bg-red-950/10 transition-colors font-bold">Clear All Chat History</button>
+                <button onclick="resetQuota()" class="w-full p-2 text-xs border border-sep text-[var(--text-muted)] rounded transition-colors">Manual Quota Reset</button>
             </div>
+            
             <button onclick="toggleSettings()" class="w-full bg-[#cc7755] text-white text-xs py-3 rounded uppercase font-bold tracking-widest wobble-hover">Close</button>
         </div>
 
         <!-- Scrollable Area -->
         <div id="chat-container" class="flex-1 overflow-y-auto px-4 py-8 md:px-12 lg:px-24 custom-scrollbar">
-            <!-- Landing View (Hidden when chat starts) -->
+            <!-- Landing View -->
             <div id="landing-hero" class="hidden">
                 <div class="mb-10">
                     <h1 class="text-4xl font-semibold tracking-tight text-[var(--text-main)] mb-2 flex items-center justify-center gap-3">
@@ -184,9 +243,7 @@
                     </h1>
                     <p class="text-[var(--text-muted)] text-lg">How can I help you today?</p>
                 </div>
-                <div id="landing-input-container" class="max-w-2xl mx-auto">
-                    <!-- Placeholder for the actual input which will be moved here -->
-                </div>
+                <div id="landing-input-container" class="max-w-2xl mx-auto"></div>
             </div>
 
             <!-- Standard Chat View -->
@@ -195,19 +252,31 @@
 
         <!-- Persistent Input Container (Bottom) -->
         <div id="input-area-global" class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent shrink-0">
-            <!-- Added id "global-input-inner" to the container to ensure appendChild works -->
             <div id="global-input-inner" class="max-w-3xl mx-auto">
-                <div id="input-wrapper" class="relative flex items-end gap-2">
-                    <textarea
-                        id="user-input"
-                        placeholder="Talk to Cladue..."
-                        class="w-full rounded-2xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15.5px] sans-font placeholder:text-[#5a5a54] transition-all shadow-lg border border-sep"
-                        rows="1"
-                        style="min-height: 56px; max-height: 200px;"
-                    ></textarea>
-                    <button id="send-btn" class="absolute right-2 bottom-2 p-2.5 rounded-xl bg-[#cc7755] text-white hover:bg-[#b56545] transition-colors wobble-hover">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                <div id="input-positioner" class="relative">
+                    
+                    <!-- Textarea & Button Group -->
+                    <div id="input-wrapper" class="relative z-10">
+                        <textarea
+                            id="user-input"
+                            placeholder="Talk to Cladue..."
+                            class="w-full rounded-2xl pl-4 pr-14 py-4 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15.5px] sans-font placeholder:text-[#5a5a54] transition-all shadow-lg border border-sep"
+                            rows="1"
+                            style="min-height: 56px; max-height: 200px;"
+                        ></textarea>
+                        
+                        <button id="send-btn" class="absolute p-2 rounded-xl bg-[#cc7755] text-white hover:bg-[#b56545] transition-colors wobble-hover shadow-md">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+
+                    <!-- Quota Warning Element (Tucked Behind) -->
+                    <div id="quota-banner" class="hidden px-5 pb-3 border-x border-b border-sep text-[11px] flex items-center justify-between sans-font shadow-inner">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[var(--text-muted)]">You have used <span id="quota-percentage" class="text-[var(--text-main)] font-mono font-bold">0%</span> of your daily compute quota.</span>
+                        </div>
+                        <a href="plan.html" class="upgrade-btn uppercase tracking-widest text-[10px] hover:opacity-80">Upgrade</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,6 +290,11 @@
         let chats = JSON.parse(localStorage.getItem('cladue_chats') || '[]');
         let currentChatId = null;
 
+        // Quota Logic
+        let messagesSentCount = 0; // Starts at 0 for every session/refresh, or resets on new chat
+        let quotaEnabled = localStorage.getItem('cladue_quota_enabled') !== 'false';
+        const QUOTA_START_THRESHOLD = 3; 
+
         const messagesList = document.getElementById('messages-list');
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
@@ -231,6 +305,9 @@
         const landingInputContainer = document.getElementById('landing-input-container');
         const inputAreaGlobal = document.getElementById('input-area-global');
         const globalInputInner = document.getElementById('global-input-inner');
+        const quotaBanner = document.getElementById('quota-banner');
+        const quotaPercentage = document.getElementById('quota-percentage');
+        const quotaToggle = document.getElementById('quota-toggle');
 
         async function loadSystemPrompt() {
             try {
@@ -243,9 +320,53 @@
 
         async function init() {
             await loadSystemPrompt();
+            quotaToggle.checked = quotaEnabled;
             if (chats.length > 0) loadChat(chats[0].id);
             else startNewChat();
             renderHistory();
+            updateQuotaUI();
+        }
+
+        function updateQuotaUI() {
+            if (!quotaEnabled) {
+                quotaBanner.classList.add('hidden');
+                return;
+            }
+
+            if (messagesSentCount >= QUOTA_START_THRESHOLD) {
+                quotaBanner.classList.remove('hidden');
+                const n = messagesSentCount - QUOTA_START_THRESHOLD;
+                const baseRemainder = 9.25; 
+                const percent = 100 - (baseRemainder * Math.pow(0.5, n));
+                
+                let precision = 2;
+                if (percent > 99.5) precision = 4;
+                if (percent > 99.9) precision = 6;
+                if (percent > 99.99) precision = 8;
+                
+                quotaPercentage.innerText = percent.toFixed(precision) + '%';
+                
+                if (percent > 99.99) {
+                    quotaPercentage.style.color = '#ef4444';
+                    quotaPercentage.classList.add('animate-pulse');
+                } else {
+                    quotaPercentage.style.color = '';
+                    quotaPercentage.classList.remove('animate-pulse');
+                }
+            } else {
+                quotaBanner.classList.add('hidden');
+            }
+        }
+
+        function resetQuota() {
+            messagesSentCount = 0;
+            updateQuotaUI();
+        }
+
+        function handleQuotaToggle(enabled) {
+            quotaEnabled = enabled;
+            localStorage.setItem('cladue_quota_enabled', enabled);
+            updateQuotaUI();
         }
 
         function toggleSettings() {
@@ -253,12 +374,12 @@
         }
 
         function startNewChat() {
+            // Reset "quota" count for new chat experience
+            messagesSentCount = 0;
+            updateQuotaUI();
+
             currentChatId = Date.now().toString();
-            const newChat = {
-                id: currentChatId,
-                title: "New Chat",
-                messages: [] 
-            };
+            const newChat = { id: currentChatId, title: "New Chat", messages: [] };
             chats.unshift(newChat);
             saveToLocal();
             renderHistory();
@@ -270,15 +391,16 @@
             const chat = chats.find(c => c.id === id);
             if (!chat) return startNewChat();
             
+            // Sync quota count with message count of the current chat for visual consistency
+            messagesSentCount = chat.messages.filter(m => m.role === 'user').length;
+            updateQuotaUI();
+
             messagesList.innerHTML = '';
-            
-            if (chat.messages.length === 0) {
-                switchToLandingMode();
-            } else {
-                switchToChatMode();
-                chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError));
+            if (chat.messages.length === 0) switchToLandingMode();
+            else { 
+                switchToChatMode(); 
+                chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError)); 
             }
-            
             renderHistory();
             scrollToBottom(true);
         }
@@ -288,10 +410,7 @@
             landingHero.classList.remove('hidden');
             messagesList.classList.add('hidden');
             inputAreaGlobal.classList.add('opacity-0', 'pointer-events-none');
-            
-            if (inputWrapper && landingInputContainer) {
-                landingInputContainer.appendChild(inputWrapper);
-            }
+            if (inputWrapper && landingInputContainer) landingInputContainer.appendChild(inputWrapper.parentElement);
             userInput.focus();
         }
 
@@ -300,10 +419,7 @@
             landingHero.classList.add('hidden');
             messagesList.classList.remove('hidden');
             inputAreaGlobal.classList.remove('opacity-0', 'pointer-events-none');
-            
-            if (inputWrapper && globalInputInner) {
-                globalInputInner.appendChild(inputWrapper);
-            }
+            if (inputWrapper && globalInputInner) globalInputInner.appendChild(inputWrapper.parentElement);
             userInput.focus();
         }
 
@@ -321,15 +437,10 @@
         }
 
         function formatAssistantContent(content) {
-            if (!content) {
-                return `<div class="think-block expanded"><div class="think-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="thinking-dots">Thinking</span></div><div class="think-container"><div class="think-content">...</div></div></div>`;
-            }
+            if (!content) return `<div class="think-block expanded"><div class="think-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="thinking-dots">Thinking</span></div><div class="think-container"><div class="think-content">...</div></div></div>`;
             const thinkRegex = /<think>([\s\S]*?)(?:<\/think>|$)/g;
             let thinkBlocks = [];
-            let textContent = content.replace(thinkRegex, (match, p1) => {
-                thinkBlocks.push(p1.trim());
-                return `\n\n[CLADUE_THINK_${thinkBlocks.length - 1}]\n\n`;
-            });
+            let textContent = content.replace(thinkRegex, (match, p1) => { thinkBlocks.push(p1.trim()); return `\n\n[CLADUE_THINK_${thinkBlocks.length - 1}]\n\n`; });
             let formatted = marked.parse(textContent);
             thinkBlocks.forEach((thinkContent, index) => {
                 const isStillThinking = !content.includes('</think>') && index === thinkBlocks.length - 1;
@@ -342,9 +453,7 @@
         function scrollToBottom(force = false) {
             const threshold = 150; 
             const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < threshold;
-            if (force || isNearBottom) {
-                chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: force ? 'auto' : 'smooth' });
-            }
+            if (force || isNearBottom) chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: force ? 'auto' : 'smooth' });
         }
 
         function appendMessageUI(role, content, isError = false) {
@@ -363,17 +472,14 @@
         async function handleSend() {
             const content = userInput.value.trim();
             if (!content) return;
-            
             userInput.value = '';
             userInput.style.height = 'auto';
 
-            const chat = chats.find(c => c.id === currentChatId);
-            
-            if (chat.messages.length === 0) {
-                chat.title = content.length > 20 ? content.substring(0, 20) + "..." : content;
-                switchToChatMode();
-            }
+            messagesSentCount++;
+            updateQuotaUI();
 
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat.messages.length === 0) { chat.title = content.length > 20 ? content.substring(0, 20) + "..." : content; switchToChatMode(); }
             chat.messages.push({ role: 'user', content });
             appendMessageUI('user', content);
             saveToLocal();
@@ -386,17 +492,10 @@
             try {
                 const apiMessages = chat.messages.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content }));
                 apiMessages.unshift({ role: 'system', content: SYSTEM_PROMPT });
-
-                const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: DEFAULT_MODEL, messages: apiMessages, stream: true })
-                });
-
+                const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: DEFAULT_MODEL, messages: apiMessages, stream: true }) });
                 if (!response.ok) throw new Error(`Status ${response.status}`);
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
@@ -405,11 +504,7 @@
                         if (!line.trim()) continue;
                         try {
                             const json = JSON.parse(line);
-                            if (json.message?.content) {
-                                fullResponse += json.message.content;
-                                contentArea.innerHTML = formatAssistantContent(fullResponse);
-                                scrollToBottom();
-                            }
+                            if (json.message?.content) { fullResponse += json.message.content; contentArea.innerHTML = formatAssistantContent(fullResponse); scrollToBottom(); }
                         } catch (e) {}
                     }
                 }
