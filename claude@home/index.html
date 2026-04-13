@@ -113,6 +113,18 @@
         main { border-color: var(--border-color); }
         textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
         .border-sep { border-color: var(--border-color); }
+
+        /* Loading Dots Animation */
+        .thinking-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
     </style>
 </head>
 <body class="h-screen flex">
@@ -290,6 +302,21 @@
         }
 
         function formatAssistantContent(content) {
+            // Handle initial server wait state
+            if (!content) {
+                return `
+                    <div class="think-block expanded">
+                        <div class="think-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <span class="thinking-dots">Thinking</span>
+                        </div>
+                        <div class="think-container">
+                            <div class="think-content">...</div>
+                        </div>
+                    </div>
+                `;
+            }
+
             const thinkRegex = /<think>([\s\S]*?)(?:<\/think>|$)/g;
             let thinkBlocks = [];
             let textContent = content.replace(thinkRegex, (match, p1) => {
@@ -297,14 +324,18 @@
                 return `\n\n[CLADUE_THINK_${thinkBlocks.length - 1}]\n\n`;
             });
 
+            // If there's no think tag at all but content is being generated (wait-state transition),
+            // and we still want a think block placeholder if the model is known to be a "thinking" model,
+            // we handle it. But standard behavior is just to parse the text.
             let formatted = marked.parse(textContent);
+            
             thinkBlocks.forEach((thinkContent, index) => {
                 const isStillThinking = !content.includes('</think>') && index === thinkBlocks.length - 1;
                 const blockHtml = `
                     <div class="think-block ${isStillThinking ? 'expanded' : ''}">
                         <div class="think-header" onclick="this.parentElement.classList.toggle('expanded')">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span>${isStillThinking ? 'Thinking...' : 'Thought for a while'}</span>
+                            <span class="${isStillThinking ? 'thinking-dots' : ''}">${isStillThinking ? 'Thinking' : 'Thought for a while'}</span>
                             <svg class="think-arrow transition-transform ml-auto mr-2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"></path></svg>
                         </div>
                         <div class="think-container">
@@ -318,7 +349,7 @@
         }
 
         function scrollToBottom(force = false) {
-            const threshold = 150; // pixels from bottom to trigger auto-scroll
+            const threshold = 150; 
             const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < threshold;
             if (force || isNearBottom) {
                 chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: force ? 'auto' : 'smooth' });
@@ -372,6 +403,7 @@
             saveToLocal();
             renderHistory();
 
+            // Append assistant bubble IMMEDIATELY with empty content (triggers initial "Thinking" UI)
             const assistantWrapper = appendMessageUI('assistant', '');
             const contentArea = assistantWrapper.querySelector('.content-area');
             
