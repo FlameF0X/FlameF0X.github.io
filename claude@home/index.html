@@ -30,6 +30,7 @@
             color: var(--text-main);
             font-family: 'Outfit', sans-serif;
             margin: 0;
+            height: 100vh;
             overflow: hidden;
         }
 
@@ -37,8 +38,9 @@
         .sans-font { font-family: 'Outfit', sans-serif; }
         .star-icon { transform: rotate(12deg); color: var(--accent-color); }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
         .user-bubble {
             border-top-right-radius: 2px;
@@ -111,8 +113,6 @@
         main { border-color: var(--border-color); }
         textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
         .border-sep { border-color: var(--border-color); }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 <body class="h-screen flex">
@@ -147,7 +147,7 @@
     </aside>
 
     <!-- Main -->
-    <main class="flex-1 flex flex-col relative uncanny-skew">
+    <main class="flex-1 flex flex-col relative uncanny-skew h-full">
         
         <!-- Settings Modal -->
         <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#222] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
@@ -166,7 +166,7 @@
         </div>
 
         <!-- Input Area -->
-        <div class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent">
+        <div class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent shrink-0">
             <div class="max-w-3xl mx-auto">
                 <div class="relative flex items-end gap-2">
                     <textarea
@@ -266,7 +266,7 @@
             messagesList.innerHTML = '';
             chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError));
             renderHistory();
-            chatContainer.scrollTo(0, chatContainer.scrollHeight);
+            scrollToBottom(true);
         }
 
         function renderHistory() {
@@ -317,6 +317,14 @@
             return formatted;
         }
 
+        function scrollToBottom(force = false) {
+            const threshold = 150; // pixels from bottom to trigger auto-scroll
+            const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < threshold;
+            if (force || isNearBottom) {
+                chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: force ? 'auto' : 'smooth' });
+            }
+        }
+
         function appendMessageUI(role, content, isError = false) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`;
@@ -344,7 +352,7 @@
                 `;
             }
             messagesList.appendChild(wrapper);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            scrollToBottom(role === 'user');
             return wrapper;
         }
 
@@ -402,7 +410,7 @@
                             if (json.message && json.message.content) {
                                 fullResponse += json.message.content;
                                 contentArea.innerHTML = formatAssistantContent(fullResponse);
-                                chatContainer.scrollTo(0, chatContainer.scrollHeight);
+                                scrollToBottom();
                             }
                             if (json.done) break;
                         } catch (e) {
