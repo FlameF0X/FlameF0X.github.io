@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            /* Consistent Dark Palette */
             --bg-color: #1a1a18;
             --sidebar-bg: #111110;
             --border-color: #2d2d2b;
@@ -42,6 +41,25 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
+        /* Chat States */
+        #chat-container.landing-mode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #landing-hero {
+            text-align: center;
+            width: 100%;
+            max-width: 48rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .user-bubble {
             border-top-right-radius: 2px;
             box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
@@ -56,13 +74,9 @@
 
         /* Markdown Styles */
         .markdown-body p { margin-bottom: 0.75em; }
-        .markdown-body p:last-child { margin-bottom: 0; }
         .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; font-family: monospace; }
         .markdown-body pre { background-color: #000; border: 1px solid var(--border-color); color: #ccc; padding: 1em; border-radius: 5px; overflow-x: auto; margin-bottom: 1em; }
-        .markdown-body pre code { background-color: transparent; padding: 0; color: inherit; font-size: 85%; }
-        .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
-        .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
-
+        
         /* Think Block UI */
         .think-block { margin-bottom: 1rem; }
         .think-header {
@@ -73,10 +87,8 @@
             gap: 0.5rem;
             cursor: pointer;
             user-select: none;
-            font-family: 'Arial', sans-serif;
             margin-bottom: 0.25rem;
         }
-        .think-header:hover { opacity: 0.8; }
         .think-container {
             display: none;
             position: relative;
@@ -86,35 +98,12 @@
         }
         .think-container::before {
             content: '';
-            position: absolute;
-            left: 0.5rem;
-            top: 0;
-            bottom: 0;
-            width: 1px;
+            position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 1px;
             background-color: var(--think-border);
-        }
-        .think-content {
-            color: var(--think-text);
-            font-size: 0.85rem;
-            line-height: 1.5;
         }
         .think-block.expanded .think-container { display: block; }
         .think-block.expanded .think-arrow { transform: rotate(180deg); }
 
-        @keyframes wobble {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(1deg); }
-            75% { transform: rotate(-1deg); }
-            100% { transform: rotate(0deg); }
-        }
-        .wobble-hover:hover { animation: wobble 0.4s ease infinite; }
-        
-        aside { background-color: var(--sidebar-bg); border-color: var(--border-color); }
-        main { border-color: var(--border-color); }
-        textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
-        .border-sep { border-color: var(--border-color); }
-
-        /* Loading Dots Animation */
         .thinking-dots::after {
             content: '.';
             animation: dots 1.5s steps(5, end) infinite;
@@ -125,6 +114,18 @@
             60% { content: '...'; }
             80%, 100% { content: ''; }
         }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        .wobble-hover:hover { animation: wobble 0.4s ease infinite; }
+        
+        aside { background-color: var(--sidebar-bg); border-color: var(--border-color); }
+        main { border-color: var(--border-color); }
+        textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
+        .border-sep { border-color: var(--border-color); }
     </style>
 </head>
 <body class="h-screen flex">
@@ -164,32 +165,48 @@
         <!-- Settings Modal -->
         <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#222] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
             <h3 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-[var(--text-main)]">System Settings</h3>
-            
             <div class="space-y-4 mb-6">
                 <button onclick="clearAllChats()" class="w-full p-2 text-xs border border-red-900 text-red-500 rounded bg-red-950/10 transition-colors font-bold">Clear All Chat History</button>
             </div>
-
             <button onclick="toggleSettings()" class="w-full bg-[#cc7755] text-white text-xs py-3 rounded uppercase font-bold tracking-widest wobble-hover">Close</button>
         </div>
 
-        <!-- Messages -->
+        <!-- Scrollable Area -->
         <div id="chat-container" class="flex-1 overflow-y-auto px-4 py-8 md:px-12 lg:px-24 custom-scrollbar">
+            <!-- Landing View (Hidden when chat starts) -->
+            <div id="landing-hero" class="hidden">
+                <div class="mb-10">
+                    <h1 class="text-4xl font-semibold tracking-tight text-[var(--text-main)] mb-2 flex items-center justify-center gap-3">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon">
+                            <path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" />
+                        </svg>
+                        Good afternoon, human.
+                    </h1>
+                    <p class="text-[var(--text-muted)] text-lg">How can I help you today?</p>
+                </div>
+                <div id="landing-input-container" class="max-w-2xl mx-auto">
+                    <!-- Placeholder for the actual input which will be moved here -->
+                </div>
+            </div>
+
+            <!-- Standard Chat View -->
             <div id="messages-list" class="max-w-3xl mx-auto space-y-8 pb-10"></div>
         </div>
 
-        <!-- Input Area -->
-        <div class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent shrink-0">
-            <div class="max-w-3xl mx-auto">
-                <div class="relative flex items-end gap-2">
+        <!-- Persistent Input Container (Bottom) -->
+        <div id="input-area-global" class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent shrink-0">
+            <!-- Added id "global-input-inner" to the container to ensure appendChild works -->
+            <div id="global-input-inner" class="max-w-3xl mx-auto">
+                <div id="input-wrapper" class="relative flex items-end gap-2">
                     <textarea
                         id="user-input"
                         placeholder="Talk to Cladue..."
-                        class="w-full rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15px] sans-font placeholder:text-[#5a5a54] transition-colors shadow-sm"
+                        class="w-full rounded-2xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15.5px] sans-font placeholder:text-[#5a5a54] transition-all shadow-lg border border-sep"
                         rows="1"
-                        style="min-height: 52px; max-height: 200px;"
+                        style="min-height: 56px; max-height: 200px;"
                     ></textarea>
-                    <button id="send-btn" class="absolute right-2 bottom-2 p-2.5 rounded-lg bg-[#cc7755] text-white hover:bg-[#b56545] transition-colors wobble-hover">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    <button id="send-btn" class="absolute right-2 bottom-2 p-2.5 rounded-xl bg-[#cc7755] text-white hover:bg-[#b56545] transition-colors wobble-hover">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
             </div>
@@ -209,17 +226,18 @@
         const sendBtn = document.getElementById('send-btn');
         const chatHistoryEl = document.getElementById('chat-history');
         const chatContainer = document.getElementById('chat-container');
+        const landingHero = document.getElementById('landing-hero');
+        const inputWrapper = document.getElementById('input-wrapper');
+        const landingInputContainer = document.getElementById('landing-input-container');
+        const inputAreaGlobal = document.getElementById('input-area-global');
+        const globalInputInner = document.getElementById('global-input-inner');
 
         async function loadSystemPrompt() {
             try {
                 const response = await fetch('sys.txt');
-                if (response.ok) {
-                    SYSTEM_PROMPT = await response.text();
-                } else {
-                    SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
-                }
+                SYSTEM_PROMPT = response.ok ? await response.text() : "You are Cladue, an AI assistant.";
             } catch (err) {
-                SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
+                SYSTEM_PROMPT = "You are Cladue, an AI assistant.";
             }
         }
 
@@ -239,7 +257,7 @@
             const newChat = {
                 id: currentChatId,
                 title: "New Chat",
-                messages: [{ role: 'assistant', content: "Hello. I am Cladue. How can I help today?" }]
+                messages: [] 
             };
             chats.unshift(newChat);
             saveToLocal();
@@ -247,102 +265,75 @@
             loadChat(currentChatId);
         }
 
-        function deleteChat(e, id) {
-            e.stopPropagation();
-            chats = chats.filter(c => c.id !== id);
-            saveToLocal();
-            if (currentChatId === id) {
-                if (chats.length > 0) loadChat(chats[0].id);
-                else startNewChat();
-            } else {
-                renderHistory();
-            }
-        }
-
-        function renameChat(e, id) {
-            e.stopPropagation();
-            const chat = chats.find(c => c.id === id);
-            if (!chat) return;
-            const newTitle = prompt("Rename chat:", chat.title);
-            if (newTitle && newTitle.trim()) {
-                chat.title = newTitle.trim();
-                saveToLocal();
-                renderHistory();
-            }
-        }
-
         function loadChat(id) {
             currentChatId = id;
             const chat = chats.find(c => c.id === id);
             if (!chat) return startNewChat();
+            
             messagesList.innerHTML = '';
-            chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError));
+            
+            if (chat.messages.length === 0) {
+                switchToLandingMode();
+            } else {
+                switchToChatMode();
+                chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError));
+            }
+            
             renderHistory();
             scrollToBottom(true);
         }
 
-        function renderHistory() {
-            const historyTitle = `<div class="text-[10px] font-bold text-[var(--text-muted)] mb-2 uppercase pl-2 sans-font flex justify-between items-center">
-                <span>Recent</span>
-            </div>`;
+        function switchToLandingMode() {
+            chatContainer.classList.add('landing-mode');
+            landingHero.classList.remove('hidden');
+            messagesList.classList.add('hidden');
+            inputAreaGlobal.classList.add('opacity-0', 'pointer-events-none');
             
+            if (inputWrapper && landingInputContainer) {
+                landingInputContainer.appendChild(inputWrapper);
+            }
+            userInput.focus();
+        }
+
+        function switchToChatMode() {
+            chatContainer.classList.remove('landing-mode');
+            landingHero.classList.add('hidden');
+            messagesList.classList.remove('hidden');
+            inputAreaGlobal.classList.remove('opacity-0', 'pointer-events-none');
+            
+            if (inputWrapper && globalInputInner) {
+                globalInputInner.appendChild(inputWrapper);
+            }
+            userInput.focus();
+        }
+
+        function renderHistory() {
+            const historyTitle = `<div class="text-[10px] font-bold text-[var(--text-muted)] mb-2 uppercase pl-2 flex justify-between items-center"><span>Recent</span></div>`;
             chatHistoryEl.innerHTML = historyTitle + chats.map(chat => `
                 <div onclick="loadChat('${chat.id}')" class="group flex items-center justify-between px-3 py-2 text-sm rounded cursor-pointer transition-colors ${chat.id === currentChatId ? 'active-chat' : 'hover:bg-[var(--sidebar-hover)]'} text-[var(--text-muted)]">
                     <span class="truncate pr-2">${chat.title}</span>
                     <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="renameChat(event, '${chat.id}')" class="p-1 hover:text-amber-600 transition-colors" title="Rename">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </button>
-                        <button onclick="deleteChat(event, '${chat.id}')" class="p-1 hover:text-red-500 transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        </button>
+                        <button onclick="renameChat(event, '${chat.id}')" class="p-1 hover:text-amber-600 transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                        <button onclick="deleteChat(event, '${chat.id}')" class="p-1 hover:text-red-500 transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </div>
                 </div>
             `).join('');
         }
 
         function formatAssistantContent(content) {
-            // Handle initial server wait state
             if (!content) {
-                return `
-                    <div class="think-block expanded">
-                        <div class="think-header">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span class="thinking-dots">Thinking</span>
-                        </div>
-                        <div class="think-container">
-                            <div class="think-content">...</div>
-                        </div>
-                    </div>
-                `;
+                return `<div class="think-block expanded"><div class="think-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="thinking-dots">Thinking</span></div><div class="think-container"><div class="think-content">...</div></div></div>`;
             }
-
             const thinkRegex = /<think>([\s\S]*?)(?:<\/think>|$)/g;
             let thinkBlocks = [];
             let textContent = content.replace(thinkRegex, (match, p1) => {
                 thinkBlocks.push(p1.trim());
                 return `\n\n[CLADUE_THINK_${thinkBlocks.length - 1}]\n\n`;
             });
-
-            // If there's no think tag at all but content is being generated (wait-state transition),
-            // and we still want a think block placeholder if the model is known to be a "thinking" model,
-            // we handle it. But standard behavior is just to parse the text.
             let formatted = marked.parse(textContent);
-            
             thinkBlocks.forEach((thinkContent, index) => {
                 const isStillThinking = !content.includes('</think>') && index === thinkBlocks.length - 1;
-                const blockHtml = `
-                    <div class="think-block ${isStillThinking ? 'expanded' : ''}">
-                        <div class="think-header" onclick="this.parentElement.classList.toggle('expanded')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span class="${isStillThinking ? 'thinking-dots' : ''}">${isStillThinking ? 'Thinking' : 'Thought for a while'}</span>
-                            <svg class="think-arrow transition-transform ml-auto mr-2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"></path></svg>
-                        </div>
-                        <div class="think-container">
-                            <div class="think-content">${marked.parse(thinkContent || '...')}</div>
-                        </div>
-                    </div>
-                `;
+                const blockHtml = `<div class="think-block ${isStillThinking ? 'expanded' : ''}"><div class="think-header" onclick="this.parentElement.classList.toggle('expanded')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span class="${isStillThinking ? 'thinking-dots' : ''}">${isStillThinking ? 'Thinking' : 'Thought for a while'}</span><svg class="think-arrow transition-transform ml-auto mr-2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"></path></svg></div><div class="think-container"><div class="think-content">${marked.parse(thinkContent || '...')}</div></div></div>`;
                 formatted = formatted.replace(new RegExp(`<p>\\[CLADUE_THINK_${index}\\]<\\/p>|\\[CLADUE_THINK_${index}\\]`, 'g'), blockHtml);
             });
             return formatted;
@@ -359,28 +350,10 @@
         function appendMessageUI(role, content, isError = false) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`;
-            wrapper.id = role === 'assistant' ? `msg-${Date.now()}` : '';
-
             if (role === 'assistant') {
-                wrapper.innerHTML = `
-                    <div class="w-8 h-8 rounded shrink-0 bg-[#2d2d2b] flex items-center justify-center mt-1 border border-sep">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon"><path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" /></svg>
-                    </div>
-                    <div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)] content-area">
-                        ${isError ? `<div class="p-4 border border-red-900 bg-red-950/20 rounded-lg text-red-500">${content}</div>` : formatAssistantContent(content)}
-                    </div>
-                `;
+                wrapper.innerHTML = `<div class="w-8 h-8 rounded shrink-0 bg-[#2d2d2b] flex items-center justify-center mt-1 border border-sep"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon"><path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" /></svg></div><div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)] content-area">${isError ? `<div class="p-4 border border-red-900 bg-red-950/20 rounded-lg text-red-500">${content}</div>` : formatAssistantContent(content)}</div>`;
             } else {
-                wrapper.innerHTML = `
-                    <div class="max-w-[85%] order-1">
-                        <div class="user-bubble text-[#e2e2e1] px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm sans-font">
-                            ${content}
-                        </div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full shrink-0 bg-[#3a3a38] flex items-center justify-center mt-1 order-2 border border-[#4a4a48]">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#8a8a84] translate-y-0.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    </div>
-                `;
+                wrapper.innerHTML = `<div class="max-w-[85%] order-1"><div class="user-bubble text-[#e2e2e1] px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm sans-font">${content}</div></div><div class="w-8 h-8 rounded-full shrink-0 bg-[#3a3a38] flex items-center justify-center mt-1 order-2 border border-[#4a4a48]"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#8a8a84] translate-y-0.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>`;
             }
             messagesList.appendChild(wrapper);
             scrollToBottom(role === 'user');
@@ -390,12 +363,15 @@
         async function handleSend() {
             const content = userInput.value.trim();
             if (!content) return;
+            
             userInput.value = '';
             userInput.style.height = 'auto';
 
             const chat = chats.find(c => c.id === currentChatId);
-            if (chat.messages.length === 1 && chat.messages[0].role === 'assistant') {
+            
+            if (chat.messages.length === 0) {
                 chat.title = content.length > 20 ? content.substring(0, 20) + "..." : content;
+                switchToChatMode();
             }
 
             chat.messages.push({ role: 'user', content });
@@ -403,10 +379,8 @@
             saveToLocal();
             renderHistory();
 
-            // Append assistant bubble IMMEDIATELY with empty content (triggers initial "Thinking" UI)
             const assistantWrapper = appendMessageUI('assistant', '');
             const contentArea = assistantWrapper.querySelector('.content-area');
-            
             let fullResponse = "";
 
             try {
@@ -416,46 +390,33 @@
                 const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        model: DEFAULT_MODEL, 
-                        messages: apiMessages, 
-                        stream: true 
-                    })
+                    body: JSON.stringify({ model: DEFAULT_MODEL, messages: apiMessages, stream: true })
                 });
 
                 if (!response.ok) throw new Error(`Status ${response.status}`);
-
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
-
+                    const lines = decoder.decode(value, { stream: true }).split('\n');
                     for (const line of lines) {
                         if (!line.trim()) continue;
                         try {
                             const json = JSON.parse(line);
-                            if (json.message && json.message.content) {
+                            if (json.message?.content) {
                                 fullResponse += json.message.content;
                                 contentArea.innerHTML = formatAssistantContent(fullResponse);
                                 scrollToBottom();
                             }
-                            if (json.done) break;
-                        } catch (e) {
-                            console.error("Stream parse error", e);
-                        }
+                        } catch (e) {}
                     }
                 }
-
                 chat.messages.push({ role: 'assistant', content: fullResponse });
                 saveToLocal();
-
             } catch (err) {
-                const errorMsg = `Server Connection Error: ${err.message}. Ensure Ollama is running at ${OLLAMA_ENDPOINT}.`;
+                const errorMsg = `Connection Error: ${err.message}`;
                 contentArea.innerHTML = `<div class="p-4 border border-red-900 bg-red-950/20 rounded-lg text-red-500">${errorMsg}</div>`;
                 chat.messages.push({ role: 'assistant', content: errorMsg, isError: true });
                 saveToLocal();
@@ -464,18 +425,12 @@
 
         function saveToLocal() { localStorage.setItem('cladue_chats', JSON.stringify(chats)); }
         function clearAllChats() { if (confirm("Delete ALL chats?")) { chats=[]; saveToLocal(); startNewChat(); } }
-        
+        function deleteChat(e, id) { e.stopPropagation(); chats = chats.filter(c => c.id !== id); saveToLocal(); if (currentChatId === id) chats.length > 0 ? loadChat(chats[0].id) : startNewChat(); else renderHistory(); }
+        function renameChat(e, id) { e.stopPropagation(); const chat = chats.find(c => c.id === id); if (!chat) return; const newTitle = prompt("Rename chat:", chat.title); if (newTitle?.trim()) { chat.title = newTitle.trim(); saveToLocal(); renderHistory(); } }
+
         sendBtn.addEventListener('click', handleSend);
-        userInput.addEventListener('keydown', (e) => { 
-            if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); handleSend(); 
-            } 
-        });
-        
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
+        userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+        userInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
 
         init();
     </script>
