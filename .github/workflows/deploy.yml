@@ -2,16 +2,23 @@ name: Deploy Cladue to Pages
 
 on:
   push:
-    branches: ["main"] # Ensures this runs when you push to your main branch
+    branches: ["main"]
 
-# Sets permissions to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,8 +26,6 @@ jobs:
 
       - name: Inject Secret Endpoint
         run: |
-          # This command finds the placeholder and replaces it with your secret.
-          # We use '|' as a delimiter in case your URL contains slashes.
           sed -i "s|__ENDPOINT_PLACEHOLDER__|${{ secrets.ENDPOINT }}|g" index.html
 
       - name: Setup Pages
@@ -29,7 +34,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # Uploads the entire root directory
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
