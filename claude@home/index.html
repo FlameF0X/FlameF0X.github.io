@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,40 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        if (localStorage.getItem('cladue_theme') === 'dark' || (!('cladue_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
     <style>
         :root {
-            --bg-color: #f3efe6;
-            --sidebar-bg: #e8e4db;
-            --border-color: #d3cdc0;
-            --accent-color: #cc7755;
-            --text-main: #333331;
-            --text-muted: #6a655f;
-            --bubble-user: #dfdad0;
-            --input-bg: #ffffff;
-            --think-border: #d3cdc0;
-            --think-text: #6a655f;
-            --sidebar-hover: #dad5cb;
-        }
-
-        .dark {
-            --bg-color: #2a2a28;
-            --sidebar-bg: #1e1e1d;
-            --border-color: #3f3f3c;
+            /* Consistent Dark Palette */
+            --bg-color: #1a1a18;
+            --sidebar-bg: #111110;
+            --border-color: #2d2d2b;
             --accent-color: #d98866;
             --text-main: #e2e2e1;
-            --text-muted: #a0a09a;
-            --bubble-user: #3f3f3c;
-            --input-bg: #333331;
-            --think-border: #4a4a48;
+            --text-muted: #8a8a84;
+            --bubble-user: #2d2d2b;
+            --input-bg: #222220;
+            --think-border: #3a3a38;
             --think-text: #a0a09a;
-            --sidebar-hover: #2d2d2b;
+            --sidebar-hover: #1c1c1a;
         }
 
         body {
@@ -51,7 +31,6 @@
             font-family: 'Outfit', sans-serif;
             margin: 0;
             overflow: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .uncanny-skew { transform: skewX(-0.05deg); }
@@ -63,22 +42,21 @@
 
         .user-bubble {
             border-top-right-radius: 2px;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
             background-color: var(--bubble-user);
         }
 
         .active-chat { 
             background-color: var(--bubble-user) !important; 
             font-weight: 600;
-            color: var(--text-main) !important;
+            color: #ffffff !important;
         }
 
         /* Markdown Styles */
         .markdown-body p { margin-bottom: 0.75em; }
         .markdown-body p:last-child { margin-bottom: 0; }
-        .markdown-body code { background-color: rgba(0,0,0,0.05); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; font-family: monospace; }
-        .dark .markdown-body code { background-color: rgba(255,255,255,0.1); }
-        .markdown-body pre { background-color: #2d2d2d; color: #ccc; padding: 1em; border-radius: 5px; overflow-x: auto; margin-bottom: 1em; }
+        .markdown-body code { background-color: rgba(255,255,255,0.1); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; font-family: monospace; }
+        .markdown-body pre { background-color: #000; border: 1px solid var(--border-color); color: #ccc; padding: 1em; border-radius: 5px; overflow-x: auto; margin-bottom: 1em; }
         .markdown-body pre code { background-color: transparent; padding: 0; color: inherit; font-size: 85%; }
         .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
         .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
@@ -133,12 +111,14 @@
         main { border-color: var(--border-color); }
         textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
         .border-sep { border-color: var(--border-color); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 <body class="h-screen flex">
 
     <!-- Sidebar -->
-    <aside class="w-72 hidden md:flex flex-col border-r shadow-[2px_0_15px_rgba(0,0,0,0.02)] z-10 transition-colors">
+    <aside class="w-72 hidden md:flex flex-col border-r shadow-[2px_0_15px_rgba(0,0,0,0.1)] z-10">
         <div class="p-4 border-b border-sep">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="startNewChat()">
@@ -161,21 +141,20 @@
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                 </svg>
-                <span>Engin Room (Settings)</span>
+                <span>Engine Room</span>
             </button>
         </div>
     </aside>
 
     <!-- Main -->
-    <main class="flex-1 flex flex-col relative uncanny-skew transition-colors">
+    <main class="flex-1 flex flex-col relative uncanny-skew">
         
         <!-- Settings Modal -->
-        <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#fffdf9] dark:bg-[#333] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
-            <h3 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-[var(--text-main)]">Interface Settings</h3>
+        <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#222] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
+            <h3 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-[var(--text-main)]">System Settings</h3>
             
             <div class="space-y-4 mb-6">
-                <button onclick="toggleDarkMode()" class="w-full p-2 text-xs border border-sep rounded bg-black/5 dark:bg-white/5 transition-colors text-[var(--text-main)]">Toggle Dark/Light Mode</button>
-                <button onclick="clearAllChats()" class="w-full p-2 text-xs border border-red-200 dark:border-red-900 text-red-600 rounded bg-red-50 dark:bg-red-900/10 transition-colors font-bold">Clear All Chat History</button>
+                <button onclick="clearAllChats()" class="w-full p-2 text-xs border border-red-900 text-red-500 rounded bg-red-950/10 transition-colors font-bold">Clear All Chat History</button>
             </div>
 
             <button onclick="toggleSettings()" class="w-full bg-[#cc7755] text-white text-xs py-3 rounded uppercase font-bold tracking-widest wobble-hover">Close</button>
@@ -193,7 +172,7 @@
                     <textarea
                         id="user-input"
                         placeholder="Talk to Cladue..."
-                        class="w-full rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15px] sans-font placeholder:text-[#a09a90] transition-colors shadow-sm"
+                        class="w-full rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15px] sans-font placeholder:text-[#5a5a54] transition-colors shadow-sm"
                         rows="1"
                         style="min-height: 52px; max-height: 200px;"
                     ></textarea>
@@ -206,7 +185,6 @@
     </main>
 
     <script>
-        // HARDCODED CONFIG
         const OLLAMA_ENDPOINT = 'https://ollama.msdhaliwal.in';
         const DEFAULT_MODEL = 'hf.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF:Q4_0';
         let SYSTEM_PROMPT = '';
@@ -238,11 +216,6 @@
             if (chats.length > 0) loadChat(chats[0].id);
             else startNewChat();
             renderHistory();
-        }
-
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('cladue_theme', isDark ? 'dark' : 'light');
         }
 
         function toggleSettings() {
@@ -317,7 +290,7 @@
         }
 
         function formatAssistantContent(content) {
-            const thinkRegex = /<think>([\s\S]*?)<\/think>/g;
+            const thinkRegex = /<think>([\s\S]*?)(?:<\/think>|$)/g;
             let thinkBlocks = [];
             let textContent = content.replace(thinkRegex, (match, p1) => {
                 thinkBlocks.push(p1.trim());
@@ -326,15 +299,16 @@
 
             let formatted = marked.parse(textContent);
             thinkBlocks.forEach((thinkContent, index) => {
+                const isStillThinking = !content.includes('</think>') && index === thinkBlocks.length - 1;
                 const blockHtml = `
-                    <div class="think-block">
+                    <div class="think-block ${isStillThinking ? 'expanded' : ''}">
                         <div class="think-header" onclick="this.parentElement.classList.toggle('expanded')">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span>Thought for a while</span>
+                            <span>${isStillThinking ? 'Thinking...' : 'Thought for a while'}</span>
                             <svg class="think-arrow transition-transform ml-auto mr-2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"></path></svg>
                         </div>
                         <div class="think-container">
-                            <div class="think-content">${marked.parse(thinkContent)}</div>
+                            <div class="think-content">${marked.parse(thinkContent || '...')}</div>
                         </div>
                     </div>
                 `;
@@ -346,30 +320,32 @@
         function appendMessageUI(role, content, isError = false) {
             const wrapper = document.createElement('div');
             wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`;
+            wrapper.id = role === 'assistant' ? `msg-${Date.now()}` : '';
 
             if (role === 'assistant') {
                 wrapper.innerHTML = `
-                    <div class="w-8 h-8 rounded shrink-0 bg-[#e6ded0] dark:bg-[#3f3f3c] flex items-center justify-center mt-1 border border-sep">
+                    <div class="w-8 h-8 rounded shrink-0 bg-[#2d2d2b] flex items-center justify-center mt-1 border border-sep">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon"><path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" /></svg>
                     </div>
-                    <div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)]">
-                        ${isError ? `<div class="p-4 border border-red-200 bg-red-50 dark:bg-red-950/20 rounded-lg text-red-600">${content}</div>` : formatAssistantContent(content)}
+                    <div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)] content-area">
+                        ${isError ? `<div class="p-4 border border-red-900 bg-red-950/20 rounded-lg text-red-500">${content}</div>` : formatAssistantContent(content)}
                     </div>
                 `;
             } else {
                 wrapper.innerHTML = `
                     <div class="max-w-[85%] order-1">
-                        <div class="user-bubble text-[#222] dark:text-[#e2e2e1] px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm sans-font">
+                        <div class="user-bubble text-[#e2e2e1] px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm sans-font">
                             ${content}
                         </div>
                     </div>
-                    <div class="w-8 h-8 rounded-full shrink-0 bg-[#c0b8aa] dark:bg-[#5a554f] flex items-center justify-center mt-1 order-2 border border-[#a0988a]">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#f3efe6] translate-y-0.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <div class="w-8 h-8 rounded-full shrink-0 bg-[#3a3a38] flex items-center justify-center mt-1 order-2 border border-[#4a4a48]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#8a8a84] translate-y-0.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
                 `;
             }
             messagesList.appendChild(wrapper);
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            return wrapper;
         }
 
         async function handleSend() {
@@ -388,14 +364,10 @@
             saveToLocal();
             renderHistory();
 
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'flex gap-4 justify-start opacity-70';
-            loadingDiv.innerHTML = `
-                <div class="w-8 h-8 rounded shrink-0 bg-[#e6ded0] dark:bg-[#3f3f3c] flex items-center justify-center mt-1"><svg class="animate-spin text-[#cc7755]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></div>
-                <div class="text-[15px] leading-relaxed italic pt-2 text-[var(--text-main)]">Thinking...</div>
-            `;
-            messagesList.appendChild(loadingDiv);
-            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+            const assistantWrapper = appendMessageUI('assistant', '');
+            const contentArea = assistantWrapper.querySelector('.content-area');
+            
+            let fullResponse = "";
 
             try {
                 const apiMessages = chat.messages.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content }));
@@ -404,22 +376,48 @@
                 const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: DEFAULT_MODEL, messages: apiMessages, stream: false })
+                    body: JSON.stringify({ 
+                        model: DEFAULT_MODEL, 
+                        messages: apiMessages, 
+                        stream: true 
+                    })
                 });
 
-                loadingDiv.remove();
                 if (!response.ok) throw new Error(`Status ${response.status}`);
-                const data = await response.json();
-                const botResponse = data.message.content;
 
-                chat.messages.push({ role: 'assistant', content: botResponse });
-                appendMessageUI('assistant', botResponse);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            const json = JSON.parse(line);
+                            if (json.message && json.message.content) {
+                                fullResponse += json.message.content;
+                                contentArea.innerHTML = formatAssistantContent(fullResponse);
+                                chatContainer.scrollTo(0, chatContainer.scrollHeight);
+                            }
+                            if (json.done) break;
+                        } catch (e) {
+                            console.error("Stream parse error", e);
+                        }
+                    }
+                }
+
+                chat.messages.push({ role: 'assistant', content: fullResponse });
                 saveToLocal();
+
             } catch (err) {
-                loadingDiv.remove();
-                const errorMsg = `Server Connection Error: ${err.message}. Please check if Ollama is running at ${OLLAMA_ENDPOINT}.`;
+                const errorMsg = `Server Connection Error: ${err.message}. Ensure Ollama is running at ${OLLAMA_ENDPOINT}.`;
+                contentArea.innerHTML = `<div class="p-4 border border-red-900 bg-red-950/20 rounded-lg text-red-500">${errorMsg}</div>`;
                 chat.messages.push({ role: 'assistant', content: errorMsg, isError: true });
-                appendMessageUI('assistant', errorMsg, true);
                 saveToLocal();
             }
         }
@@ -434,7 +432,6 @@
             } 
         });
         
-        // Auto-resize textarea
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
