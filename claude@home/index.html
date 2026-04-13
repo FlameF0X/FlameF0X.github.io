@@ -138,7 +138,7 @@
 <body class="h-screen flex">
 
     <!-- Sidebar -->
-    <aside class="w-72 hidden md:flex flex-col border-r shadow-[2px_0_15px_rgba(0,0,0,0.02)] z-10 transition-colors">
+    <aside class="w-72 hidden md:flex flex-col border-r shadow-[2px_0_15_rgba(0,0,0,0.02)] z-10 transition-colors">
         <div class="p-4 border-b border-sep">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="startNewChat()">
@@ -207,14 +207,10 @@
 
     <script>
         /**
-         * CONFIGURATION
-         * * For GitHub Actions injection, use a placeholder that you can swap 
-         * using a tool like `sed` in your workflow, e.g.:
-         * sed -i "s|__ENDPOINT_PLACEHOLDER__|${{ secrets.ENDPOINT }}|g" index.html
+         * SECRETS / CONFIGURATION
+         * The OLLAMA_ENDPOINT value is injected from environment secrets.
          */
-        const OLLAMA_ENDPOINT = '__ENDPOINT_PLACEHOLDER__'.startsWith('__') 
-            ? 'https://ollama.msdhaliwal.in' // Fallback for local dev
-            : '__ENDPOINT_PLACEHOLDER__';
+        const OLLAMA_ENDPOINT = '__ENDPOINT_PLACEHOLDER__';
             
         const DEFAULT_MODEL = 'hf.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF:Q4_0';
         let SYSTEM_PROMPT = '';
@@ -227,7 +223,6 @@
         const sendBtn = document.getElementById('send-btn');
         const chatHistoryEl = document.getElementById('chat-history');
         const chatContainer = document.getElementById('chat-container');
-        const endpointDisplay = document.getElementById('endpoint-display');
 
         async function loadSystemPrompt() {
             try {
@@ -235,15 +230,14 @@
                 if (response.ok) {
                     SYSTEM_PROMPT = await response.text();
                 } else {
-                    SYSTEM_PROMPT = "You are Claude, a helpful AI assistant. You are conversational, honest, and genuinely helpful while maintaining appropriate limits. DO NOT USE EMOJIS.";
+                    SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
                 }
             } catch (err) {
-                SYSTEM_PROMPT = "You are Claude, a helpful AI assistant. You are conversational, honest, and genuinely helpful while maintaining appropriate limits. DO NOT USE EMOJIS.";
+                SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
             }
         }
 
         async function init() {
-            endpointDisplay.textContent = OLLAMA_ENDPOINT;
             await loadSystemPrompt();
             if (chats.length > 0) loadChat(chats[0].id);
             else startNewChat();
@@ -363,7 +357,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon"><path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" /></svg>
                     </div>
                     <div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)]">
-                        ${isError ? `<div class="p-4 border border-red-200 bg-red-50 dark:bg-red-950/20 rounded-lg text-red-600">${content}</div>` : formatAssistantContent(content)}
+                        ${isError ? `<div class="p-4 border border-red-200 bg-red-50 dark:bg-red-950/20 rounded-lg text-red-600">Connection error. Please check your setup.</div>` : formatAssistantContent(content)}
                     </div>
                 `;
             } else {
@@ -427,9 +421,8 @@
                 saveToLocal();
             } catch (err) {
                 loadingDiv.remove();
-                const errorMsg = `Server Connection Error: ${err.message}. Please check if Ollama is running at ${OLLAMA_ENDPOINT}.`;
-                chat.messages.push({ role: 'assistant', content: errorMsg, isError: true });
-                appendMessageUI('assistant', errorMsg, true);
+                chat.messages.push({ role: 'assistant', content: 'Connection error', isError: true });
+                appendMessageUI('assistant', 'Connection error', true);
                 saveToLocal();
             }
         }
