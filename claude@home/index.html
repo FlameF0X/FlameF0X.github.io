@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cladue@Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        if (localStorage.getItem('cladue_theme') === 'dark' || (!('cladue_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <style>
+        :root {
+            --bg-color: #f3efe6;
+            --sidebar-bg: #e8e4db;
+            --border-color: #d3cdc0;
+            --accent-color: #cc7755;
+            --text-main: #333331;
+            --text-muted: #6a655f;
+            --bubble-user: #dfdad0;
+            --input-bg: #ffffff;
+            --think-border: #d3cdc0;
+            --think-text: #6a655f;
+            --sidebar-hover: #dad5cb;
+        }
+
+        .dark {
+            --bg-color: #2a2a28;
+            --sidebar-bg: #1e1e1d;
+            --border-color: #3f3f3c;
+            --accent-color: #d98866;
+            --text-main: #e2e2e1;
+            --text-muted: #a0a09a;
+            --bubble-user: #3f3f3c;
+            --input-bg: #333331;
+            --think-border: #4a4a48;
+            --think-text: #a0a09a;
+            --sidebar-hover: #2d2d2b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .uncanny-skew { transform: skewX(-0.05deg); }
+        .sans-font { font-family: 'Outfit', sans-serif; }
+        .star-icon { transform: rotate(12deg); color: var(--accent-color); }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        .user-bubble {
+            border-top-right-radius: 2px;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+            background-color: var(--bubble-user);
+        }
+
+        .active-chat { 
+            background-color: var(--bubble-user) !important; 
+            font-weight: 600;
+            color: var(--text-main) !important;
+        }
+
+        /* Markdown Styles */
+        .markdown-body p { margin-bottom: 0.75em; }
+        .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body code { background-color: rgba(0,0,0,0.05); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; font-family: monospace; }
+        .dark .markdown-body code { background-color: rgba(255,255,255,0.1); }
+        .markdown-body pre { background-color: #2d2d2d; color: #ccc; padding: 1em; border-radius: 5px; overflow-x: auto; margin-bottom: 1em; }
+        .markdown-body pre code { background-color: transparent; padding: 0; color: inherit; font-size: 85%; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
+
+        /* Think Block UI */
+        .think-block { margin-bottom: 1rem; }
+        .think-header {
+            color: var(--think-text);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+            font-family: 'Arial', sans-serif;
+            margin-bottom: 0.25rem;
+        }
+        .think-header:hover { opacity: 0.8; }
+        .think-container {
+            display: none;
+            position: relative;
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .think-container::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: var(--think-border);
+        }
+        .think-content {
+            color: var(--think-text);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .think-block.expanded .think-container { display: block; }
+        .think-block.expanded .think-arrow { transform: rotate(180deg); }
+
+        @keyframes wobble {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .wobble-hover:hover { animation: wobble 0.4s ease infinite; }
+        
+        aside { background-color: var(--sidebar-bg); border-color: var(--border-color); }
+        main { border-color: var(--border-color); }
+        textarea { background-color: var(--input-bg); border-color: var(--border-color); color: var(--text-main); }
+        .border-sep { border-color: var(--border-color); }
+    </style>
+</head>
+<body class="h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-72 hidden md:flex flex-col border-r shadow-[2px_0_15px_rgba(0,0,0,0.02)] z-10 transition-colors">
+        <div class="p-4 border-b border-sep">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="startNewChat()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon">
+                        <path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" />
+                    </svg>
+                    <span class="font-bold text-lg tracking-tighter sans-font opacity-90 text-[var(--text-main)]">Cladue@Home</span>
+                </div>
+            </div>
+            <button onclick="startNewChat()" class="mt-4 w-full border border-sep rounded-lg py-2 text-sm sans-font hover:bg-[var(--sidebar-hover)] transition-all flex items-center justify-center gap-2 text-[var(--text-main)]">
+                <span>+</span> New Chat
+            </button>
+        </div>
+        
+        <div id="chat-history" class="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar"></div>
+
+        <div class="p-4 border-t border-sep space-y-2">
+            <button onclick="toggleSettings()" class="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors w-full p-2 rounded hover:bg-[var(--sidebar-hover)] sans-font">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Engine Room</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col relative uncanny-skew transition-colors">
+        
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden absolute top-4 left-4 z-50 bg-[#fffdf9] dark:bg-[#333] p-6 rounded border border-sep shadow-2xl w-[20rem] sans-font">
+            <h3 class="font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-[var(--text-main)]">Interface Settings</h3>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1 block">Active Endpoint</label>
+                    <div id="endpoint-display" class="text-xs p-2 bg-black/5 dark:bg-white/5 rounded break-all font-mono border border-sep"></div>
+                </div>
+                <button onclick="toggleDarkMode()" class="w-full p-2 text-xs border border-sep rounded bg-black/5 dark:bg-white/5 transition-colors text-[var(--text-main)]">Toggle Dark/Light Mode</button>
+                <button onclick="clearAllChats()" class="w-full p-2 text-xs border border-red-200 dark:border-red-900 text-red-600 rounded bg-red-50 dark:bg-red-900/10 transition-colors font-bold">Clear All Chat History</button>
+            </div>
+
+            <button onclick="toggleSettings()" class="w-full bg-[#cc7755] text-white text-xs py-3 rounded uppercase font-bold tracking-widest wobble-hover">Close</button>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-container" class="flex-1 overflow-y-auto px-4 py-8 md:px-12 lg:px-24 custom-scrollbar">
+            <div id="messages-list" class="max-w-3xl mx-auto space-y-8 pb-10"></div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 md:p-6 bg-gradient-to-t from-[var(--bg-color)] to-transparent">
+            <div class="max-w-3xl mx-auto">
+                <div class="relative flex items-end gap-2">
+                    <textarea
+                        id="user-input"
+                        placeholder="Talk to Cladue..."
+                        class="w-full rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15px] sans-font placeholder:text-[#a09a90] transition-colors shadow-sm"
+                        rows="1"
+                        style="min-height: 52px; max-height: 200px;"
+                    ></textarea>
+                    <button id="send-btn" class="absolute right-2 bottom-2 p-2.5 rounded-lg bg-[#cc7755] text-white hover:bg-[#b56545] transition-colors wobble-hover">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * CONFIGURATION
+         * * For GitHub Actions injection, use a placeholder that you can swap 
+         * using a tool like `sed` in your workflow, e.g.:
+         * sed -i "s|__ENDPOINT_PLACEHOLDER__|${{ secrets.ENDPOINT }}|g" index.html
+         */
+        const OLLAMA_ENDPOINT = '__ENDPOINT_PLACEHOLDER__'.startsWith('__') 
+            ? 'https://ollama.msdhaliwal.in' // Fallback for local dev
+            : '__ENDPOINT_PLACEHOLDER__';
+            
+        const DEFAULT_MODEL = 'hf.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF:Q4_0';
+        let SYSTEM_PROMPT = '';
+
+        let chats = JSON.parse(localStorage.getItem('cladue_chats') || '[]');
+        let currentChatId = null;
+
+        const messagesList = document.getElementById('messages-list');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatHistoryEl = document.getElementById('chat-history');
+        const chatContainer = document.getElementById('chat-container');
+        const endpointDisplay = document.getElementById('endpoint-display');
+
+        async function loadSystemPrompt() {
+            try {
+                const response = await fetch('sys.txt');
+                if (response.ok) {
+                    SYSTEM_PROMPT = await response.text();
+                } else {
+                    SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
+                }
+            } catch (err) {
+                SYSTEM_PROMPT = "You are Cladue, an AI assistant running locally. You are helpful, slightly informal, and concise.";
+            }
+        }
+
+        async function init() {
+            endpointDisplay.textContent = OLLAMA_ENDPOINT;
+            await loadSystemPrompt();
+            if (chats.length > 0) loadChat(chats[0].id);
+            else startNewChat();
+            renderHistory();
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('cladue_theme', isDark ? 'dark' : 'light');
+        }
+
+        function toggleSettings() {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        }
+
+        function startNewChat() {
+            currentChatId = Date.now().toString();
+            const newChat = {
+                id: currentChatId,
+                title: "New Chat",
+                messages: [{ role: 'assistant', content: "Hello. I am Cladue. How can I help today?" }]
+            };
+            chats.unshift(newChat);
+            saveToLocal();
+            renderHistory();
+            loadChat(currentChatId);
+        }
+
+        function deleteChat(e, id) {
+            e.stopPropagation();
+            chats = chats.filter(c => c.id !== id);
+            saveToLocal();
+            if (currentChatId === id) {
+                if (chats.length > 0) loadChat(chats[0].id);
+                else startNewChat();
+            } else {
+                renderHistory();
+            }
+        }
+
+        function renameChat(e, id) {
+            e.stopPropagation();
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return;
+            const newTitle = prompt("Rename chat:", chat.title);
+            if (newTitle && newTitle.trim()) {
+                chat.title = newTitle.trim();
+                saveToLocal();
+                renderHistory();
+            }
+        }
+
+        function loadChat(id) {
+            currentChatId = id;
+            const chat = chats.find(c => c.id === id);
+            if (!chat) return startNewChat();
+            messagesList.innerHTML = '';
+            chat.messages.forEach(msg => appendMessageUI(msg.role, msg.content, msg.isError));
+            renderHistory();
+            chatContainer.scrollTo(0, chatContainer.scrollHeight);
+        }
+
+        function renderHistory() {
+            const historyTitle = `<div class="text-[10px] font-bold text-[var(--text-muted)] mb-2 uppercase pl-2 sans-font flex justify-between items-center">
+                <span>Recent</span>
+            </div>`;
+            
+            chatHistoryEl.innerHTML = historyTitle + chats.map(chat => `
+                <div onclick="loadChat('${chat.id}')" class="group flex items-center justify-between px-3 py-2 text-sm rounded cursor-pointer transition-colors ${chat.id === currentChatId ? 'active-chat' : 'hover:bg-[var(--sidebar-hover)]'} text-[var(--text-muted)]">
+                    <span class="truncate pr-2">${chat.title}</span>
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="renameChat(event, '${chat.id}')" class="p-1 hover:text-amber-600 transition-colors" title="Rename">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button onclick="deleteChat(event, '${chat.id}')" class="p-1 hover:text-red-500 transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatAssistantContent(content) {
+            const thinkRegex = /<think>([\s\S]*?)<\/think>/g;
+            let thinkBlocks = [];
+            let textContent = content.replace(thinkRegex, (match, p1) => {
+                thinkBlocks.push(p1.trim());
+                return `\n\n[CLADUE_THINK_${thinkBlocks.length - 1}]\n\n`;
+            });
+
+            let formatted = marked.parse(textContent);
+            thinkBlocks.forEach((thinkContent, index) => {
+                const blockHtml = `
+                    <div class="think-block">
+                        <div class="think-header" onclick="this.parentElement.classList.toggle('expanded')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            <span>Thought for a while</span>
+                            <svg class="think-arrow transition-transform ml-auto mr-2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"></path></svg>
+                        </div>
+                        <div class="think-container">
+                            <div class="think-content">${marked.parse(thinkContent)}</div>
+                        </div>
+                    </div>
+                `;
+                formatted = formatted.replace(new RegExp(`<p>\\[CLADUE_THINK_${index}\\]<\\/p>|\\[CLADUE_THINK_${index}\\]`, 'g'), blockHtml);
+            });
+            return formatted;
+        }
+
+        function appendMessageUI(role, content, isError = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex gap-4 ${role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`;
+
+            if (role === 'assistant') {
+                wrapper.innerHTML = `
+                    <div class="w-8 h-8 rounded shrink-0 bg-[#e6ded0] dark:bg-[#3f3f3c] flex items-center justify-center mt-1 border border-sep">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon"><path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" /></svg>
+                    </div>
+                    <div class="max-w-[85%] pt-1 text-[16px] leading-relaxed markdown-body text-[var(--text-main)]">
+                        ${isError ? `<div class="p-4 border border-red-200 bg-red-50 dark:bg-red-950/20 rounded-lg text-red-600">${content}</div>` : formatAssistantContent(content)}
+                    </div>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="max-w-[85%] order-1">
+                        <div class="user-bubble text-[#222] dark:text-[#e2e2e1] px-5 py-3 rounded-2xl text-[15px] leading-relaxed shadow-sm sans-font">
+                            ${content}
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full shrink-0 bg-[#c0b8aa] dark:bg-[#5a554f] flex items-center justify-center mt-1 order-2 border border-[#a0988a]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#f3efe6] translate-y-0.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                `;
+            }
+            messagesList.appendChild(wrapper);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function handleSend() {
+            const content = userInput.value.trim();
+            if (!content) return;
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat.messages.length === 1 && chat.messages[0].role === 'assistant') {
+                chat.title = content.length > 20 ? content.substring(0, 20) + "..." : content;
+            }
+
+            chat.messages.push({ role: 'user', content });
+            appendMessageUI('user', content);
+            saveToLocal();
+            renderHistory();
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'flex gap-4 justify-start opacity-70';
+            loadingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded shrink-0 bg-[#e6ded0] dark:bg-[#3f3f3c] flex items-center justify-center mt-1"><svg class="animate-spin text-[#cc7755]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></div>
+                <div class="text-[15px] leading-relaxed italic pt-2 text-[var(--text-main)]">Thinking...</div>
+            `;
+            messagesList.appendChild(loadingDiv);
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+
+            try {
+                const apiMessages = chat.messages.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content }));
+                apiMessages.unshift({ role: 'system', content: SYSTEM_PROMPT });
+
+                const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: DEFAULT_MODEL, messages: apiMessages, stream: false })
+                });
+
+                loadingDiv.remove();
+                if (!response.ok) throw new Error(`Status ${response.status}`);
+                const data = await response.json();
+                const botResponse = data.message.content;
+
+                chat.messages.push({ role: 'assistant', content: botResponse });
+                appendMessageUI('assistant', botResponse);
+                saveToLocal();
+            } catch (err) {
+                loadingDiv.remove();
+                const errorMsg = `Server Connection Error: ${err.message}. Please check if Ollama is running at ${OLLAMA_ENDPOINT}.`;
+                chat.messages.push({ role: 'assistant', content: errorMsg, isError: true });
+                appendMessageUI('assistant', errorMsg, true);
+                saveToLocal();
+            }
+        }
+
+        function saveToLocal() { localStorage.setItem('cladue_chats', JSON.stringify(chats)); }
+        function clearAllChats() { if (confirm("Delete ALL chats?")) { chats=[]; saveToLocal(); startNewChat(); } }
+        
+        sendBtn.addEventListener('click', handleSend);
+        userInput.addEventListener('keydown', (e) => { 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); handleSend(); 
+            } 
+        });
+        
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        init();
+    </script>
+</body>
+</html>
