@@ -1,0 +1,36 @@
+name: Deploy Cladue to Pages
+
+on:
+  push:
+    branches: ["main"] # Ensures this runs when you push to your main branch
+
+# Sets permissions to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Inject Secret Endpoint
+        run: |
+          # This command finds the placeholder and replaces it with your secret.
+          # We use '|' as a delimiter in case your URL contains slashes.
+          sed -i "s|__ENDPOINT_PLACEHOLDER__|${{ secrets.ENDPOINT }}|g" index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # Uploads the entire root directory
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
