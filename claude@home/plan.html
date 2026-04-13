@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Plans | Cladue@Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a18;
+            --card-bg: #222220;
+            --border-color: #2d2d2b;
+            --text-main: #e2e2e1;
+            --text-muted: #8a8a84;
+            --accent: #d98866;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .plan-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-4px);
+            border-color: #3d3d3b;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+
+        .toggle-container {
+            background-color: #111110;
+            padding: 4px;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            padding: 6px 16px;
+            border-radius: 0.5rem;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .toggle-btn.active {
+            background-color: var(--border-color);
+            color: white;
+        }
+
+        .check-icon {
+            color: #666;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .plan-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: black;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 0.75rem;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: white;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 0.75rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            background-color: #3d3d3b;
+        }
+
+        .badge-usage {
+            background-color: #1a1a18;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center py-12 px-6">
+
+    <!-- Header -->
+    <div class="text-center mb-10 animate-fade">
+        <h1 class="text-4xl font-medium mb-8">Plans that grow with you</h1>
+        
+        <div class="toggle-container mb-4">
+            <button id="btn-individual" class="toggle-btn active" onclick="switchTab('individual')">Individual</button>
+            <button id="btn-team" class="toggle-btn" onclick="switchTab('team')">Team and Enterprise</button>
+        </div>
+    </div>
+
+    <!-- Individual Section -->
+    <div id="section-individual" class="grid md:grid-cols-2 gap-8 w-full max-w-4xl animate-fade">
+        <!-- Pro Plan -->
+        <div class="plan-card p-8">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="plan-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold">Pro</h2>
+                <p class="text-[var(--text-muted)] text-sm">Research, code, and organize</p>
+            </div>
+            
+            <div class="text-center mb-8">
+                <div class="flex items-baseline justify-center gap-1">
+                    <span class="text-3xl font-bold">15 €</span>
+                    <span class="text-xs text-[var(--text-muted)]">EUR / month billed annually</span>
+                </div>
+            </div>
+
+            <a href="#" class="btn-primary mb-8">Get Pro plan</a>
+
+            <div class="space-y-4 text-sm">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Everything in Free and:</p>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Cladue Code directly in your codebase</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Power through tasks with Cowork</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Higher usage limits</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Deep research and analysis</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Memory that carries across conversations</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Max Plan -->
+        <div class="plan-card p-8">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="plan-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold">Max</h2>
+                <p class="text-[var(--text-muted)] text-sm">Higher limits, priority access</p>
+            </div>
+            
+            <div class="text-center mb-8">
+                <div class="flex items-baseline justify-center gap-1">
+                    <span class="text-3xl font-bold">From 90 €</span>
+                    <span class="text-xs text-[var(--text-muted)]">EUR / month billed monthly</span>
+                </div>
+            </div>
+
+            <a href="#" class="btn-primary mb-8">Get Max plan</a>
+
+            <div class="space-y-4 text-sm">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Everything in Pro, plus:</p>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Up to 20x more usage than Pro*</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Early access to advanced Cladue features</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Higher output limits for all tasks</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Priority access at high traffic times</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Cladue in PowerPoint</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section (Hidden by default) -->
+    <div id="section-team" class="hidden grid md:grid-cols-2 gap-8 w-full max-w-4xl animate-fade">
+        <!-- Team Plan -->
+        <div class="plan-card p-8">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="plan-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold">Team</h2>
+                <p class="text-[var(--text-muted)] text-sm">Predictable usage per seat</p>
+            </div>
+            
+            <div class="badge-usage">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm">Standard seat</span>
+                    <span class="font-bold">16,83 EUR / mo</span>
+                </div>
+                <p class="text-[10px] text-[var(--text-muted)]">All Claude features, plus more usage than Pro*</p>
+            </div>
+
+            <button class="btn-secondary mb-8 cursor-not-allowed opacity-60">Get Team plan</button>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>200K context window</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Extra usage available at API rates</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Cladue Code</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="plan-card p-8">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="plan-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 21h18M3 7l9-4 9 4v14H3V7zm4 14h2v-4h4v4h2v-4h4v4h2V7l-9-4-9 4v14z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold">Enterprise</h2>
+                <p class="text-[var(--text-muted)] text-sm">Flexible pooled usage</p>
+            </div>
+            
+            <div class="badge-usage">
+                <h4 class="text-xs font-bold uppercase mb-1">Seat price + usage at API rates</h4>
+                <p class="text-[10px] text-[var(--text-muted)]">20 USD/seat. Usage cost scales with model and task.</p>
+            </div>
+
+            <button class="btn-secondary mb-8 cursor-not-allowed opacity-60">Get Enterprise plan</button>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Pay-as-you-go pricing</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Set user and org spend limits</span>
+                </div>
+                <div class="flex gap-3">
+                    <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>500K context window</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Disclaimer -->
+    <div class="mt-16 max-w-2xl text-center animate-fade" style="animation-delay: 0.2s">
+        <p class="text-[10px] text-[var(--text-muted)] leading-relaxed">
+            *Usage limits apply. Prices shown don't include applicable tax. Prices and plans are subject to change at Anthropic's discretion.<br><br>
+            You will be charged 21% VAT, the standard rate in Romania, at checkout.
+        </p>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const btnInd = document.getElementById('btn-individual');
+            const btnTeam = document.getElementById('btn-team');
+            const secInd = document.getElementById('section-individual');
+            const secTeam = document.getElementById('section-team');
+
+            if (tab === 'individual') {
+                btnInd.classList.add('active');
+                btnTeam.classList.remove('active');
+                secInd.classList.remove('hidden');
+                secTeam.classList.add('hidden');
+            } else {
+                btnTeam.classList.add('active');
+                btnInd.classList.remove('active');
+                secTeam.classList.remove('hidden');
+                secInd.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
