@@ -184,7 +184,7 @@
                 const response = await fetch(`articles/${hash}.md`);
                 if (response.ok) {
                     const markdown = await response.text();
-                    contentEl.innerHTML = marked.parse(markdown);
+                    contentEl.innerHTML = marked.parse(markdown, { mangle: false, headerIds: false });
                     if (hash !== 'home') {
                         knownArticles.add(hash);
                         localStorage.setItem('wikiprion_history', JSON.stringify(Array.from(knownArticles)));
