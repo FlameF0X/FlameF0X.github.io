@@ -1,7 +1,7 @@
 <div class="infobox">
 <div class="infobox-title">Prion (PrP)</div>
 <div style="background-color: white; padding: 10px;">
-<img src="[https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/1QLZ.png/600px-1QLZ.png](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/1QLZ.png/600px-1QLZ.png)" alt="Prion Protein Structure" style="width: 100%;">
+<img src="[https://upload.wikimedia.org/wikipedia/commons/4/4c/PDB_6DU9.png](https://upload.wikimedia.org/wikipedia/commons/4/4c/PDB_6DU9.png)" alt="Prion Protein Structure" style="width: 100%;">
 </div>
 <div class="img-caption">3D structure of the human major prion protein (PrP).</div>
 <table>
