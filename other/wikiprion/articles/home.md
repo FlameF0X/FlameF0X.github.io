@@ -1,42 +1,47 @@
-# WikiPrion
+<div class="infobox">
+    <div class="infobox-title">Prion (PrP<sup>Sc</sup>)</div>
+    <div class="bg-white p-2">
+        <img src="[https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/1QLZ.png/600px-1QLZ.png](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/1QLZ.png/600px-1QLZ.png)" alt="3D structure of major prion protein">
+    </div>
+    <div class="img-caption">3D structure of the human major prion protein (PrP).</div>
+    <table>
+        <tr><th>Classification</th><td>Infectious Protein</td></tr>
+        <tr><th>Composition</th><td>Amino Acids</td></tr>
+        <tr><th>Discovery</th><td>1982</td></tr>
+        <tr><th>Fatality Rate</th><td>100%</td></tr>
+    </table>
+</div>
 
-Welcome to WikiPrion, the collaborative archive dedicated to transmissible spongiform encephalopathies (TSEs) and the anomalous misfolded proteins that cause them.
+# Main Page
+<div class="subtitle">From WikiPrion, the free encyclopedia</div>
 
-## What is a Prion?
+Welcome to **WikiPrion**, the collaborative archive dedicated to **transmissible spongiform encephalopathies (TSEs)** and the anomalous misfolded proteins that cause them.
 
-A prion is an infectious agent composed entirely of a protein material that can fold in multiple, structurally distinct ways. One of these ways is transmissible to other prion proteins, leading to a disease that is similar to a viral or bacterial infection but lacks any genetic material (nucleic acids).
+### What is a Prion?
 
-The term "prion" was coined in 1982 by Stanley B. Prusiner—a portmanteau of protein and infection.
+A **prion** is an infectious agent composed entirely of a protein material that can fold in multiple, structurally distinct ways. Unlike viruses or bacteria, prions contain no nucleic acids (DNA or RNA). The disease occurs when a normal, healthy protein—the "cellular" prion protein ($PrP^C$)—misfolds into a pathological isoform known as $PrP^{Sc}$.
 
-## The Misfolding Mechanism
+### The Misfolding Mechanism
 
-In its healthy state, the protein (known as $PrP^C$ or "cellular" prion protein) is found throughout the body, particularly in the central nervous system. Its exact function is still debated, but it is believed to play a role in cell-cell adhesion and intracellular signaling.
+The pathology begins when a $PrP^C$ molecule flips into the $PrP^{Sc}$ shape. This misfolded isoform acts as a template, forcing healthy proteins it contacts to misfold in a chain reaction. This process creates aggregated amyloid fibers that lead to the characteristic "spongiform" (holey) appearance of affected brain tissue.
 
-The pathology begins when a $PrP^C$ molecule flips into the $PrP^{Sc}$ (Scrapie) isoform. This misfolded shape:
 
-- **Is highly stable**: Resistant to heat, radiation, and chemical disinfectants.
-- **Is "Catalytic"**: It acts as a template, forcing healthy proteins it touches to misfold into the same deadly shape.
-- **Aggregates**: It forms amyloid fibers that create microscopic holes in brain tissue, giving the brain a "spongy" appearance (spongiform).
 
 ## Major Pathologies
 
 ### Human Strains
-
-- **Creutzfeldt–Jakob Disease (CJD)**: The most common human TSE, appearing sporadically in 1 in a million people annually.
-- **Fatal Familial Insomnia (FFI)**: A genetic mutation that prevents the brain from entering sleep, leading to total cognitive collapse.
-- **Kuru**: Historically found in Papua New Guinea, transmitted through funerary cannibalism.
+* [**Creutzfeldt–Jakob Disease (CJD)**](#cjd): The most common human TSE, appearing sporadically in approximately 1 in a million people annually.
+* [**Fatal Familial Insomnia (FFI)**](#ffi): A genetic mutation targeting the thalamus, preventing sleep and leading to cognitive collapse.
+* [**Kuru**](#kuru): Historically found in Papua New Guinea, transmitted via ritualistic cannibalism.
 
 ### Animal Strains
-
-- **Bovine Spongiform Encephalopathy (BSE)**: Widely known as "Mad Cow Disease."
-- **Chronic Wasting Disease (CWD)**: A disease currently spreading through North American cervid populations.
+* [**Bovine Spongiform Encephalopathy (BSE)**](#bse): Widely known as "Mad Cow Disease."
+* [**Chronic Wasting Disease (CWD)**](#cwd): A highly contagious prion disease affecting deer, elk, and moose.
 
 ## Technical Facts
 
-- **Inextinguishable**: Prions can survive being incinerated at 600°C (1,112°F). Standard hospital autoclaves that kill bacteria and viruses often leave prions intact.
-- **Soil Persistence**: In cases of Chronic Wasting Disease, prions have been found to remain infectious in the soil for over 16 years.
-- **The Species Barrier**: While many prions are species-specific, the BSE (Mad Cow) outbreak proved that some can jump the species barrier to humans, resulting in variant CJD.
+* **Inextinguishable:** Prions can survive being incinerated at 600°C. They are resistant to standard hospital sterilization techniques like autoclaving and formaldehyde.
+* **Environmental Persistence:** In some animal populations, prions have remained infectious in the soil for over 16 years.
+* **The Species Barrier:** While many strains are species-specific, the BSE outbreak proved that certain prions can cross the species barrier to humans.
 
----
-
-For more information, use the search bar to look up specific strains or browse the "Discovered Articles" in the sidebar.
+*For more information, use the search bar to look up specific strains or browse the "Discovered Articles" in the sidebar.*
