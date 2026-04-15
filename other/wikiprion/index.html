@@ -82,14 +82,6 @@
             color: var(--wiki-accent) !important;
             background: rgba(239, 68, 68, 0.05);
         }
-
-        .tab-active {
-            background: var(--wiki-bg);
-            border: 1px solid var(--wiki-border);
-            border-bottom-color: var(--wiki-bg);
-            margin-bottom: -1px;
-            color: white;
-        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -102,7 +94,6 @@
         </div>
         
         <nav class="flex-1 overflow-y-auto wiki-sidebar p-4 space-y-6 text-sm" id="sidebar-nav">
-            <!-- Navigation will be generated dynamically -->
             <div>
                 <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-2">Navigation</div>
                 <div id="nav-fixed" class="space-y-1">
@@ -113,7 +104,6 @@
             <div>
                 <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-2">Discovered Articles</div>
                 <div id="nav-discovered" class="space-y-1">
-                    <!-- Successfully fetched articles will appear here -->
                     <p class="px-2 py-1 text-[11px] italic text-slate-600">No articles explored yet.</p>
                 </div>
             </div>
@@ -122,20 +112,12 @@
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-12 border-b border-slate-800 bg-[#0a0a0c] flex items-end px-8 justify-between">
-            <div class="flex gap-1 h-8 text-xs">
-                <button class="px-4 py-1 border border-transparent tab-active">Article</button>
-                <button class="px-4 py-1 border border-transparent text-slate-500 hover:text-slate-300">Talk</button>
-            </div>
-            <div class="flex gap-4 h-8 text-xs items-center mb-1">
-                <button class="text-slate-300 hover:underline">Read</button>
-                <button class="text-slate-500 hover:underline">Edit</button>
-                <button class="text-slate-500 hover:underline">View history</button>
-                <div class="ml-4 relative">
-                    <form id="search-form">
-                        <input type="text" id="search-input" placeholder="Search WikiPrion" class="bg-[#161a22] border border-slate-700 rounded px-2 py-1 text-xs w-48 focus:outline-none focus:border-red-500">
-                    </form>
-                </div>
+        <!-- Minimal Header with Search Only -->
+        <header class="h-14 border-b border-slate-800 bg-[#0a0a0c] flex items-center px-12 justify-end">
+            <div class="relative">
+                <form id="search-form">
+                    <input type="text" id="search-input" placeholder="Search WikiPrion..." class="bg-[#161a22] border border-slate-700 rounded-full px-4 py-1.5 text-xs w-64 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 transition-all">
+                </form>
             </div>
         </header>
 
@@ -148,9 +130,8 @@
                 <!-- Content injected here -->
             </article>
 
-            <footer class="max-w-5xl mx-auto px-12 py-8 border-t border-slate-800 text-[10px] text-slate-500 space-y-2">
-                <p>WikiPrion data resides in the <code>/articles/</code> directory.</p>
-                <p>To see all files in the sidebar, create an <code>articles/list.json</code> containing <code>["kuru", "cjd", "ffi"]</code>.</p>
+            <footer class="max-w-5xl mx-auto px-12 py-8 border-t border-slate-800 text-[10px] text-slate-600">
+                <p>WikiPrion Archive Access | Data sourced from local /articles/ directory.</p>
             </footer>
         </main>
     </div>
@@ -160,7 +141,6 @@
         const loader = document.getElementById('loader');
         const discoveredNav = document.getElementById('nav-discovered');
         
-        // Track articles we've successfully seen in this session
         let knownArticles = new Set(JSON.parse(localStorage.getItem('wikiprion_history') || '[]'));
 
         function updateSidebar() {
@@ -173,7 +153,6 @@
                 </a>
             `).join('');
 
-            // Highlight active
             const hash = window.location.hash.substring(1) || 'home';
             document.querySelectorAll('aside a').forEach(link => {
                 link.classList.toggle('active-link', link.getAttribute('href') === '#' + hash);
@@ -185,25 +164,21 @@
             loader.classList.remove('hidden');
             
             try {
-                // Try to fetch the specific MD file
                 const response = await fetch(`articles/${hash}.md`);
                 
                 if (response.ok) {
                     const markdown = await response.text();
                     contentEl.innerHTML = marked.parse(markdown);
                     
-                    // If successful and not 'home', add to our discovered list
                     if (hash !== 'home') {
                         knownArticles.add(hash);
                         localStorage.setItem('wikiprion_history', JSON.stringify(Array.from(knownArticles)));
-                        updateSidebar();
                     }
                 } else {
                     contentEl.innerHTML = `
                         <h1>Article not found</h1>
                         <div class="subtitle">From WikiPrion, the free encyclopedia</div>
                         <p>The page <b>/articles/${hash}.md</b> does not exist in the database.</p>
-                        <p>If you intended to create this article, please upload the markdown file to the correct directory.</p>
                     `;
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -211,12 +186,10 @@
                 contentEl.innerHTML = `<h1>Error</h1><p>Failed to connect to the article vault.</p>`;
             } finally {
                 loader.classList.add('hidden');
-                updateSidebar(); // Ensure highlighting update
+                updateSidebar();
             }
         }
 
-        // Automatic Article List Fetch (Optional but recommended)
-        // If you place a 'list.json' in your articles folder, this will populate the sidebar on load
         async function tryFetchArticleList() {
             try {
                 const response = await fetch('articles/list.json');
@@ -225,10 +198,9 @@
                     list.forEach(item => knownArticles.add(item));
                     updateSidebar();
                 }
-            } catch(e) { /* silent fail if no list exists */ }
+            } catch(e) {}
         }
 
-        // Event Listeners
         window.addEventListener('hashchange', loadArticle);
         window.onload = () => {
             tryFetchArticleList();
