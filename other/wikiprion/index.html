@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikiPrion | The Protein Misfolding Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --wiki-bg: #0a0a0c;
+            --wiki-sidebar: #0f1115;
+            --wiki-border: #334155;
+            --wiki-accent: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--wiki-bg);
+            color: #e2e8f0;
+        }
+
+        /* Wikipedia Typography Styles */
+        .prose { max-width: none; }
+        .prose h1 { 
+            font-family: 'Libre Baskerville', serif;
+            color: #f8fafc; 
+            font-weight: 400; 
+            font-size: 2.5rem; 
+            margin-bottom: 0.25rem; 
+            border-bottom: 1px solid var(--wiki-border); 
+            padding-bottom: 0.5rem; 
+        }
+        .prose .subtitle {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+            border-bottom: none;
+        }
+        .prose h2 { 
+            font-family: 'Libre Baskerville', serif;
+            color: #f1f5f9; 
+            font-weight: 700; 
+            font-size: 1.5rem; 
+            margin-top: 2rem; 
+            margin-bottom: 0.5rem; 
+            border-bottom: 1px solid #1e293b;
+        }
+        .prose p { margin-bottom: 1rem; line-height: 1.8; color: #cbd5e1; text-align: justify; }
+        
+        /* Infobox Style */
+        .infobox {
+            float: right;
+            width: 300px;
+            background: #161a22;
+            border: 1px solid var(--wiki-border);
+            padding: 0.5rem;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+        .infobox-title {
+            background: #27272a;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .infobox img { width: 100%; height: auto; margin-bottom: 0.5rem; border: 1px solid #334155; }
+        .infobox table { width: 100%; border-collapse: collapse; }
+        .infobox th { text-align: left; padding: 4px; color: #94a3b8; width: 40%; font-weight: 600; }
+        .infobox td { padding: 4px; color: #e2e8f0; }
+
+        .wiki-sidebar::-webkit-scrollbar { width: 4px; }
+        .wiki-sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .active-link {
+            font-weight: 700;
+            color: var(--wiki-accent) !important;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .tab-active {
+            background: var(--wiki-bg);
+            border: 1px solid var(--wiki-border);
+            border-bottom-color: var(--wiki-bg);
+            margin-bottom: -1px;
+            color: white;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-[#0f1115] border-r border-slate-800 flex flex-col shrink-0">
+        <div class="p-6 flex flex-col items-center border-b border-slate-800/50">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-900 to-black rounded-full mb-3 border border-red-500/50 flex items-center justify-center text-2xl">☣</div>
+            <h1 class="text-xl font-serif tracking-tight">WikiPrion</h1>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto wiki-sidebar p-4 space-y-6 text-sm" id="sidebar-nav">
+            <!-- Navigation will be generated dynamically -->
+            <div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-2">Navigation</div>
+                <div id="nav-fixed" class="space-y-1">
+                    <a href="#home" class="block px-2 py-1 text-slate-400 hover:text-white transition-colors">Main page</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-2">Discovered Articles</div>
+                <div id="nav-discovered" class="space-y-1">
+                    <!-- Successfully fetched articles will appear here -->
+                    <p class="px-2 py-1 text-[11px] italic text-slate-600">No articles explored yet.</p>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-12 border-b border-slate-800 bg-[#0a0a0c] flex items-end px-8 justify-between">
+            <div class="flex gap-1 h-8 text-xs">
+                <button class="px-4 py-1 border border-transparent tab-active">Article</button>
+                <button class="px-4 py-1 border border-transparent text-slate-500 hover:text-slate-300">Talk</button>
+            </div>
+            <div class="flex gap-4 h-8 text-xs items-center mb-1">
+                <button class="text-slate-300 hover:underline">Read</button>
+                <button class="text-slate-500 hover:underline">Edit</button>
+                <button class="text-slate-500 hover:underline">View history</button>
+                <div class="ml-4 relative">
+                    <form id="search-form">
+                        <input type="text" id="search-input" placeholder="Search WikiPrion" class="bg-[#161a22] border border-slate-700 rounded px-2 py-1 text-xs w-48 focus:outline-none focus:border-red-500">
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-[#0a0a0c] relative scroll-smooth">
+            <div id="loader" class="hidden absolute inset-0 flex items-center justify-center bg-[#0a0a0c] z-50">
+                <div class="w-8 h-8 border-2 border-red-500/20 border-t-red-500 rounded-full animate-spin"></div>
+            </div>
+
+            <article id="content" class="max-w-5xl mx-auto py-10 px-12 prose prose-invert">
+                <!-- Content injected here -->
+            </article>
+
+            <footer class="max-w-5xl mx-auto px-12 py-8 border-t border-slate-800 text-[10px] text-slate-500 space-y-2">
+                <p>WikiPrion data resides in the <code>/articles/</code> directory.</p>
+                <p>To see all files in the sidebar, create an <code>articles/list.json</code> containing <code>["kuru", "cjd", "ffi"]</code>.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const contentEl = document.getElementById('content');
+        const loader = document.getElementById('loader');
+        const discoveredNav = document.getElementById('nav-discovered');
+        
+        // Track articles we've successfully seen in this session
+        let knownArticles = new Set(JSON.parse(localStorage.getItem('wikiprion_history') || '[]'));
+
+        function updateSidebar() {
+            if (knownArticles.size === 0) return;
+            
+            const sorted = Array.from(knownArticles).sort();
+            discoveredNav.innerHTML = sorted.map(id => `
+                <a href="#${id}" class="block px-2 py-1 text-slate-400 hover:text-white transition-colors capitalize">
+                    ${id.replace(/-/g, ' ')}
+                </a>
+            `).join('');
+
+            // Highlight active
+            const hash = window.location.hash.substring(1) || 'home';
+            document.querySelectorAll('aside a').forEach(link => {
+                link.classList.toggle('active-link', link.getAttribute('href') === '#' + hash);
+            });
+        }
+
+        async function loadArticle() {
+            const hash = window.location.hash.substring(1).toLowerCase() || 'home';
+            loader.classList.remove('hidden');
+            
+            try {
+                // Try to fetch the specific MD file
+                const response = await fetch(`articles/${hash}.md`);
+                
+                if (response.ok) {
+                    const markdown = await response.text();
+                    contentEl.innerHTML = marked.parse(markdown);
+                    
+                    // If successful and not 'home', add to our discovered list
+                    if (hash !== 'home') {
+                        knownArticles.add(hash);
+                        localStorage.setItem('wikiprion_history', JSON.stringify(Array.from(knownArticles)));
+                        updateSidebar();
+                    }
+                } else {
+                    contentEl.innerHTML = `
+                        <h1>Article not found</h1>
+                        <div class="subtitle">From WikiPrion, the free encyclopedia</div>
+                        <p>The page <b>/articles/${hash}.md</b> does not exist in the database.</p>
+                        <p>If you intended to create this article, please upload the markdown file to the correct directory.</p>
+                    `;
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                contentEl.innerHTML = `<h1>Error</h1><p>Failed to connect to the article vault.</p>`;
+            } finally {
+                loader.classList.add('hidden');
+                updateSidebar(); // Ensure highlighting update
+            }
+        }
+
+        // Automatic Article List Fetch (Optional but recommended)
+        // If you place a 'list.json' in your articles folder, this will populate the sidebar on load
+        async function tryFetchArticleList() {
+            try {
+                const response = await fetch('articles/list.json');
+                if (response.ok) {
+                    const list = await response.json();
+                    list.forEach(item => knownArticles.add(item));
+                    updateSidebar();
+                }
+            } catch(e) { /* silent fail if no list exists */ }
+        }
+
+        // Event Listeners
+        window.addEventListener('hashchange', loadArticle);
+        window.onload = () => {
+            tryFetchArticleList();
+            loadArticle();
+        };
+
+        document.getElementById('search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('search-input');
+            const val = input.value.trim().toLowerCase().replace(/\s+/g, '-');
+            if (val) {
+                window.location.hash = val;
+                input.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
