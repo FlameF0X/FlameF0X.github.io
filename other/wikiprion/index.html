@@ -69,10 +69,31 @@
             padding: 0.5rem;
             margin-bottom: 0.5rem;
         }
-        .infobox img { width: 100%; height: auto; margin-bottom: 0.5rem; border: 1px solid #334155; }
         .infobox table { width: 100%; border-collapse: collapse; }
         .infobox th { text-align: left; padding: 4px; color: #94a3b8; width: 40%; font-weight: 600; }
         .infobox td { padding: 4px; color: #e2e8f0; }
+
+        /* Image Handling */
+        article img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 2px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--wiki-border);
+        }
+        .infobox img {
+            margin: 0;
+            border: none;
+            display: block;
+            width: 100%;
+        }
+        .img-caption {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            padding: 0.5rem 0;
+            text-align: center;
+            line-height: 1.4;
+        }
 
         .wiki-sidebar::-webkit-scrollbar { width: 4px; }
         .wiki-sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -86,7 +107,6 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Left Sidebar -->
     <aside class="w-64 bg-[#0f1115] border-r border-slate-800 flex flex-col shrink-0">
         <div class="p-6 flex flex-col items-center border-b border-slate-800/50">
             <div class="w-16 h-16 bg-gradient-to-br from-red-900 to-black rounded-full mb-3 border border-red-500/50 flex items-center justify-center text-2xl">☣</div>
@@ -100,7 +120,6 @@
                     <a href="#home" class="block px-2 py-1 text-slate-400 hover:text-white transition-colors">Main page</a>
                 </div>
             </div>
-
             <div>
                 <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-2">Discovered Articles</div>
                 <div id="nav-discovered" class="space-y-1">
@@ -110,9 +129,7 @@
         </nav>
     </aside>
 
-    <!-- Main Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Minimal Header with Search Only -->
         <header class="h-14 border-b border-slate-800 bg-[#0a0a0c] flex items-center px-12 justify-end">
             <div class="relative">
                 <form id="search-form">
@@ -131,7 +148,7 @@
             </article>
 
             <footer class="max-w-5xl mx-auto px-12 py-8 border-t border-slate-800 text-[10px] text-slate-600">
-                <p>WikiPrion Archive Access | Data sourced from local /articles/ directory.</p>
+                <p>WikiPrion Archive Access | Images sourced via Wikimedia Commons.</p>
             </footer>
         </main>
     </div>
@@ -144,14 +161,14 @@
         let knownArticles = new Set(JSON.parse(localStorage.getItem('wikiprion_history') || '[]'));
 
         function updateSidebar() {
-            if (knownArticles.size === 0) return;
-            
             const sorted = Array.from(knownArticles).sort();
-            discoveredNav.innerHTML = sorted.map(id => `
-                <a href="#${id}" class="block px-2 py-1 text-slate-400 hover:text-white transition-colors capitalize">
-                    ${id.replace(/-/g, ' ')}
-                </a>
-            `).join('');
+            if (sorted.length > 0) {
+                discoveredNav.innerHTML = sorted.map(id => `
+                    <a href="#${id}" class="block px-2 py-1 text-slate-400 hover:text-white transition-colors capitalize">
+                        ${id.replace(/-/g, ' ')}
+                    </a>
+                `).join('');
+            }
 
             const hash = window.location.hash.substring(1) || 'home';
             document.querySelectorAll('aside a').forEach(link => {
@@ -165,47 +182,27 @@
             
             try {
                 const response = await fetch(`articles/${hash}.md`);
-                
                 if (response.ok) {
                     const markdown = await response.text();
                     contentEl.innerHTML = marked.parse(markdown);
-                    
                     if (hash !== 'home') {
                         knownArticles.add(hash);
                         localStorage.setItem('wikiprion_history', JSON.stringify(Array.from(knownArticles)));
                     }
                 } else {
-                    contentEl.innerHTML = `
-                        <h1>Article not found</h1>
-                        <div class="subtitle">From WikiPrion, the free encyclopedia</div>
-                        <p>The page <b>/articles/${hash}.md</b> does not exist in the database.</p>
-                    `;
+                    contentEl.innerHTML = `<h1>Article not found</h1><p>The page <b>/articles/${hash}.md</b> does not exist.</p>`;
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
-                contentEl.innerHTML = `<h1>Error</h1><p>Failed to connect to the article vault.</p>`;
+                contentEl.innerHTML = `<h1>Error</h1><p>Failed to connect to the vault.</p>`;
             } finally {
                 loader.classList.add('hidden');
                 updateSidebar();
             }
         }
 
-        async function tryFetchArticleList() {
-            try {
-                const response = await fetch('articles/list.json');
-                if (response.ok) {
-                    const list = await response.json();
-                    list.forEach(item => knownArticles.add(item));
-                    updateSidebar();
-                }
-            } catch(e) {}
-        }
-
         window.addEventListener('hashchange', loadArticle);
-        window.onload = () => {
-            tryFetchArticleList();
-            loadArticle();
-        };
+        window.onload = loadArticle;
 
         document.getElementById('search-form').addEventListener('submit', (e) => {
             e.preventDefault();
