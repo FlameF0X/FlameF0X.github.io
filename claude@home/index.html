@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cladue@Home</title>
+    <title>Claude@Home</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -182,7 +182,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-icon">
                         <path d="M12 2L15 9l8 1-6 6 2 9-9-4-8 5 1-8-7-5 8-2z" stroke-linejoin="round" />
                     </svg>
-                    <span class="font-bold text-lg tracking-tighter sans-font opacity-90 text-[var(--text-main)]">Cladue@Home</span>
+                    <span class="font-bold text-lg tracking-tighter sans-font opacity-90 text-[var(--text-main)]">Claude@Home</span>
                 </div>
             </div>
             <button onclick="startNewChat()" class="mt-4 w-full border border-sep rounded-lg py-2 text-sm sans-font hover:bg-[var(--sidebar-hover)] transition-all flex items-center justify-center gap-2 text-[var(--text-main)]">
@@ -259,7 +259,7 @@
                     <div id="input-wrapper" class="relative z-10">
                         <textarea
                             id="user-input"
-                            placeholder="Talk to Cladue..."
+                            placeholder="Talk to Claude..."
                             class="w-full rounded-2xl pl-4 pr-14 py-4 focus:outline-none focus:ring-1 focus:ring-[#cc7755] resize-none overflow-hidden text-[15.5px] sans-font placeholder:text-[#5a5a54] transition-all shadow-lg border border-sep"
                             rows="1"
                             style="min-height: 56px; max-height: 200px;"
@@ -312,9 +312,9 @@
         async function loadSystemPrompt() {
             try {
                 const response = await fetch('sys.txt');
-                SYSTEM_PROMPT = response.ok ? await response.text() : "You are Cladue, an AI assistant.";
+                SYSTEM_PROMPT = response.ok ? await response.text() : "You are Claude, an AI assistant.";
             } catch (err) {
-                SYSTEM_PROMPT = "You are Cladue, an AI assistant.";
+                SYSTEM_PROMPT = "You are Claude, an AI assistant.";
             }
         }
 
