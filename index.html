@@ -241,32 +241,19 @@
                         </thead>
                         <tbody class="divide-y divide-rule/50">
                             <tr>
-                                <td class="py-4 font-bold">i3-4096ctx</td>
-                                <td class="py-4 text-muted">~300m</td>
-                                <td class="py-4 text-muted">4096</td>
+                                <td class="py-4 font-bold">LFM2.5-1.2B-Distilled-Claude-4.6</td>
+                                <td class="py-4 text-muted">1.2B</td>
+                                <td class="py-4 text-muted">12k</td>
+                                <td class="py-4 text-muted">nvidia t4</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" class="underline">view_card</a></td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="underline">view_gguf</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold">ChessSLM</td>
+                                <td class="py-4 text-muted">30.3m</td>
+                                <td class="py-4 text-muted">1024</td>
                                 <td class="py-4 text-muted">nvidia p100</td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-4096ctx" class="underline">view_card</a></td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold">i3-200m v2.0</td>
-                                <td class="py-4 text-muted">~200m</td>
-                                <td class="py-4 text-muted">2048</td>
-                                <td class="py-4 text-muted">v100</td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-200m-v2" class="underline">view_card</a></td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold text-dim">i3-80m</td>
-                                <td class="py-4 text-dim">~80m</td>
-                                <td class="py-4 text-dim">1024</td>
-                                <td class="py-4 text-dim">legacy</td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-80m" class="underline text-dim">view_card</a></td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold text-dim">i3-22m</td>
-                                <td class="py-4 text-dim">~22m</td>
-                                <td class="py-4 text-dim">512</td>
-                                <td class="py-4 text-dim">legacy</td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/i3-lab/i3-22m" class="underline text-dim">view_card</a></td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/ChessSLM" class="underline">view_card</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -274,13 +261,35 @@
 
                 <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
                     <div class="text-dim italic text-sm">
-                        more to be presented soon...
+                        <tbody class="divide-y divide-rule/50">
+                            <tr>
+                                <td class="py-4 font-bold">MathGPT2</td>
+                                <td class="py-4 text-muted">81.9m</td>
+                                <td class="py-4 text-muted">1024</td>
+                                <td class="py-4 text-muted">nvidia t4</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/MathGPT2" class="underline">view_card</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold">ChessSLM</td>
+                                <td class="py-4 text-muted">30m</td>
+                                <td class="py-4 text-muted">1024</td>
+                                <td class="py-4 text-muted">nvidia p100</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/ChessSLM" class="underline">view_card</a></td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 font-bold">FlameF0X/Qwen2-0.2B-it</td>
+                                <td class="py-4 text-muted">~0.2B</td>
+                                <td class="py-4 text-muted">2048</td>
+                                <td class="py-4 text-muted">nvidia p100</td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/Qwen2-0.2B-it" class="underline">view_card</a></td>
+                            </tr>
+                        </tbody>
                     </div>
                 </div>
 
                 <div class="mt-8">
                     <button id="toggle-legacy" class="text-[10px] uppercase tracking-widest border-b border-dotted border-dim text-dim hover:text-ink hover:border-ink transition-colors">
-                        + load_legacy_architectures
+                        + load_more_obscure_models
                     </button>
                 </div>
             </div>
