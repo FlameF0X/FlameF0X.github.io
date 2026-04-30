@@ -112,48 +112,68 @@
             <div class="lg:col-span-8 p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-grid">
                 <span class="section-label">01. identity</span>
                 <h1 class="text-4xl md:text-6xl mb-8 leading-none">
-                    artificial intelligence architect
+                    artificial intelligence enthusiastic
                 </h1>
                 <p class="text-muted text-lg max-w-2xl leading-relaxed mb-12">
-                    i build robust pipelines, train sota models, and open-source the future. my work bridges the gap between complex ml theory and usable, functional applications.
+                    i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!
                 </p>
                 <div class="flex flex-wrap gap-1">
-                    <a href="#projects" class="px-6 py-3 bg-ink text-paper text-sm font-bold uppercase tracking-widest hover:bg-muted transition-colors">
-                        view operations
-                    </a>
-                    <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
-                        github
-                    </a>
+                      <a href="#projects" class="px-6 py-3 bg-ink text-paper text-sm font-bold uppercase tracking-widest hover:bg-muted transition-colors">
+                          view operations
+                      </a>
+                      <a href="https://hf.co/flamef0x" target="_blank" class="px-6 py-3 border border-[#FFD21E] text-[#FFD21E] text-sm uppercase tracking-widest hover:bg-[#FFD21E] hover:text-black transition-colors inline-flex items-center gap-2">
+                          huggingface
+                      </a>
+                      <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
+                          github
+                      </a>
                 </div>
             </div>
             
             <div class="lg:col-span-4 flex flex-col">
-                <div class="p-6 border-b border-grid bg-ink text-codetext flex-grow">
-                    <span class="section-label !text-muted">console.log(status)</span>
-                    <pre class="text-[11px] leading-tight mt-4"><code><span class="token-keyword">const</span> <span class="token-fn">status</span> = {
-  active: <span class="token-num">true</span>,
-  training: [<span class="token-str">"i3-1B-Ethan"</span>, <span class="token-str">"i3-Pocket"</span>],
-  uptime: <span class="token-str">"99.9%"</span>,
-  location: <span class="token-str">"remote"</span>
-};
-
-<span class="token-comment">// current task</span>
-<span class="token-fn">optimize</span>(i3_architecture);</code></pre>
+                <div class="flex flex-col gap-5 p-6 bg-ink text-codetext border border-grid font-mono text-sm">
+            
+                <!-- User Prompt -->
+                <div class="text-white">
+                    <span class="text-muted mr-2"></span>What is the capital of France?
                 </div>
+            
+                <!-- Subtle Separator -->
+                <div class="w-full h-px bg-grid"></div>
+            
+                <!-- Minimal Collapsible Thinking Log -->
+                <details class="group">
+                    <!-- 'list-none' and the webkit pseudo-class hide the ugly default browser arrow -->
+                    <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none text-muted hover:text-white transition-colors flex items-center gap-2 w-max">
+                        <span class="text-[10px] transition-transform group-open:rotate-90">▶</span>
+                        <span class="tracking-widest uppercase">Thinking Process</span>
+                    </summary>
+                    
+                    <!-- The log entries, indented with a subtle line -->
+                    <div class="mt-3 pl-4 border-l border-grid space-y-2 text-muted/80">
+                        <p> Analyzing request about the capital of France.</p>
+                        <p> Straightforward factual question.</p>
+                        <p> Retrieving data: Paris.</p>
+                        <p> Formulating concise response.</p>
+                    </div>
+                </details>
+            
+                <!-- Final AI Answer -->
+                <div class="flex flex-col gap-3">
+                    <blockquote class="pl-4 border-l-2 border-[#FFD21E] text-white text-base">
+                        The capital of France is Paris.
+                    </blockquote>
+                    <p class="text-muted leading-relaxed">
+                        Known globally as its cultural, political, and economic hub, Paris has been the city's heart since the 17th century. 🎨🗼
+                    </p>
+                </div>
+            
+            </div>
                 <div class="p-6">
                     <span class="section-label">02. current_state</span>
                     <div class="flex items-center gap-2 mt-2">
                         <div class="w-2 h-2 bg-success"></div>
-                        <span class="font-bold text-sm">active_training_sequence</span>
-                    </div>
-                    <div class="mt-4 space-y-1">
-                        <div class="flex justify-between text-[10px] text-muted">
-                            <span>gpu_utilization</span>
-                            <span>84%</span>
-                        </div>
-                        <div class="w-full bg-rule h-[2px]">
-                            <div class="bg-ink h-full w-[84%]"></div>
-                        </div>
+                        <span class="font-bold text-sm">training</span>
                     </div>
                 </div>
             </div>
@@ -164,28 +184,36 @@
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-6 md:p-12 border-b md:border-b-0 md:border-r border-grid">
                     <span class="section-label">03. development_index</span>
-                    <h2 class="text-3xl mb-8">selected projects</h2>
+                    <h2 class="text-3xl mb-8">projects</h2>
                     <div class="space-y-12">
                         <div class="group border-l border-rule pl-6 py-2">
                             <span class="section-label">project_01</span>
-                            <h3 class="text-xl mb-2 font-bold"><a href="https://huggingface.co/i3-lab" class="hover:underline">i3-lab</a></h3>
+                            <h3 class="text-xl mb-2 font-bold">LFM2.5-1.2B-Distilled-Claude</h3>
                             <p class="text-muted text-sm leading-relaxed mb-4">
-                                state-of-the-art pre-training language model pipeline. efficient, scalable, and built for experimentation.
+                                a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA.
                             </p>
                             <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                <span>[collection]</span>
-                                <span>[hf space]</span>
+                                    <a href="https://huggingface.co/collections/FlameF0X/liquid-claude" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
+                                        > open collection
+                                    </a>
+                                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
+                                        > open best model
+                                    </a>
                             </div>
                         </div>
 
                         <div class="group border-l border-rule pl-6 py-2">
                             <span class="section-label">project_02</span>
-                            <h3 class="text-xl mb-2 font-bold"><a href="https://github.com/FlameF0X/open-i3" class="hover:underline">open-i3</a></h3>
+                            <h3 class="text-xl mb-2 font-bold">open-i3</h3>
                             <p class="text-muted text-sm leading-relaxed mb-4">
                                 the open-source release of the i3 architecture. promoting transparency in ai development.
                             </p>
                             <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                <span>[github repo]</span>
+                                <div class="mt-2">
+                                    <a href="https://github.com/FlameF0X/open-i3" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
+                                        > open repo
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -194,29 +222,35 @@
                 <div class="flex flex-col">
                     <div class="p-6 md:p-12 border-b border-grid">
                         <span class="section-label">project_03</span>
-                        <h3 class="text-xl mb-2 font-bold"><a href="https://flamef0x.github.io/other/chess/chess" class="hover:underline">ChessSLM</a></h3>
+                        <h3 class="text-xl mb-2 font-bold">ChessSLM</h3>
                         <p class="text-muted text-sm leading-relaxed mb-4">
                             small language models trained exclusively to play chess. available variants: <a href="https://huggingface.co/FlameF0X/ChessSLM" class="text-ink hover:underline">base</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-RL" class="text-ink hover:underline">rl</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-Neo" class="text-ink hover:underline">neo</a>, and <a href="https://huggingface.co/FlameF0X/ChessSLM-Nano" class="text-ink hover:underline">nano</a>.
                         </p>
                         <div class="mt-2">
                             <a href="https://flamef0x.github.io/other/chess/" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
-                                > play_against_them
+                                > play against it
                             </a>
                         </div>
                     </div>
                     <div class="p-6 md:p-12 border-b border-grid">
                         <span class="section-label">project_04</span>
-                        <h3 class="text-xl mb-2 font-bold"><a href="https://github.com/FlameF0X/i3-papers" class="hover:underline">i3-papers</a></h3>
+                        <h3 class="text-xl mb-2 font-bold">koda-waf</h3>
                         <p class="text-muted text-sm leading-relaxed">
-                            documentation & official research papers. technical specifications and architectural overviews.
+                            a small, SOTA open-weights WAF model development by me for NetGoat.
                         </p>
+                            <a href="https://huggingface.co/netgoat-ai/koda-waf" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
+                                > open repo
+                            </a>
                     </div>
                     <div class="p-6 md:p-12">
                         <span class="section-label">project_05</span>
-                        <h3 class="text-xl mb-2 font-bold"><a href="https://www.npmjs.com/package/literallynothing.js" class="hover:underline">literallynothing.js</a></h3>
+                        <h3 class="text-xl mb-2 font-bold">literallynothing.js</h3>
                         <p class="text-muted text-sm leading-relaxed">
-                            npm package that does exactly what it says. 0 bytes of utility. functional minimalism at its absolute limit.
+                            the name is self-explanatory.
                         </p>
+                            <a href="https://www.npmjs.com/package/literallynothing.js" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block">
+                                > open npm
+                            </a>
                     </div>
                 </div>
             </div>
@@ -245,8 +279,7 @@
                                 <td class="py-4 text-muted">1.2B</td>
                                 <td class="py-4 text-muted">12k</td>
                                 <td class="py-4 text-muted">nvidia t4</td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" class="underline">view_card</a></td>
-                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="underline">view_gguf</a></td>
+                                <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" class="underline">view_card</a> <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="underline">view_gguf</a></td>
                             </tr>
                             <tr>
                                 <td class="py-4 font-bold">ChessSLM</td>
@@ -261,6 +294,16 @@
 
                 <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
                     <div class="text-dim italic text-sm">
+                      <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b border-rule">
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">model_id</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">params</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">ctx_window</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim">hardware</th>
+                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim">access</th>
+                            </tr>
+                        </thead>
                         <tbody class="divide-y divide-rule/50">
                             <tr>
                                 <td class="py-4 font-bold">MathGPT2</td>
@@ -284,6 +327,7 @@
                                 <td class="py-4 text-right"><a href="https://huggingface.co/FlameF0X/Qwen2-0.2B-it" class="underline">view_card</a></td>
                             </tr>
                         </tbody>
+                      </table>
                     </div>
                 </div>
 
