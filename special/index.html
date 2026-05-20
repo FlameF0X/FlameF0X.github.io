@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquid CodeX — FlameF0X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F6F4EF;
+    --bg-card: #FFFFFF;
+    --text: #111111;
+    --text-muted: #777770;
+    --text-faint: #AAAAAA;
+    --accent: #4349D0;
+    --accent-light: #ECEEFF;
+    --border: #E0DDD6;
+    --border-strong: #C8C5BD;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 6px;
+    --radius-lg: 12px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .nav-logo svg { flex-shrink: 0; }
+
+  .nav-logo-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 100px 5vw 80px;
+    max-width: 900px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-family: var(--mono);
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title .accent { color: var(--accent); }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    margin-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .hero-stat-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .hero-stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .hero-divider { width: 1px; height: 36px; background: var(--border-strong); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 5vw;
+  }
+
+  /* ── MODELS SECTION ── */
+  .models-section {
+    padding: 80px 5vw;
+  }
+
+  .models-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .models-title {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .models-count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── MODEL CARD ── */
+  .model-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .model-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.2s;
+    border-radius: 0;
+  }
+
+  .model-card:hover { border-color: var(--border-strong); }
+  .model-card:hover::before { background: var(--accent); }
+
+  .model-card.status-training::before { background: #F5A623; }
+  .model-card.status-active::before { background: #3BB87F; }
+  .model-card.status-legacy::before { background: var(--border-strong); }
+
+  .model-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .model-id {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .model-id:hover { color: var(--accent); }
+
+  .model-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    background: var(--bg);
+  }
+
+  .badge.status {
+    border-color: transparent;
+  }
+
+  .badge.status-active {
+    background: #E8F9F1;
+    color: #1E7A4F;
+  }
+
+  .badge.status-training {
+    background: #FEF5E7;
+    color: #9A6500;
+  }
+
+  .badge.status-legacy {
+    background: #F1EFE8;
+    color: var(--text-muted);
+  }
+
+  .badge.tag-reasoning { background: var(--accent-light); color: var(--accent); border-color: transparent; }
+  .badge.tag-code { background: #E8F0FE; color: #1A56CC; border-color: transparent; }
+  .badge.tag-distillation { background: #F3E8FF; color: #6B21A8; border-color: transparent; }
+
+  .model-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    max-width: 640px;
+    font-weight: 300;
+  }
+
+  .model-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .model-meta-item {
+    padding: 12px 16px;
+    border-right: 1px solid var(--border);
+  }
+
+  .model-meta-item:last-child { border-right: none; }
+
+  .model-meta-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 4px;
+  }
+
+  .model-meta-value {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .model-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .model-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .model-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .model-link {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    background: transparent;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .model-link:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .model-link.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .model-link.primary:hover { background: #3540B8; border-color: #3540B8; }
+
+  /* ── BASE MODEL ── */
+  .model-base {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .model-base::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 1px;
+    background: var(--border-strong);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .model-meta-grid { grid-template-columns: repeat(2, 1fr); }
+    .model-meta-item { border-bottom: 1px solid var(--border); }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     ▸  ADD OR EDIT MODELS HERE
+     ════════════════════════════════════════ -->
+<script>
+const MODELS = [
+  {
+    id: "LFM2.5-1.2B-Distilled-Claude-4.6",
+    hf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6",
+    gguf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF",
+    description: "Claude Sonnet 4.6 adaptive reasoning distilled into LFM2.5-1.2B-Thinking via LoRA. Trained on a 4K Claude Sonnet 4.6 dataset for CoT reasoning that was made using Claude.ai, not the Claude API.",
+    tags: ["reasoning", "distillation"],
+    params: "1.2B",
+    context: "12 k",
+    hardware: "NVIDIA T4",
+    downloads: "1.5K",
+    status: "active",
+    base: "LiquidAI/LFM2.5-1.2B-Thinking",
+  },
+  {
+    id: "LFM2.5-1.2B-Distilled-Claude",
+    hf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude",
+    gguf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-GGUF",
+    description: "Multi-teacher distillation from Claude Opus/Sonnet 4.5 & 4.6 and Gemini 3 Pro reasoning traces. The earlier experiment that started it all.",
+    tags: ["reasoning", "distillation"],
+    params: "1.2B",
+    context: "12 k",
+    hardware: "NVIDIA T4",
+    downloads: "2.5K",
+    status: "legacy",
+    base: "LiquidAI/LFM2.5-1.2B-Thinking",
+  },
+  {
+    id: "LFM2.5-1.2B-Thinking-CodeX",
+    hf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Thinking-CodeX",
+    gguf: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Thinking-CodeX-Q4_K_M-GGUF",
+    description: "SFT/LoRA on CodeX-2M-Thinking — a 2M-sample thinking-style code dataset. Trained with TRL. Domain-specific deep dive into code reasoning.",
+    tags: ["reasoning", "code"],
+    params: "1.2B",
+    context: "12 k",
+    hardware: "NVIDIA T4",
+    downloads: "344",
+    status: "active", // training
+    base: "LiquidAI/LFM2.5-1.2B-Thinking",
+  },
+  /* ────────────────────────────────────────────
+     TO ADD A NEW MODEL, COPY THE BLOCK BELOW,
+     PASTE IT ABOVE THIS COMMENT, AND FILL IT IN:
+
+  {
+    id: "LFM2.5-1.2B-YourModelName",
+    hf: "https://huggingface.co/FlameF0X/...",
+    gguf: null,              // or a URL string
+    description: "...",
+    tags: ["reasoning"],     // reasoning | code | distillation
+    params: "1.2B",
+    context: "12 k",
+    hardware: "NVIDIA T4",
+    downloads: "0",
+    status: "training",      // active | training | legacy
+    base: "LiquidAI/LFM2.5-1.2B-Thinking",
+  },
+     ──────────────────────────────────────────── */
+];
+
+const TAG_CLASS = {
+  reasoning: "tag-reasoning",
+  code: "tag-code",
+  distillation: "tag-distillation",
+};
+
+const STATUS_LABEL = {
+  active: "active",
+  training: "training",
+  legacy: "legacy",
+};
+</script>
+
+<!-- ════════ NAV ════════ -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="nav-logo-text">liquid&nbsp;stuff</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#models">models</a></li>
+    <li><a href="https://huggingface.co/FlameF0X" target="_blank">huggingface ↗</a></li>
+    <li><a href="https://flamef0x.github.io" target="_blank">portfolio ↗</a></li>
+  </ul>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <p class="section-label">01.&nbsp;&nbsp;collection</p>
+  <h1 class="hero-title">
+    small models.<br>
+    <span class="accent">serious reasoning.</span>
+  </h1>
+  <p class="hero-desc">
+    A focused collection of LFM2.5 fine-tunes built around reasoning, code, and distillation. Every model is a deliberate experiment — not a clone.
+  </p>
+  <div class="hero-meta" id="hero-stats">
+    <!-- populated by JS -->
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ════════ MODELS ════════ -->
+<section class="models-section">
+  <div class="models-header">
+    <h2 class="models-title">fine-tuned models</h2>
+    <span class="models-count" id="models-count"></span>
+  </div>
+  <div id="models-grid"></div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+
+    <span class="footer-text">liquid stuff — by flamef0x, page made with Claude</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="https://huggingface.co/FlameF0X" target="_blank">huggingface</a></li>
+    <li><a href="https://github.com/FlameF0X" target="_blank">github</a></li>
+    <li><a href="https://flamef0x.github.io" target="_blank">portfolio</a></li>
+  </ul>
+</footer>
+
+<!-- ════════ RENDER ════════ -->
+<script>
+(function () {
+  const grid = document.getElementById('models-grid');
+  const countEl = document.getElementById('models-count');
+  const statsEl = document.getElementById('hero-stats');
+
+  const totalDownloads = MODELS.reduce((acc, m) => {
+    const n = parseFloat(m.downloads.replace('K','')) * (m.downloads.includes('K') ? 1000 : 1);
+    return acc + n;
+  }, 0);
+
+  const activeCount = MODELS.filter(m => m.status === 'active').length;
+
+  statsEl.innerHTML = `
+    <div class="hero-stat">
+      <span class="hero-stat-value">${MODELS.length}</span>
+      <span class="hero-stat-label">models</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-value">${totalDownloads >= 1000 ? (totalDownloads/1000).toFixed(1)+'K' : totalDownloads}</span>
+      <span class="hero-stat-label">total downloads</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-value">1.2B</span>
+      <span class="hero-stat-label">params each</span>
+    </div>
+  `;
+
+  countEl.textContent = `${MODELS.length} model${MODELS.length !== 1 ? 's' : ''}`;
+
+  MODELS.forEach((m, i) => {
+    const tagHTML = m.tags.map(t =>
+      `<span class="badge ${TAG_CLASS[t] || ''}">${t}</span>`
+    ).join('');
+
+    const statusHTML = `<span class="badge status status-${m.status}">${STATUS_LABEL[m.status]}</span>`;
+
+    const linksHTML = [
+      `<a class="model-link primary" href="${m.hf}" target="_blank">view on HF ↗</a>`,
+      m.gguf ? `<a class="model-link" href="${m.gguf}" target="_blank">GGUF</a>` : ''
+    ].join('');
+
+    const card = document.createElement('article');
+    card.className = `model-card status-${m.status}`;
+    card.innerHTML = `
+      <div class="model-card-top">
+        <a class="model-id" href="${m.hf}" target="_blank">${m.id}</a>
+        <div class="model-badges">${statusHTML}</div>
+      </div>
+      <p class="model-desc">${m.description}</p>
+      <div class="model-meta-grid">
+        <div class="model-meta-item">
+          <div class="model-meta-label">params</div>
+          <div class="model-meta-value">${m.params}</div>
+        </div>
+        <div class="model-meta-item">
+          <div class="model-meta-label">context</div>
+          <div class="model-meta-value">${m.context}</div>
+        </div>
+        <div class="model-meta-item">
+          <div class="model-meta-label">hardware</div>
+          <div class="model-meta-value">${m.hardware}</div>
+        </div>
+        <div class="model-meta-item">
+          <div class="model-meta-label">downloads</div>
+          <div class="model-meta-value">${m.downloads}</div>
+        </div>
+      </div>
+      <div class="model-card-footer">
+        <div class="model-tags">
+          ${tagHTML}
+          <span class="model-base">fine-tune of ${m.base}</span>
+        </div>
+        <div class="model-links">${linksHTML}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>
