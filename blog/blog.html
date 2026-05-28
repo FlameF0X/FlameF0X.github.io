@@ -307,7 +307,7 @@
             line-height: 1.8;
             color: var(--text);
             font-size: 14px;
-            max-width: 700px;
+            max-width: 800px;
         }
 
         .post-body p { margin-bottom: 1.25rem; }
@@ -318,6 +318,37 @@
         .post-body a { color: var(--black); text-decoration: underline; }
         .post-body ul, .post-body ol { margin: 0 0 1.25rem 1.5rem; }
         .post-body li { margin-bottom: 0.4rem; }
+
+        /* ── TABLE STYLES ── */
+        .post-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 13px;
+        }
+
+        .post-body th, 
+        .post-body td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .post-body th {
+            background-color: var(--bg2);
+            color: var(--black);
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .post-body tr {
+            transition: background 0.15s ease;
+        }
+
+        .post-body tbody tr:hover {
+            background-color: var(--bg2);
+        }
 
         /* ── FOOTER ── */
         footer {
@@ -338,6 +369,13 @@
             .page-header h1 { font-size: 2rem; }
             .post-card.is-new { padding: 1.5rem 1rem; }
             footer { padding: 1.5rem 1rem; }
+            
+            /* Make tables scrollable horizontally on mobile */
+            .post-body table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
         }
     </style>
 </head>
@@ -386,6 +424,17 @@
             const d = Math.ceil(Math.abs(new Date() - new Date(dateString)) / 864e5);
             return d;
         }
+
+        // Clean event listener registration inside .finally()
+        const setupEventListener = () => {
+            postsListEl.addEventListener('click', e => {
+                const card = e.target.closest('.post-card');
+                if (card) {
+                    const post = posts.find(p => p.id === card.dataset.id);
+                    if (post) showPost(post);
+                }
+            });
+        };
 
         function sortPosts() {
             switch (sortSelect.value) {
@@ -440,22 +489,22 @@
             document.getElementById('back-btn').onclick = () => renderList();
         }
 
-        // CACHE BUSTING FIX: Added timestamp to URL and { cache: 'no-store' } to force fresh fetch
+        // Fetch dynamically from blog-posts.json with Cache Busting
         fetch(`blog-posts.json?t=${new Date().getTime()}`, { cache: 'no-store' })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Failed to load JSON file.');
+                return r.json();
+            })
             .then(data => {
                 posts = data;
                 sortPosts();
-                postsListEl.addEventListener('click', e => {
-                    const card = e.target.closest('.post-card');
-                    if (card) {
-                        const post = posts.find(p => p.id === card.dataset.id);
-                        if (post) showPost(post);
-                    }
-                });
             })
-            .catch(() => {
+            .catch(err => {
+                console.error("Error loading blog posts:", err);
                 postsListEl.innerHTML = '<div class="empty-state">> failed to load blog-posts.json</div>';
+            })
+            .finally(() => {
+                setupEventListener();
             });
 
         sortSelect.addEventListener('change', sortPosts);
