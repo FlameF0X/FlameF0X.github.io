@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** 17 January 2026
+**Last Updated:** 28 May 2026
 
 ## Introduction
 
@@ -41,13 +41,6 @@ We do not collect, store, process, or transmit any of your:
 - Data persists only in your browser's local storage
 - Clearing your browser data will permanently delete this information
 - We cannot access, recover, or view any of your conversations
-
-### Auto-PreTrain Service
-- Requires an API key to upload your trained model
-- **We do not store your API key**
-- The API key is used only during the active session
-- All training happens on your infrastructure
-- We do not have access to your training data or model checkpoints
 
 ## Third-Party Services
 
