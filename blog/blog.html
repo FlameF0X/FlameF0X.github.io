@@ -3,446 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Daniel.FlameFox Portfolio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Blog - flamef0x.github.io</title>
     <link rel="icon" href="https://cdn-avatars.huggingface.co/v1/production/uploads/6615494716917dfdc645c44e/-qgGeUlEsf5z-jilWawyO.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --primary-dark: #4f46e5;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --new-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --new-glow: 0 0 30px rgba(102, 102, 234, 0.3);
-            --pulse-color: rgba(102, 102, 234, 0.4);
+            --bg: #f5f0e8;
+            --bg2: #ede8df;
+            --border: #c8c2b5;
+            --border-dark: #222;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --accent: #e8c84a;
+            --accent-border: #b8952a;
+            --black: #111;
+            --font: 'JetBrains Mono', 'Courier New', monospace;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            min-height: 100vh;
-            background-color: var(--dark-bg);
+            font-family: var(--font);
+            background: var(--bg);
             color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .header {
+        /* ── NAV ── */
+        nav {
+            border-bottom: 1px solid var(--border-dark);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 1.5rem;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            height: 52px;
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 15px;
             font-weight: 700;
-            background: linear-gradient(to right, var(--primary-light), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.3px;
         }
 
-        .nav ul {
+        .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 0;
             list-style: none;
         }
 
-        .nav a {
-            color: var(--text);
+        .nav-links a {
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
+            color: var(--text-muted);
+            padding: 0 1.2rem;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            border-left: 1px solid var(--border-dark);
+            transition: background 0.15s, color 0.15s;
         }
 
-        .nav a:after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s;
+        .nav-links a:hover { background: var(--bg2); color: var(--text); }
+        .nav-links a.active { background: var(--black); color: var(--bg); }
+
+        /* ── LAYOUT ── */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2.5rem 4rem;
         }
 
-        .nav a:hover {
-            color: var(--primary-light);
-        }
-
-        .section {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            margin-bottom: 1.5rem;
-        }
-
-        .sort-controls {
+        /* ── PAGE HEADER ── */
+        .page-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding: 3rem 0 2rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+            align-items: flex-end;
         }
 
-        .sort-select {
-            background-color: var(--card-bg);
-            color: var(--text);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .sort-select:hover {
-            border-color: var(--primary-light);
-        }
-
-        .post-summary {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            background: #212e43;
-            padding: 20px;
-            border-radius: 15px;
-            position: relative;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .post-summary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        /* New post highlighting styles */
-        .post-summary.new-post {
-            background: var(--new-gradient);
-            border: 2px solid var(--primary-light);
-            box-shadow: var(--new-glow);
-            animation: subtle-pulse 3s infinite;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .post-summary.new-post::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shimmer 2s infinite;
-            pointer-events: none;
-        }
-
-        .post-summary.new-post:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(102, 102, 234, 0.4);
-        }
-
-        .new-badge {
-            position: absolute;
-            top: -5px;
-            right: 15px;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .section-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            animation: badge-bounce 2s infinite;
+            margin-bottom: 0.75rem;
         }
 
-        .trending-icon {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #ffd700;
-            font-size: 1.2rem;
-            animation: trending-glow 2s infinite alternate;
+        .page-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1;
+            color: var(--black);
         }
 
-        @keyframes subtle-pulse {
-            0%, 100% { 
-                box-shadow: var(--new-glow);
-            }
-            50% { 
-                box-shadow: 0 0 40px rgba(102, 102, 234, 0.5);
-            }
+        /* ── SORT CONTROL ── */
+        .sort-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 4px;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        .sort-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        @keyframes badge-bounce {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
-        }
-
-        @keyframes trending-glow {
-            0% { 
-                text-shadow: 0 0 5px #ffd700;
-                transform: scale(1);
-            }
-            100% { 
-                text-shadow: 0 0 15px #ffd700, 0 0 25px #ffd700;
-                transform: scale(1.1);
-            }
-        }
-
-        .post-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-light);
+        select {
+            font-family: var(--font);
+            font-size: 13px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border-dark);
+            padding: 6px 10px;
             cursor: pointer;
-            transition: color 0.3s;
-            margin-bottom: 0.5rem;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+
+        select:hover { border-color: var(--black); }
+
+        /* ── POSTS GRID ── */
+        #posts-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        /* ── POST CARD ── */
+        .post-card {
+            border-bottom: 1px solid var(--border);
+            padding: 1.75rem 0;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: start;
+            transition: background 0.15s;
             position: relative;
         }
 
-        .post-summary.new-post .post-title {
-            color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        .post-card:first-child { border-top: 1px solid var(--border); }
+
+        .post-card:hover { background: var(--bg2); padding-left: 1rem; padding-right: 1rem; margin: 0 -1rem; }
+
+        .post-card.is-new {
+            background: var(--black);
+            color: var(--bg);
+            padding: 1.75rem 1.5rem;
+            margin: 1.5rem 0;
+            border: none;
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .post-card.is-new:hover {
+            background: #222;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .post-card.is-new .post-meta { color: #999; }
+        .post-card.is-new .post-summary-text { color: #bbb; }
+        .post-card.is-new .post-arrow { color: var(--accent); }
+
+        .post-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge-new {
+            background: var(--accent);
+            color: var(--black);
+            font-size: 10px;
             font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            text-transform: uppercase;
         }
 
-        .post-title:hover {
-            color: var(--primary);
+        .badge-hot {
+            background: transparent;
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            border: 1px solid var(--accent);
+            text-transform: uppercase;
         }
 
-        .post-summary.new-post .post-title:hover {
-            color: #f0f8ff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        .post-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
         }
 
-        .post-date {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            font-family: 'Roboto Mono', monospace;
-        }
+        .post-card.is-new .post-card-title { color: #fff; }
 
-        .post-summary.new-post .post-date {
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        .post-content-summary {
-            color: var(--text-secondary);
+        .post-summary-text {
+            font-size: 13px;
+            color: var(--text-muted);
             line-height: 1.6;
+            max-width: 680px;
         }
 
-        .post-summary.new-post .post-content-summary {
-            color: rgba(255, 255, 255, 0.95);
+        .post-arrow {
+            font-size: 18px;
+            color: var(--text-muted);
+            align-self: center;
+            transition: transform 0.15s;
         }
 
-        #back-btn {
+        .post-card:hover .post-arrow { transform: translateX(4px); color: var(--text); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 4rem 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ── SINGLE POST ── */
+        #post-content {
+            display: none;
+        }
+
+        .back-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--primary-light);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text-muted);
             cursor: pointer;
-            margin-bottom: 1.5rem;
-            transition: color 0.3s;
+            border: 1px solid var(--border);
+            padding: 7px 14px;
+            margin: 2rem 0 2.5rem;
+            background: transparent;
+            transition: all 0.15s;
+            letter-spacing: 0.5px;
         }
 
-        #back-btn:hover {
-            color: var(--primary);
+        .back-btn:hover {
+            background: var(--black);
+            color: var(--bg);
+            border-color: var(--black);
         }
 
-        .post-content-text {
-            line-height: 1.6;
-            color: var(--text-secondary);
-            margin-top: 1rem;
+        .post-full-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .section-title {
-            font-size: 2rem;
-            margin-bottom: 0;
-            background: linear-gradient(to right, var(--primary-light), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .post-full-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
         }
 
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .new-badge {
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 3px 8px;
-            }
-            
-            .trending-icon {
-                right: 10px;
-                font-size: 1rem;
-            }
-            
-            .post-summary {
-                padding: 15px;
-            }
+        .post-full-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            color: var(--black);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+        }
+
+        .post-full-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+        }
+
+        .post-body {
+            line-height: 1.8;
+            color: var(--text);
+            font-size: 14px;
+            max-width: 700px;
+        }
+
+        .post-body p { margin-bottom: 1.25rem; }
+        .post-body h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem; color: var(--black); }
+        .post-body h3 { font-size: 1rem; margin: 1.5rem 0 0.5rem; color: var(--text-muted); }
+        .post-body code { background: var(--bg2); padding: 2px 6px; font-family: var(--font); font-size: 13px; }
+        .post-body pre { background: var(--black); color: var(--bg); padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+        .post-body a { color: var(--black); text-decoration: underline; }
+        .post-body ul, .post-body ol { margin: 0 0 1.25rem 1.5rem; }
+        .post-body li { margin-bottom: 0.4rem; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border-dark);
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 1rem; }
+            main { padding: 0 1rem 3rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .page-header h1 { font-size: 2rem; }
+            .post-card.is-new { padding: 1.5rem 1rem; }
+            footer { padding: 1.5rem 1rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <i class="fas fa-code"></i>
-                <span>Daniel.FlameFox</span>
-            </div>
-            <nav class="nav">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                </ul>
-            </nav>
-        </header>
 
-        <div class="sort-controls">
-            <h1 class="section-title">Blog Posts</h1>
-            <select class="sort-select" id="sort-select">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title-asc">Title (A-Z)</option>
-                <option value="title-desc">Title (Z-A)</option>
-            </select>
+    <nav>
+        <a class="logo" href="/">flamef0x.github.io</a>
+        <ul class="nav-links">
+            <li><a href="/">home</a></li>
+            <li><a href="/blog" class="active">blog</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <div>
+                <div class="section-label">04. blog_index</div>
+                <h1>blog</h1>
+            </div>
+            <div class="sort-wrap">
+                <span class="sort-label">sort</span>
+                <select id="sort-select">
+                    <option value="newest">newest first</option>
+                    <option value="oldest">oldest first</option>
+                    <option value="title-asc">title (a–z)</option>
+                    <option value="title-desc">title (z–a)</option>
+                </select>
+            </div>
         </div>
 
-        <div id="posts-list" class="section"></div>
-        <div id="post-content" class="section" style="display: none;"></div>
+        <div id="posts-list"></div>
+        <div id="post-content"></div>
+    </main>
 
-        <script>
-            const postsListEl = document.getElementById('posts-list');
-            const postContentEl = document.getElementById('post-content');
-            const sortSelect = document.getElementById('sort-select');
-            const backBtnId = 'back-btn';
+    <footer>
+        <span>flamef0x.github.io</span>
+        <span>daniel.flamefox</span>
+    </footer>
 
-            let posts = [];
+    <script>
+        const postsListEl = document.getElementById('posts-list');
+        const postContentEl = document.getElementById('post-content');
+        const sortSelect = document.getElementById('sort-select');
+        let posts = [];
 
-            // Check if a post is "new" (within last 7 days)
-            function isNewPost(dateString) {
-                const postDate = new Date(dateString);
-                const now = new Date();
-                const diffTime = Math.abs(now - postDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 7;
+        function daysDiff(dateString) {
+            const d = Math.ceil(Math.abs(new Date() - new Date(dateString)) / 864e5);
+            return d;
+        }
+
+        function sortPosts() {
+            switch (sortSelect.value) {
+                case 'newest':   posts.sort((a,b)=>new Date(b.date)-new Date(a.date)); break;
+                case 'oldest':   posts.sort((a,b)=>new Date(a.date)-new Date(b.date)); break;
+                case 'title-asc':  posts.sort((a,b)=>a.title.localeCompare(b.title)); break;
+                case 'title-desc': posts.sort((a,b)=>b.title.localeCompare(a.title)); break;
             }
+            renderList();
+        }
 
-            // Check if a post is "hot" (within last 3 days)
-            function isHotPost(dateString) {
-                const postDate = new Date(dateString);
-                const now = new Date();
-                const diffTime = Math.abs(now - postDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 3;
+        function renderList() {
+            postContentEl.style.display = 'none';
+            postsListEl.style.display = 'grid';
+            if (!posts.length) {
+                postsListEl.innerHTML = '<div class="empty-state">> no posts found. check back later.</div>';
+                return;
             }
-
-            function sortPosts() {
-                switch(sortSelect.value) {
-                    case 'newest':
-                        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        break;
-                    case 'oldest':
-                        posts.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        break;
-                    case 'title-asc':
-                        posts.sort((a, b) => a.title.localeCompare(b.title));
-                        break;
-                    case 'title-desc':
-                        posts.sort((a, b) => b.title.localeCompare(a.title));
-                        break;
-                }
-                renderPostsList();
-            }
-
-            function renderPostsList() {
-                postContentEl.style.display = 'none';
-                postsListEl.style.display = 'block';
-                postsListEl.innerHTML = posts.map(post => {
-                    const isNew = isNewPost(post.date);
-                    const isHot = isHotPost(post.date);
-                    
-                    return `
-                        <div class="post-summary ${isNew ? 'new-post' : ''}" data-id="${post.id}">
-                            
-                            ${isHot ? '<i class="fas fa-fire trending-icon"></i>' : ''}
-                            <div class="post-title">${post.title}</div>
-                            <div class="post-date">${post.date}</div>
-                            <div class="post-content-summary">${post.summary}</div>
+            postsListEl.innerHTML = posts.map(post => {
+                const days = daysDiff(post.date);
+                const isNew = days <= 7;
+                const isHot = days <= 3;
+                return `
+                    <div class="post-card ${isNew ? 'is-new' : ''}" data-id="${post.id}">
+                        <div>
+                            <div class="post-meta">
+                                <span>${post.date}</span>
+                                ${isNew ? `<span class="badge-new">new</span>` : ''}
+                                ${isHot ? `<span class="badge-hot">hot</span>` : ''}
+                            </div>
+                            <div class="post-card-title">${post.title}</div>
+                            <div class="post-summary-text">${post.summary}</div>
                         </div>
-                    `;
-                }).join('');
-            }
-
-            function showPost(post) {
-                postsListEl.style.display = 'none';
-                postContentEl.style.display = 'block';
-                postContentEl.innerHTML = `
-                    <div id="${backBtnId}" class="post-title">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to All Posts
+                        <div class="post-arrow">→</div>
                     </div>
-                    <h2 class="post-title" style="font-size: 2rem; margin-bottom: 0.5rem;">${post.title}</h2>
-                    <div class="post-date">${post.date}</div>
-                    <div class="post-content-text">${post.content}</div>
                 `;
+            }).join('');
+        }
 
-                const backBtn = document.getElementById(backBtnId);
-                backBtn.onclick = () => renderPostsList();
-            }
+        function showPost(post) {
+            postsListEl.style.display = 'none';
+            postContentEl.style.display = 'block';
+            postContentEl.innerHTML = `
+                <button class="back-btn" id="back-btn">← back to all posts</button>
+                <div class="post-full-header">
+                    <div class="post-full-label">post_entry</div>
+                    <h2 class="post-full-title">${post.title}</h2>
+                    <div class="post-full-date">${post.date}</div>
+                </div>
+                <div class="post-body">${post.content}</div>
+            `;
+            document.getElementById('back-btn').onclick = () => renderList();
+        }
 
-            // Load posts from JSON file
-            fetch('blog-posts.json')
-                .then(res => res.json())
-                .then(data => {
-                    posts = data;
-                    sortPosts();
-                    
-                    postsListEl.addEventListener('click', e => {
-                        const postElement = e.target.closest('.post-summary');
-                        if (postElement) {
-                            const postId = postElement.dataset.id;
-                            const post = posts.find(p => p.id === postId);
-                            showPost(post);
-                        }
-                    });
-                })
-                .catch(err => {
-                    postsListEl.innerHTML = '<p class="post-content-summary">Failed to load blog posts. Make sure blog-posts.json exists in the same directory.</p>';
-                    console.error(err);
+        fetch('blog-posts.json')
+            .then(r => r.json())
+            .then(data => {
+                posts = data;
+                sortPosts();
+                postsListEl.addEventListener('click', e => {
+                    const card = e.target.closest('.post-card');
+                    if (card) {
+                        const post = posts.find(p => p.id === card.dataset.id);
+                        if (post) showPost(post);
+                    }
                 });
+            })
+            .catch(() => {
+                postsListEl.innerHTML = '<div class="empty-state">> failed to load blog-posts.json</div>';
+            });
 
-            // Sort event listener
-            sortSelect.addEventListener('change', sortPosts);
-        </script>
-    </div>
+        sortSelect.addEventListener('change', sortPosts);
+    </script>
 </body>
 </html>
