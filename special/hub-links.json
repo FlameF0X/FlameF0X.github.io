@@ -1,0 +1,16 @@
+[
+  {
+    "title": "blog",
+    "type": "link",
+    "description": "The page of my blogs",
+    "url": "https://flamef0x.github.io/special/main/liquid-stuff",
+    "isExternal": true
+  },
+  {
+    "title": "liquid stuff",
+    "type": "project",
+    "description": "A dedicated pafe for my best fine tunes of a language model.",
+    "url": "https://flamef0x.github.io/special/main/liquid-stuff",
+    "isExternal": true
+  }
+]
