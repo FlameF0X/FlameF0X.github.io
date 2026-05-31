@@ -156,6 +156,8 @@ tbody td { padding: 9px 16px; vertical-align: middle; }
 
 .rank-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); width: 60px; }
 .model-cell { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--ink2); word-break: break-all; }
+.model-cell a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: color 0.12s, border-color 0.12s; }
+.model-cell a:hover { color: var(--accent); border-bottom-color: var(--accent); }
 .elo-cell { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; text-align: right; white-space: nowrap; }
 .bar-cell { width: 120px; padding-right: 20px; }
 .bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
@@ -377,7 +379,7 @@ function renderTable(data) {
       tbody.insertAdjacentHTML("beforeend", `
         <tr>
           <td class="rank-cell">${med}${rank}</td>
-          <td class="model-cell">${d.model}</td>
+          <td class="model-cell"><a href="https://huggingface.co/${d.model}" target="_blank" rel="noopener">${d.model}</a></td>
           <td class="elo-cell" style="color:${eCol}">${d.elo}</td>
           <td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></td>
         </tr>`);
