@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ChessLLM Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #f6f6f4;
+  --white:   #ffffff;
+  --ink:     #111111;
+  --ink2:    #444444;
+  --muted:   #999999;
+  --border:  #e2e2df;
+  --accent:  #2952e3;
+  --accent-l:#eef1fd;
+  --r:       6px;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Nav */
+nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+}
+.nav-inner {
+  max-width: 1080px; margin: 0 auto; padding: 0 32px;
+  height: 52px; display: flex; align-items: center; justify-content: space-between;
+}
+.brand {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 15px; letter-spacing: -0.02em;
+}
+.brand em { font-style: normal; color: var(--accent); }
+.nav-pill {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--accent); background: var(--accent-l);
+  padding: 3px 10px; border-radius: 999px; letter-spacing: 0.04em;
+}
+
+/* Stats strip — full bleed */
+.stats-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--border); gap: 1px;
+  border-bottom: 1px solid var(--border);
+}
+.stat {
+  background: var(--white); padding: 20px 28px;
+}
+.stat-label {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 5px;
+}
+.stat-value {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 1.75rem; letter-spacing: -0.03em;
+}
+
+/* Shell */
+.shell { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+/* Hero */
+.hero { padding: 52px 0 44px; border-bottom: 1px solid var(--border); }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--muted); letter-spacing: 0.08em; margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -0.035em;
+  line-height: 1.07; margin-bottom: 14px;
+}
+.hero p {
+  color: var(--muted); font-weight: 300; font-size: 15px; max-width: 460px;
+}
+
+/* Section */
+.section { padding: 44px 0 0; }
+.section-head {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap;
+}
+.section-rule { flex: 1; height: 1px; background: var(--border); }
+
+/* Chart card */
+.chart-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px 24px 12px; margin-bottom: 44px;
+}
+.chart-header { margin-bottom: 18px; }
+.chart-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; }
+.chart-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Tooltip */
+.tooltip {
+  position: fixed; pointer-events: none; z-index: 200;
+  background: var(--ink); color: #fff;
+  border-radius: 5px; padding: 9px 13px;
+  font-size: 12px; opacity: 0;
+  transition: opacity 0.08s;
+  max-width: 300px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.tooltip .t-model { font-family: 'DM Mono', monospace; font-size: 10px; color: #93aee8; margin-bottom: 3px; word-break: break-all; }
+.tooltip .t-elo   { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+.tooltip .t-rank  { font-size: 10px; color: #777; margin-top: 1px; }
+
+/* Table */
+.tbl-controls {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+}
+.search {
+  flex: 1; max-width: 300px;
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--white); color: var(--ink);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  padding: 8px 13px; outline: none; transition: border-color 0.15s;
+}
+.search:focus { border-color: var(--accent); }
+.search::placeholder { color: var(--muted); }
+.res-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+
+.tbl-wrap {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; margin-bottom: 64px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  padding: 10px 16px;
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); background: var(--bg);
+  border-bottom: 1px solid var(--border); text-align: left;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f0f3ff; }
+tbody td { padding: 9px 16px; vertical-align: middle; }
+
+.rank-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); width: 60px; }
+.model-cell { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--ink2); word-break: break-all; }
+.elo-cell { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; text-align: right; white-space: nowrap; }
+.bar-cell { width: 120px; padding-right: 20px; }
+.bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--accent); opacity: 0.6; border-radius: 2px; }
+
+.medal { font-size: 12px; margin-right: 3px; }
+
+/* Loading */
+#loading {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; z-index: 999; transition: opacity 0.3s;
+}
+#loading.gone { opacity: 0; pointer-events: none; }
+.spin {
+  width: 26px; height: 26px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-txt { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 680px) {
+  .shell, .nav-inner { padding-left: 16px; padding-right: 16px; }
+  .stats-strip { grid-template-columns: repeat(2, 1fr); }
+  .bar-cell { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spin"></div>
+  <div class="load-txt">Fetching leaderboard&hellip;</div>
+</div>
+
+<div class="tooltip" id="tt">
+  <div class="t-model" id="tt-model"></div>
+  <div class="t-elo"   id="tt-elo"></div>
+  <div class="t-rank"  id="tt-rank"></div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">Chess<em>LLM</em></div>
+    <div class="nav-pill">ELO Leaderboard</div>
+  </div>
+</nav>
+
+<div class="stats-strip">
+  <div class="stat"><div class="stat-label">Models ranked</div><div class="stat-value" id="s-n">—</div></div>
+  <div class="stat"><div class="stat-label">Best ELO</div><div class="stat-value" id="s-max">—</div></div>
+  <div class="stat"><div class="stat-label">Worst ELO</div><div class="stat-value" id="s-min">—</div></div>
+  <div class="stat"><div class="stat-label">Median ELO</div><div class="stat-value" id="s-med">—</div></div>
+</div>
+
+<div class="shell">
+
+  <div class="hero">
+    <div class="hero-eyebrow">♟ Source · github.com/chessllm</div>
+    <h1>LLM Chess<br>Performance Rankings</h1>
+    <p>Language models benchmarked by ELO rating in head-to-head chess play.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">ELO Distribution</div>
+      <div class="section-rule"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Step Line Chart — All Models by Rank</div>
+        <div class="chart-sub">Hover to inspect individual models</div>
+      </div>
+      <div id="chart"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Full Rankings</div>
+      <div class="section-rule"></div>
+    </div>
+    <div class="tbl-controls">
+      <input class="search" id="search" type="text" placeholder="Search model…" />
+      <span class="res-count" id="res-count"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Model</th>
+            <th style="text-align:right">ELO</th>
+            <th class="bar-cell"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CSV_URL = "https://gist.githubusercontent.com/chessllm/696115fe2df47fb2350fcff2663678c9/raw/chessllm_leaderboard.csv";
+const tip = document.getElementById("tt");
+
+function parseCSV(txt) {
+  return txt.trim().split("\n").slice(1).map(row => {
+    const p = row.split(",");
+    const elo = parseInt(p[p.length - 1].trim(), 10);
+    const model = p.slice(0, -1).join(",").trim();
+    return (model && !isNaN(elo)) ? { model, elo } : null;
+  }).filter(Boolean).sort((a, b) => b.elo - a.elo);
+}
+
+function drawChart(data) {
+  const el = document.getElementById("chart");
+  const W  = el.clientWidth || 900;
+  const H  = Math.round(Math.min(Math.max(W * 0.36, 220), 380));
+  const m  = { top: 12, right: 16, bottom: 40, left: 54 };
+  const iW = W - m.left - m.right;
+  const iH = H - m.top - m.bottom;
+
+  const eMin = d3.min(data, d => d.elo) - 8;
+  const eMax = d3.max(data, d => d.elo) + 8;
+  const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, iW]);
+  const y = d3.scaleLinear().domain([eMin, eMax]).range([iH, 0]);
+
+  const lineGen = d3.line().x((d,i)=>x(i)).y(d=>y(d.elo)).curve(d3.curveStepAfter);
+  const areaGen = d3.area().x((d,i)=>x(i)).y0(iH).y1(d=>y(d.elo)).curve(d3.curveStepAfter);
+
+  const svg = d3.select("#chart").append("svg").attr("viewBox",`0 0 ${W} ${H}`);
+  const defs = svg.append("defs");
+
+  const grad = defs.append("linearGradient").attr("id","g1").attr("x1",0).attr("y1",0).attr("x2",0).attr("y2",1);
+  grad.append("stop").attr("offset","0%").attr("stop-color","#2952e3").attr("stop-opacity",0.1);
+  grad.append("stop").attr("offset","100%").attr("stop-color","#2952e3").attr("stop-opacity",0.01);
+
+  const g = svg.append("g").attr("transform",`translate(${m.left},${m.top})`);
+
+  // Grid
+  g.selectAll(".hg").data(y.ticks(5)).join("line")
+    .attr("x1",0).attr("x2",iW).attr("y1",d=>y(d)).attr("y2",d=>y(d))
+    .attr("stroke","#e2e2df").attr("stroke-dasharray","3,3");
+
+  // Area + line
+  g.append("path").datum(data).attr("fill","url(#g1)").attr("d",areaGen);
+  g.append("path").datum(data).attr("fill","none").attr("stroke","#2952e3").attr("stroke-width",1.8).attr("d",lineGen);
+
+  // Top dot
+  g.append("circle").attr("cx",x(0)).attr("cy",y(data[0].elo))
+    .attr("r",4).attr("fill","#2952e3").attr("stroke","#fff").attr("stroke-width",2);
+
+  // X axis
+  const xTicks = d3.range(0, data.length, Math.max(1, Math.floor(data.length / 8)));
+  g.append("g").attr("transform",`translate(0,${iH})`)
+    .call(d3.axisBottom(x).tickValues(xTicks).tickFormat(i=>`#${Math.round(i)+1}`))
+    .call(a=>a.select(".domain").attr("stroke","#e2e2df"))
+    .call(a=>a.selectAll(".tick line").attr("stroke","#e2e2df"))
+    .call(a=>a.selectAll("text").attr("fill","#999").attr("font-family","'DM Mono',monospace").attr("font-size","9px"));
+
+  // Y axis
+  g.append("g").call(d3.axisLeft(y).ticks(5))
+    .call(a=>a.select(".domain").attr("stroke","#e2e2df"))
+    .call(a=>a.selectAll(".tick line").attr("stroke","#e2e2df"))
+    .call(a=>a.selectAll("text").attr("fill","#999").attr("font-family","'DM Mono',monospace").attr("font-size","9px"));
+
+  // X label
+  svg.append("text").attr("x",m.left+iW/2).attr("y",H-2)
+    .attr("text-anchor","middle").attr("fill","#bbb")
+    .attr("font-family","'DM Mono',monospace").attr("font-size","8px").attr("letter-spacing","0.15em")
+    .text("RANK");
+
+  // Hover elements
+  const vline = g.append("line").attr("y1",0).attr("y2",iH)
+    .attr("stroke","#2952e3").attr("stroke-width",1).attr("stroke-dasharray","3,3").attr("opacity",0);
+  const dot = g.append("circle").attr("r",4)
+    .attr("fill","#fff").attr("stroke","#2952e3").attr("stroke-width",2).attr("opacity",0);
+
+  g.append("rect").attr("width",iW).attr("height",iH)
+    .attr("fill","none").attr("pointer-events","all").style("cursor","crosshair")
+    .on("mousemove", function(event) {
+      const [mx] = d3.pointer(event);
+      const idx = Math.max(0, Math.min(data.length-1, Math.round(x.invert(mx))));
+      const d   = data[idx];
+      vline.attr("x1",x(idx)).attr("x2",x(idx)).attr("opacity",1);
+      dot.attr("cx",x(idx)).attr("cy",y(d.elo)).attr("opacity",1);
+      document.getElementById("tt-model").textContent = d.model;
+      document.getElementById("tt-elo").textContent   = `ELO ${d.elo}`;
+      document.getElementById("tt-rank").textContent  = `Rank #${idx+1} of ${data.length}`;
+      tip.style.opacity = "1";
+      tip.style.left = (event.clientX + 14) + "px";
+      tip.style.top  = (event.clientY - 14) + "px";
+    })
+    .on("mouseleave", () => { vline.attr("opacity",0); dot.attr("opacity",0); tip.style.opacity="0"; });
+}
+
+function renderTable(data) {
+  const eMin = data[data.length-1].elo, eMax = data[0].elo;
+  const span = eMax - eMin || 1;
+  const tbody = document.getElementById("tbody");
+  const countEl = document.getElementById("res-count");
+  const medals = { 1:"🥇", 2:"🥈", 3:"🥉" };
+
+  function rows(list) {
+    tbody.innerHTML = "";
+    countEl.textContent = `${list.length} models`;
+    list.forEach(d => {
+      const rank = data.indexOf(d) + 1;
+      const pct  = ((d.elo - eMin) / span * 100).toFixed(1);
+      const med  = medals[rank] ? `<span class="medal">${medals[rank]}</span>` : "";
+      const eCol = d.elo >= 1080 ? "#15803d" : d.elo >= 1040 ? "#2952e3" : d.elo < 970 ? "#aaa" : "var(--ink)";
+      tbody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td class="rank-cell">${med}${rank}</td>
+          <td class="model-cell">${d.model}</td>
+          <td class="elo-cell" style="color:${eCol}">${d.elo}</td>
+          <td class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></td>
+        </tr>`);
+    });
+  }
+
+  rows(data);
+  document.getElementById("search").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    rows(q ? data.filter(d => d.model.toLowerCase().includes(q)) : data);
+  });
+}
+
+async function main() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = parseCSV(await res.text());
+    if (!data.length) throw new Error("Empty dataset");
+
+    const elos = [...data.map(d => d.elo)].sort((a,b)=>a-b);
+    document.getElementById("s-n").textContent   = data.length;
+    document.getElementById("s-max").textContent = elos[elos.length-1];
+    document.getElementById("s-min").textContent = elos[0];
+    document.getElementById("s-med").textContent = elos[Math.floor(elos.length/2)];
+
+    drawChart(data);
+    renderTable(data);
+
+    const loader = document.getElementById("loading");
+    loader.classList.add("gone");
+    setTimeout(() => loader.remove(), 400);
+  } catch(err) {
+    document.getElementById("loading").innerHTML =
+      `<div style="font-family:'DM Mono',monospace;font-size:12px;color:#b91c1c">Failed to load: ${err.message}</div>`;
+  }
+}
+
+main();
+</script>
+</body>
+</html>
