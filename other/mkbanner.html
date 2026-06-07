@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&family=Lora:ital,wght@1,400;1,500&family=Montserrat:wght@700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --surface-2: #1e1e1e;
+            --border: rgba(255,255,255,0.07);
+            --border-strong: rgba(255,255,255,0.12);
+            --text: #eeede9;
+            --text-muted: #686868;
+            --text-dim: #444;
+            --accent: #b8ff57;
+            --accent-dim: rgba(184,255,87,0.12);
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+            --font-brand: 'Syne', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        /* ─── Header ─── */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: rgba(13,13,13,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        .brand {
+            font-family: var(--font-brand);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            font-family: var(--font-body);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: all 0.15s;
+        }
+
+        .btn {
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border-strong);
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface-2);
+            color: var(--text);
+            border-color: rgba(255,255,255,0.18);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #0d0d0d;
+            font-weight: 600;
+        }
+
+        .btn-accent:hover {
+            background: #ccff77;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ─── Layout ─── */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            padding: 20px 28px;
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        /* ─── Canvas panel ─── */
+        .canvas-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .canvas-wrap {
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .canvas-meta {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.03em;
+            pointer-events: none;
+        }
+
+        .canvas-aspect {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2173 / 724;
+        }
+
+        canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .canvas-hint {
+            font-size: 12px;
+            color: var(--text-dim);
+            padding: 2px 0;
+        }
+
+        /* ─── Palette row ─── */
+        .palette-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .palette-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+
+        .swatch-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .swatch-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .swatch-btn.active {
+            border-color: var(--text);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .section {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 13px 16px 11px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .section-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* ─── Form controls ─── */
+        label.field-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"] {
+            font-family: var(--font-body);
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 8px 11px;
+            color: var(--text);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--border-strong);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-dim);
+        }
+
+        /* Range inputs */
+        .range-row {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .range-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .range-name {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .range-val {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Checkbox */
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .check-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* ─── Font buttons ─── */
+        .font-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .font-btn {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 10px 6px 8px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+        }
+
+        .font-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--text);
+        }
+
+        .font-btn.active {
+            background: var(--accent-dim);
+            border-color: rgba(184,255,87,0.3);
+            color: var(--accent);
+        }
+
+        .font-btn .glyph {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .font-btn .name {
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ─── Zone pad ─── */
+        .zone-layout {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .zone-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 90px;
+            flex-shrink: 0;
+        }
+
+        .zone-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            transition: all 0.15s;
+        }
+
+        .zone-btn:hover {
+            background: var(--surface-2);
+            border-color: var(--border-strong);
+        }
+
+        .zone-btn.active {
+            background: var(--accent-dim);
+            border-color: rgba(184,255,87,0.35);
+        }
+
+        .sliders-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        #renderStatus {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        #renderStatus.active { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">Banner<span>·</span>Studio</div>
+    <div class="header-actions">
+        <button id="shuffleBtn" class="btn btn-ghost">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"/></svg>
+            Shuffle
+        </button>
+        <button id="downloadBtn" class="btn btn-accent">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export JPG
+        </button>
+    </div>
+</header>
+
+<main>
+    <!-- Canvas column -->
+    <div class="canvas-panel">
+        <div class="canvas-wrap">
+            <div class="canvas-aspect">
+                <canvas id="bannerCanvas"></canvas>
+            </div>
+            <div class="canvas-meta">2173 × 724</div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; padding: 0 2px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span class="palette-label">Palette</span>
+                <div class="palette-row" id="paletteRow"></div>
+            </div>
+            <span class="canvas-hint">Click canvas to reposition text</span>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+        <!-- Text -->
+        <div class="section">
+            <div class="section-header">Text</div>
+            <div class="section-body">
+                <div>
+                    <label class="field-label" for="titleInput">Title</label>
+                    <input type="text" id="titleInput" value="ChessSLM" placeholder="Main title…">
+                </div>
+                <div>
+                    <label class="field-label" for="subtitleInput">Subtitle</label>
+                    <input type="text" id="subtitleInput" value="the best 30m parameters LM at chess" placeholder="Optional subtitle…">
+                </div>
+                <div>
+                    <label class="field-label">Typeface</label>
+                    <div class="font-row">
+                        <button class="font-btn font-preset-btn" data-font="serif">
+                            <span class="glyph" style="font-family:'Lora',serif; font-style:italic;">S</span>
+                            <span class="name">Lora</span>
+                        </button>
+                        <button class="font-btn font-preset-btn" data-font="sans">
+                            <span class="glyph" style="font-family:'Montserrat',sans-serif; font-weight:700;">A</span>
+                            <span class="name">Montserrat</span>
+                        </button>
+                        <button class="font-btn font-preset-btn" data-font="mono">
+                            <span class="glyph" style="font-family:'Share Tech Mono',monospace;">_M</span>
+                            <span class="name">Mono</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Position -->
+        <div class="section" style="margin-top:8px;">
+            <div class="section-header">Position</div>
+            <div class="section-body">
+                <div class="zone-layout">
+                    <div class="zone-pad" id="zonePad"></div>
+                    <div class="sliders-col">
+                        <div class="range-row">
+                            <div class="range-meta">
+                                <span class="range-name">X</span>
+                                <span class="range-val" id="offsetXVal">50%</span>
+                            </div>
+                            <input type="range" id="offsetX" min="5" max="95" value="50">
+                        </div>
+                        <div class="range-row">
+                            <div class="range-meta">
+                                <span class="range-name">Y</span>
+                                <span class="range-val" id="offsetYVal">50%</span>
+                            </div>
+                            <input type="range" id="offsetY" min="5" max="95" value="50">
+                        </div>
+                        <div class="check-row">
+                            <input type="checkbox" id="showLine" checked>
+                            <label class="check-label" for="showLine">Dividing line</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Style -->
+        <div class="section" style="margin-top:8px;">
+            <div class="section-header">Style</div>
+            <div class="section-body">
+                <div class="range-row">
+                    <div class="range-meta">
+                        <span class="range-name">Font size</span>
+                        <span class="range-val" id="fontSizeVal">160px</span>
+                    </div>
+                    <input type="range" id="fontSize" min="80" max="280" value="160">
+                </div>
+                <div class="range-row">
+                    <div class="range-meta">
+                        <span class="range-name">Blur</span>
+                        <span class="range-val" id="blurRadiusVal">160px</span>
+                    </div>
+                    <input type="range" id="blurRadius" min="40" max="300" value="160">
+                </div>
+                <div class="range-row">
+                    <div class="range-meta">
+                        <span class="range-name">Grain</span>
+                        <span class="range-val" id="grainIntensityVal">14%</span>
+                    </div>
+                    <input type="range" id="grainIntensity" min="0" max="35" value="14">
+                </div>
+                <div class="range-row">
+                    <div class="range-meta">
+                        <span class="range-name">Darkness</span>
+                        <span class="range-val" id="darknessVal">92%</span>
+                    </div>
+                    <input type="range" id="darkness" min="50" max="98" value="92">
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <span class="footer-left">Banner Studio — client-side rendering</span>
+    <span id="renderStatus">ready</span>
+</footer>
+
+<script>
+    const CANVAS_WIDTH = 2173;
+    const CANVAS_HEIGHT = 724;
+
+    const canvas = document.getElementById('bannerCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+
+    let selectedFont = "serif";
+    let gradientHuePreset = "gold";
+    let abstractBlobs = [];
+
+    const titleInput   = document.getElementById('titleInput');
+    const subtitleInput = document.getElementById('subtitleInput');
+    const shuffleBtn   = document.getElementById('shuffleBtn');
+    const downloadBtn  = document.getElementById('downloadBtn');
+    const renderStatus = document.getElementById('renderStatus');
+    const offsetX      = document.getElementById('offsetX');
+    const offsetY      = document.getElementById('offsetY');
+    const fontSize     = document.getElementById('fontSize');
+    const blurRadius   = document.getElementById('blurRadius');
+    const grainIntensity = document.getElementById('grainIntensity');
+    const darkness     = document.getElementById('darkness');
+    const showLineCheck = document.getElementById('showLine');
+
+    const offsetXVal   = document.getElementById('offsetXVal');
+    const offsetYVal   = document.getElementById('offsetYVal');
+    const fontSizeVal  = document.getElementById('fontSizeVal');
+    const blurRadiusVal = document.getElementById('blurRadiusVal');
+    const grainIntensityVal = document.getElementById('grainIntensityVal');
+    const darknessVal  = document.getElementById('darknessVal');
+
+    const FONT_FAMILIES = {
+        "serif": "'Lora', serif",
+        "sans":  "'Montserrat', sans-serif",
+        "mono":  "'Share Tech Mono', monospace"
+    };
+
+    const COLOR_THEMES = {
+        "gold":   { base:[15,12,5],  spots:[{r:212,g:175,b:55,alpha:0.8},{r:184,g:134,b:11,alpha:0.65},{r:101,g:67,b:33,alpha:0.9},{r:255,g:215,b:0,alpha:0.4}], swatch:"#d4a017" },
+        "red":    { base:[12,4,4],   spots:[{r:200,g:20,b:20,alpha:0.75},{r:255,g:100,b:100,alpha:0.6},{r:80,g:5,b:5,alpha:0.9}], swatch:"#c01414" },
+        "orange": { base:[14,8,4],   spots:[{r:230,g:90,b:10,alpha:0.75},{r:255,g:170,b:50,alpha:0.6},{r:100,g:30,b:0,alpha:0.9}], swatch:"#e65a0a" },
+        "teal":   { base:[4,12,12],  spots:[{r:10,g:180,b:160,alpha:0.75},{r:120,g:230,b:220,alpha:0.6},{r:2,g:50,b:45,alpha:0.9}], swatch:"#0ab4a0" },
+        "purple": { base:[10,5,12],  spots:[{r:140,g:20,b:220,alpha:0.7},{r:200,g:120,b:255,alpha:0.55},{r:40,g:5,b:80,alpha:0.95}], swatch:"#8c14dc" },
+        "blue":   { base:[4,8,14],   spots:[{r:20,g:100,b:220,alpha:0.75},{r:100,g:180,b:255,alpha:0.5},{r:5,g:20,b:80,alpha:0.9}], swatch:"#1464dc" }
+    };
+
+    // Build palette swatches
+    const paletteRow = document.getElementById('paletteRow');
+    Object.entries(COLOR_THEMES).forEach(([key, theme]) => {
+        const btn = document.createElement('button');
+        btn.className = 'swatch-btn';
+        btn.dataset.hue = key;
+        btn.style.background = theme.swatch;
+        btn.title = key.charAt(0).toUpperCase() + key.slice(1);
+        btn.addEventListener('click', () => {
+            gradientHuePreset = key;
+            regenerateBlobs();
+            updateUI();
+            drawBanner();
+        });
+        paletteRow.appendChild(btn);
+    });
+
+    // Build zone pad
+    const ZONE_COORDS = {
+        "lt":[10,15],"ct":[50,15],"rt":[90,15],
+        "lm":[10,50],"cm":[50,50],"rm":[90,50],
+        "lb":[10,75],"cb":[50,75],"rb":[90,75]
+    };
+    const zonePad = document.getElementById('zonePad');
+    Object.entries(ZONE_COORDS).forEach(([key, coords]) => {
+        const btn = document.createElement('button');
+        btn.className = 'zone-btn';
+        btn.dataset.zone = key;
+        btn.title = key;
+        btn.addEventListener('click', () => {
+            offsetX.value = coords[0];
+            offsetY.value = coords[1];
+            updateUI();
+            drawBanner();
+        });
+        zonePad.appendChild(btn);
+    });
+
+    function regenerateBlobs() {
+        abstractBlobs = [];
+        const theme = COLOR_THEMES[gradientHuePreset];
+        const n = Math.floor(Math.random() * 3) + 4;
+        for (let i = 0; i < n; i++) {
+            const c = theme.spots[Math.floor(Math.random() * theme.spots.length)];
+            abstractBlobs.push({
+                x:  Math.random() * CANVAS_WIDTH,
+                y:  CANVAS_HEIGHT * 0.2 + Math.random() * CANVAS_HEIGHT * 0.7,
+                rx: 350 + Math.random() * 450,
+                ry: 250 + Math.random() * 350,
+                color: c
+            });
+        }
+    }
+
+    function drawBanner() {
+        renderStatus.textContent = "rendering";
+        renderStatus.className = "";
+
+        const theme = COLOR_THEMES[gradientHuePreset];
+        const dark = parseInt(darkness.value) / 100;
+        const br = Math.round(theme.base[0] * (1 - dark) * 2);
+        const bg = Math.round(theme.base[1] * (1 - dark) * 2);
+        const bb = Math.round(theme.base[2] * (1 - dark) * 2);
+
+        ctx.fillStyle = `rgb(${br},${bg},${bb})`;
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        ctx.filter = `blur(${blurRadius.value}px)`;
+        abstractBlobs.forEach(blob => {
+            ctx.fillStyle = `rgba(${blob.color.r},${blob.color.g},${blob.color.b},${blob.color.alpha})`;
+            ctx.beginPath();
+            ctx.ellipse(blob.x, blob.y, blob.rx, blob.ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.restore();
+
+        const grain = parseInt(grainIntensity.value);
+        if (grain > 0) {
+            const img = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            const d = img.data;
+            for (let i = 0; i < d.length; i += 4) {
+                const n = (Math.random() - 0.5) * grain * 2.8;
+                d[i]   = Math.max(0, Math.min(255, d[i]   + n));
+                d[i+1] = Math.max(0, Math.min(255, d[i+1] + n));
+                d[i+2] = Math.max(0, Math.min(255, d[i+2] + n));
+            }
+            ctx.putImageData(img, 0, 0);
+        }
+
+        const title    = titleInput.value.trim() || "UNTITLED";
+        const subtitle = subtitleInput.value.trim();
+        const fs       = parseInt(fontSize.value);
+        const xPct     = parseInt(offsetX.value) / 100;
+        const yPct     = parseInt(offsetY.value) / 100;
+
+        ctx.fillStyle   = "#ffffff";
+        ctx.font        = `${fs}px ${FONT_FAMILIES[selectedFont]}`;
+        ctx.textBaseline = "top";
+
+        const tw   = ctx.measureText(title).width;
+        const pad  = 90;
+        let tx = Math.max(pad, Math.min((CANVAS_WIDTH - tw) * xPct, CANVAS_WIDTH - tw - pad));
+        let ty = Math.max(pad, Math.min((CANVAS_HEIGHT - fs) * yPct, CANVAS_HEIGHT - fs - pad));
+
+        ctx.shadowColor   = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur    = 12;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 4;
+        ctx.fillText(title, tx, ty);
+        ctx.shadowColor   = 'transparent';
+
+        if (subtitle) {
+            const sfs = Math.round(fs * 0.35);
+            ctx.font  = `${sfs}px ${FONT_FAMILIES[selectedFont]}`;
+            const sw  = ctx.measureText(subtitle).width;
+
+            let sx = tx;
+            let sy = ty + fs + 40;
+
+            if (xPct > 0.7)               sx = tx + tw - sw;
+            else if (xPct > 0.4 && xPct < 0.6) sx = tx + (tw - sw) / 2;
+
+            if (selectedFont === "serif" && showLineCheck.checked) {
+                const lineY     = ty + fs + 20;
+                const lineW     = Math.max(tw, sw) + 30;
+                let lineX       = tx;
+                if (xPct > 0.7)               lineX = tx + tw - lineW;
+                else if (xPct > 0.4 && xPct < 0.6) lineX = tx + (tw - lineW) / 2;
+
+                ctx.strokeStyle = "rgba(220,220,220,0.7)";
+                ctx.lineWidth   = 4;
+                ctx.beginPath();
+                ctx.moveTo(lineX, lineY);
+                ctx.lineTo(lineX + lineW, lineY);
+                ctx.stroke();
+                sy = lineY + 25;
+            }
+
+            ctx.fillStyle = "rgba(220,220,220,0.85)";
+            ctx.fillText(subtitle, sx, sy);
+        }
+
+        renderStatus.textContent = "ready";
+        renderStatus.className   = "active";
+    }
+
+    function updateUI() {
+        offsetXVal.textContent      = offsetX.value + "%";
+        offsetYVal.textContent      = offsetY.value + "%";
+        fontSizeVal.textContent     = fontSize.value + "px";
+        blurRadiusVal.textContent   = blurRadius.value + "px";
+        grainIntensityVal.textContent = grainIntensity.value + "%";
+        darknessVal.textContent     = darkness.value + "%";
+
+        // Zone buttons
+        document.querySelectorAll('.zone-btn').forEach(btn => {
+            const c = ZONE_COORDS[btn.dataset.zone];
+            const on = c && +c[0] === +offsetX.value && +c[1] === +offsetY.value;
+            btn.classList.toggle('active', on);
+        });
+
+        // Font buttons
+        document.querySelectorAll('.font-preset-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.font === selectedFont);
+        });
+
+        // Swatches
+        document.querySelectorAll('.swatch-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.hue === gradientHuePreset);
+        });
+    }
+
+    // Event wiring
+    [offsetX, offsetY, fontSize, blurRadius, grainIntensity, darkness, showLineCheck, titleInput, subtitleInput].forEach(el => {
+        el.addEventListener('input', () => { updateUI(); drawBanner(); });
+    });
+
+    document.querySelectorAll('.font-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedFont = btn.dataset.font;
+            updateUI();
+            drawBanner();
+        });
+    });
+
+    shuffleBtn.addEventListener('click', () => {
+        const keys = Object.keys(COLOR_THEMES);
+        gradientHuePreset = keys[Math.floor(Math.random() * keys.length)];
+        regenerateBlobs();
+        updateUI();
+        drawBanner();
+    });
+
+    canvas.addEventListener('click', e => {
+        const r  = canvas.getBoundingClientRect();
+        offsetX.value = Math.round((e.clientX - r.left) / r.width * 100);
+        offsetY.value = Math.round((e.clientY - r.top)  / r.height * 100);
+        updateUI();
+        drawBanner();
+    });
+
+    downloadBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.download = `${titleInput.value.trim() || 'banner'}_2173x724.jpg`;
+        a.href = canvas.toDataURL('image/jpeg', 0.95);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    window.onload = () => {
+        regenerateBlobs();
+        updateUI();
+        setTimeout(drawBanner, 200);
+    };
+</script>
+</body>
+</html>
