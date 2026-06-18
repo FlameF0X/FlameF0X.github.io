@@ -1,199 +1,441 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Upscale Analyzer (NanoSR-6x)</title>
+    <title>NANO-SR.v6 // OPTICAL TELEMETRY RECON</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .pattern-checkerboard {
-            background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: {
+                            950: '#030303',
+                            900: '#09090b',
+                            800: '#141419',
+                            700: '#1f1f26',
+                        },
+                        acid: {
+                            400: '#c5f34c',
+                            500: '#a3e635',
+                            600: '#84cc16',
+                        }
+                    }
+                }
+            }
         }
+    </script>
+
+    <style>
+        /* Tech Blueprint Grid Background */
+        .blueprint-bg {
+            background-color: #030303;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                radial-gradient(rgba(163, 230, 53, 0.03) 1px, transparent 0);
+            background-size: 24px 24px, 24px 24px, 48px 48px;
+            background-position: center center;
+        }
+
+        /* Subtle Scanline Overlay */
+        .scanlines {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 2;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030303;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f26;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3e635;
+        }
+
+        /* Tactical HUD Crosshair container */
         .zoom-container {
             position: relative;
             cursor: crosshair;
             overflow: hidden;
             aspect-ratio: 1 / 1;
-            background-color: #020617;
-            border-radius: 0.75rem;
+            background-color: #09090b;
+            border: 1px solid #1f1f26;
+            transition: border-color 0.3s ease;
+        }
+        .zoom-container:hover {
+            border-color: #a3e635;
         }
         .zoom-image {
             width: 100%;
             height: 100%;
             object-fit: contain;
             transform-origin: 50% 50%;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
-        /* Custom loader pulse */
-        .ai-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+        /* Reticle overlay for Tactical Zoom */
+        .hud-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border: 1px solid rgba(163, 230, 53, 0.05);
+            z-index: 10;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .7; transform: scale(1.05); }
+
+        /* Glowing LEDs */
+        .led-pulse {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px rgba(163, 230, 53, 0.6)); }
+            50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(163, 230, 53, 0)); }
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
+
+        /* Grid Pattern for Checkerboard */
+        .checkerboard-pattern {
+            background-image: repeating-conic-gradient(#09090b 0% 25%, #141419 0% 50%);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans custom-scrollbar">
-    <div class="max-w-7xl mx-auto space-y-6">
-        
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+<body class="blueprint-bg text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-acid-500 selection:text-black">
+
+    <!-- Top Technical Nav / Status Bar -->
+    <header class="border-b border-obsidian-800/85 bg-obsidian-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- Logo & Model Spec -->
             <div class="flex items-center gap-4">
-                <div class="p-3 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></svg>
+                <div class="relative p-2.5 bg-acid-500 text-black font-mono font-extrabold text-sm tracking-tighter shadow-[0_0_15px_rgba(163,230,53,0.2)]">
+                    N_SR //
+                    <div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-white border-r border-b border-black"></div>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold">NanoSR AI Analyzer</h1>
-                    <p class="text-slate-400 text-sm">FlameF0X/NanoSR-6x • 6x Super Resolution</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold tracking-tight text-white uppercase">NanoSR Optical Engine</h1>
+                        <span class="text-[9px] bg-obsidian-800 border border-obsidian-700 px-1.5 py-0.5 rounded font-mono text-slate-400">v6.2-PRO</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono tracking-widest uppercase">System Status: <span class="text-acid-500">Telemetry Active</span></p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="aiStatus" class="hidden flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-                    <div class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-                    <span class="text-[10px] font-bold uppercase text-indigo-400 tracking-wider">AI Upscaling...</span>
-                </div>
-                <div class="flex gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
-                    <button id="pixelMode" class="px-3 py-1 rounded text-xs font-medium bg-indigo-600 text-white">Pixelated</button>
-                    <button id="smoothMode" class="px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">Smooth</button>
-                </div>
-            </div>
-        </header>
 
-        <!-- Main Workspace -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Global Status & View Controls -->
+            <div class="flex flex-wrap items-center gap-4">
+                <!-- AI Engine State indicator -->
+                <div id="aiStatus" class="hidden flex items-center gap-2 px-3 py-1 bg-acid-500/10 border border-acid-500/30 rounded font-mono text-[10px] text-acid-400 uppercase tracking-widest">
+                    <span class="w-1.5 h-1.5 rounded-full bg-acid-500 led-pulse"></span>
+                    Synthesizing 6x Subpixels...
+                </div>
+                
+                <!-- Interpolation Selector -->
+                <div class="flex items-center gap-1.5 bg-obsidian-900 border border-obsidian-800 p-1 rounded-sm">
+                    <span class="text-[10px] font-mono text-slate-500 px-2 uppercase">Render:</span>
+                    <button id="pixelMode" class="px-2.5 py-1 font-mono text-[10px] uppercase transition-all duration-200 bg-acid-500 text-black font-semibold">
+                        NEAREST (Pixelated)
+                    </button>
+                    <button id="smoothMode" class="px-2.5 py-1 font-mono text-[10px] uppercase transition-all duration-200 text-slate-400 hover:text-white">
+                        BILINEAR (Smooth)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Column 1: System Input Controls -->
+        <section class="lg:col-span-1 space-y-6">
             
-            <!-- Left: Controls & Upload -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5">
+            <!-- Input Module -->
+            <div class="bg-obsidian-950 border border-obsidian-800 rounded-sm p-5 space-y-6 relative">
+                <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
+                    MODULE [01] // INPUT
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-[11px] font-mono uppercase tracking-widest text-slate-400">
+                        Capture Low-Res Source
+                    </label>
+                    
+                    <!-- Advanced Drag & Drop Zone -->
+                    <div id="dropZone1" class="group relative h-48 border border-dashed border-obsidian-700 hover:border-acid-500/50 bg-obsidian-900/40 rounded-sm flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden">
+                        
+                        <!-- Local Image Preview Layer -->
+                        <div id="previewContainer1" class="hidden absolute inset-0 z-10 p-2 bg-obsidian-950 checkerboard-pattern">
+                            <img id="img1Preview" class="w-full h-full object-contain filter brightness-95">
+                            <div class="absolute bottom-2 left-2 bg-black/85 border border-obsidian-700 px-2 py-0.5 rounded font-mono text-[8px] text-slate-400">
+                                BASE_RAW_IMAGE
+                            </div>
+                        </div>
+
+                        <!-- Empty Prompt Layer -->
+                        <div id="uploadPrompt1" class="flex flex-col items-center text-center p-4 space-y-3 z-0">
+                            <div class="p-3 bg-obsidian-850 border border-obsidian-800 rounded-full group-hover:border-acid-500/40 group-hover:bg-acid-500/5 transition-all">
+                                <svg class="text-slate-500 group-hover:text-acid-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-slate-300 block">Drag & Drop Image</span>
+                                <span class="text-[10px] text-slate-500 font-mono">or click to open browser</span>
+                            </div>
+                        </div>
+                        <input type="file" id="file1" class="hidden" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Parameters Controls -->
+                <div class="space-y-4 pt-2 border-t border-obsidian-900">
                     <div>
-                        <h2 class="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">1. Upload Low-Res</h2>
-                        <div id="dropZone1" class="h-48 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-500/5 hover:border-indigo-500/40 transition-all group overflow-hidden relative">
-                            <div id="previewContainer1" class="hidden w-full h-full p-2 relative z-10 bg-slate-950/50">
-                                <img id="img1Preview" class="w-full h-full object-contain">
-                            </div>
-                            <div id="uploadPrompt1" class="flex flex-col items-center">
-                                <svg class="text-slate-600 group-hover:text-indigo-500 mb-2 transition-colors" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                <span class="text-sm text-slate-500">Drop or Click</span>
-                            </div>
-                            <input type="file" id="file1" class="hidden" accept="image/*">
+                        <div class="flex justify-between mb-1.5 items-baseline">
+                            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Delta Sensitivity</label>
+                            <span id="toleranceVal" class="text-xs font-mono font-bold text-acid-500 bg-acid-500/10 px-1.5 rounded">10</span>
+                        </div>
+                        <input type="range" id="tolerance" min="1" max="50" value="10" class="w-full accent-acid-500 h-1 bg-obsidian-800 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-[8px] font-mono text-slate-600 mt-1">
+                            <span>MIN (1)</span>
+                            <span>MAX (50)</span>
                         </div>
                     </div>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Map Sensitivity</label>
-                                <span id="toleranceVal" class="text-xs font-mono text-indigo-400">10</span>
-                            </div>
-                            <input type="range" id="tolerance" min="1" max="50" value="10" class="w-full accent-indigo-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+
+                    <!-- Technical Specs Display -->
+                    <div class="p-3.5 bg-obsidian-900 border border-obsidian-800/80 rounded-sm font-mono space-y-1.5 text-[10px]">
+                        <h4 class="text-slate-400 border-b border-obsidian-800 pb-1 uppercase tracking-wider text-[9px] font-bold">ENGINE SPECIFICATIONS</h4>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Upscale Mode:</span>
+                            <span class="text-white font-semibold">Sub-Pixel 6x SR</span>
                         </div>
-                        
-                        <div class="p-4 bg-slate-950/50 rounded-xl border border-slate-800/50 space-y-2">
-                            <h3 class="text-[10px] font-bold uppercase text-slate-400 tracking-wide">Analysis Info</h3>
-                            <ul class="text-[11px] text-slate-500 space-y-1">
-                                <li class="flex justify-between"><span>Upscale Factor:</span> <span class="text-slate-300">6x</span></li>
-                                <li class="flex justify-between"><span>Engine:</span> <span class="text-slate-300">NanoSR-6x</span></li>
-                                <li class="flex justify-between"><span>Status:</span> <span id="currentStatusText" class="text-emerald-500">Ready</span></li>
-                            </ul>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Core Engine:</span>
+                            <span class="text-white">FlameF0X/NanoSR-6x</span>
                         </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Telemetry:</span>
+                            <span id="currentStatusText" class="text-acid-500 font-bold uppercase">Ready</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tech Tip Box -->
+            <div class="p-4 bg-obsidian-950 border border-obsidian-800/80 rounded-sm font-mono space-y-2 relative">
+                <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 text-[9px] text-slate-500 tracking-wider">
+                    SYSTEM INFO
+                </div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    Hover and move your pointer over the output monitors to activate **synchronous tactical zoom**. This maps reconstruction details down to individual predicted matrix nodes.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- Column 2-4: Main Diagnostics & Comparison Display -->
+        <section class="lg:col-span-3 space-y-6">
+
+            <!-- State 1: Empty Slate (Needs Image) -->
+            <div id="emptyState" class="h-full min-h-[500px] flex flex-col items-center justify-center border border-obsidian-800/80 rounded-sm text-center p-8 bg-obsidian-950/40 relative overflow-hidden group">
+                <div class="absolute inset-0 blueprint-bg opacity-40 pointer-events-none"></div>
+                <!-- Neon laser target scan graphic -->
+                <div class="relative w-28 h-28 mb-6 border border-obsidian-800 flex items-center justify-center">
+                    <div class="absolute inset-2 border border-dashed border-obsidian-700"></div>
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-px bg-acid-500/50"></div>
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-px bg-acid-500/50"></div>
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-acid-500/50"></div>
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-px bg-acid-500/50"></div>
+                    <svg class="text-slate-600 opacity-60 z-10" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                </div>
+                <div class="space-y-2 z-10 max-w-sm">
+                    <h3 class="text-sm font-mono uppercase tracking-widest text-slate-300">Awaiting Target Acquisition</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed font-sans">
+                        Please upload or drop an image in the control dock to run the super-resolution deep learning model.
+                    </p>
+                </div>
+            </div>
+
+            <!-- State 2: Reconstruction Active (Loader) -->
+            <div id="processingState" class="hidden h-full min-h-[500px] flex flex-col items-center justify-center border border-acid-500/20 rounded-sm p-8 bg-obsidian-950 scanlines relative overflow-hidden">
+                <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
+                
+                <div class="relative mb-8">
+                    <!-- Spinning technical loader -->
+                    <div class="w-24 h-24 rounded-full border-2 border-dashed border-acid-500/20 animate-spin flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full border border-dotted border-acid-500/50 animate-ping"></div>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-mono text-[10px] text-acid-500 tracking-tighter">PROCESSING</span>
+                    </div>
+                </div>
+
+                <div class="text-center space-y-3 z-10 max-w-md">
+                    <h3 class="text-lg font-mono tracking-widest text-white uppercase">RECONSTRUCTING HIGH-FREQUENCY DETAILS</h3>
+                    <p class="text-xs text-slate-400 font-sans leading-relaxed">
+                        Querying the model... We are optimizing edges, synthesizing texture data, and constructing sub-pixel enhancements using FlameF0X/NanoSR-6x.
+                    </p>
+                    <div class="w-48 h-1 bg-obsidian-900 border border-obsidian-850 rounded-full mx-auto overflow-hidden">
+                        <div class="h-full bg-acid-500 w-1/3 animate-pulse rounded-full"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Results & Analysis -->
-            <div class="lg:col-span-3 space-y-6">
-                <!-- Result State: Empty -->
-                <div id="emptyState" class="h-full min-h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-slate-900 rounded-3xl text-slate-600 bg-slate-900/10">
-                    <svg class="mb-4 opacity-10" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                    <p class="text-lg font-medium opacity-40 text-center px-6">Upload a source image.<br>The AI will automatically generate a 6x reconstruction.</p>
+            <!-- State 3: Diagnostic Results Telemetry -->
+            <div id="resultsView" class="hidden space-y-6">
+                
+                <!-- Horizontal Info HUD -->
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-obsidian-950 border border-obsidian-800 p-4 rounded-sm relative">
+                    <div class="absolute top-0 left-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
+                        HUD MODULE [02] // METRICS
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1 text-[10px] font-mono text-acid-400 bg-acid-400/10 border border-acid-500/35 px-2.5 py-1 uppercase rounded-sm">
+                            <span class="w-1.5 h-1.5 bg-acid-500 rounded-full led-pulse"></span>
+                            Telemetry Synchronized
+                        </div>
+                    </div>
+
+                    <!-- Telemetry Coordinates Tracking HUD -->
+                    <div class="flex items-center gap-6 text-[11px] font-mono text-slate-400">
+                        <div>
+                            COORD: <span id="hudCoords" class="text-white">- : -</span>
+                        </div>
+                        <div>
+                            ZOOM: <span class="text-white">6.0x</span>
+                        </div>
+                        <div>
+                            RESOLUTION: <span id="resTag" class="text-acid-500">--</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Result State: Processing -->
-                <div id="processingState" class="hidden h-full min-h-[500px] flex flex-col items-center justify-center bg-slate-900/30 rounded-3xl space-y-8 border border-slate-800">
-                    <div class="relative">
-                        <div class="ai-pulse p-10 bg-indigo-600/10 rounded-full border border-indigo-500/20">
-                            <svg class="text-indigo-500 animate-spin" xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <!-- 3-Way Diagnostic Screen Panel Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- Viewport 1: Bicubic Baseline -->
+                    <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_01 [BASELINE]</span>
+                            <span class="text-[9px] font-mono text-slate-600">BICUBIC_SMOOTH</span>
                         </div>
-                        <div class="absolute -bottom-2 -right-2 bg-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded text-white uppercase animate-bounce">AI Active</div>
+                        <div class="zoom-container group">
+                            <!-- Overlay markers -->
+                            <div class="hud-overlay"></div>
+                            <img id="zImg1" class="zoom-image">
+                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
+                                BICUBIC INTERPOLATION
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-center space-y-2">
-                        <h3 class="text-2xl font-bold text-white tracking-tight">AI Reconstruction in Progress</h3>
-                        <p class="text-slate-400 max-w-sm mx-auto">Calling NanoSR-6x Space. Enhancing edges and generating sub-pixel detail (6x upscale)...</p>
+
+                    <!-- Viewport 2: AI Enhanced Result (Hero Window) -->
+                    <div class="bg-obsidian-950 border border-acid-500/30 p-2 rounded-sm space-y-2 relative">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[9px] font-mono tracking-wider text-acid-400 uppercase font-semibold">SYS_MON_02 [RECON_OUTPUT]</span>
+                            <span class="text-[9px] font-mono text-acid-500 font-bold">ACTIVE_SR</span>
+                        </div>
+                        <div class="zoom-container">
+                            <!-- Overlay markers -->
+                            <div class="hud-overlay" style="border-color: rgba(163,230,53,0.15)"></div>
+                            <img id="zImg2" class="zoom-image">
+                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-acid-500 text-black text-[9px] font-mono font-bold rounded-sm shadow-md">
+                                NANO-SR 6x AI ENHANCED
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Viewport 3: Difference Map -->
+                    <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_03 [DELTA_SPECTRUM]</span>
+                            <span class="text-[9px] font-mono text-slate-600">HI_FREQ_DELTA</span>
+                        </div>
+                        <div class="zoom-container">
+                            <!-- Overlay markers -->
+                            <div class="hud-overlay"></div>
+                            <img id="zDiff" class="zoom-image">
+                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
+                                DELTA ENHANCEMENT MAP
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Result State: Success -->
-                <div id="resultsView" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="flex items-center gap-2 text-amber-500 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20 w-fit text-[10px] font-bold uppercase tracking-wider">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                            Hover boxes to inspect sub-pixels
+                <!-- Custom Info Banner detailing scientific output -->
+                <div class="border-l-2 border-acid-500 bg-obsidian-950 p-6 rounded-sm relative overflow-hidden">
+                    <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
+                    <div class="flex items-start gap-4 relative z-10">
+                        <div class="p-2.5 bg-acid-500/10 border border-acid-500/30 text-acid-500 rounded-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
                         </div>
-                        <div class="text-xs text-slate-500 font-medium bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-                            Output Res: <span id="resTag" class="text-indigo-400 font-mono">--</span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Box 1: Bicubic -->
-                        <div class="bg-slate-900/50 p-1 rounded-[1rem] border border-slate-800">
-                            <div class="zoom-container">
-                                <img id="zImg1" class="zoom-image">
-                                <div class="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-bold uppercase text-slate-300 border border-white/10">Bicubic Baseline</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Box 2: AI Result -->
-                        <div class="bg-slate-900/50 p-1 rounded-[1rem] border border-indigo-500/30 ring-4 ring-indigo-500/5">
-                            <div class="zoom-container">
-                                <img id="zImg2" class="zoom-image">
-                                <div class="absolute top-3 left-3 px-2 py-1 bg-indigo-600 rounded text-[9px] font-bold uppercase text-white shadow-lg">NanoSR-6x AI</div>
-                            </div>
-                        </div>
-
-                        <!-- Box 3: Diff Map -->
-                        <div class="bg-slate-900/50 p-1 rounded-[1rem] border border-slate-800">
-                            <div class="zoom-container">
-                                <img id="zDiff" class="zoom-image">
-                                <div class="absolute top-3 left-3 px-2 py-1 bg-emerald-600/80 backdrop-blur-md rounded text-[9px] font-bold uppercase text-white border border-white/10">Detail Enhancement Map</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-indigo-900/10 border border-indigo-500/20 p-6 rounded-2xl flex items-start gap-5 shadow-inner">
-                        <div class="p-3 bg-indigo-500/20 rounded-xl text-indigo-400 shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                        </div>
-                        <div class="space-y-1">
-                            <h4 class="font-bold text-indigo-300">AI Reconstruction Logic</h4>
-                            <p class="text-sm text-slate-400 leading-relaxed">
-                                The <span class="text-emerald-400 font-semibold">Green Map</span> visualizes pixels that the AI generated from scratch. While the bicubic baseline simply blurs existing data, NanoSR-6x predicts high-frequency features like texture grain, sharp object boundaries, and atmospheric clarity.
+                        <div class="space-y-1.5">
+                            <h4 class="text-sm font-mono font-bold text-white uppercase tracking-wider">Delta Reconstruction Telemetry Matrix</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                The <span class="text-acid-400 font-semibold">High-Frequency Delta Map</span> highlights exactly where the optical intelligence generated synthesized textures. Rather than merely smoothing or introducing artifacts like bicubic filters, the super-resolution engine generates new crisp structures and organic bounds along high contrast vectors.
                             </p>
                         </div>
                     </div>
                 </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- UI Custom Toast Notifications -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <!-- Technical Footer -->
+    <footer class="border-t border-obsidian-800/80 bg-obsidian-950/80 backdrop-blur-md px-6 py-4 mt-12 text-slate-500 text-[10px] font-mono">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <span>SYSTEM CORE: ONLINE</span>
+                <span>•</span>
+                <span>MODEL WEIGHTS: FlameF0X/NanoSR-6x</span>
+            </div>
+            <div>
+                <span>TACTICAL RECON ENGINE — ALL INTEL SYNTHESIZED LOCALLY</span>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <!-- Import Gradio Client -->
+    <!-- Gradio API & Client Code -->
     <script type="module">
         import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
+        // Global Application State
         const state = {
             sourceImg: null,
             aiResultImg: null,
@@ -201,6 +443,7 @@
             isProcessing: false
         };
 
+        // DOM elements cache
         const el = {
             file1: document.getElementById('file1'),
             drop1: document.getElementById('dropZone1'),
@@ -212,14 +455,38 @@
             emptyState: document.getElementById('emptyState'),
             processingState: document.getElementById('processingState'),
             aiStatus: document.getElementById('aiStatus'),
-            statusText: document.getElementById('currentStatusText')
+            statusText: document.getElementById('currentStatusText'),
+            toastContainer: document.getElementById('toastContainer'),
+            hudCoords: document.getElementById('hudCoords')
         };
 
+        // Event Listeners setup
         el.drop1.onclick = () => el.file1.click();
         
         el.file1.onchange = (e) => {
             const file = e.target.files[0];
             if (file) handleSourceUpload(file);
+        };
+
+        // Drag and drop mechanics for uploading raw content
+        el.drop1.ondragover = (e) => {
+            e.preventDefault();
+            el.drop1.classList.add('border-acid-500', 'bg-acid-500/5');
+        };
+
+        el.drop1.ondragleave = () => {
+            el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
+        };
+
+        el.drop1.ondrop = (e) => {
+            e.preventDefault();
+            el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleSourceUpload(file);
+            } else {
+                showToast("System Error: Invalid image format submitted.", "error");
+            }
         };
 
         el.tolerance.oninput = (e) => {
@@ -232,13 +499,25 @@
 
         function setInterp(mode) {
             state.interpolation = mode;
-            el.pixelMode.className = mode === 'pixelated' ? 'px-3 py-1 rounded text-xs font-medium bg-indigo-600 text-white shadow-lg transition-all' : 'px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200 transition-all';
-            el.smoothMode.className = mode === 'smooth' ? 'px-3 py-1 rounded text-xs font-medium bg-indigo-600 text-white shadow-lg transition-all' : 'px-3 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200 transition-all';
-            if (state.aiResultImg) runAnalysis();
+            
+            // Rebrand Mode Selector Styling
+            if (mode === 'pixelated') {
+                el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
+                el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
+            } else {
+                el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
+                el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
+            }
+
+            if (state.aiResultImg) {
+                runAnalysis();
+                showToast(`Interpolation changed to ${mode.toUpperCase()}`);
+            }
         }
 
         async function handleSourceUpload(file) {
-            // Show local preview immediately
+            showToast("Reading source file raw pixels...", "info");
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 state.sourceImg = e.target.result;
@@ -248,7 +527,7 @@
             };
             reader.readAsDataURL(file);
 
-            // Call Gradio AI
+            // Call Gradio AI model space
             await startAiUpscale(file);
         }
 
@@ -256,28 +535,27 @@
             try {
                 toggleUiState('processing');
                 el.statusText.innerText = "Processing...";
-                el.statusText.className = "text-indigo-400";
+                el.statusText.className = "text-acid-500 led-pulse";
                 
-                // Connect to the specific Space. No localhost needed.
+                // Connection tracking
                 const client = await Client.connect("FlameF0X/NanoSR-6x");
                 
                 const result = await client.predict("/upscale_image", {
                     input_img: fileBlob,
                 });
 
-                // Gradio returns an array of outputs. The image is at index 0.
-                // It can be a URL string or an object with .url or .data.
                 const output = result.data[0];
                 state.aiResultImg = typeof output === 'string' ? output : (output.url || output.data);
                 
-                // Run analysis
+                // Run detailed differential analysis
                 await runAnalysis();
                 toggleUiState('results');
-                el.statusText.innerText = "Done";
-                el.statusText.className = "text-emerald-500";
+                el.statusText.innerText = "Online";
+                el.statusText.className = "text-acid-500";
+                showToast("6x Upscale & Telemetry mapped successfully!", "success");
             } catch (err) {
                 console.error("AI Upscale Error:", err);
-                alert("The AI model failed to respond. The Space might be starting up or sleeping. Please try again in 30 seconds.");
+                showToast("The AI model endpoint timed out. Retrying in 10s is recommended.", "error");
                 toggleUiState('empty');
                 el.statusText.innerText = "Failed";
                 el.statusText.className = "text-red-500";
@@ -290,12 +568,12 @@
             const imgS = await loadImage(state.sourceImg);
             const imgA = await loadImage(state.aiResultImg);
 
-            // AI results are 6x, so we use its dimensions as the target
+            // Output targets are based on the upscaled model 6x size
             const w = imgA.width;
             const h = imgA.height;
             const thresh = parseInt(el.tolerance.value);
             
-            document.getElementById('resTag').innerText = `${w} x ${h}`;
+            document.getElementById('resTag').innerText = `${w} x ${h} PX`;
 
             const c1 = document.createElement('canvas');
             const c2 = document.createElement('canvas');
@@ -307,15 +585,15 @@
             const ctx2 = c2.getContext('2d');
             const ctxD = cD.getContext('2d');
 
-            // 1. Draw Baseline (Bicubic interpolation)
+            // Viewport 1: Bicubic Baseline Construction
             ctx1.imageSmoothingEnabled = state.interpolation !== 'pixelated';
             ctx1.imageSmoothingQuality = 'high';
             ctx1.drawImage(imgS, 0, 0, w, h);
 
-            // 2. Draw AI Output
+            // Viewport 2: Pure Model Space Outputs
             ctx2.drawImage(imgA, 0, 0, w, h);
 
-            // 3. Create Detail Map (Modified to look like your upload)
+            // Viewport 3: Differential Analyzer Matrix
             const d1 = ctx1.getImageData(0, 0, w, h).data;
             const d2 = ctx2.getImageData(0, 0, w, h).data;
             const out = ctxD.createImageData(w, h);
@@ -325,14 +603,14 @@
                 const diff = (Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3;
                 
                 if (diff > thresh) {
-                    // Similar to the uploaded "Detail Enhancement Map": Green/Yellow highlights
-                    od[i] = diff * 0.5;      // Some Red
-                    od[i+1] = Math.min(255, diff * 5); // Strong Green
-                    od[i+2] = diff * 0.2;    // Low Blue
+                    // tactical acid yellow spectrum indicators
+                    od[i] = Math.min(255, diff * 1.5);
+                    od[i+1] = Math.min(255, diff * 4.5);
+                    od[i+2] = Math.min(255, diff * 0.1);
                     od[i+3] = 255;
                 } else {
-                    // Dark background for non-diff areas
-                    od[i] = 10; od[i+1] = 15; od[i+2] = 20; od[i+3] = 255;
+                    // Deep telemetry void space
+                    od[i] = 3; od[i+1] = 3; od[i+2] = 5; od[i+3] = 255;
                 }
             }
             ctxD.putImageData(out, 0, 0);
@@ -365,12 +643,39 @@
             });
         }
 
-        // Global Sync Zoom Logic
+        // Custom tactical toaster feedback alert system
+        function showToast(message, type = "info") {
+            const toast = document.createElement('div');
+            let typeStyles = "border-obsidian-800 bg-obsidian-950 text-slate-300";
+            if (type === "success") typeStyles = "border-acid-500/50 bg-obsidian-950 text-acid-400";
+            if (type === "error") typeStyles = "border-red-500/50 bg-obsidian-950 text-red-400";
+
+            toast.className = `p-3 border rounded-sm font-mono text-[10px] tracking-wider uppercase transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2 shadow-lg ${typeStyles}`;
+            toast.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full ${type === "error" ? 'bg-red-500' : 'bg-acid-500'} led-pulse"></span>
+                <span>${message}</span>
+            `;
+            el.toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Synchronized Zoom Reticle Logic across monitors
         document.querySelectorAll('.zoom-container').forEach(container => {
             const handleZoom = e => {
                 const rect = container.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+                // Update Telemetry coordinate metrics in HUD
+                el.hudCoords.innerText = `${Math.round(x)}% : ${Math.round(y)}%`;
 
                 document.querySelectorAll('.zoom-image').forEach(img => {
                     img.style.transformOrigin = `${x}% ${y}%`;
@@ -381,12 +686,13 @@
             container.addEventListener('mousemove', handleZoom);
             
             container.addEventListener('mouseleave', () => {
+                el.hudCoords.innerText = `- : -`;
                 document.querySelectorAll('.zoom-image').forEach(img => {
                     img.style.transform = 'scale(1)';
                 });
             });
 
-            // Touch support
+            // Fluid tactile drag for multi-touch responsive displays
             container.addEventListener('touchmove', e => {
                 e.preventDefault();
                 const touch = e.touches[0];
