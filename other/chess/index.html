@@ -928,7 +928,10 @@
         newGameBtn.disabled = true;
         statusFooterEl.innerText = "Connecting to ChessSLM Space…";
         try {
-            client = await Client.connect(SPACE_ID);
+            client = await Client.connect(SPACE_ID, {
+                fetch: (url, options = {}) =>
+                    fetch(url, { ...options, credentials: 'omit' })
+            });
             statusFooterEl.innerText = "Ready — press Play to start";
             newGameBtn.disabled = false;
         } catch (err) {
