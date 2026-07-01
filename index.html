@@ -5,38 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" type="image/png">
     <title>flamef0x.github.io | Hub</title>
-    
+
     <!-- Meta Tags -->
     <meta property="og:title" content="flamef0x.github.io | Hub" />
     <meta property="og:description" content="My project hub and more." />
-    
+
     <!-- Twitter (Discord often reads these as a fallback) -->
     <meta name="twitter:card" content="summary_large_image">
-    
-    <!-- Typography: IBM Plex Mono -->
+
+    <!-- Typography: JetBrains Mono (matches blog) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        mono: ['"IBM Plex Mono"', 'monospace'],
+                        mono: ['"JetBrains Mono"', '"Courier New"', 'monospace'],
                     },
                     colors: {
-                        paper: '#f5f2ec',
-                        ink: '#111111',
-                        muted: '#555555',
+                        /* base palette — matches blog page */
+                        paper: '#f5f0e8',
+                        paper2: '#ede8df',
+                        ink: '#1a1a1a',
+                        black: '#111111',
+                        muted: '#666666',
                         dim: '#999999',
-                        rule: '#ddd8cf',
+                        rule: '#c8c2b5',
+                        ruledark: '#222222',
                         codebg: '#1c1c1c',
                         codetext: '#e0e0e0',
-                        success: '#228b22',
-                        error: '#b22222',
+                        /* theme colors pulled from the leaderboard chart */
+                        accent: '#cc5218',      /* dark orange — "my models (top)" */
+                        accent2: '#e8944a',     /* mid orange  — "my models (lower)" */
+                        accent3: '#f2c99a',     /* light orange */
+                        slate: '#6b6b6b',       /* "other models" gray */
+                        slatelight: '#a8a8a8',
                     }
                 }
             }
@@ -60,27 +68,81 @@
             @apply border-rule;
         }
 
-        /* Syntax Highlighting */
-        .token-keyword { color: #cf6edf; }
-        .token-fn { color: #61afef; }
-        .token-str { color: #98c379; }
-        .token-num { color: #d19a66; }
-        .token-comment { color: #5c6370; font-style: italic; }
-
         ::selection {
             @apply bg-ink text-paper;
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #f5f2ec; }
-        ::-webkit-scrollbar-thumb { background: #ddd8cf; }
+        ::-webkit-scrollbar-track { background: #f5f0e8; }
+        ::-webkit-scrollbar-thumb { background: #c8c2b5; }
 
         #legacy-content {
             display: none;
         }
         #legacy-content.expanded {
             display: block;
+        }
+
+        /* Nav — ported from blog page */
+        .site-nav {
+            border-bottom: 1px solid #222222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            height: 52px;
+        }
+        .site-nav .logo {
+            font-size: 15px;
+            font-weight: 700;
+            color: #111111;
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+        .site-nav .nav-links {
+            display: flex;
+            gap: 0;
+            list-style: none;
+            height: 100%;
+        }
+        .site-nav .nav-links a {
+            text-decoration: none;
+            color: #666666;
+            padding: 0 1.2rem;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            border-left: 1px solid #222222;
+            transition: background 0.15s, color 0.15s;
+        }
+        .site-nav .nav-links a:hover { background: #ede8df; color: #1a1a1a; }
+        .site-nav .lang-btn {
+            font-size: 11px;
+            border: 1px solid #111111;
+            padding: 4px 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            transition: background 0.15s, color 0.15s;
+        }
+        .site-nav .lang-btn:hover { background: #111111; color: #f5f0e8; }
+        .site-nav .support-btn {
+            font-size: 11px;
+            border: 1px solid #111111;
+            padding: 4px 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .site-nav .support-btn:hover { background: #111111; color: #f5f0e8; }
+        .site-nav .nav-cell {
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 1.5rem;
+            border-left: 1px solid #222222;
         }
     </style>
 </head>
@@ -95,31 +157,23 @@
 </script>
 <body class="min-h-screen">
 
-    <!-- Header / Nav -->
-    <header class="border-b border-grid sticky top-0 bg-paper/95 z-50">
-        <div class="container mx-auto flex justify-between items-stretch">
-            <div class="py-6 px-6 border-r border-grid flex items-center">
-                <a href="https://flamef0x.github.io" class="text-xl font-bold tracking-tighter">
-                    flamef0x.github.io
-                </a>
+    <!-- Header / Nav (blog style) -->
+    <header class="sticky top-0 bg-paper/95 z-50 site-nav">
+        <a href="https://flamef0x.github.io" class="logo">flamef0x.github.io</a>
+        <nav class="hidden md:flex nav-links">
+            <a href="/i3/index.html">i3</a>
+            <a href="/special" class="trans" data-en="special" data-zh="特别">special</a>
+            <a href="#projects" class="trans" data-en="projects" data-zh="项目">projects</a>
+            <a href="#huggingface" class="trans" data-en="models" data-zh="模型">models</a>
+            <a href="#skills" class="trans" data-en="stack" data-zh="技术栈">stack</a>
+            <a href="/blog">blog</a>
+        </nav>
+        <div class="flex items-center">
+            <div class="nav-cell">
+                <button id="lang-toggle" class="lang-btn">zh</button>
             </div>
-            <nav class="hidden md:flex flex-grow items-center px-8 gap-8 lowercase text-sm">
-                <a href="/i3/index.html" class="text-muted hover:text-ink transition-colors">i3</a>
-                <a href="/special" class="text-muted hover:text-ink transition-colors trans" data-en="special" data-zh="特别">special</a>
-                <a href="#projects" class="text-muted hover:text-ink transition-colors trans" data-en="projects" data-zh="项目">projects</a>
-                <a href="#huggingface" class="text-muted hover:text-ink transition-colors trans" data-en="models" data-zh="模型">models</a>
-                <a href="#skills" class="text-muted hover:text-ink transition-colors trans" data-en="stack" data-zh="技术栈">stack</a>
-            </nav>
-            <div class="flex items-center px-6 border-l border-grid">
-                <!-- Language Toggle Button -->
-                <button id="lang-toggle" class="text-xs border border-ink px-4 py-1 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest font-bold">
-                    zh
-                </button>
-            </div>
-            <div class="flex items-center px-6 border-l border-grid">
-                <a href="#support" class="text-xs border border-ink px-4 py-1 hover:bg-ink hover:text-paper transition-colors trans" data-en="support_me" data-zh="赞助我">
-                    support_me
-                </a>
+            <div class="nav-cell">
+                <a href="#support" class="support-btn trans" data-en="support_me" data-zh="赞助我">support_me</a>
             </div>
         </div>
     </header>
@@ -136,8 +190,8 @@
         </section>
 
         <!-- Hero Section -->
-        <section class="grid lg:grid-cols-12 border-b border-grid">
-            <div class="lg:col-span-8 p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-grid">
+        <section class="border-b border-grid">
+            <div class="p-6 md:p-12">
                 <span class="section-label trans" data-en="01. identity" data-zh="01. 个人标识">01. identity</span>
                 <h1 class="text-4xl md:text-6xl mb-8 leading-none trans" data-en="hi, welcome" data-zh="嗨，欢迎">
                     hi, welcome
@@ -146,59 +200,15 @@
                     i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!
                 </p>
                 <div class="flex flex-wrap gap-1">
-                      <a href="#projects" class="px-6 py-3 bg-ink text-paper text-sm font-bold uppercase tracking-widest hover:bg-muted transition-colors trans" data-en="view operations" data-zh="查看运行项目">
+                      <a href="#projects" class="px-6 py-3 bg-accent text-paper text-sm font-bold uppercase tracking-widest hover:bg-ink transition-colors trans" data-en="view operations" data-zh="查看运行项目">
                           view operations
                       </a>
-                      <a href="https://hf.co/flamef0x" target="_blank" class="px-6 py-3 border border-[#FFD21E] text-[#FFD21E] text-sm uppercase tracking-widest hover:bg-[#FFD21E] hover:text-black transition-colors inline-flex items-center gap-2">
+                      <a href="https://hf.co/flamef0x" target="_blank" class="px-6 py-3 border border-accent2 text-accent2 text-sm uppercase tracking-widest hover:bg-accent2 hover:text-paper transition-colors inline-flex items-center gap-2">
                           huggingface
                       </a>
                       <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
                           github
                       </a>
-                </div>
-            </div>
-            
-            <div class="lg:col-span-4 flex flex-col">
-                <div class="flex flex-col gap-5 p-6 bg-ink text-codetext border border-grid font-mono text-sm">
-            
-                <!-- User Prompt -->
-                <div class="text-white">
-                    <span class="text-muted mr-2">&gt;</span><span class="trans" data-en="What is the capital of France?" data-zh="中国的首都是什么？">What is the capital of France?</span>
-                </div>
-            
-                <!-- Subtle Separator -->
-                <div class="w-full h-px bg-grid"></div>
-            
-                <!-- Minimal Collapsible Thinking Log -->
-                <details class="group">
-                    <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none text-muted hover:text-white transition-colors flex items-center gap-2 w-max">
-                        <span class="text-[10px] transition-transform group-open:rotate-90">▶</span>
-                        <span class="tracking-widest uppercase trans" data-en="Thinking Process" data-zh="思考过程">Thinking Process</span>
-                    </summary>
-                    
-                    <!-- The log entries, indented with a subtle line -->
-                    <div class="mt-3 pl-4 border-l border-grid space-y-2 text-muted/80">
-                        <p class="trans" data-en="Analyzing request about the capital of France." data-zh="分析关于中国首都的请求。"> Analyzing request about the capital of France.</p>
-                        <p class="trans" data-en="Straightforward factual question." data-zh="简单的事实型问题。"> Straightforward factual question.</p>
-                        <p class="trans" data-en="Retrieving data: Paris." data-zh="正在检索数据：中国。"> Retrieving data: Paris.</p>
-                        <p class="trans" data-en="Formulating concise response." data-zh="正在构建简明的回答。"> Formulating concise response.</p>
-                    </div>
-                </details>
-            
-                <!-- Final AI Answer -->
-                <div class="flex flex-col gap-3">
-                    <blockquote class="pl-4 border-l-2 border-[#FFD21E] text-white text-base trans" data-en="The capital of France is Paris." data-zh="中国的首都是北京。">
-                        The capital of France is Paris.
-                    </blockquote>
-                </div>
-            
-            </div>
-                <div class="p-6">
-                    <span class="section-label trans" data-en="02. current_state" data-zh="02. 当前状态">02. current_state</span>
-                    <div class="flex items-center gap-2 mt-2">
-                        <div class="w-2 h-2 bg-success"></div>
-                        <span class="font-bold text-sm trans" data-en="training" data-zh="模型训练中">training</span>
-                    </div>
                 </div>
             </div>
         </section>
@@ -207,7 +217,7 @@
         <section id="projects" class="border-b border-grid">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-6 md:p-12 border-b md:border-b-0 md:border-r border-grid">
-                    <span class="section-label trans" data-en="03. development_index" data-zh="03. 开发索引">03. development_index</span>
+                    <span class="section-label trans" data-en="02. development_index" data-zh="02. 开发索引">02. development_index</span>
                     <h2 class="text-3xl mb-8 trans" data-en="projects" data-zh="核心项目">projects</h2>
                     <div class="space-y-12">
                         <div class="group border-l border-rule pl-6 py-2">
@@ -247,10 +257,10 @@
                     <div class="p-6 md:p-12 border-b border-grid">
                         <span class="section-label trans" data-en="project_03" data-zh="项目_03">project_03</span>
                         <h3 class="text-xl mb-2 font-bold">ChessSLM</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans" 
-                           data-en="small language models trained exclusively to play chess. available variants: <a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-ink hover:underline'>base</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-ink hover:underline'>rl</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-ink hover:underline'>neo</a>, and <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-ink hover:underline'>nano</a>." 
-                           data-zh="专门为国际象棋对局训练的小型语言模型。可用变体：<a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-ink hover:underline'>基础版 (base)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-ink hover:underline'>强化学习版 (rl)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-ink hover:underline'>新版 (neo)</a>, 以及 <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-ink hover:underline'>微型版 (nano)</a>。">
-                            small language models trained exclusively to play chess. available variants: <a href="https://huggingface.co/FlameF0X/ChessSLM" class="text-ink hover:underline">base</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-RL" class="text-ink hover:underline">rl</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-Neo" class="text-ink hover:underline">neo</a>, and <a href="https://huggingface.co/FlameF0X/ChessSLM-Nano" class="text-ink hover:underline">nano</a>.
+                        <p class="text-muted text-sm leading-relaxed mb-4 trans"
+                           data-en="small language models trained exclusively to play chess. available variants: <a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>base</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>rl</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>neo</a>, and <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>nano</a>."
+                           data-zh="专门为国际象棋对局训练的小型语言模型。可用变体：<a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>基础版 (base)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>强化学习版 (rl)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>新版 (neo)</a>, 以及 <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>微型版 (nano)</a>。">
+                            small language models trained exclusively to play chess. available variants: <a href="https://huggingface.co/FlameF0X/ChessSLM" class="text-accent hover:underline">base</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-RL" class="text-accent hover:underline">rl</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-Neo" class="text-accent hover:underline">neo</a>, and <a href="https://huggingface.co/FlameF0X/ChessSLM-Nano" class="text-accent hover:underline">nano</a>.
                         </p>
                         <div class="mt-2">
                             <a href="https://flamef0x.github.io/other/chess/" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> play against it" data-zh="> 与之人机对决">
@@ -282,99 +292,40 @@
             </div>
         </section>
 
-        <!-- Models List -->
+        <!-- Models List (modular, data-driven) -->
         <section id="huggingface" class="border-b border-grid">
-            <div class="p-6 md:p-12 bg-[#faf9f6]">
-                <span class="section-label trans" data-en="04. model_zoo" data-zh="04. 模型库">04. model_zoo</span>
+            <div class="p-6 md:p-12 bg-paper2">
+                <span class="section-label trans" data-en="03. model_zoo" data-zh="03. 模型库">03. model_zoo</span>
                 <h2 class="text-3xl mb-12 trans" data-en="hugging face models" data-zh="Hugging Face 模型列表">hugging face models</h2>
-                
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
                             <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="model_id" data-zh="模型 id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="params" data-zh="参数量">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="ctx_window" data-zh="上下文窗口">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="hardware" data-zh="训练硬件">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="access" data-zh="访问方式">access</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
+                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-rule/50">
-                            <tr>
-                                <td class="py-4 font-bold">NanoSR-6x</td>
-                                <td class="py-4 text-muted">N/A</td>
-                                <td class="py-4 text-muted">NaN</td>
-                                <td class="py-4 text-muted">nvidia t4</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/NanoSR-6x" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold">LFM2.5-1.2B-Distilled-Claude-4.6</td>
-                                <td class="py-4 text-muted">1.2B</td>
-                                <td class="py-4 text-muted">12k</td>
-                                <td class="py-4 text-muted">nvidia t4</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a> 
-                                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="underline trans" data-en="view_gguf" data-zh="查看GGUF">view_gguf</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold">ChessSLM</td>
-                                <td class="py-4 text-muted">30.3m</td>
-                                <td class="py-4 text-muted">1024</td>
-                                <td class="py-4 text-muted">nvidia p100</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/ChessSLM" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="model-zoo-active" class="divide-y divide-rule/50"></tbody>
                     </table>
                 </div>
 
                 <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
-                    <div class="text-dim italic text-sm">
-                      <table class="w-full text-left text-sm border-collapse">
+                    <table class="w-full text-left text-sm border-collapse text-dim">
                         <thead>
                             <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="model_id" data-zh="模型 id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="params" data-zh="参数量">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="ctx_window" data-zh="上下文窗口">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="hardware" data-zh="训练硬件">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim trans" data-en="access" data-zh="访问方式">access</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
+                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
+                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-rule/50">
-                            <tr>
-                                <td class="py-4 font-bold">MathGPT2</td>
-                                <td class="py-4 text-muted">81.9m</td>
-                                <td class="py-4 text-muted">1024</td>
-                                <td class="py-4 text-muted">nvidia t4</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/MathGPT2" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold">ChessSLM</td>
-                                <td class="py-4 text-muted">30m</td>
-                                <td class="py-4 text-muted">1024</td>
-                                <td class="py-4 text-muted">nvidia p100</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/ChessSLM" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 font-bold">FlameF0X/Qwen2-0.2B-it</td>
-                                <td class="py-4 text-muted">~0.2B</td>
-                                <td class="py-4 text-muted">2048</td>
-                                <td class="py-4 text-muted">nvidia p100</td>
-                                <td class="py-4 text-right">
-                                    <a href="https://huggingface.co/FlameF0X/Qwen2-0.2B-it" class="underline trans" data-en="view_card" data-zh="查看模型卡">view_card</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                        <tbody id="model-zoo-legacy" class="divide-y divide-rule/50"></tbody>
+                    </table>
                 </div>
 
                 <div class="mt-8">
@@ -388,7 +339,7 @@
         <!-- Technical Capability -->
         <section id="skills" class="border-b border-grid">
             <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="05. capabilities" data-zh="05. 技术能力栈">05. capabilities</span>
+                <span class="section-label trans" data-en="04. capabilities" data-zh="04. 技术能力栈">04. capabilities</span>
                 <h2 class="text-2xl mb-8 trans" data-en="technical capability stack" data-zh="基础架构与硬技术栈">technical capability stack</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-rule">
                     <div class="p-6 border-r border-b border-rule">
@@ -411,18 +362,18 @@
             </div>
         </section>
 
-        <!-- Support -->
-        <section id="support" class="p-6 md:p-12 text-center bg-ink text-codetext">
-            <span class="section-label !text-muted trans" data-en="06. contributions" data-zh="06. 资助研究">06. contributions</span>
-            <h2 class="text-4xl md:text-5xl mt-4 mb-8 trans" data-en="fuel the research" data-zh="助力模型算力资助">fuel the research</h2>
-            <p class="text-dim max-w-lg mx-auto mb-12 text-sm leading-relaxed trans" data-en="computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence." data-zh="算力目前是模型迭代训练的主要瓶颈。如果我的开源成果对您的研究有所帮助，欢迎赞助下一次算力序列。">
+        <!-- Support (compact) -->
+        <section id="support" class="px-6 md:px-12 py-8 text-center bg-ink text-codetext">
+            <span class="section-label !text-slatelight trans" data-en="05. contributions" data-zh="05. 资助研究">05. contributions</span>
+            <h2 class="text-2xl md:text-3xl mt-2 mb-3 trans" data-en="fuel the research" data-zh="助力模型算力资助">fuel the research</h2>
+            <p class="text-dim max-w-md mx-auto mb-6 text-xs leading-relaxed trans" data-en="computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence." data-zh="算力目前是模型迭代训练的主要瓶颈。如果我的开源成果对您的研究有所帮助，欢迎赞助下一次算力序列。">
                 computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-2 pb-12">
-                <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-8 py-3 bg-paper text-ink font-bold text-sm uppercase tracking-widest hover:bg-rule transition-colors trans" data-en="support_via_kofi" data-zh="通过_kofi_资助">
+            <div class="flex flex-col sm:flex-row justify-center gap-2">
+                <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-6 py-2 bg-accent2 text-ink font-bold text-xs uppercase tracking-widest hover:bg-accent3 transition-colors trans" data-en="support_via_kofi" data-zh="通过_kofi_资助">
                     support_via_kofi
                 </a>
-                <a href="https://cloud.vast.ai/?ref_id=222345" target="_blank" class="px-8 py-3 border border-muted text-paper text-sm uppercase tracking-widest hover:border-paper transition-colors trans" data-en="vast.ai_template" data-zh="vast.ai_算力模版">
+                <a href="https://cloud.vast.ai/?ref_id=222345" target="_blank" class="px-6 py-2 border border-slate text-paper text-xs uppercase tracking-widest hover:border-paper transition-colors trans" data-en="vast.ai_template" data-zh="vast.ai_算力模版">
                     vast.ai_template
                 </a>
             </div>
@@ -431,80 +382,122 @@
     </main>
 
     <script>
+        /* ─────────────────────────────────────────────
+           MODEL ZOO — modular data source.
+           To add a model, just push an object into
+           MODEL_ZOO below. `legacy: true` puts it in the
+           collapsible "obscure models" drawer instead of
+           the main table.
+        ───────────────────────────────────────────── */
+        const MODEL_ZOO = [
+            {
+                id: "NanoSR-6x",
+                params: "N/A",
+                ctx: "NaN",
+                hardware: "nvidia t4",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/NanoSR-6x" }
+                ],
+                legacy: false
+            },
+            {
+                id: "LFM2.5-1.2B-Distilled-Claude-4.6",
+                params: "1.2B",
+                ctx: "12k",
+                hardware: "nvidia t4",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" },
+                    { label_en: "view_gguf", label_zh: "查看GGUF", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" }
+                ],
+                legacy: false
+            },
+            {
+                id: "ChessSLM",
+                params: "30.3m",
+                ctx: "1024",
+                hardware: "nvidia p100",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
+                ],
+                legacy: false
+            },
+            {
+                id: "MathGPT2",
+                params: "81.9m",
+                ctx: "1024",
+                hardware: "nvidia t4",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/MathGPT2" }
+                ],
+                legacy: true
+            },
+            {
+                id: "ChessSLM (v1)",
+                params: "30m",
+                ctx: "1024",
+                hardware: "nvidia p100",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
+                ],
+                legacy: true
+            },
+            {
+                id: "FlameF0X/Qwen2-0.2B-it",
+                params: "~0.2B",
+                ctx: "2048",
+                hardware: "nvidia p100",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/Qwen2-0.2B-it" }
+                ],
+                legacy: true
+            }
+        ];
+
+        function renderModelRow(model, lang) {
+            const links = model.links.map(l => {
+                const label = lang === 'zh' ? l.label_zh : l.label_en;
+                return `<a href="${l.url}" class="underline">${label}</a>`;
+            }).join(' ');
+            return `
+                <tr>
+                    <td class="py-4 font-bold">${model.id}</td>
+                    <td class="py-4 text-muted">${model.params}</td>
+                    <td class="py-4 text-muted">${model.ctx}</td>
+                    <td class="py-4 text-muted">${model.hardware}</td>
+                    <td class="py-4 text-right">${links}</td>
+                </tr>
+            `;
+        }
+
+        function renderModelZoo(lang) {
+            const activeEl = document.getElementById('model-zoo-active');
+            const legacyEl = document.getElementById('model-zoo-legacy');
+            activeEl.innerHTML = MODEL_ZOO.filter(m => !m.legacy).map(m => renderModelRow(m, lang)).join('');
+            legacyEl.innerHTML = MODEL_ZOO.filter(m => m.legacy).map(m => renderModelRow(m, lang)).join('');
+        }
+
+        const HCOL_LABELS = {
+            model_id: { en: 'model_id', zh: '模型 id' },
+            params: { en: 'params', zh: '参数量' },
+            ctx_window: { en: 'ctx_window', zh: '上下文窗口' },
+            hardware: { en: 'hardware', zh: '训练硬件' },
+            access: { en: 'access', zh: '访问方式' }
+        };
+
+        function renderHeaders(lang) {
+            document.querySelectorAll('[data-hcol]').forEach(th => {
+                const key = th.getAttribute('data-hcol');
+                th.textContent = HCOL_LABELS[key][lang];
+            });
+        }
+
+        /* ── Toggle + language logic ── */
         const toggleBtn = document.getElementById('toggle-legacy');
         const legacyContent = document.getElementById('legacy-content');
         const langToggleBtn = document.getElementById('lang-toggle');
 
         let currentLang = localStorage.getItem('lang') || 'en';
 
-        // Scrabble / Decoder characters (Mix of numbers, operations, brackets, and East Asian blocks)
-        const scramblePool = "qwertyuiopasdfghjklzxcvbnm-=[];'#,./日月中火水木金土日月火水木金土国国中中会会人";
-
-        // Traverses child nodes recursively to extract only true Text Nodes
-        function getTextNodes(node) {
-            const textNodes = [];
-            function walk(current) {
-                if (current.nodeType === Node.TEXT_NODE) {
-                    textNodes.push(current);
-                } else {
-                    for (let child of current.childNodes) {
-                        walk(child);
-                    }
-                }
-            }
-            walk(node);
-            return textNodes;
-        }
-
-        // Animates a single text node with a cipher scrambler sequence
-        function scrambleTextNode(node, oldStr, newStr) {
-            const maxLength = Math.max(oldStr.length, newStr.length);
-            let currentIteration = 0;
-            const totalSteps = 14; // Speed controls (lower = faster)
-            
-            const interval = setInterval(() => {
-                let result = "";
-                for (let i = 0; i < maxLength; i++) {
-                    if (i < currentIteration) {
-                        // Reveal correct final translation character
-                        result += newStr[i] || "";
-                    } else if (i < newStr.length || i < oldStr.length) {
-                        // Generate scrambled matrix glyph
-                        result += scramblePool[Math.floor(Math.random() * scramblePool.length)];
-                    }
-                }
-                node.nodeValue = result;
-                currentIteration += maxLength / totalSteps;
-                
-                if (currentIteration >= maxLength) {
-                    node.nodeValue = newStr;
-                    clearInterval(interval);
-                }
-            }, 25);
-        }
-
-        // Orchestrates structure swap and scrambles text node assets securely (without corrupting nested links or formatting)
-        function scrambleElementHTML(element, targetHTML) {
-            // Store original node states
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = targetHTML;
-            
-            const currentTextNodes = getTextNodes(element);
-            const targetTextNodes = getTextNodes(tempDiv);
-            
-            // Swap inner HTML to secure modern links, styling structure
-            element.innerHTML = targetHTML;
-            const newTextNodes = getTextNodes(element);
-            
-            // Independently decode all underlying text channels
-            newTextNodes.forEach((node, nodeIdx) => {
-                const oldStr = (currentTextNodes[nodeIdx] ? currentTextNodes[nodeIdx].nodeValue : "") || "";
-                const newStr = (targetTextNodes[nodeIdx] ? targetTextNodes[nodeIdx].nodeValue : "") || "";
-                scrambleTextNode(node, oldStr, newStr);
-            });
-        }
-
-        // Helper function to dynamically change legacy expander button label
         function updateLegacyButtonText() {
             if (!toggleBtn || !legacyContent) return;
             const isExpanded = legacyContent.classList.contains('expanded');
@@ -515,53 +508,37 @@
             }
         }
 
-        // Apply selected language to DOM with cascading scrabble delay
-        function setLanguage(lang, useScramble = false) {
+        function setLanguage(lang) {
             currentLang = lang;
             localStorage.setItem('lang', lang);
             document.documentElement.setAttribute('lang', lang);
 
-            const transElements = document.querySelectorAll('.trans');
-            
-            transElements.forEach((el, index) => {
+            document.querySelectorAll('.trans').forEach(el => {
                 const targetHTML = el.getAttribute(`data-${lang}`);
-                if (!targetHTML) return;
-                
-                if (useScramble) {
-                    // Stagger translation triggers from top to bottom
-                    const cascadeDelay = index * 25; // 25ms delay per element down the grid
-                    setTimeout(() => {
-                        scrambleElementHTML(el, targetHTML);
-                    }, cascadeDelay);
-                } else {
-                    // Direct instantaneous swap for page load snappiness
-                    el.innerHTML = targetHTML;
-                }
+                if (targetHTML) el.innerHTML = targetHTML;
             });
 
-            // Update Language Switcher Text (shows the alternative option)
+            renderHeaders(lang);
+            renderModelZoo(lang);
+
             if (langToggleBtn) {
                 langToggleBtn.innerText = lang === 'en' ? 'zh' : 'en';
             }
 
-            // Sync Legacy toggler
             updateLegacyButtonText();
         }
 
-        // Legacy Content Toggle Listener
         toggleBtn.addEventListener('click', () => {
             legacyContent.classList.toggle('expanded');
             updateLegacyButtonText();
         });
 
-        // Lang Switcher Button Listener
         langToggleBtn.addEventListener('click', () => {
             const targetLang = currentLang === 'en' ? 'zh' : 'en';
-            setLanguage(targetLang, true); // Active clicks trigger scramble
+            setLanguage(targetLang);
         });
 
-        // Initialize App Language directly on load
-        setLanguage(currentLang, false);
+        setLanguage(currentLang);
     </script>
 
 </body>
