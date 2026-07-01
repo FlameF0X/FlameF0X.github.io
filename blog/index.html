@@ -1,148 +1,472 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - flamef0x.github.io</title>
     <link rel="icon" href="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" type="image/png">
-    <title>flamef0x.github.io | Hub</title>
-
-    <!-- Meta Tags -->
-    <meta property="og:title" content="flamef0x.github.io | Hub" />
-    <meta property="og:description" content="My project hub and more." />
-
-    <!-- Twitter (Discord often reads these as a fallback) -->
-    <meta name="twitter:card" content="summary_large_image">
-
-    <!-- Typography: JetBrains Mono (matches blog) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        mono: ['"JetBrains Mono"', '"Courier New"', 'monospace'],
-                    },
-                    colors: {
-                        /* base palette — matches blog page */
-                        paper: '#f5f0e8',
-                        paper2: '#ede8df',
-                        ink: '#1a1a1a',
-                        black: '#111111',
-                        muted: '#666666',
-                        dim: '#999999',
-                        rule: '#c8c2b5',
-                        ruledark: '#222222',
-                        codebg: '#1c1c1c',
-                        codetext: '#e0e0e0',
-                        /* theme colors pulled from the leaderboard chart */
-                        accent: '#cc5218',      /* dark orange — "my models (top)" */
-                        accent2: '#e8944a',     /* mid orange  — "my models (lower)" */
-                        accent3: '#f2c99a',     /* light orange */
-                        slate: '#6b6b6b',       /* "other models" gray */
-                        slatelight: '#a8a8a8',
-                    }
-                }
-            }
+    
+    <style>
+        :root {
+            --bg: #f5f0e8;
+            --bg2: #ede8df;
+            --border: #c8c2b5;
+            --border-dark: #222;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --accent: #e8c84a;
+            --accent-border: #b8952a;
+            --black: #111;
+            --font: 'JetBrains Mono', 'Courier New', monospace;
         }
-    </script>
 
-    <style type="text/tailwindcss">
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            @apply bg-paper text-ink font-mono antialiased;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
         }
 
-        h1, h2, h3, h4 {
-            @apply font-bold tracking-tight lowercase;
-        }
-
-        .section-label {
-            @apply text-[10px] uppercase tracking-[0.2em] text-dim mb-1 block;
-        }
-
-        .border-grid {
-            @apply border-rule;
-        }
-
-        ::selection {
-            @apply bg-ink text-paper;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #f5f0e8; }
-        ::-webkit-scrollbar-thumb { background: #c8c2b5; }
-
-        #legacy-content {
-            display: none;
-        }
-        #legacy-content.expanded {
-            display: block;
-        }
-
-        /* Nav — ported from blog page */
-        .site-nav {
-            border-bottom: 1px solid #222222;
+        /* ── NAV ── */
+        nav {
+            border-bottom: 1px solid var(--border-dark);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1.5rem;
+            padding: 0 2.5rem;
             height: 52px;
         }
-        .site-nav .logo {
+
+        .logo {
             font-size: 15px;
             font-weight: 700;
-            color: #111111;
+            color: var(--black);
             text-decoration: none;
             letter-spacing: -0.3px;
         }
-        .site-nav .nav-links {
+
+        .nav-links {
             display: flex;
             gap: 0;
             list-style: none;
-            height: 100%;
         }
-        .site-nav .nav-links a {
+
+        .nav-links a {
             text-decoration: none;
-            color: #666666;
+            color: var(--text-muted);
             padding: 0 1.2rem;
             height: 52px;
             display: flex;
             align-items: center;
             font-size: 13px;
-            border-left: 1px solid #222222;
+            border-left: 1px solid var(--border-dark);
             transition: background 0.15s, color 0.15s;
         }
-        .site-nav .nav-links a:hover { background: #ede8df; color: #1a1a1a; }
-        .site-nav .lang-btn {
-            font-size: 11px;
-            border: 1px solid #111111;
-            padding: 4px 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            transition: background 0.15s, color 0.15s;
+
+        .nav-links a:hover { background: var(--bg2); color: var(--text); }
+        .nav-links a.active { background: var(--black); color: var(--bg); }
+
+        /* ── LAYOUT ── */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2.5rem 4rem;
         }
-        .site-nav .lang-btn:hover { background: #111111; color: #f5f0e8; }
-        .site-nav .support-btn {
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding: 3rem 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .section-label {
             font-size: 11px;
-            border: 1px solid #111111;
-            padding: 4px 14px;
-            text-transform: uppercase;
+            color: var(--text-muted);
             letter-spacing: 1.5px;
-            transition: background 0.15s, color 0.15s;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
         }
-        .site-nav .support-btn:hover { background: #111111; color: #f5f0e8; }
-        .site-nav .nav-cell {
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1;
+            color: var(--black);
+        }
+
+        /* ── SORT CONTROL ── */
+        .sort-wrap {
             display: flex;
             align-items: center;
-            height: 52px;
-            padding: 0 1.5rem;
-            border-left: 1px solid #222222;
+            gap: 0.75rem;
+            padding-bottom: 4px;
+        }
+
+        .sort-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        select {
+            font-family: var(--font);
+            font-size: 13px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border-dark);
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+
+        select:hover { border-color: var(--black); }
+
+        /* ── POSTS GRID ── */
+        #posts-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        /* ── POST CARD ── */
+        .post-card {
+            border-bottom: 1px solid var(--border);
+            padding: 1.75rem 0;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: start;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .post-card:first-child { border-top: 1px solid var(--border); }
+
+        .post-card:hover { background: var(--bg2); padding-left: 1rem; padding-right: 1rem; margin: 0 -1rem; }
+
+        .post-card.is-new {
+            background: var(--black);
+            color: var(--bg);
+            padding: 1.75rem 1.5rem;
+            margin: 1.5rem 0;
+            border: none;
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .post-card.is-new:hover {
+            background: #222;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .post-card.is-new .post-meta { color: #999; }
+        .post-card.is-new .post-summary-text { color: #bbb; }
+        .post-card.is-new .post-arrow { color: var(--accent); }
+
+        .post-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge-new {
+            background: var(--accent);
+            color: var(--black);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            text-transform: uppercase;
+        }
+
+        .badge-hot {
+            background: transparent;
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            border: 1px solid var(--accent);
+            text-transform: uppercase;
+        }
+
+        .post-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .post-card.is-new .post-card-title { color: #fff; }
+
+        .post-summary-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-width: 680px;
+        }
+
+        .post-arrow {
+            font-size: 18px;
+            color: var(--text-muted);
+            align-self: center;
+            transition: transform 0.15s;
+        }
+
+        .post-card:hover .post-arrow { transform: translateX(4px); color: var(--text); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 4rem 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ── SINGLE POST ── */
+        #post-content {
+            display: none;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            padding: 7px 14px;
+            margin: 2rem 0 2.5rem;
+            background: transparent;
+            transition: all 0.15s;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn:hover {
+            background: var(--black);
+            color: var(--bg);
+            border-color: var(--black);
+        }
+
+        .post-full-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .post-full-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-full-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            color: var(--black);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+        }
+
+        .post-full-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+        }
+
+        .post-body {
+            line-height: 1.8;
+            color: var(--text);
+            font-size: 14px;
+            max-width: 800px;
+        }
+
+        .post-body p { margin-bottom: 1.25rem; }
+        .post-body h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem; color: var(--black); }
+        .post-body h3 { font-size: 1rem; margin: 1.5rem 0 0.5rem; color: var(--text-muted); }
+        .post-body code { background: var(--bg2); padding: 2px 6px; font-family: var(--font); font-size: 13px; }
+        .post-body pre { background: var(--black); color: var(--bg); padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+        .post-body a { color: var(--black); text-decoration: underline; }
+        .post-body ul, .post-body ol { margin: 0 0 1.25rem 1.5rem; }
+        .post-body li { margin-bottom: 0.4rem; }
+
+        /* ── IMAGES IN POST BODY ── */
+        .post-body img {
+            border-radius: 8px;
+            cursor: zoom-in;
+            display: block;
+            margin: 1.5rem 0;
+            max-width: 100%;
+            transition: opacity 0.15s, transform 0.18s, box-shadow 0.18s;
+        }
+
+        .post-body img:hover {
+            opacity: 0.93;
+            transform: scale(1.012);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+        }
+
+        /* ── LIGHTBOX ── */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(8, 8, 8, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            padding: 2rem;
+        }
+
+        #lightbox.active {
+            display: flex;
+        }
+
+        #lightbox-img {
+            width: 92vw;
+            height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 24px 72px rgba(0, 0, 0, 0.65);
+            cursor: default;
+            animation: lb-pop 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+        }
+
+        @keyframes lb-pop {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        #lightbox-close {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.5rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-family: var(--font);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s, transform 0.15s;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        #lightbox-close:hover {
+            color: #fff;
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.14);
+        }
+
+        #lightbox-caption {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.45);
+            font-family: var(--font);
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-align: center;
+            pointer-events: none;
+            max-width: 80vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── TABLE STYLES ── */
+        .post-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 13px;
+        }
+
+        .post-body th, 
+        .post-body td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .post-body th {
+            background-color: var(--bg2);
+            color: var(--black);
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .post-body tr {
+            transition: background 0.15s ease;
+        }
+
+        .post-body tbody tr:hover {
+            background-color: var(--bg2);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border-dark);
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 1rem; }
+            main { padding: 0 1rem 3rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .page-header h1 { font-size: 2rem; }
+            .post-card.is-new { padding: 1.5rem 1rem; }
+            footer { padding: 1.5rem 1rem; }
+            
+            .post-body table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            #lightbox { padding: 0.75rem; }
+            #lightbox-img { border-radius: 8px; width: 98vw; height: 88vh; }
         }
     </style>
 </head>
@@ -155,391 +479,177 @@
 
   gtag('config', 'G-C2TKQFH6ZF');
 </script>
-<body class="min-h-screen">
+<body>
 
-    <!-- Header / Nav (blog style) -->
-    <header class="sticky top-0 bg-paper/95 z-50 site-nav">
-        <a href="https://flamef0x.github.io" class="logo">flamef0x.github.io</a>
-        <nav class="hidden md:flex nav-links">
-            <a href="/i3/index.html">i3</a>
-            <a href="/special" class="trans" data-en="special" data-zh="特别">special</a>
-            <a href="#projects" class="trans" data-en="projects" data-zh="项目">projects</a>
-            <a href="#huggingface" class="trans" data-en="models" data-zh="模型">models</a>
-            <a href="#skills" class="trans" data-en="stack" data-zh="技术栈">stack</a>
-            <a href="/blog">blog</a>
-        </nav>
-        <div class="flex items-center">
-            <div class="nav-cell">
-                <button id="lang-toggle" class="lang-btn">zh</button>
+    <nav>
+        <a class="logo" href="/">flamef0x.github.io</a>
+        <ul class="nav-links">
+            <li><a href="/">home</a></li>
+            <li><a href="/blog" class="active">blog</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <div>
+                <h1>blog</h1>
             </div>
-            <div class="nav-cell">
-                <a href="#support" class="support-btn trans" data-en="support_me" data-zh="赞助我">support_me</a>
+            <div class="sort-wrap">
+                <span class="sort-label">sort</span>
+                <select id="sort-select">
+                    <option value="newest">newest first</option>
+                    <option value="oldest">oldest first</option>
+                    <option value="title-asc">title (a–z)</option>
+                    <option value="title-desc">title (z–a)</option>
+                </select>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content Grid -->
-    <main class="container mx-auto border-x border-b border-grid min-h-screen">
-
-        <!-- Banner -->
-        <section class="border-b border-grid relative">
-            <video src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/sequence.webm" class="w-full h-48 md:h-64 object-cover block" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
-            <div class="absolute bottom-2 right-2 bg-ink/70 text-paper text-[10px] md:text-xs px-3 py-1.5 max-w-[90%] md:max-w-sm leading-snug">
-                made by me in blender. (i know it looks ai-generated since the cube has some weird artifacts, but that's because i rendered with 5 samples instead of 4096 — old laptop.)
-            </div>
-        </section>
-
-        <!-- Hero Section -->
-        <section class="border-b border-grid">
-            <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="01. identity" data-zh="01. 个人标识">01. identity</span>
-                <h1 class="text-4xl md:text-6xl mb-8 leading-none trans" data-en="hi, welcome" data-zh="嗨，欢迎">
-                    hi, welcome
-                </h1>
-                <p class="text-muted text-lg max-w-2xl leading-relaxed mb-12 trans" data-en="i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!" data-zh="我喜欢构建能够编写代码、具备类似于 Claude 推理能力（通过知识蒸馏）的小型语言模型，并致力于让它们极其擅长下国际象棋！">
-                    i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!
-                </p>
-                <div class="flex flex-wrap gap-1">
-                      <a href="#projects" class="px-6 py-3 bg-accent text-paper text-sm font-bold uppercase tracking-widest hover:bg-ink transition-colors trans" data-en="view operations" data-zh="查看运行项目">
-                          view operations
-                      </a>
-                      <a href="https://hf.co/flamef0x" target="_blank" class="px-6 py-3 border border-accent2 text-accent2 text-sm uppercase tracking-widest hover:bg-accent2 hover:text-paper transition-colors inline-flex items-center gap-2">
-                          huggingface
-                      </a>
-                      <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
-                          github
-                      </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Grid -->
-        <section id="projects" class="border-b border-grid">
-            <div class="grid grid-cols-1 md:grid-cols-2">
-                <div class="p-6 md:p-12 border-b md:border-b-0 md:border-r border-grid">
-                    <span class="section-label trans" data-en="02. development_index" data-zh="02. 开发索引">02. development_index</span>
-                    <h2 class="text-3xl mb-8 trans" data-en="projects" data-zh="核心项目">projects</h2>
-                    <div class="space-y-12">
-                        <div class="group border-l border-rule pl-6 py-2">
-                            <span class="section-label trans" data-en="project_01" data-zh="项目_01">project_01</span>
-                            <h3 class="text-xl mb-2 font-bold">LFM2.5-1.2B-Distilled-Claude</h3>
-                            <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA." data-zh="基于 LoRA 训练，将 Claude Sonnet 4.6 的自适应推理能力蒸馏至 LFM2.5-1.2b-Thinking 中。">
-                                a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA.
-                            </p>
-                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                    <a href="https://huggingface.co/collections/FlameF0X/liquid-claude" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open collection" data-zh="> 打开收藏集">
-                                        > open collection
-                                    </a>
-                                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open best model" data-zh="> 打开最佳模型">
-                                        > open best model
-                                    </a>
-                            </div>
-                        </div>
-
-                        <div class="group border-l border-rule pl-6 py-2">
-                            <span class="section-label trans" data-en="project_02" data-zh="项目_02">project_02</span>
-                            <h3 class="text-xl mb-2 font-bold">open-i3</h3>
-                            <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="the open-source release of the i3 architecture. promoting transparency in ai development." data-zh="i3 架构的开源发布，旨在促进人工智能开发的透明度。">
-                                the open-source release of the i3 architecture. promoting transparency in ai development.
-                            </p>
-                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                <div class="mt-2">
-                                    <a href="https://github.com/FlameF0X/open-i3" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open repo" data-zh="> 打开开源仓库">
-                                        > open repo
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col">
-                    <div class="p-6 md:p-12 border-b border-grid">
-                        <span class="section-label trans" data-en="project_03" data-zh="项目_03">project_03</span>
-                        <h3 class="text-xl mb-2 font-bold">ChessSLM</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans"
-                           data-en="small language models trained exclusively to play chess. available variants: <a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>base</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>rl</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>neo</a>, and <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>nano</a>."
-                           data-zh="专门为国际象棋对局训练的小型语言模型。可用变体：<a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>基础版 (base)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>强化学习版 (rl)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>新版 (neo)</a>, 以及 <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>微型版 (nano)</a>。">
-                            small language models trained exclusively to play chess. available variants: <a href="https://huggingface.co/FlameF0X/ChessSLM" class="text-accent hover:underline">base</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-RL" class="text-accent hover:underline">rl</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-Neo" class="text-accent hover:underline">neo</a>, and <a href="https://huggingface.co/FlameF0X/ChessSLM-Nano" class="text-accent hover:underline">nano</a>.
-                        </p>
-                        <div class="mt-2">
-                            <a href="https://flamef0x.github.io/other/chess/" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> play against it" data-zh="> 与之人机对决">
-                                > play against it
-                            </a>
-                        </div>
-                    </div>
-                    <div class="p-6 md:p-12 border-b border-grid">
-                        <span class="section-label trans" data-en="project_04" data-zh="项目_04">project_04</span>
-                        <h3 class="text-xl mb-2 font-bold">koda-waf</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="a small, SOTA open-weights WAF model development by me for NetGoat." data-zh="由我为 NetGoat 开发的小型、先进（SOTA）开源权重 Web 应用防火墙（WAF）模型。">
-                            a small, SOTA open-weights WAF model development by me for NetGoat.
-                        </p>
-                            <a href="https://huggingface.co/netgoat-ai/koda-waf" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open repo" data-zh="> 打开开源仓库">
-                                > open repo
-                            </a>
-                    </div>
-                    <div class="p-6 md:p-12">
-                        <span class="section-label trans" data-en="project_05" data-zh="项目_05">project_05</span>
-                        <h3 class="text-xl mb-2 font-bold">literallynothing.js</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="the name is self-explanatory." data-zh="顾名思义，里面真的什么都没有。">
-                            the name is self-explanatory.
-                        </p>
-                            <a href="https://www.npmjs.com/package/literallynothing.js" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open npm" data-zh="> 打开 npm">
-                                > open npm
-                            </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Models List (modular, data-driven) -->
-        <section id="huggingface" class="border-b border-grid">
-            <div class="p-6 md:p-12 bg-paper2">
-                <span class="section-label trans" data-en="03. model_zoo" data-zh="03. 模型库">03. model_zoo</span>
-                <h2 class="text-3xl mb-12 trans" data-en="hugging face models" data-zh="Hugging Face 模型列表">hugging face models</h2>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
-                            </tr>
-                        </thead>
-                        <tbody id="model-zoo-active" class="divide-y divide-rule/50"></tbody>
-                    </table>
-                </div>
-
-                <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
-                    <table class="w-full text-left text-sm border-collapse text-dim">
-                        <thead>
-                            <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
-                            </tr>
-                        </thead>
-                        <tbody id="model-zoo-legacy" class="divide-y divide-rule/50"></tbody>
-                    </table>
-                </div>
-
-                <div class="mt-8">
-                    <button id="toggle-legacy" class="text-[10px] uppercase tracking-widest border-b border-dotted border-dim text-dim hover:text-ink hover:border-ink transition-colors">
-                        + load_more_obscure_models
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Technical Capability -->
-        <section id="skills" class="border-b border-grid">
-            <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="04. capabilities" data-zh="04. 技术能力栈">04. capabilities</span>
-                <h2 class="text-2xl mb-8 trans" data-en="technical capability stack" data-zh="基础架构与硬技术栈">technical capability stack</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-rule">
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="01. language" data-zh="01. 编程语言">01. language</span>
-                        <span class="font-bold">python 3.10+</span>
-                    </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="02. framework" data-zh="02. 开发框架">02. framework</span>
-                        <span class="font-bold">pytorch / cuda</span>
-                    </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="03. distribution" data-zh="03. 分发托管">03. distribution</span>
-                        <span class="font-bold">huggingface</span>
-                    </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="04. processing" data-zh="04. 数据集处理">04. processing</span>
-                        <span class="font-bold">hf datasets</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Support (compact) -->
-        <section id="support" class="px-6 md:px-12 py-8 text-center bg-ink text-codetext">
-            <span class="section-label !text-slatelight trans" data-en="05. contributions" data-zh="05. 资助研究">05. contributions</span>
-            <h2 class="text-2xl md:text-3xl mt-2 mb-3 trans" data-en="fuel the research" data-zh="助力模型算力资助">fuel the research</h2>
-            <p class="text-dim max-w-md mx-auto mb-6 text-xs leading-relaxed trans" data-en="computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence." data-zh="算力目前是模型迭代训练的主要瓶颈。如果我的开源成果对您的研究有所帮助，欢迎赞助下一次算力序列。">
-                computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-2">
-                <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-6 py-2 bg-accent2 text-ink font-bold text-xs uppercase tracking-widest hover:bg-accent3 transition-colors trans" data-en="support_via_kofi" data-zh="通过_kofi_资助">
-                    support_via_kofi
-                </a>
-                <a href="https://cloud.vast.ai/?ref_id=222345" target="_blank" class="px-6 py-2 border border-slate text-paper text-xs uppercase tracking-widest hover:border-paper transition-colors trans" data-en="vast.ai_template" data-zh="vast.ai_算力模版">
-                    vast.ai_template
-                </a>
-            </div>
-        </section>
-
+        <div id="posts-list"></div>
+        <div id="post-content"></div>
     </main>
 
+    <footer>
+        <span>flamef0x.github.io</span>
+        <span>daniel.flamefox</span>
+    </footer>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <button id="lightbox-close" aria-label="Close image viewer">✕</button>
+        <img id="lightbox-img" src="" alt="" />
+        <div id="lightbox-caption"></div>
+    </div>
+
     <script>
-        /* ─────────────────────────────────────────────
-           MODEL ZOO — modular data source.
-           To add a model, just push an object into
-           MODEL_ZOO below. `legacy: true` puts it in the
-           collapsible "obscure models" drawer instead of
-           the main table.
-        ───────────────────────────────────────────── */
-        const MODEL_ZOO = [
-            {
-                id: "NanoSR-6x",
-                params: "N/A",
-                ctx: "NaN",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/NanoSR-6x" }
-                ],
-                legacy: false
-            },
-            {
-                id: "LFM2.5-1.2B-Distilled-Claude-4.6",
-                params: "1.2B",
-                ctx: "12k",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" },
-                    { label_en: "view_gguf", label_zh: "查看GGUF", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" }
-                ],
-                legacy: false
-            },
-            {
-                id: "ChessSLM",
-                params: "30.3m",
-                ctx: "1024",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
-                ],
-                legacy: false
-            },
-            {
-                id: "MathGPT2",
-                params: "81.9m",
-                ctx: "1024",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/MathGPT2" }
-                ],
-                legacy: true
-            },
-            {
-                id: "ChessSLM (v1)",
-                params: "30m",
-                ctx: "1024",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
-                ],
-                legacy: true
-            },
-            {
-                id: "FlameF0X/Qwen2-0.2B-it",
-                params: "~0.2B",
-                ctx: "2048",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/Qwen2-0.2B-it" }
-                ],
-                legacy: true
+        const postsListEl   = document.getElementById('posts-list');
+        const postContentEl = document.getElementById('post-content');
+        const sortSelect    = document.getElementById('sort-select');
+        const lightbox      = document.getElementById('lightbox');
+        const lightboxImg   = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        let posts = [];
+
+        /* ── LIGHTBOX LOGIC ── */
+        function openLightbox(src, alt) {
+            lightboxImg.src = src;
+            lightboxImg.alt = alt || '';
+            lightboxCaption.textContent = alt || '';
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Click the dark backdrop to close
+        lightbox.addEventListener('click', e => {
+            if (e.target === lightbox) closeLightbox();
+        });
+        lightboxClose.addEventListener('click', closeLightbox);
+
+        // Escape key to close
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+        });
+
+        // Delegate: any img inside .post-body triggers the lightbox
+        postContentEl.addEventListener('click', e => {
+            if (e.target.tagName === 'IMG' && e.target.closest('.post-body')) {
+                openLightbox(e.target.src, e.target.alt);
             }
-        ];
+        });
 
-        function renderModelRow(model, lang) {
-            const links = model.links.map(l => {
-                const label = lang === 'zh' ? l.label_zh : l.label_en;
-                return `<a href="${l.url}" class="underline">${label}</a>`;
-            }).join(' ');
-            return `
-                <tr>
-                    <td class="py-4 font-bold">${model.id}</td>
-                    <td class="py-4 text-muted">${model.params}</td>
-                    <td class="py-4 text-muted">${model.ctx}</td>
-                    <td class="py-4 text-muted">${model.hardware}</td>
-                    <td class="py-4 text-right">${links}</td>
-                </tr>
-            `;
+        /* ── POSTS LOGIC ── */
+        function daysDiff(dateString) {
+            return Math.ceil(Math.abs(new Date() - new Date(dateString)) / 864e5);
         }
 
-        function renderModelZoo(lang) {
-            const activeEl = document.getElementById('model-zoo-active');
-            const legacyEl = document.getElementById('model-zoo-legacy');
-            activeEl.innerHTML = MODEL_ZOO.filter(m => !m.legacy).map(m => renderModelRow(m, lang)).join('');
-            legacyEl.innerHTML = MODEL_ZOO.filter(m => m.legacy).map(m => renderModelRow(m, lang)).join('');
-        }
-
-        const HCOL_LABELS = {
-            model_id: { en: 'model_id', zh: '模型 id' },
-            params: { en: 'params', zh: '参数量' },
-            ctx_window: { en: 'ctx_window', zh: '上下文窗口' },
-            hardware: { en: 'hardware', zh: '训练硬件' },
-            access: { en: 'access', zh: '访问方式' }
+        const setupEventListener = () => {
+            postsListEl.addEventListener('click', e => {
+                const card = e.target.closest('.post-card');
+                if (card) {
+                    const post = posts.find(p => p.id === card.dataset.id);
+                    if (post) showPost(post);
+                }
+            });
         };
 
-        function renderHeaders(lang) {
-            document.querySelectorAll('[data-hcol]').forEach(th => {
-                const key = th.getAttribute('data-hcol');
-                th.textContent = HCOL_LABELS[key][lang];
-            });
-        }
-
-        /* ── Toggle + language logic ── */
-        const toggleBtn = document.getElementById('toggle-legacy');
-        const legacyContent = document.getElementById('legacy-content');
-        const langToggleBtn = document.getElementById('lang-toggle');
-
-        let currentLang = localStorage.getItem('lang') || 'en';
-
-        function updateLegacyButtonText() {
-            if (!toggleBtn || !legacyContent) return;
-            const isExpanded = legacyContent.classList.contains('expanded');
-            if (currentLang === 'zh') {
-                toggleBtn.innerText = isExpanded ? '- 隐藏过往架构' : '+ 加载更多小众模型';
-            } else {
-                toggleBtn.innerText = isExpanded ? '- hide_legacy_architectures' : '+ load_more_obscure_models';
+        function sortPosts() {
+            switch (sortSelect.value) {
+                case 'newest':     posts.sort((a,b) => new Date(b.date) - new Date(a.date)); break;
+                case 'oldest':     posts.sort((a,b) => new Date(a.date) - new Date(b.date)); break;
+                case 'title-asc':  posts.sort((a,b) => a.title.localeCompare(b.title));      break;
+                case 'title-desc': posts.sort((a,b) => b.title.localeCompare(a.title));      break;
             }
+            renderList();
         }
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('lang', lang);
-            document.documentElement.setAttribute('lang', lang);
+        function renderList() {
+            postContentEl.style.display = 'none';
+            postsListEl.style.display = 'grid';
+            if (!posts.length) {
+                postsListEl.innerHTML = '<div class="empty-state">> no posts found. check back later.</div>';
+                return;
+            }
+            postsListEl.innerHTML = posts.map(post => {
+                const days  = daysDiff(post.date);
+                const isNew = days <= 7;
+                const isHot = days <= 3;
+                return `
+                    <div class="post-card ${isNew ? 'is-new' : ''}" data-id="${post.id}">
+                        <div>
+                            <div class="post-meta">
+                                <span>${post.date}</span>
+                                ${isNew ? `<span class="badge-new">new</span>` : ''}
+                                ${isHot ? `<span class="badge-hot">hot</span>` : ''}
+                            </div>
+                            <div class="post-card-title">${post.title}</div>
+                            <div class="post-summary-text">${post.summary}</div>
+                        </div>
+                        <div class="post-arrow">→</div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-            document.querySelectorAll('.trans').forEach(el => {
-                const targetHTML = el.getAttribute(`data-${lang}`);
-                if (targetHTML) el.innerHTML = targetHTML;
+        function showPost(post) {
+            postsListEl.style.display = 'none';
+            postContentEl.style.display = 'block';
+            postContentEl.innerHTML = `
+                <button class="back-btn" id="back-btn">← back to all posts</button>
+                <div class="post-full-header">
+                    <div class="post-full-label">post_entry</div>
+                    <h2 class="post-full-title">${post.title}</h2>
+                    <div class="post-full-date">${post.date}</div>
+                </div>
+                <div class="post-body">${post.content}</div>
+            `;
+            document.getElementById('back-btn').onclick = () => renderList();
+        }
+
+        // Fetch with cache-busting
+        fetch(`blog-posts.json?t=${new Date().getTime()}`, { cache: 'no-store' })
+            .then(r => {
+                if (!r.ok) throw new Error('Failed to load JSON file.');
+                return r.json();
+            })
+            .then(data => {
+                posts = data;
+                sortPosts();
+            })
+            .catch(err => {
+                console.error("Error loading blog posts:", err);
+                postsListEl.innerHTML = '<div class="empty-state">> failed to load blog-posts.json</div>';
+            })
+            .finally(() => {
+                setupEventListener();
             });
 
-            renderHeaders(lang);
-            renderModelZoo(lang);
-
-            if (langToggleBtn) {
-                langToggleBtn.innerText = lang === 'en' ? 'zh' : 'en';
-            }
-
-            updateLegacyButtonText();
-        }
-
-        toggleBtn.addEventListener('click', () => {
-            legacyContent.classList.toggle('expanded');
-            updateLegacyButtonText();
-        });
-
-        langToggleBtn.addEventListener('click', () => {
-            const targetLang = currentLang === 'en' ? 'zh' : 'en';
-            setLanguage(targetLang);
-        });
-
-        setLanguage(currentLang);
+        sortSelect.addEventListener('change', sortPosts);
     </script>
-
 </body>
 </html>
