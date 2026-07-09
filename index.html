@@ -144,6 +144,42 @@
             padding: 0 1.5rem;
             border-left: 1px solid #222222;
         }
+
+        /* Projects log list */
+        .proj-row {
+            display: grid;
+            grid-template-columns: 3.5rem 1fr;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            border-bottom: 1px solid #c8c2b5;
+            transition: background 0.15s;
+        }
+        .proj-row:hover {
+            background: #ede8df;
+        }
+        .proj-index {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #c8c2b5;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .proj-row:hover .proj-index {
+            color: #cc5218;
+        }
+        .proj-links a {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid #1a1a1a;
+            padding: 6px 14px;
+            display: inline-block;
+            transition: background 0.15s, color 0.15s;
+        }
+        .proj-links a:hover {
+            background: #1a1a1a;
+            color: #f5f0e8;
+        }
     </style>
 </head>
 <!-- Google tag (gtag.js) -->
@@ -213,82 +249,12 @@
             </div>
         </section>
 
-        <!-- Projects Grid -->
+        <!-- Projects (modular, data-driven log list) -->
         <section id="projects" class="border-b border-grid">
-            <div class="grid grid-cols-1 md:grid-cols-2">
-                <div class="p-6 md:p-12 border-b md:border-b-0 md:border-r border-grid">
-                    <span class="section-label trans" data-en="02. development_index" data-zh="02. 开发索引">02. development_index</span>
-                    <h2 class="text-3xl mb-8 trans" data-en="projects" data-zh="核心项目">projects</h2>
-                    <div class="space-y-12">
-                        <div class="group border-l border-rule pl-6 py-2">
-                            <span class="section-label trans" data-en="project_01" data-zh="项目_01">project_01</span>
-                            <h3 class="text-xl mb-2 font-bold">LFM2.5-1.2B-Distilled-Claude</h3>
-                            <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA." data-zh="基于 LoRA 训练，将 Claude Sonnet 4.6 的自适应推理能力蒸馏至 LFM2.5-1.2b-Thinking 中。">
-                                a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA.
-                            </p>
-                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                    <a href="https://huggingface.co/collections/FlameF0X/liquid-claude" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open collection" data-zh="> 打开收藏集">
-                                        > open collection
-                                    </a>
-                                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open best model" data-zh="> 打开最佳模型">
-                                        > open best model
-                                    </a>
-                            </div>
-                        </div>
-
-                        <div class="group border-l border-rule pl-6 py-2">
-                            <span class="section-label trans" data-en="project_02" data-zh="项目_02">project_02</span>
-                            <h3 class="text-xl mb-2 font-bold">open-i3</h3>
-                            <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="the open-source release of the i3 architecture. promoting transparency in ai development." data-zh="i3 架构的开源发布，旨在促进人工智能开发的透明度。">
-                                the open-source release of the i3 architecture. promoting transparency in ai development.
-                            </p>
-                            <div class="flex gap-4 text-[10px] uppercase font-bold text-dim">
-                                <div class="mt-2">
-                                    <a href="https://github.com/FlameF0X/open-i3" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open repo" data-zh="> 打开开源仓库">
-                                        > open repo
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-col">
-                    <div class="p-6 md:p-12 border-b border-grid">
-                        <span class="section-label trans" data-en="project_03" data-zh="项目_03">project_03</span>
-                        <h3 class="text-xl mb-2 font-bold">ChessSLM</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans"
-                           data-en="small language models trained exclusively to play chess. available variants: <a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>base</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>rl</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>neo</a>, and <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>nano</a>."
-                           data-zh="专门为国际象棋对局训练的小型语言模型。可用变体：<a href='https://huggingface.co/FlameF0X/ChessSLM' class='text-accent hover:underline'>基础版 (base)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-RL' class='text-accent hover:underline'>强化学习版 (rl)</a>, <a href='https://huggingface.co/FlameF0X/ChessSLM-Neo' class='text-accent hover:underline'>新版 (neo)</a>, 以及 <a href='https://huggingface.co/FlameF0X/ChessSLM-Nano' class='text-accent hover:underline'>微型版 (nano)</a>。">
-                            small language models trained exclusively to play chess. available variants: <a href="https://huggingface.co/FlameF0X/ChessSLM" class="text-accent hover:underline">base</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-RL" class="text-accent hover:underline">rl</a>, <a href="https://huggingface.co/FlameF0X/ChessSLM-Neo" class="text-accent hover:underline">neo</a>, and <a href="https://huggingface.co/FlameF0X/ChessSLM-Nano" class="text-accent hover:underline">nano</a>.
-                        </p>
-                        <div class="mt-2">
-                            <a href="https://lichess.org/?user=chessslm-1&variant=standard&gameMode=casual&time=unlimited#friend" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> play against it" data-zh="> 与之人机对决">
-                                > play against it
-                            </a>
-                        </div>
-                    </div>
-                    <div class="p-6 md:p-12 border-b border-grid">
-                        <span class="section-label trans" data-en="project_04" data-zh="项目_04">project_04</span>
-                        <h3 class="text-xl mb-2 font-bold">koda-waf</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="a small, SOTA open-weights WAF model development by me for NetGoat." data-zh="由我为 NetGoat 开发的小型、先进（SOTA）开源权重 Web 应用防火墙（WAF）模型。">
-                            a small, SOTA open-weights WAF model development by me for NetGoat.
-                        </p>
-                            <a href="https://huggingface.co/netgoat-ai/koda-waf" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open repo" data-zh="> 打开开源仓库">
-                                > open repo
-                            </a>
-                    </div>
-                    <div class="p-6 md:p-12">
-                        <span class="section-label trans" data-en="project_05" data-zh="项目_05">project_05</span>
-                        <h3 class="text-xl mb-2 font-bold">literallynothing.js</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 trans" data-en="the name is self-explanatory." data-zh="顾名思义，里面真的什么都没有。">
-                            the name is self-explanatory.
-                        </p>
-                            <a href="https://www.npmjs.com/package/literallynothing.js" class="text-[10px] border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors uppercase tracking-widest inline-block trans" data-en="> open npm" data-zh="> 打开 npm">
-                                > open npm
-                            </a>
-                    </div>
-                </div>
+            <div class="p-6 md:p-12">
+                <span class="section-label trans" data-en="02. development_index" data-zh="02. 开发索引">02. development_index</span>
+                <h2 class="text-3xl mb-8 trans" data-en="projects" data-zh="核心项目">projects</h2>
+                <div id="projects-list" class="border-t border-rule"></div>
             </div>
         </section>
 
@@ -383,6 +349,76 @@
 
     <script>
         /* ─────────────────────────────────────────────
+           PROJECTS — modular data source.
+           To add a project, push an object into PROJECTS
+           below. To remove one, delete its object. That's it —
+           no HTML to touch.
+        ───────────────────────────────────────────── */
+        const PROJECTS = [
+            {
+                title: "LFM2.5-1.2B-Distilled-Claude",
+                desc_en: "a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA.",
+                desc_zh: "基于 LoRA 训练，将 Claude Sonnet 4.6 的自适应推理能力蒸馏至 LFM2.5-1.2b-Thinking 中。",
+                links: [
+                    { label_en: "open collection", label_zh: "打开收藏集", url: "https://huggingface.co/collections/FlameF0X/liquid-claude" },
+                    { label_en: "open best model", label_zh: "打开最佳模型", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" }
+                ]
+            },
+            {
+                title: "ChessSLM",
+                desc_en: "small language models trained exclusively to play chess. available variants: base, rl, neo, and nano.",
+                desc_zh: "专门为国际象棋对局训练的小型语言模型。可用变体：基础版 (base)、强化学习版 (rl)、新版 (neo)、微型版 (nano)。",
+                links: [
+                    { label_en: "base", label_zh: "基础版", url: "https://huggingface.co/FlameF0X/ChessSLM" },
+                    { label_en: "rl", label_zh: "强化学习版", url: "https://huggingface.co/FlameF0X/ChessSLM-RL" },
+                    { label_en: "neo", label_zh: "新版", url: "https://huggingface.co/FlameF0X/ChessSLM-Neo" },
+                    { label_en: "nano", label_zh: "微型版", url: "https://huggingface.co/FlameF0X/ChessSLM-Nano" },
+                    { label_en: "play against it", label_zh: "与之人机对决", url: "https://lichess.org/?user=chessslm-1&variant=standard&gameMode=casual&time=unlimited#friend" }
+                ]
+            },
+            {
+                title: "koda-waf",
+                desc_en: "a small, SOTA open-weights WAF model development by me for NetGoat.",
+                desc_zh: "由我为 NetGoat 开发的小型、先进（SOTA）开源权重 Web 应用防火墙（WAF）模型。",
+                links: [
+                    { label_en: "open repo", label_zh: "打开开源仓库", url: "https://huggingface.co/netgoat-ai/koda-waf" }
+                ]
+            },
+            {
+                title: "literallynothing.js",
+                desc_en: "the name is self-explanatory.",
+                desc_zh: "顾名思义，里面真的什么都没有。",
+                links: [
+                    { label_en: "open npm", label_zh: "打开 npm", url: "https://www.npmjs.com/package/literallynothing.js" }
+                ]
+            }
+        ];
+
+        function renderProjectRow(project, index, lang) {
+            const desc = lang === 'zh' ? project.desc_zh : project.desc_en;
+            const links = project.links.map(l => {
+                const label = lang === 'zh' ? l.label_zh : l.label_en;
+                return `<a href="${l.url}" target="_blank">${label}</a>`;
+            }).join(' ');
+            const num = String(index + 1).padStart(2, '0');
+            return `
+                <div class="proj-row">
+                    <div class="proj-index">${num}</div>
+                    <div>
+                        <h3 class="text-xl mb-2 font-bold">${project.title}</h3>
+                        <p class="text-muted text-sm leading-relaxed mb-4 max-w-2xl">${desc}</p>
+                        <div class="proj-links flex flex-wrap gap-2">${links}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProjects(lang) {
+            const el = document.getElementById('projects-list');
+            el.innerHTML = PROJECTS.map((p, i) => renderProjectRow(p, i, lang)).join('');
+        }
+
+        /* ─────────────────────────────────────────────
            MODEL ZOO — modular data source.
            To add a model, just push an object into
            MODEL_ZOO below. `legacy: true` puts it in the
@@ -391,6 +427,16 @@
         ───────────────────────────────────────────── */
         const MODEL_ZOO = [
             {
+                id: "TinyMoE-100m-2x8",
+                params: "100m a10m",
+                ctx: "1024",
+                hardware: "nvidia l4",
+                links: [
+                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/TinyMoE-100m-2x8-retrained" }
+                ],
+                legacy: false
+            },
+            {
                 id: "NanoSR-6x",
                 params: "N/A",
                 ctx: "NaN",
@@ -398,7 +444,7 @@
                 links: [
                     { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/NanoSR-6x" }
                 ],
-                legacy: false
+                legacy: true
             },
             {
                 id: "LFM2.5-1.2B-Distilled-Claude-4.6",
@@ -419,7 +465,7 @@
                 links: [
                     { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
                 ],
-                legacy: false
+                legacy: true
             },
             {
                 id: "MathGPT2",
@@ -520,6 +566,7 @@
 
             renderHeaders(lang);
             renderModelZoo(lang);
+            renderProjects(lang);
 
             if (langToggleBtn) {
                 langToggleBtn.innerText = lang === 'en' ? 'zh' : 'en';
