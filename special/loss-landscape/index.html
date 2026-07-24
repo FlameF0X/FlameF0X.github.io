@@ -683,7 +683,7 @@
                 colors.push(vertexColor.r, vertexColor.g, vertexColor.b);
             }
 
-            geometry.setAttribute('color', THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             geometry.computeVertexNormals();
 
             // Materials
