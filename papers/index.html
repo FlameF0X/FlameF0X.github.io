@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papers - flamef0x.github.io</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- KaTeX for math -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <!-- marked.js for Markdown → HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #f5f0e8;
+            --bg2: #ede8df;
+            --border: #c8c2b5;
+            --border-dark: #222;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --accent: #e8c84a;
+            --accent-border: #b8952a;
+            --black: #111;
+            --font: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        /* ── NAV ── */
+        nav {
+            border-bottom: 1px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            height: 52px;
+        }
+
+        .logo {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            padding: 0 1.2rem;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            border-left: 1px solid var(--border-dark);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-links a:hover { background: var(--bg2); color: var(--text); }
+        .nav-links a.active { background: var(--black); color: var(--bg); }
+
+        /* ── LAYOUT ── */
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2.5rem 4rem;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding: 3rem 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .section-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1;
+            color: var(--black);
+        }
+
+        /* ── SORT CONTROL ── */
+        .sort-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 4px;
+        }
+
+        .sort-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        select {
+            font-family: var(--font);
+            font-size: 13px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border-dark);
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+
+        select:hover { border-color: var(--black); }
+
+        /* ── POSTS GRID ── */
+        #posts-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        /* ── POST CARD ── */
+        .post-card {
+            border-bottom: 1px solid var(--border);
+            padding: 1.75rem 0;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: start;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .post-card:first-child { border-top: 1px solid var(--border); }
+
+        .post-card:hover { background: var(--bg2); padding-left: 1rem; padding-right: 1rem; margin: 0 -1rem; }
+
+        .post-card.is-new {
+            background: var(--black);
+            color: var(--bg);
+            padding: 1.75rem 1.5rem;
+            margin: 1.5rem 0;
+            border: none;
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .post-card.is-new:hover {
+            background: #222;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .post-card.is-new .post-meta { color: #999; }
+        .post-card.is-new .post-summary-text { color: #bbb; }
+        .post-card.is-new .post-arrow { color: var(--accent); }
+
+        .post-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge-new {
+            background: var(--accent);
+            color: var(--black);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            text-transform: uppercase;
+        }
+
+        .badge-hot {
+            background: transparent;
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 7px;
+            border: 1px solid var(--accent);
+            text-transform: uppercase;
+        }
+
+        .post-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .post-card.is-new .post-card-title { color: #fff; }
+
+        .post-summary-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-width: 680px;
+        }
+
+        .post-arrow {
+            font-size: 18px;
+            color: var(--text-muted);
+            align-self: center;
+            transition: transform 0.15s;
+        }
+
+        .post-card:hover .post-arrow { transform: translateX(4px); color: var(--text); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 4rem 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ── SINGLE POST ── */
+        #post-content {
+            display: none;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            padding: 7px 14px;
+            margin: 2rem 0 2.5rem;
+            background: transparent;
+            transition: all 0.15s;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn:hover {
+            background: var(--black);
+            color: var(--bg);
+            border-color: var(--black);
+        }
+
+        .post-full-header {
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .post-full-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-full-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            color: var(--black);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+        }
+
+        .post-full-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+        }
+
+        .post-body {
+            line-height: 1.8;
+            color: var(--text);
+            font-size: 14px;
+            max-width: 800px;
+        }
+
+        .post-body p { margin-bottom: 1.25rem; }
+        .post-body h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem; color: var(--black); }
+        .post-body h3 { font-size: 1rem; margin: 1.5rem 0 0.5rem; color: var(--text-muted); }
+        .post-body code { background: var(--bg2); padding: 2px 6px; font-family: var(--font); font-size: 13px; }
+        .post-body pre { background: var(--black); color: var(--bg); padding: 1.25rem; margin: 1.5rem 0; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+        .post-body pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+        .post-body a { color: var(--black); text-decoration: underline; }
+        .post-body blockquote {
+            border-left: 3px solid var(--accent-border);
+            margin: 1.5rem 0;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg2);
+            font-style: italic;
+            color: #555;
+        }
+        .post-body blockquote p { margin-bottom: 0.5rem; }
+        .post-body hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+        .post-body h1 { font-size: 1.5rem; margin: 2.5rem 0 1rem; color: var(--black); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        .post-body ul, .post-body ol { margin: 0 0 1.25rem 1.5rem; }
+        .post-body li { margin-bottom: 0.4rem; }
+
+        /* ── IMAGES IN POST BODY ── */
+        .post-body img {
+            border-radius: 8px;
+            cursor: zoom-in;
+            display: block;
+            margin: 1.5rem 0;
+            max-width: 100%;
+            transition: opacity 0.15s, transform 0.18s, box-shadow 0.18s;
+        }
+
+        .post-body img:hover {
+            opacity: 0.93;
+            transform: scale(1.012);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+        }
+
+        /* ── LIGHTBOX ── */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(8, 8, 8, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            padding: 2rem;
+        }
+
+        #lightbox.active {
+            display: flex;
+        }
+
+        #lightbox-img {
+            width: 92vw;
+            height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 24px 72px rgba(0, 0, 0, 0.65);
+            cursor: default;
+            animation: lb-pop 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+        }
+
+        @keyframes lb-pop {
+            from { opacity: 0; transform: scale(0.92); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        #lightbox-close {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.5rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-family: var(--font);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s, transform 0.15s;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        #lightbox-close:hover {
+            color: #fff;
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.14);
+        }
+
+        #lightbox-caption {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.45);
+            font-family: var(--font);
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-align: center;
+            pointer-events: none;
+            max-width: 80vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── TABLE STYLES ── */
+        .post-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 13px;
+        }
+
+        .post-body th, 
+        .post-body td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .post-body th {
+            background-color: var(--bg2);
+            color: var(--black);
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .post-body tr {
+            transition: background 0.15s ease;
+        }
+
+        .post-body tbody tr:hover {
+            background-color: var(--bg2);
+        }
+
+        /* ── KATEX ── */
+        .katex-display { margin: 1.5rem 0 !important; overflow-x: auto; overflow-y: hidden; }
+        .katex { font-size: 1.05em !important; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border-dark);
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            nav { padding: 0 1rem; }
+            main { padding: 0 1rem 3rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .page-header h1 { font-size: 2rem; }
+            .post-card.is-new { padding: 1.5rem 1rem; }
+            footer { padding: 1.5rem 1rem; }
+            
+            .post-body table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            #lightbox { padding: 0.75rem; }
+            #lightbox-img { border-radius: 8px; width: 98vw; height: 88vh; }
+        }
+    </style>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C2TKQFH6ZF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C2TKQFH6ZF');
+</script>
+<body>
+
+    <nav>
+        <a class="logo" href="/">flamef0x.github.io</a>
+        <ul class="nav-links">
+            <li><a href="/">home</a></li>
+            <li><a href="/papers" class="active">papers</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <div>
+                <h1>papers</h1>
+            </div>
+            <div class="sort-wrap">
+                <span class="sort-label">sort</span>
+                <select id="sort-select">
+                    <option value="newest">newest first</option>
+                    <option value="oldest">oldest first</option>
+                    <option value="title-asc">title (a–z)</option>
+                    <option value="title-desc">title (z–a)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="posts-list"></div>
+        <div id="post-content"></div>
+    </main>
+
+    <footer>
+        <span>flamef0x.github.io/papers</span>
+        <span>daniel.flamefox</span>
+    </footer>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <button id="lightbox-close" aria-label="Close image viewer">✕</button>
+        <img id="lightbox-img" src="" alt="" />
+        <div id="lightbox-caption"></div>
+    </div>
+
+    <script>
+        const postsListEl   = document.getElementById('posts-list');
+        const postContentEl = document.getElementById('post-content');
+        const sortSelect    = document.getElementById('sort-select');
+        const lightbox      = document.getElementById('lightbox');
+        const lightboxImg   = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const PAPERS_DIR = 'paper-list';
+        let posts = [];
+
+        /* ── LIGHTBOX LOGIC ── */
+        function openLightbox(src, alt) {
+            lightboxImg.src = src;
+            lightboxImg.alt = alt || '';
+            lightboxCaption.textContent = alt || '';
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Click the dark backdrop to close
+        lightbox.addEventListener('click', e => {
+            if (e.target === lightbox) closeLightbox();
+        });
+        lightboxClose.addEventListener('click', closeLightbox);
+
+        // Escape key to close
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+        });
+
+        // Delegate: any img inside .post-body triggers the lightbox
+        postContentEl.addEventListener('click', e => {
+            if (e.target.tagName === 'IMG' && e.target.closest('.post-body')) {
+                openLightbox(e.target.src, e.target.alt);
+            }
+        });
+
+        /* ── POSTS LOGIC ── */
+        function daysDiff(dateString) {
+            return Math.ceil(Math.abs(new Date() - new Date(dateString)) / 864e5);
+        }
+
+        const setupEventListener = () => {
+            postsListEl.addEventListener('click', e => {
+                const card = e.target.closest('.post-card');
+                if (card) {
+                    const post = posts.find(p => p.id === card.dataset.id);
+                    if (post) showPost(post);
+                }
+            });
+        };
+
+        function sortPosts() {
+            switch (sortSelect.value) {
+                case 'newest':     posts.sort((a,b) => new Date(b.date) - new Date(a.date)); break;
+                case 'oldest':     posts.sort((a,b) => new Date(a.date) - new Date(b.date)); break;
+                case 'title-asc':  posts.sort((a,b) => a.title.localeCompare(b.title));      break;
+                case 'title-desc': posts.sort((a,b) => b.title.localeCompare(a.title));      break;
+            }
+            renderList();
+        }
+
+        function renderList() {
+            postContentEl.style.display = 'none';
+            postsListEl.style.display = 'grid';
+            if (!posts.length) {
+                postsListEl.innerHTML = '<div class="empty-state">> no papers found. check back later.</div>';
+                return;
+            }
+            postsListEl.innerHTML = posts.map(post => {
+                const days  = daysDiff(post.date);
+                const isNew = days <= 7;
+                const isHot = days <= 3;
+                return `
+                    <div class="post-card ${isNew ? 'is-new' : ''}" data-id="${post.id}">
+                        <div>
+                            <div class="post-meta">
+                                <span>${post.date}</span>
+                                ${post.authors ? `<span style="color:var(--text-muted);">${post.authors}</span>` : ''}
+                                ${isNew ? `<span class="badge-new">new</span>` : ''}
+                                ${isHot ? `<span class="badge-hot">hot</span>` : ''}
+                            </div>
+                            <div class="post-card-title">${post.title}</div>
+                            <div class="post-summary-text">${post.summary || post.abstract || ''}</div>
+                        </div>
+                        <div class="post-arrow">→</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showPost(post) {
+            postsListEl.style.display = 'none';
+            postContentEl.style.display = 'block';
+            postContentEl.innerHTML = `
+                <button class="back-btn" id="back-btn">← back to papers</button>
+                <div class="post-full-header">
+                    <div class="post-full-label">paper · ${post.id || 'preprint'}</div>
+                    <h2 class="post-full-title">${post.title}</h2>
+                    <div class="post-full-date">${post.authors ? post.authors + ' — ' : ''}${post.date}</div>
+                </div>
+                <div class="post-body" id="paper-body">Loading paper…</div>
+            `;
+            document.getElementById('back-btn').onclick = () => renderList();
+
+            // Fetch and render the markdown paper
+            const file = post.file || `${post.id}.md`;
+            fetch(`${PAPERS_DIR}/${file}?t=${Date.now()}`, { cache: 'no-store' })
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.text();
+                })
+                .then(md => {
+                    // Render markdown to HTML
+                    let html;
+                    try {
+                        html = marked.parse(md);
+                    } catch (e) {
+                        html = `<pre>${md}</pre>`;
+                    }
+                    document.getElementById('paper-body').innerHTML = html;
+
+                    // Render math with KaTeX
+                    try {
+                        renderMathInElement(document.getElementById('paper-body'), {
+                            delimiters: [
+                                { left: '$$', right: '$$', display: true },
+                                { left: '$', right: '$', display: false },
+                            ],
+                            throwOnError: false
+                        });
+                    } catch (e) { /* KaTeX may not find anything to render */ }
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(err => {
+                    document.getElementById('paper-body').innerHTML =
+                        `<p style="color:var(--accent);">Failed to load paper: ${err.message}.<br>Make sure <code>${PAPERS_DIR}/${file}</code> exists.</p>`;
+                });
+        }
+
+        // Fetch papers manifest with cache-busting
+        fetch(`${PAPERS_DIR}/papers.json?t=${new Date().getTime()}`, { cache: 'no-store' })
+            .then(r => {
+                if (!r.ok) throw new Error('Failed to load papers manifest.');
+                return r.json();
+            })
+            .then(data => {
+                posts = data;
+                sortPosts();
+            })
+            .catch(err => {
+                console.error("Error loading papers:", err);
+                postsListEl.innerHTML = '<div class="empty-state">> failed to load <code>paper-list/papers.json</code>.<br>> make sure the folder exists with the manifest and .md files.</div>';
+            })
+            .finally(() => {
+                setupEventListener();
+            });
+
+        sortSelect.addEventListener('change', sortPosts);
+    </script>
+</body>
+</html>
