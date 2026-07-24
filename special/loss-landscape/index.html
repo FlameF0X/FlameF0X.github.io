@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loss Landscape 3D Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js for 3D graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Google Fonts: Space Mono & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            DEFAULT: '#f3f0e6',
+                            dark: '#e6e1d3',
+                            card: '#e8e4d8',
+                            hover: '#ded9c9'
+                        },
+                        terracotta: {
+                            DEFAULT: '#d14f24',
+                            dark: '#b83e16',
+                            light: '#e06136'
+                        },
+                        charcoal: {
+                            DEFAULT: '#1a1a1a',
+                            muted: '#5a5850',
+                            light: '#8c887b'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', '"Space Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f3f0e6;
+            color: #1a1a1a;
+            font-family: 'JetBrains Mono', 'Space Mono', monospace;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e6e1d3;
+            border-left: 1px solid #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+        }
+
+        .brutalist-border {
+            border: 1px solid #1a1a1a;
+        }
+
+        .brutalist-btn {
+            background-color: transparent;
+            border: 1px solid #1a1a1a;
+            color: #1a1a1a;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.15s ease-in-out;
+        }
+        .brutalist-btn:hover {
+            background-color: #1a1a1a;
+            color: #f3f0e6;
+        }
+
+        .brutalist-btn-primary {
+            background-color: #d14f24;
+            border: 1px solid #1a1a1a;
+            color: #ffffff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.15s ease-in-out;
+        }
+        .brutalist-btn-primary:hover {
+            background-color: #b83e16;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .custom-file-drop {
+            border: 2px dashed #1a1a1a;
+            background-color: rgba(232, 228, 216, 0.4);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .custom-file-drop.dragover {
+            background-color: rgba(209, 79, 36, 0.15);
+            border-color: #d14f24;
+        }
+
+        /* Canvas viewport canvas styling */
+        #viewport-container {
+            position: relative;
+            width: 100%;
+            height: 540px;
+            background-color: #0d0f17; /* Dark viewport for vivid 3D landscape */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-terracotta selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full brutalist-border bg-cream border-t-0 border-x-0 sticky top-0 z-50">
+        <div class="flex flex-wrap items-stretch justify-between text-xs md:text-sm">
+            <!-- Brand / Logo -->
+            <a href="#" class="px-4 py-3 font-bold border-r border-[#1a1a1a] flex items-center hover:bg-cream-dark transition-colors">
+                loss_landscape.lab
+            </a>
+
+            <!-- Nav Items -->
+            <div class="hidden md:flex items-stretch border-r border-[#1a1a1a]">
+                <a href="#identity" class="px-4 py-3 border-r border-[#1a1a1a] hover:bg-cream-dark transition-colors lowercase">01. identity</a>
+                <a href="#models" class="px-4 py-3 border-r border-[#1a1a1a] hover:bg-cream-dark transition-colors lowercase">02. models_index</a>
+                <a href="#viewport" class="px-4 py-3 border-r border-[#1a1a1a] hover:bg-cream-dark transition-colors lowercase">03. 3d_topology</a>
+                <a href="#inspector" class="px-4 py-3 hover:bg-cream-dark transition-colors lowercase">04. jsonl_stream</a>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-stretch">
+                <label for="jsonl-input" class="px-4 py-3 border-l border-[#1a1a1a] bg-cream hover:bg-cream-dark transition-colors cursor-pointer flex items-center font-bold text-xs uppercase tracking-wider">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Load .JSONL
+                </label>
+                <input type="file" id="jsonl-input" accept=".jsonl,.json" class="hidden" />
+
+                <button onclick="loadSampleDataset()" class="px-4 py-3 border-l border-[#1a1a1a] bg-terracotta text-white font-bold hover:bg-terracotta-dark transition-colors text-xs uppercase tracking-wider">
+                    Demo Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 md:py-10 space-y-10">
+
+        <!-- 01. IDENTITY / HERO SECTION -->
+        <section id="identity" class="space-y-4">
+            <div class="text-xs uppercase tracking-widest text-charcoal-muted font-bold">
+                01. IDENTITY / MULTI_MODEL_EXPLORER
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-charcoal">
+                loss landscape 3d visualizer
+            </h1>
+
+            <p class="text-sm md:text-base text-charcoal-muted max-w-3xl leading-relaxed">
+                interactive 3d loss surface explorer for small & large language models. load datasets directly from your pyTorch filter-normalized loss landscape evaluation script outputting structured <span class="bg-cream-card px-1.5 py-0.5 border border-charcoal text-charcoal font-semibold">.jsonl</span> datapoints.
+            </p>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button onclick="scrollToSection('viewport')" class="brutalist-btn-primary px-5 py-2.5 text-xs">
+                    View 3D Topology
+                </button>
+                <label for="jsonl-input-hero" class="brutalist-btn px-5 py-2.5 text-xs cursor-pointer inline-block">
+                    Upload Custom .JSONL
+                </label>
+                <input type="file" id="jsonl-input-hero" accept=".jsonl,.json" class="hidden" />
+                
+                <button onclick="exportOBJMesh()" class="brutalist-btn px-5 py-2.5 text-xs">
+                    Export Mesh (.OBJ)
+                </button>
+            </div>
+        </section>
+
+        <!-- 02. MODEL INDEX REGISTRY -->
+        <section id="models" class="space-y-4 pt-4 border-t border-charcoal">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs uppercase tracking-widest text-charcoal-muted font-bold">
+                    02. DEVELOPMENT_INDEX / PARSED_MODELS
+                </div>
+                <div id="parsed-count-badge" class="text-xs border border-charcoal px-2.5 py-1 bg-cream-card font-bold">
+                    3 MODELS PARSED
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold tracking-tight text-charcoal">
+                parsed model surfaces
+            </h2>
+
+            <!-- Cards Container -->
+            <div id="model-cards-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- 03. 3D SURFACE VIEWPORT -->
+        <section id="viewport" class="space-y-4 pt-4 border-t border-charcoal">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs uppercase tracking-widest text-charcoal-muted font-bold">
+                    03. SURFACE_RENDERER / TOPOLOGY
+                </div>
+                <div id="active-model-tag" class="text-xs border border-charcoal px-2.5 py-1 bg-terracotta text-white font-bold uppercase">
+                    ACTIVE: AxiomicLabs/GPT-X2-125M
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                
+                <!-- Main WebGL Viewport Container (3 Cols) -->
+                <div class="lg:col-span-3 brutalist-border relative overflow-hidden flex flex-col bg-charcoal">
+                    <!-- Top Status Bar overlay -->
+                    <div class="bg-[#12141d] text-white/80 border-b border-white/10 px-4 py-2 flex flex-wrap items-center justify-between text-xs font-mono z-10">
+                        <div class="flex items-center space-x-3">
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="canvas-status-text">Three.js WebGL Surface Active</span>
+                        </div>
+                        <div class="flex items-center space-x-4 text-xs opacity-75">
+                            <span>GRID: <strong id="grid-res-display" class="text-white">64x64</strong></span>
+                            <span>PARAMS: <strong class="text-white">α, β ∈ [-0.8, 0.8]</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- WebGL Canvas Host -->
+                    <div id="viewport-container" class="flex-grow">
+                        <!-- Three Canvas appended here dynamically -->
+                    </div>
+
+                    <!-- Bottom Bar Info -->
+                    <div class="bg-[#12141d] text-white/70 border-t border-white/10 px-4 py-2 text-xs font-mono flex flex-wrap justify-between items-center z-10">
+                        <div class="truncate max-w-xl">
+                            PROMPT: <span id="prompt-preview" class="text-white italic">"Deep learning loss landscapes are high-dimensional non-convex functions..."</span>
+                        </div>
+                        <button onclick="takeCanvasScreenshot()" class="hover:text-white underline text-xs">
+                            📷 Take Snapshot
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Control Panel Sidebar (1 Col) -->
+                <div class="lg:col-span-1 brutalist-border bg-cream-card p-4 flex flex-col justify-between space-y-5 text-xs">
+                    <div>
+                        <div class="font-bold uppercase tracking-wider text-charcoal border-b border-charcoal pb-2 mb-3">
+                            Render Settings
+                        </div>
+
+                        <!-- Colormap Selector -->
+                        <div class="space-y-1 mb-4">
+                            <label class="block font-semibold text-charcoal-muted uppercase text-[10px]">Colormap Palette</label>
+                            <select id="colormap-select" onchange="updateSurfaceMesh()" class="w-full bg-cream border border-charcoal p-2 font-mono text-xs focus:outline-none">
+                                <option value="viridis">Viridis (Default Python)</option>
+                                <option value="plasma">Plasma (High Energy)</option>
+                                <option value="magma">Magma (Dark Core)</option>
+                                <option value="brutalist">Brutalist Terracotta</option>
+                                <option value="monochrome">Technical Wireframe Mono</option>
+                            </select>
+                        </div>
+
+                        <!-- Render Mode -->
+                        <div class="space-y-1 mb-4">
+                            <label class="block font-semibold text-charcoal-muted uppercase text-[10px]">Surface Representation</label>
+                            <select id="render-mode-select" onchange="updateSurfaceMesh()" class="w-full bg-cream border border-charcoal p-2 font-mono text-xs focus:outline-none">
+                                <option value="solid">Solid Shaded Surface</option>
+                                <option value="wireframe">Wireframe Grid</option>
+                                <option value="both">Solid + Wireframe Overlay</option>
+                                <option value="points">Point Cloud Vertices</option>
+                            </select>
+                        </div>
+
+                        <!-- Elevation / Height Scale Slider -->
+                        <div class="space-y-1 mb-4">
+                            <div class="flex justify-between items-center">
+                                <label class="font-semibold text-charcoal-muted uppercase text-[10px]">Z Elevation Scale</label>
+                                <span id="elevation-val" class="font-bold">1.5x</span>
+                            </div>
+                            <input type="range" id="elevation-slider" min="0.1" max="4.0" step="0.1" value="1.5" oninput="updateElevation(this.value)" class="w-full accent-terracotta cursor-pointer">
+                        </div>
+
+                        <!-- Wireframe Density / Smoothness -->
+                        <div class="space-y-1 mb-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="auto-rotate-check" onchange="toggleAutoRotate(this.checked)" checked class="accent-terracotta cursor-pointer">
+                                <label for="auto-rotate-check" class="font-bold text-charcoal cursor-pointer">Auto-Rotate Camera</label>
+                            </div>
+                        </div>
+
+                        <!-- Surface Stats Card -->
+                        <div class="border border-charcoal p-3 bg-cream space-y-2 mt-4">
+                            <div class="font-bold uppercase tracking-wider text-[10px] text-charcoal-muted border-b border-charcoal/20 pb-1">
+                                Topology Metrics
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-charcoal-muted">Min Loss:</span>
+                                <strong id="metric-min-loss" class="font-mono text-emerald-700">1.2405</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-charcoal-muted">Max Loss:</span>
+                                <strong id="metric-max-loss" class="font-mono text-terracotta">6.8912</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-charcoal-muted">Center Loss:</span>
+                                <strong id="metric-center-loss" class="font-mono">1.3120</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-charcoal-muted">Delta Range:</span>
+                                <strong id="metric-delta-loss" class="font-mono">5.6507</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Viewport Reset -->
+                    <div class="pt-2">
+                        <button onclick="resetCameraView()" class="w-full brutalist-btn py-2 text-xs">
+                            Reset Camera View
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 04. RAW DATAPOINT INSPECTOR & DROPZONE -->
+        <section id="inspector" class="space-y-4 pt-4 border-t border-charcoal">
+            <div class="text-xs uppercase tracking-widest text-charcoal-muted font-bold">
+                04. DATAPOINT_INSPECTOR / FILE_STREAM
+            </div>
+
+            <h2 class="text-2xl font-bold tracking-tight text-charcoal">
+                jsonl stream payload & drag-drop
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                
+                <!-- Drag and Drop Upload Zone -->
+                <div id="drop-zone" class="custom-file-drop p-8 brutalist-border flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px]" onclick="document.getElementById('jsonl-input-drop').click()">
+                    <svg class="w-12 h-12 text-charcoal mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <div class="font-bold text-sm text-charcoal uppercase tracking-wider mb-1">
+                        Drop your loss_landscapes.jsonl file here
+                    </div>
+                    <div class="text-xs text-charcoal-muted max-w-xs">
+                        Accepts JSON lines containing `model_id`, `alphas`, `betas`, and `loss_surface` 2D arrays.
+                    </div>
+                    <input type="file" id="jsonl-input-drop" accept=".jsonl,.json" class="hidden" />
+                </div>
+
+                <!-- Raw JSON View / Inspector -->
+                <div class="brutalist-border bg-[#12141d] p-4 text-emerald-400 font-mono text-xs flex flex-col justify-between h-[220px]">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2 mb-2 text-white/70">
+                        <span>Active Record JSON Payload</span>
+                        <button onclick="copyActiveJSONPayload()" class="hover:text-white text-[10px] uppercase border border-white/30 px-2 py-0.5">
+                            Copy Line
+                        </button>
+                    </div>
+                    <pre id="json-raw-preview" class="overflow-auto flex-grow text-[11px] leading-tight text-emerald-300">
+// Selected record JSON snippet will appear here...
+                    </pre>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full brutalist-border bg-cream border-b-0 border-x-0 mt-12 py-6 text-xs text-charcoal">
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <strong>loss_landscape.lab</strong> — high dimensional neural optimization visualizer
+            </div>
+            <div class="flex space-x-4">
+                <a href="https://github.com" target="_blank" class="hover:underline">GitHub</a>
+                <span>/</span>
+                <a href="https://huggingface.co" target="_blank" class="hover:underline">HuggingFace</a>
+                <span>/</span>
+                <a href="#identity" class="hover:underline">Back to top ↑</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-charcoal text-white border border-white px-4 py-3 shadow-2xl text-xs font-mono transition-all transform translate-y-20 opacity-0 z-50 flex items-center space-x-2">
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <script>
+        let datasetRecords = [];
+        let activeRecordIndex = 0;
+        
+        // Three.js State Variables
+        let scene, camera, renderer, controls;
+        let surfaceMesh = null;
+        let wireframeMesh = null;
+        let pointsMesh = null;
+        let currentElevationScale = 1.5;
+
+        // Color Maps
+        const COLOR_MAPS = {
+            viridis: [
+                [0.0, [68, 1, 84]],
+                [0.25, [59, 82, 139]],
+                [0.5, [33, 145, 140]],
+                [0.75, [94, 201, 98]],
+                [1.0, [253, 231, 37]]
+            ],
+            plasma: [
+                [0.0, [13, 8, 135]],
+                [0.25, [126, 3, 168]],
+                [0.5, [204, 71, 120]],
+                [0.75, [248, 149, 64]],
+                [1.0, [240, 249, 33]]
+            ],
+            magma: [
+                [0.0, [0, 0, 4]],
+                [0.25, [81, 18, 124]],
+                [0.5, [182, 54, 121]],
+                [0.75, [251, 136, 97]],
+                [1.0, [252, 253, 191]]
+            ],
+            brutalist: [
+                [0.0, [26, 26, 26]],
+                [0.3, [90, 88, 80]],
+                [0.6, [209, 79, 36]],
+                [1.0, [243, 240, 230]]
+            ],
+            monochrome: [
+                [0.0, [20, 25, 35]],
+                [0.5, [100, 110, 130]],
+                [1.0, [220, 225, 235]]
+            ]
+        };
+
+        // Synthesize Synthetic High-Quality Loss Surfaces for Immediate Demo Mode
+        function generateSyntheticLandscape(modelId, patternType, promptText) {
+            const size = 64;
+            const stepRange = 0.8;
+            const alphas = [];
+            const betas = [];
+            for (let i = 0; i < size; i++) {
+                const val = -stepRange + (i / (size - 1)) * (stepRange * 2);
+                alphas.push(val);
+                betas.push(val);
+            }
+
+            const lossSurface = [];
+            let minL = 9999, maxL = -9999;
+
+            for (let i = 0; i < size; i++) {
+                const row = [];
+                const b = betas[i];
+                for (let j = 0; j < size; j++) {
+                    const a = alphas[j];
+                    const r2 = a * a + b * b;
+                    let l = 0;
+
+                    if (patternType === 'bowl') {
+                        // Smooth convex basin with light high-frequency noise
+                        l = 1.2 + 4.5 * r2 + 0.3 * Math.sin(a * 8) * Math.cos(b * 8);
+                    } else if (patternType === 'valley') {
+                        // Non-convex saddle / narrow curving valley
+                        l = 1.1 + 3.0 * Math.pow(a - b * b, 2) + 0.8 * Math.cos(a * 10) + 0.5 * (a*a + b*b);
+                    } else {
+                        // Chaotic multi-modal loss landscape (unstable optimizer)
+                        l = 1.5 + 2.5 * r2 + 1.2 * Math.sin(a * 12) * Math.sin(b * 12) + 0.8 * Math.cos(a * 6 + b * 6);
+                    }
+
+                    l = Math.max(0.1, l);
+                    if (l < minL) minL = l;
+                    if (l > maxL) maxL = l;
+                    row.push(Number(l.toFixed(4)));
+                }
+                lossSurface.push(row);
+            }
+
+            const centerIdx = Math.floor(size / 2);
+            const centerL = lossSurface[centerIdx][centerIdx];
+
+            return {
+                model_id: modelId,
+                grid_size: size,
+                step_range: stepRange,
+                prompt: promptText,
+                alphas: alphas,
+                betas: betas,
+                loss_surface: lossSurface,
+                stats: {
+                    min_loss: Number(minL.toFixed(4)),
+                    max_loss: Number(maxL.toFixed(4)),
+                    center_loss: Number(centerL.toFixed(4))
+                }
+            };
+        }
+
+        function initThreeJS() {
+            const container = document.getElementById('viewport-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0d0f17);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(18, 14, 22);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 1.2;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight1.position.set(20, 40, 20);
+            scene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0xd14f24, 0.4); // Subtle terracotta tint light
+            dirLight2.position.set(-20, -20, -20);
+            scene.add(dirLight2);
+
+            // Grid Floor Helper for context
+            const gridHelper = new THREE.GridHelper(24, 24, 0x333748, 0x1f2333);
+            gridHelper.position.y = -0.1;
+            scene.add(gridHelper);
+
+            // Window resize handler
+            window.addEventListener('resize', onWindowResize);
+
+            // Start animation loop
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('viewport-container');
+            if (!container || !renderer || !camera) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function interpolateColor(value, colorMapKey) {
+            const stops = COLOR_MAPS[colorMapKey] || COLOR_MAPS.viridis;
+            const clampedVal = Math.max(0, Math.min(1, value));
+
+            let lower = stops[0];
+            let upper = stops[stops.length - 1];
+
+            for (let i = 0; i < stops.length - 1; i++) {
+                if (clampedVal >= stops[i][0] && clampedVal <= stops[i+1][0]) {
+                    lower = stops[i];
+                    upper = stops[i+1];
+                    break;
+                }
+            }
+
+            const range = upper[0] - lower[0];
+            const factor = range === 0 ? 0 : (clampedVal - lower[0]) / range;
+
+            const r = Math.round(lower[1][0] + factor * (upper[1][0] - lower[1][0]));
+            const g = Math.round(lower[1][1] + factor * (upper[1][1] - lower[1][1]));
+            const b = Math.round(lower[1][2] + factor * (upper[1][2] - lower[1][2]));
+
+            return new THREE.Color(`rgb(${r},${g},${b})`);
+        }
+
+        function updateSurfaceMesh() {
+            if (datasetRecords.length === 0) return;
+            const record = datasetRecords[activeRecordIndex];
+            if (!record || !record.loss_surface) return;
+
+            // Remove existing meshes from scene
+            if (surfaceMesh) scene.remove(surfaceMesh);
+            if (wireframeMesh) scene.remove(wireframeMesh);
+            if (pointsMesh) scene.remove(pointsMesh);
+
+            const gridX = record.alphas.length;
+            const gridY = record.betas.length;
+            const surface = record.loss_surface;
+
+            let minL = record.stats ? record.stats.min_loss : 999;
+            let maxL = record.stats ? record.stats.max_loss : -999;
+
+            // Fallback stats scan if missing
+            if (minL === 999 || maxL === -999) {
+                minL = 9999; maxL = -9999;
+                for (let r = 0; r < gridY; r++) {
+                    for (let c = 0; c < gridX; c++) {
+                        const val = surface[r][c];
+                        if (val < minL) minL = val;
+                        if (val > maxL) maxL = val;
+                    }
+                }
+            }
+            const rangeL = (maxL - minL) || 1.0;
+
+            // Create Plane Geometry (X, Z plane representation)
+            const planeWidth = 16.0;
+            const planeHeight = 16.0;
+            const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight, gridX - 1, gridY - 1);
+            geometry.rotateX(-Math.PI / 2); // Orient horizontal
+
+            const posAttr = geometry.attributes.position;
+            const colors = [];
+            const colormapKey = document.getElementById('colormap-select').value;
+            const renderMode = document.getElementById('render-mode-select').value;
+
+            for (let i = 0; i < posAttr.count; i++) {
+                // Determine grid coordinates (row i, col j)
+                const col = i % gridX;
+                const row = Math.floor(i / gridX);
+
+                const lossVal = surface[row] ? surface[row][col] : minL;
+                const normalizedLoss = (lossVal - minL) / rangeL;
+
+                // Set Height (Y-axis) scaled by user slider
+                const yPos = (normalizedLoss * 4.0) * currentElevationScale;
+                posAttr.setY(i, yPos);
+
+                // Compute Color
+                const vertexColor = interpolateColor(normalizedLoss, colormapKey);
+                colors.push(vertexColor.r, vertexColor.g, vertexColor.b);
+            }
+
+            geometry.setAttribute('color', THREE.Float32BufferAttribute(colors, 3));
+            geometry.computeVertexNormals();
+
+            // Materials
+            const solidMaterial = new THREE.MeshStandardMaterial({
+                vertexColors: true,
+                roughness: 0.35,
+                metalness: 0.1,
+                side: THREE.DoubleSide,
+                wireframe: false
+            });
+
+            const wireframeMat = new THREE.MeshBasicMaterial({
+                color: colormapKey === 'brutalist' ? 0xd14f24 : 0x55ffaa,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.4
+            });
+
+            const pointsMat = new THREE.PointsMaterial({
+                size: 0.12,
+                vertexColors: true
+            });
+
+            // Mesh Construction according to mode
+            if (renderMode === 'solid' || renderMode === 'both') {
+                surfaceMesh = new THREE.Mesh(geometry, solidMaterial);
+                scene.add(surfaceMesh);
+            }
+
+            if (renderMode === 'wireframe' || renderMode === 'both') {
+                wireframeMesh = new THREE.Mesh(geometry, wireframeMat);
+                scene.add(wireframeMesh);
+            }
+
+            if (renderMode === 'points') {
+                pointsMesh = new THREE.Points(geometry, pointsMat);
+                scene.add(pointsMesh);
+            }
+
+            // Update UI Labels & Metrics
+            updateMetricReadouts(record, minL, maxL, rangeL);
+        }
+
+        function updateMetricReadouts(record, minL, maxL, rangeL) {
+            document.getElementById('metric-min-loss').innerText = minL.toFixed(4);
+            document.getElementById('metric-max-loss').innerText = maxL.toFixed(4);
+            document.getElementById('metric-delta-loss').innerText = rangeL.toFixed(4);
+            
+            const centerVal = record.stats ? record.stats.center_loss : (minL + rangeL/2);
+            document.getElementById('metric-center-loss').innerText = centerVal.toFixed(4);
+
+            document.getElementById('active-model-tag').innerText = `ACTIVE: ${record.model_id}`;
+            document.getElementById('grid-res-display').innerText = `${record.alphas.length}x${record.betas.length}`;
+            document.getElementById('prompt-preview').innerText = `"${record.prompt || 'N/A'}"`;
+
+            // Render JSON snippet in inspector
+            const payloadCopy = { ...record };
+            delete payloadCopy.loss_surface; // Exclude massive 2D array from quick preview
+            payloadCopy.loss_surface_preview = `[2D Array: ${record.alphas.length}x${record.betas.length}]`;
+            document.getElementById('json-raw-preview').innerText = JSON.stringify(payloadCopy, null, 2);
+        }
+
+        function updateElevation(val) {
+            currentElevationScale = parseFloat(val);
+            document.getElementById('elevation-val').innerText = `${currentElevationScale.toFixed(1)}x`;
+            updateSurfaceMesh();
+        }
+
+        function toggleAutoRotate(enabled) {
+            if (controls) controls.autoRotate = enabled;
+        }
+
+        function resetCameraView() {
+            if (camera && controls) {
+                camera.position.set(18, 14, 22);
+                controls.target.set(0, 2, 0);
+                controls.update();
+            }
+        }
+
+        function parseJSONLText(text) {
+            const lines = text.split(/\r?\n/);
+            const parsed = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                try {
+                    const record = JSON.parse(line);
+                    if (record.model_id && record.loss_surface && record.alphas && record.betas) {
+                        parsed.push(record);
+                    }
+                } catch (e) {
+                    console.warn(`Line ${i+1} is not valid JSON`);
+                }
+            }
+            return parsed;
+        }
+
+        function loadJSONLData(parsedRecords, sourceName) {
+            if (!parsedRecords || parsedRecords.length === 0) {
+                showToast("⚠️ No valid JSONL records found with required loss_surface fields.");
+                return;
+            }
+
+            datasetRecords = parsedRecords;
+            activeRecordIndex = 0;
+
+            renderModelRegistryCards();
+            updateSurfaceMesh();
+            showToast(`Loaded ${parsedRecords.length} model landscape(s) from ${sourceName}!`);
+        }
+
+        function renderModelRegistryCards() {
+            const grid = document.getElementById('model-cards-grid');
+            grid.innerHTML = '';
+
+            document.getElementById('parsed-count-badge').innerText = `${datasetRecords.length} MODELS PARSED`;
+
+            datasetRecords.forEach((record, index) => {
+                const isActive = index === activeRecordIndex;
+                const card = document.createElement('div');
+                card.className = `brutalist-border p-5 flex flex-col justify-between space-y-4 transition-all ${
+                    isActive ? 'bg-cream-dark border-2 border-charcoal' : 'bg-cream-card hover:bg-cream-hover'
+                }`;
+
+                const minL = record.stats ? record.stats.min_loss : 'N/A';
+                const maxL = record.stats ? record.stats.max_loss : 'N/A';
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-extrabold font-mono text-terracotta">
+                                0${index + 1}
+                            </span>
+                            ${
+                                isActive 
+                                ? `<span class="bg-terracotta text-white text-[10px] uppercase font-bold px-2 py-0.5 border border-charcoal">Active View</span>`
+                                : `<span class="text-[10px] uppercase font-bold text-charcoal-muted border border-charcoal/30 px-2 py-0.5">Parsed</span>`
+                            }
+                        </div>
+                        <h3 class="font-bold text-base text-charcoal truncate" title="${record.model_id}">
+                            ${record.model_id}
+                        </h3>
+                        <p class="text-xs text-charcoal-muted line-clamp-2 italic">
+                            "${record.prompt || 'No prompt specified'}"
+                        </p>
+                    </div>
+
+                    <div class="space-y-3 pt-2 border-t border-charcoal/20">
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-charcoal-muted block text-[10px] uppercase">Min Loss</span>
+                                <strong class="text-emerald-700">${minL}</strong>
+                            </div>
+                            <div>
+                                <span class="text-charcoal-muted block text-[10px] uppercase">Max Loss</span>
+                                <strong class="text-terracotta">${maxL}</strong>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="selectActiveModel(${index})" class="${
+                                isActive ? 'brutalist-btn-primary' : 'brutalist-btn'
+                            } w-full py-1.5 text-xs">
+                                ${isActive ? 'Rendering Surface' : 'Render 3D Surface'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectActiveModel(index) {
+            if (index >= 0 && index < datasetRecords.length) {
+                activeRecordIndex = index;
+                renderModelRegistryCards();
+                updateSurfaceMesh();
+                scrollToSection('viewport');
+            }
+        }
+
+        function loadSampleDataset() {
+            const demoData = [
+                generateSyntheticLandscape("AxiomicLabs/GPT-X2-125M", "bowl", "Deep learning loss landscapes are high-dimensional non-convex functions that characterize optimization efficiency."),
+                generateSyntheticLandscape("meta-llama/Llama-3.2-1B", "valley", "Reasoning models benefit from sharp non-convex trajectories during preference optimization."),
+                generateSyntheticLandscape("facebook/opt-125m", "chaotic", "Exploratory search across wide parameter perturbance paths.")
+            ];
+            loadJSONLData(demoData, "Demo Dataset");
+        }
+
+        function setupEventListeners() {
+            // File input listeners
+            const handleFileSelect = (evt) => {
+                const file = evt.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const parsed = parseJSONLText(e.target.result);
+                    loadJSONLData(parsed, file.name);
+                };
+                reader.readAsText(file);
+            };
+
+            document.getElementById('jsonl-input').addEventListener('change', handleFileSelect);
+            document.getElementById('jsonl-input-hero').addEventListener('change', handleFileSelect);
+            document.getElementById('jsonl-input-drop').addEventListener('change', handleFileSelect);
+
+            // Drag & Drop
+            const dropZone = document.getElementById('drop-zone');
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const parsed = parseJSONLText(evt.target.result);
+                        loadJSONLData(parsed, file.name);
+                    };
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        function exportOBJMesh() {
+            if (!surfaceMesh) {
+                showToast("⚠️ No surface loaded to export.");
+                return;
+            }
+
+            const geometry = surfaceMesh.geometry;
+            const pos = geometry.attributes.position;
+            let objText = `# Loss Landscape 3D Mesh OBJ Export\n# Model: ${datasetRecords[activeRecordIndex].model_id}\n`;
+
+            for (let i = 0; i < pos.count; i++) {
+                objText += `v ${pos.getX(i).toFixed(4)} ${pos.getY(i).toFixed(4)} ${pos.getZ(i).toFixed(4)}\n`;
+            }
+
+            const index = geometry.index;
+            if (index) {
+                for (let i = 0; i < index.count; i += 3) {
+                    objText += `f ${index.getX(i) + 1} ${index.getY(i) + 1} ${index.getZ(i) + 1}\n`;
+                }
+            } else {
+                const gridX = datasetRecords[activeRecordIndex].alphas.length;
+                const gridY = datasetRecords[activeRecordIndex].betas.length;
+                for (let r = 0; r < gridY - 1; r++) {
+                    for (let c = 0; c < gridX - 1; c++) {
+                        const i1 = r * gridX + c + 1;
+                        const i2 = r * gridX + (c + 1) + 1;
+                        const i3 = (r + 1) * gridX + c + 1;
+                        const i4 = (r + 1) * gridX + (c + 1) + 1;
+
+                        objText += `f ${i1} ${i2} ${i3}\n`;
+                        objText += `f ${i2} ${i4} ${i3}\n`;
+                    }
+                }
+            }
+
+            const blob = new Blob([objText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `loss_surface_${datasetRecords[activeRecordIndex].model_id.replace(/\//g, '_')}.obj`;
+            link.click();
+
+            showToast("📦 Exported 3D Mesh (.OBJ) successfully!");
+        }
+
+        function takeCanvasScreenshot() {
+            if (!renderer) return;
+            const dataURL = renderer.domElement.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = `loss_landscape_${datasetRecords[activeRecordIndex].model_id.replace(/\//g, '_')}.png`;
+            link.click();
+            showToast("📸 Screenshot downloaded!");
+        }
+
+        function copyActiveJSONPayload() {
+            const text = document.getElementById('json-raw-preview').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("📋 Copied JSON snippet to clipboard!");
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+
+        // Initialize Application on Window Load
+        window.onload = function() {
+            initThreeJS();
+            setupEventListeners();
+            loadSampleDataset(); // Pre-populate with realistic synthetic loss landscapes
+        };
+    </script>
+</body>
+</html>
