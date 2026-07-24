@@ -58,52 +58,52 @@ FWKV-ROSA consists of three main components: (1) the FWKV recurrent core with fi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        FWKV-ROSA ARCHITECTURE                        │
-│                                                                      │
+│                        FWKV-ROSA ARCHITECTURE                       │
+│                                                                     │
 │  ┌──────────┐    ┌──────────────┐    ┌──────────────────────────┐   │
 │  │  Input   │    │    ROSA      │    │   Factorized Tied Head   │   │
-│  │  Tokens  │───▶│  (Suffix     │───▶│                          │   │
+│  │  Tokens  │───▶│  (Suffix     │───▶│                         │   │
 │  │  [B, T]  │    │  Automaton)  │    │  Embed: [B,T,d_emb]      │   │
-│  └──────────┘    │              │    │    →  Proj: [B,T,d_model] │   │
+│  └──────────┘    │              │    │    → Proj: [B,T,d_model] │   │
 │                  │  Predicts:   │    └──────────┬───────────────┘   │
-│                  │  y[i] = x[j+1]│              │                    │
-│                  │  for longest │              ▼                    │
+│                  │  y[i] = x[j+1]│              │                   │
+│                  │  for longest │               ▼                   │
 │                  │  suffix match│    ┌──────────────────────┐       │
 │                  └──────┬───────┘    │   ROSA Embedding     │       │
 │                         │            │   Embed(pred) → +    │       │
 │                         │            └──────────┬───────────┘       │
-│                         │                       │                    │
-│                         └───────────────────────┤                    │
-│                                                 ▼                    │
+│                         │                       │                   │
+│                         └───────────────────────┤                   │
+│                                                 ▼                   │
 │                              ┌──────────────────────────────────┐   │
-│                              │     FWKV Block × N_Layers (14)    │   │
-│                              │                                   │   │
-│                              │  x ──▶ LayerNorm                   │   │
-│                              │   │                                │   │
-│                              │   ├─▶ k = Linear(x)                │   │
-│                              │   ├─▶ v = Linear(x)                │   │
-│                              │   ├─▶ r = σ(Linear(x))  (recept.) │   │
-│                              │   │                                │   │
-│                              │   ├─▶ a = k ⊙ v                    │   │
-│                              │   ├─▶ parallel_scan_decay(a, W)    │   │
-│                              │   │   ┌─────────────────────┐     │   │
-│                              │   │   │  W = clamp(σ(w),     │     │   │
-│                              │   │   │      min=0.1)        │     │   │
-│                              │   │   │  O(log T) scan       │     │   │
-│                              │   │   └─────────────────────┘     │   │
-│                              │   │                                │   │
-│                              │   ├─▶ out = Linear(r ⊙ wkv)       │   │
-│                              │   ├─▶ x = x + out  (residual)     │   │
-│                              │   │                                │   │
-│                              │   └─▶ FFN: Linear→GELU→Linear     │   │
-│                              │        x = x + FFN(x) (residual)  │   │
+│                              │     FWKV Block × N_Layers (14)   │   │
+│                              │                                  │   │
+│                              │  x ──▶ LayerNorm                │   │
+│                              │   │                              │   │
+│                              │   ├─▶ k = Linear(x)              │   │
+│                              │   ├─▶ v = Linear(x)              │   │
+│                              │   ├─▶ r = σ(Linear(x)) (recept.) │   │
+│                              │   │                              │   │
+│                              │   ├─▶ a = k ⊙ v                 │   │
+│                              │   ├─▶ parallel_scan_decay(a, W) │   │
+│                              │   │   ┌─────────────────────┐    │   │
+│                              │   │   │  W = clamp(σ(w),    │    │   │
+│                              │   │   │      min=0.1)       │    │   │
+│                              │   │   │  O(log T) scan      │    │   │
+│                              │   │   └─────────────────────┘    │   │
+│                              │   │                              │   │
+│                              │   ├─▶ out = Linear(r ⊙ wkv)     │   │
+│                              │   ├─▶ x = x + out  (residual)   │   │
+│                              │   │                              │   │
+│                              │   └─▶ FFN: Linear→GELU→Linear   │   │
+│                              │        x = x + FFN(x) (residual) │   │
 │                              └──────────────────────────────────┘   │
-│                                                 │                    │
-│                                                 ▼                    │
+│                                                 │                   │
+│                                                 ▼                   │
 │                              ┌──────────────────────────────────┐   │
-│                              │        Final LayerNorm            │   │
-│                              │        to_emb_space (proj^T)      │   │
-│                              │        Chunked CE / Logits        │   │
+│                              │        Final LayerNorm           │   │
+│                              │        to_emb_space (proj^T)     │   │
+│                              │        Chunked CE / Logits       │   │
 │                              └──────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -116,35 +116,35 @@ Each FWKV block (see Figure 2) operates on a hidden state $x \in \mathbb{R}^{B \
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│                    FWKV BLOCK (detail)                      │
-│                                                             │
-│   x ──────────────────────────────────────────────┐         │
-│   │                                               │         │
-│   ├──▶ proj_k ──▶ k                               │         │
-│   ├──▶ proj_v ──▶ v                               │         │
-│   ├──▶ proj_r ──▶ σ ──▶ r  (receptance gate)      │         │
-│   │                                               │         │
-│   ├──▶ a = k ⊙ v                                  │         │
-│   │       │                                        │         │
-│   │       ▼                                        │         │
-│   │   parallel_scan_decay(a, W)                    │         │
-│   │       │                                        │         │
-│   │       ▼                                        │         │
-│   │   wkv = [S_0, S_1, ..., S_{T-1}]              │         │
-│   │       │                                        │         │
-│   │       ▼                                        │         │
-│   ├──▶ proj_out(r ⊙ wkv) ──▶ + ──▶ LayerNorm      │         │
-│   │                                 │               │         │
-│   │                                 ▼               │         │
-│   │                           FFN: Linear(d→4d)     │         │
-│   │                                GELU             │         │
-│   │                                Linear(4d→d)    │         │
-│   │                                 │               │         │
-│   └─────────────────────────────────+──▶ LayerNorm  │         │
-│                                                      │         │
-│   State update:                                      │         │
-│   S_t = S_{t-1} ⊙ W + k_t ⊙ v_t                    │         │
-│   W = clamp(σ(w), min=0.1)  (per-channel, learned)  │         │
+│                    FWKV BLOCK (detail)                     │
+│                                                            │
+│   x ──────────────────────────────────────────────┐        │
+│   │                                               │        │
+│   ├──▶ proj_k ──▶ k                              │        │
+│   ├──▶ proj_v ──▶ v                              │        │
+│   ├──▶ proj_r ──▶ σ ──▶ r  (receptance gate)    │        │
+│   │                                               │        │
+│   ├──▶ a = k ⊙ v                                 │        │
+│   │       │                                       │        │
+│   │       ▼                                       │        │
+│   │   parallel_scan_decay(a, W)                   │        │
+│   │       │                                       │        │
+│   │       ▼                                       │        │
+│   │   wkv = [S_0, S_1, ..., S_{T-1}]              │        │
+│   │       │                                       │        │
+│   │       ▼                                       │        │
+│   ├──▶ proj_out(r ⊙ wkv) ──▶ + ──▶ LayerNorm    │        │
+│   │                                 │             │        │
+│   │                                 ▼             │        │
+│   │                           FFN: Linear(d→4d)   │        │
+│   │                                GELU           │        │
+│   │                                Linear(4d→d)   │        │
+│   │                                 │              │       │
+│   └─────────────────────────────────+──▶ LayerNorm │      │
+│                                                     │      │
+│   State update:                                     │      │
+│   S_t = S_{t-1} ⊙ W + k_t ⊙ v_t                   │      │
+│   W = clamp(σ(w), min=0.1)  (per-channel, learned)  │      │
 └────────────────────────────────────────────────────────────┘
 ```
 
