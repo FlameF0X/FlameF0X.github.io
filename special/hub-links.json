@@ -7,10 +7,10 @@
     "isExternal": true
   },
   {
-    "title": "liquid stuff",
-    "type": "project",
-    "description": "A dedicated pafe for my best fine tunes of a language model.",
-    "url": "https://flamef0x.github.io/special/main/liquid-stuff",
+    "title": "papers",
+    "type": "link",
+    "description": "A dedicated pafe for my papers.",
+    "url": "https://flamef0x.github.io/papers/",
     "isExternal": true
   }
 ]
