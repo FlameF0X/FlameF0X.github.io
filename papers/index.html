@@ -309,10 +309,58 @@
             letter-spacing: 0.8px;
         }
 
+        /* ── PAPER LAYOUT: sidebar + body ── */
+        .paper-layout {
+            display: flex;
+            gap: 2.5rem;
+            align-items: flex-start;
+        }
+
+        #toc-sidebar {
+            position: sticky;
+            top: 1.5rem;
+            min-width: 170px;
+            max-width: 200px;
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.5;
+            border-right: 1px solid var(--border);
+            padding-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        #toc-sidebar .toc-label {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        #toc-sidebar a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 3px 0 3px 0;
+            transition: color 0.15s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #toc-sidebar a:hover { color: var(--black); }
+        #toc-sidebar a.active { color: var(--black); font-weight: 700; }
+        #toc-sidebar a.toc-h2 { padding-left: 0.75rem; font-size: 10.5px; }
+        #toc-sidebar a.toc-h3 { padding-left: 1.5rem; font-size: 10px; }
+
         .post-body {
             line-height: 1.8;
             color: var(--text);
             font-size: 14px;
+            min-width: 0;
+            flex: 1;
             max-width: 800px;
         }
 
@@ -470,6 +518,11 @@
             align-items: center;
             font-size: 12px;
             color: var(--text-muted);
+        }
+
+        @media (max-width: 860px) {
+            #toc-sidebar { display: none; }
+            .paper-layout { display: block; }
         }
 
         /* ── RESPONSIVE ── */
@@ -650,7 +703,10 @@
                     <h2 class="post-full-title">${post.title}</h2>
                     <div class="post-full-date">${post.authors ? post.authors + ' — ' : ''}${post.date}</div>
                 </div>
-                <div class="post-body" id="paper-body">Loading paper…</div>
+                <div class="paper-layout">
+                    <nav id="toc-sidebar"><div class="toc-label">sections</div></nav>
+                    <div class="post-body" id="paper-body">Loading paper…</div>
+                </div>
             `;
             document.getElementById('back-btn').onclick = () => renderList();
 
@@ -682,12 +738,62 @@
                         });
                     } catch (e) { /* KaTeX may not find anything to render */ }
 
+                    // Build TOC sidebar from headings
+                    buildTOC();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 })
                 .catch(err => {
                     document.getElementById('paper-body').innerHTML =
                         `<p style="color:var(--accent);">Failed to load paper: ${err.message}.<br>Make sure <code>${PAPERS_DIR}/${file}</code> exists.</p>`;
                 });
+        }
+
+        /* ── TABLE OF CONTENTS ── */
+        function buildTOC() {
+            const body = document.getElementById('paper-body');
+            const toc  = document.getElementById('toc-sidebar');
+            if (!body || !toc) return;
+
+            const headings = body.querySelectorAll('h1, h2, h3');
+            if (headings.length === 0) { toc.style.display = 'none'; return; }
+            toc.style.display = '';
+
+            const links = [];
+            headings.forEach((h, i) => {
+                const id = `section-${i}`;
+                h.id = id;
+                const tag = h.tagName.toLowerCase(); // h1, h2, h3
+                const text = h.textContent.replace(/¶$/, '').trim();
+                if (!text) return;
+
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.textContent = text;
+                a.className = `toc-${tag}`;
+                a.dataset.target = id;
+                a.addEventListener('click', e => {
+                    e.preventDefault();
+                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                    // Update active state immediately
+                    links.forEach(l => l.classList.remove('active'));
+                    a.classList.add('active');
+                });
+                toc.appendChild(a);
+                links.push(a);
+            });
+
+            // Scroll-spy: highlight the current section
+            const observer = new IntersectionObserver(entries => {
+                let activeId = null;
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) activeId = entry.target.id;
+                });
+                if (activeId) {
+                    links.forEach(l => l.classList.toggle('active', l.dataset.target === activeId));
+                }
+            }, { rootMargin: '-80px 0px -60% 0px' });
+
+            headings.forEach(h => observer.observe(h));
         }
 
         // Fetch papers manifest with cache-busting
