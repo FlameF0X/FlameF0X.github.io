@@ -1,6 +1,4 @@
-# FWKV: Simplicity Is All You Need for Efficient Language Modeling
 
-**FlameF0X (Daniel Fox)**
 
 > *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X)*  
 > *Models: [FWKV-29M](https://huggingface.co/FlameF0X/FWKV-29M) · [FWKV-50M](https://huggingface.co/FlameF0X/FWKV-50M) · [FWKV-TinyStories](https://huggingface.co/FlameF0X/FWKV-TinyStories) · [FWKV-ROSA](https://huggingface.co/FlameF0X/FWKV-ROSA)*  
