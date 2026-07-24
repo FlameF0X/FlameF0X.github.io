@@ -1,5 +1,3 @@
-
-
 > *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X)*  
 > *Models: [FWKV-29M](https://huggingface.co/FlameF0X/FWKV-29M) · [FWKV-50M](https://huggingface.co/FlameF0X/FWKV-50M) · [FWKV-TinyStories](https://huggingface.co/FlameF0X/FWKV-TinyStories) · [FWKV-ROSA](https://huggingface.co/FlameF0X/FWKV-ROSA)*  
 > *Project: [flamef0x.github.io](https://flamef0x.github.io/blog/)*  
@@ -56,52 +54,52 @@ FWKV-ROSA consists of three main components: (1) the FWKV recurrent core with fi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        FWKV-ROSA ARCHITECTURE                       │
-│                                                                     │
+│                        FWKV-ROSA ARCHITECTURE                        │
+│                                                                      │
 │  ┌──────────┐    ┌──────────────┐    ┌──────────────────────────┐   │
 │  │  Input   │    │    ROSA      │    │   Factorized Tied Head   │   │
-│  │  Tokens  │───▶│  (Suffix     │───▶│                         │   │
+│  │  Tokens  │───▶│  (Suffix     │───▶│                          │   │
 │  │  [B, T]  │    │  Automaton)  │    │  Embed: [B,T,d_emb]      │   │
-│  └──────────┘    │              │    │    → Proj: [B,T,d_model] │   │
+│  └──────────┘    │              │    │    →  Proj: [B,T,d_model] │   │
 │                  │  Predicts:   │    └──────────┬───────────────┘   │
-│                  │  y[i] = x[j+1]│              │                   │
-│                  │  for longest │               ▼                   │
+│                  │  y[i] = x[j+1]│              │                    │
+│                  │  for longest │              ▼                    │
 │                  │  suffix match│    ┌──────────────────────┐       │
 │                  └──────┬───────┘    │   ROSA Embedding     │       │
 │                         │            │   Embed(pred) → +    │       │
 │                         │            └──────────┬───────────┘       │
-│                         │                       │                   │
-│                         └───────────────────────┤                   │
-│                                                 ▼                   │
+│                         │                       │                    │
+│                         └───────────────────────┤                    │
+│                                                 ▼                    │
 │                              ┌──────────────────────────────────┐   │
-│                              │     FWKV Block × N_Layers (14)   │   │
-│                              │                                  │   │
-│                              │  x ──▶ LayerNorm                │   │
-│                              │   │                              │   │
-│                              │   ├─▶ k = Linear(x)              │   │
-│                              │   ├─▶ v = Linear(x)              │   │
-│                              │   ├─▶ r = σ(Linear(x)) (recept.) │   │
-│                              │   │                              │   │
-│                              │   ├─▶ a = k ⊙ v                 │   │
-│                              │   ├─▶ parallel_scan_decay(a, W) │   │
-│                              │   │   ┌─────────────────────┐    │   │
-│                              │   │   │  W = clamp(σ(w),    │    │   │
-│                              │   │   │      min=0.1)       │    │   │
-│                              │   │   │  O(log T) scan      │    │   │
-│                              │   │   └─────────────────────┘    │   │
-│                              │   │                              │   │
-│                              │   ├─▶ out = Linear(r ⊙ wkv)     │   │
-│                              │   ├─▶ x = x + out  (residual)   │   │
-│                              │   │                              │   │
-│                              │   └─▶ FFN: Linear→GELU→Linear   │   │
-│                              │        x = x + FFN(x) (residual) │   │
+│                              │     FWKV Block × N_Layers (14)    │   │
+│                              │                                   │   │
+│                              │  x ──▶ LayerNorm                   │   │
+│                              │   │                                │   │
+│                              │   ├─▶ k = Linear(x)                │   │
+│                              │   ├─▶ v = Linear(x)                │   │
+│                              │   ├─▶ r = σ(Linear(x))  (recept.) │   │
+│                              │   │                                │   │
+│                              │   ├─▶ a = k ⊙ v                    │   │
+│                              │   ├─▶ parallel_scan_decay(a, W)    │   │
+│                              │   │   ┌─────────────────────┐     │   │
+│                              │   │   │  W = clamp(σ(w),     │     │   │
+│                              │   │   │      min=0.1)        │     │   │
+│                              │   │   │  O(log T) scan       │     │   │
+│                              │   │   └─────────────────────┘     │   │
+│                              │   │                                │   │
+│                              │   ├─▶ out = Linear(r ⊙ wkv)       │   │
+│                              │   ├─▶ x = x + out  (residual)     │   │
+│                              │   │                                │   │
+│                              │   └─▶ FFN: Linear→GELU→Linear     │   │
+│                              │        x = x + FFN(x) (residual)  │   │
 │                              └──────────────────────────────────┘   │
-│                                                 │                   │
-│                                                 ▼                   │
+│                                                 │                    │
+│                                                 ▼                    │
 │                              ┌──────────────────────────────────┐   │
-│                              │        Final LayerNorm           │   │
-│                              │        to_emb_space (proj^T)     │   │
-│                              │        Chunked CE / Logits       │   │
+│                              │        Final LayerNorm            │   │
+│                              │        to_emb_space (proj^T)      │   │
+│                              │        Chunked CE / Logits        │   │
 │                              └──────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -114,39 +112,86 @@ Each FWKV block (see Figure 2) operates on a hidden state $x \in \mathbb{R}^{B \
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│                    FWKV BLOCK (detail)                     │
-│                                                            │
-│   x ──────────────────────────────────────────────┐        │
-│   │                                               │        │
-│   ├──▶ proj_k ──▶ k                              │        │
-│   ├──▶ proj_v ──▶ v                              │        │
-│   ├──▶ proj_r ──▶ σ ──▶ r  (receptance gate)    │        │
-│   │                                               │        │
-│   ├──▶ a = k ⊙ v                                 │        │
-│   │       │                                       │        │
-│   │       ▼                                       │        │
-│   │   parallel_scan_decay(a, W)                   │        │
-│   │       │                                       │        │
-│   │       ▼                                       │        │
-│   │   wkv = [S_0, S_1, ..., S_{T-1}]              │        │
-│   │       │                                       │        │
-│   │       ▼                                       │        │
-│   ├──▶ proj_out(r ⊙ wkv) ──▶ + ──▶ LayerNorm    │        │
-│   │                                 │             │        │
-│   │                                 ▼             │        │
-│   │                           FFN: Linear(d→4d)   │        │
-│   │                                GELU           │        │
-│   │                                Linear(4d→d)   │        │
-│   │                                 │              │       │
-│   └─────────────────────────────────+──▶ LayerNorm │      │
-│                                                     │      │
-│   State update:                                     │      │
-│   S_t = S_{t-1} ⊙ W + k_t ⊙ v_t                   │      │
-│   W = clamp(σ(w), min=0.1)  (per-channel, learned)  │      │
+│                    FWKV BLOCK (detail)                      │
+│                                                             │
+│   x ──────────────────────────────────────────────┐         │
+│   │                                               │         │
+│   ├──▶ proj_k ──▶ k                               │         │
+│   ├──▶ proj_v ──▶ v                               │         │
+│   ├──▶ proj_r ──▶ σ ──▶ r  (receptance gate)      │         │
+│   │                                               │         │
+│   ├──▶ a = k ⊙ v                                  │         │
+│   │       │                                        │         │
+│   │       ▼                                        │         │
+│   │   parallel_scan_decay(a, W)                    │         │
+│   │       │                                        │         │
+│   │       ▼                                        │         │
+│   │   wkv = [S_0, S_1, ..., S_{T-1}]              │         │
+│   │       │                                        │         │
+│   │       ▼                                        │         │
+│   ├──▶ proj_out(r ⊙ wkv) ──▶ + ──▶ LayerNorm      │         │
+│   │                                 │               │         │
+│   │                                 ▼               │         │
+│   │                           FFN: Linear(d→4d)     │         │
+│   │                                GELU             │         │
+│   │                                Linear(4d→d)    │         │
+│   │                                 │               │         │
+│   └─────────────────────────────────+──▶ LayerNorm  │         │
+│                                                      │         │
+│   State update:                                      │         │
+│   S_t = S_{t-1} ⊙ W + k_t ⊙ v_t                    │         │
+│   W = clamp(σ(w), min=0.1)  (per-channel, learned)  │         │
 └────────────────────────────────────────────────────────────┘
 ```
 
 **Figure 2:** Detailed view of a single FWKV block. The three projections ($k$, $v$, $r$) are linear without bias. The receptance gate $r$ controls information flow via element-wise multiplication. $W$ is constant across time for each channel.
+
+Listing 1 shows the PyTorch implementation of a single FWKV block. The three linear projections produce the key, value, and receptance vectors. The decay weight $w$ is a learnable parameter passed through a clamped sigmoid to ensure $W \in [0.1, 1.0)$. The `parallel_scan_decay` function (Listing 2) efficiently computes the recurrence.
+
+```python
+class FWKVBlock(nn.Module):
+    def __init__(self, d: int, ffn_mult: int = 4, floor: float = 0.1):
+        super().__init__()
+        self.floor    = floor
+        self.proj_k   = nn.Linear(d, d, bias=False)
+        self.proj_v   = nn.Linear(d, d, bias=False)
+        self.proj_r   = nn.Linear(d, d, bias=False)
+        self.proj_out = nn.Linear(d, d, bias=False)
+        self.w        = nn.Parameter(torch.ones(d) * 2.0)
+        self.ffn      = nn.Sequential(
+            nn.Linear(d, ffn_mult * d, bias=False),
+            nn.GELU(),
+            nn.Linear(ffn_mult * d, d, bias=False),
+        )
+        self.norm_wkv = nn.LayerNorm(d)
+        self.norm_ffn = nn.LayerNorm(d)
+
+    @property
+    def W(self) -> torch.Tensor:
+        # Clamped sigmoid ensures decay is always in [floor, 1.0)
+        return torch.clamp(torch.sigmoid(self.w), min=self.floor)
+
+    def forward(self, x: torch.Tensor,
+                state: torch.Tensor | None = None):
+        B, T, d = x.shape
+        W = self.W
+        k = self.proj_k(x)
+        v = self.proj_v(x)
+        r = torch.sigmoid(self.proj_r(x))
+
+        a = k * v  # recurrence input term
+        if state is not None:
+            a = a.clone()
+            # Fold in carried-in state as t=-1 contribution
+            a[:, 0] = a[:, 0] + W * state
+
+        wkv_out = parallel_scan_decay(a, W)
+        new_state = wkv_out[:, -1].detach()
+
+        x = self.norm_wkv(x + self.proj_out(r * wkv_out))
+        x = self.norm_ffn(x + self.ffn(x))
+        return x, new_state
+```
 
 #### 3.1.1 Fixed Per-Channel Decay
 
@@ -174,6 +219,28 @@ for d in 1, 2, 4, 8, ... up to T:
 Each step is a single fused multiply-add over all batch elements, time steps, and channels simultaneously. The implementation is pure PyTorch—no custom CUDA kernels required. We verified the parallel scan against a naive sequential loop to within $< 10^{-14}$ maximum absolute error.
 
 > **Key insight:** The constant-decay property is what makes the vectorized scan possible. If $W$ were data-dependent (as in Mamba or gated RNNs), the scan would require associative scan operations over pairs $(a, b)$ with a more complex combine rule, typically requiring a custom CUDA kernel for efficiency.
+
+```python
+def parallel_scan_decay(a: torch.Tensor, W: torch.Tensor) -> torch.Tensor:
+    """
+    Exact O(log T) vectorized Hillis-Steele prefix scan for the recurrence:
+        state_t = W * state_{t-1} + a_t
+    where W is constant per channel (not data-dependent).
+
+    a: [B, T, d_model]
+    W: [d_model]  --  per-channel decay, clamped sigmoid
+    Returns: [B, T, d_model]
+    """
+    W = W.to(dtype=a.dtype)      # avoid silent fp32 upcast
+    val = a
+    T = a.shape[1]
+    d = 1
+    while d < T:
+        shifted = F.pad(val[:, :-d, :], (0, 0, d, 0))
+        val = val + (W ** d) * shifted
+        d *= 2
+    return val
+```
 
 ### 3.2 ROSA: Rapid Online Suffix Automaton
 
@@ -207,7 +274,75 @@ The construction proceeds online, processing one token at a time:
 
 4. **Update last_end**: Walk from `last` (the state for the full prefix up to $i$) up the suffix-link chain, updating `last_end` to $i$ for any state whose recorded end index is older.
 
-The algorithm uses at most $2n-1$ states and $3n-4$ transitions for a sequence of length $n$, and processes each token in amortized $O(1)$ time. Dictionary-based transitions make it vocabulary-size-agnostic.
+The algorithm uses at most $2n-1$ states and $3n-4$ transitions for a sequence of length $n$, and processes each token in amortized $O(1)$ time. Dictionary-based transitions make it vocabulary-size-agnostic. The complete implementation follows:
+
+```python
+def rosa(x: list[int]) -> list[int]:
+    """
+    Causal suffix-automaton predictor.
+    y[i] = x[j+1] for the longest prior matching suffix ending at i,
+    or -1 if no prior occurrence exists.
+
+    O(n) amortized, at most 2n-1 states, 3n-4 transitions.
+    """
+    n = len(x)
+    if n == 0:
+        return []
+    y = [-1] * n
+    s = 2 * n + 2
+    trans = [None] * s         # transition dict per state
+    link = [-1] * s            # suffix link
+    length = [0] * s           # longest substring length per state
+    last_end = [-1] * s        # most recent occurrence end index
+    trans[0] = {}
+    last = 0
+    size = 1
+
+    for i, t in enumerate(x):
+        cur = size; size += 1
+        trans[cur] = {}
+        length[cur] = length[last] + 1
+        p = last
+        while p != -1 and t not in trans[p]:
+            trans[p][t] = cur
+            p = link[p]
+        if p == -1:
+            link[cur] = 0
+        else:
+            q = trans[p][t]
+            if length[p] + 1 == length[q]:
+                link[cur] = q
+            else:
+                clone = size; size += 1
+                trans[clone] = trans[q].copy()
+                length[clone] = length[p] + 1
+                link[clone] = link[q]
+                last_end[clone] = last_end[q]
+                while p != -1 and trans[p][t] == q:
+                    trans[p][t] = clone
+                    p = link[p]
+                link[q] = clone
+                link[cur] = clone
+        last = cur
+
+        # Walk suffix links to find longest repeated suffix
+        v = cur
+        pred = -1
+        while v != -1:
+            if length[v] > 0 and last_end[v] >= 0:
+                pred = x[last_end[v] + 1]
+                break
+            v = link[v]
+        y[i] = pred
+
+        # Update occurrence indices
+        v = last
+        while v != -1 and last_end[v] < i:
+            last_end[v] = i
+            v = link[v]
+
+    return y
+```
 
 #### 3.2.2 Integration with the Neural Model
 
@@ -236,6 +371,40 @@ FWKV uses a factorized input/output representation that reduces the parameter co
 
 The output logits are computed as the dot product of the final hidden state (projected back to $d_\text{emb}$ via the transposed projection) with the token weight matrix. During training, we use **chunked cross-entropy**: the logit matrix is never fully materialized; instead, the loss is accumulated in chunks of `ce_chunk` (default 512) tokens, with proper normalization over non-ignored (supervised) positions.
 
+```python
+class FactorizedTiedHead(nn.Module):
+    """
+    Factorized embedding with tied input/output weights.
+    Reduces params from V*d_model to V*d_emb + d_emb*d_model.
+    """
+    def __init__(self, vocab_size: int,
+                 d_model: int, d_emb: int):
+        super().__init__()
+        self.d_model = d_model
+        self.d_emb   = d_emb
+        self.weight  = nn.Parameter(
+            torch.empty(vocab_size, d_emb))
+        self.proj    = nn.Linear(d_emb, d_model, bias=False)
+        self._init_weights()
+
+    def _init_weights(self):
+        nn.init.normal_(self.weight, std=0.02)
+        nn.init.normal_(self.proj.weight, std=0.02)
+
+    def embed(self, input_ids: torch.Tensor) -> torch.Tensor:
+        # [B, T] -> [B, T, d_emb] -> [B, T, d_model]
+        return self.proj(
+            F.embedding(input_ids, self.weight))
+
+    def to_emb_space(self, x: torch.Tensor) -> torch.Tensor:
+        # Project back to d_emb via transposed proj
+        return F.linear(x, self.proj.weight.t())
+
+    def logits(self, x_emb: torch.Tensor) -> torch.Tensor:
+        # Full logits: [B, T, vocab]
+        return F.linear(x_emb, self.weight)
+```
+
 ### 3.4 Feed-Forward Network
 
 Each FWKV block includes a standard feed-forward network with a single hidden layer:
@@ -243,6 +412,78 @@ Each FWKV block includes a standard feed-forward network with a single hidden la
 $$\text{FFN}(x) = \text{Linear}_{d \to 4d}(x) \to \text{GELU} \to \text{Linear}_{4d \to d}(x)$$
 
 The expansion factor of 4× follows the convention established by Transformer architectures. Each sub-layer (WKV mixing and FFN) is wrapped with a residual connection and LayerNorm, following a pre-norm design.
+
+### 3.5 Full Model Forward Pass
+
+Listing 5 shows the complete `FWKVLanguageModel.forward()` method, demonstrating how the ROSA copy signal, factorized embeddings, and stacked FWKV blocks interact. The model is implemented as a HuggingFace `PreTrainedModel` and is fully compatible with the `transformers` library.
+
+```python
+class FWKVLanguageModel(PreTrainedModel):
+    config_class = FWKVConfig
+
+    def __init__(self, config: FWKVConfig):
+        super().__init__(config)
+        self.shared = FactorizedTiedHead(
+            config.vocab_size, config.d_model, config.d_emb)
+        # +1 for the "no prediction" (index 0) slot
+        self.rosa_emb = nn.Embedding(
+            config.vocab_size + 1, config.d_emb, padding_idx=0)
+        nn.init.normal_(self.rosa_emb.weight, std=0.02)
+        with torch.no_grad():
+            self.rosa_emb.weight[0].zero_()
+
+        self.blocks = nn.ModuleList([
+            FWKVBlock(
+                config.d_model, config.ffn_mult, config.wkv_floor)
+            for _ in range(config.n_layers)
+        ])
+        self.norm = nn.LayerNorm(config.d_model)
+
+    def forward(self, input_ids, rosa_ids=None,
+                past_key_values=None, labels=None,
+                use_cache=True, **kwargs):
+        # --- ROSA: compute copy signal if not provided ---
+        if rosa_ids is None:
+            rows = [rosa(row.tolist())
+                    for row in input_ids.detach().cpu()]
+            rosa_ids = torch.tensor(
+                rows, device=input_ids.device, dtype=torch.long)
+
+        # --- Embed + inject ROSA signal ---
+        x = self.shared.embed(input_ids)            # [B,T,d_model]
+        rosa_idx = (rosa_ids + 1).clamp(min=0)      # -1 -> 0
+        x = x + self.shared.proj(
+            self.rosa_emb(rosa_idx))                # add copy signal
+
+        # --- FWKV recurrent blocks ---
+        states_in  = past_key_values or [None] * len(self.blocks)
+        states_out = []
+        for block, state in zip(self.blocks, states_in):
+            if self.training:
+                x, new_state = torch.utils.checkpoint.checkpoint(
+                    block, x, state, use_reentrant=False)
+            else:
+                x, new_state = block(x, state)
+            states_out.append(new_state)
+
+        # --- Project to embedding space and compute loss ---
+        x     = self.norm(x)
+        x_emb = self.shared.to_emb_space(x)
+
+        loss   = None
+        logits = None
+
+        if labels is not None:
+            loss = chunked_cross_entropy(
+                x_emb, self.shared.weight, labels,
+                self.config.ce_chunk, ignore_index=-100)
+        else:
+            logits = self.shared.logits(x_emb)
+
+        return CausalLMOutputWithPast(
+            loss=loss, logits=logits,
+            past_key_values=states_out if use_cache else None)
+```
 
 ---
 
@@ -294,6 +535,53 @@ Each conversation is formatted with a simple two-role template:
 
 The loss is **masked** such that only tokens belonging to assistant turns contribute to the cross-entropy objective. User tokens and padding tokens are assigned `ignore_index = -100`. This ensures the model learns to generate responses rather than to predict user prompts.
 
+Listing 6 shows the dataset processing pipeline. Each multi-turn conversation is tokenized, formatted with role delimiters (`<|user|>`, `<|assistant|>`), and the supervision mask tracks which tokens belong to the assistant. Examples are padded and truncated to the model's sequence length.
+
+```python
+def build_chat_example(turns: list[dict],
+                       tokenizer) -> tuple[list[int], list[bool]]:
+    user_id = tokenizer.convert_tokens_to_ids("<|user|>")
+    asst_id = tokenizer.convert_tokens_to_ids("<|assistant|>")
+    eos_id  = tokenizer.eos_token_id
+
+    ids: list[int] = []
+    supervise: list[bool] = []
+    for turn in turns:
+        role    = turn.get("role", "")
+        content = (turn.get("content") or "").strip()
+        if not content:
+            continue
+        content_ids = tokenizer.encode(" " + content)
+        if role == "user":
+            seg = [user_id] + content_ids
+            ids += seg
+            supervise += [False] * len(seg)
+        elif role == "assistant":
+            seg = [asst_id] + content_ids + [eos_id]
+            ids += seg
+            supervise += [True] * len(seg)
+    return ids, supervise
+
+
+def finalize_example(ids, supervise, seq_len, pad_id):
+    ids       = ids[: seq_len + 1]
+    supervise = supervise[: seq_len + 1]
+    pad_n = seq_len + 1 - len(ids)
+    if pad_n > 0:
+        ids       = ids + [pad_id] * pad_n
+        supervise = supervise + [False] * pad_n
+
+    input_ids = ids[:-1]
+    label_ids = ids[1:]
+    sup_mask  = supervise[1:]
+    if not any(sup_mask):
+        return None  # skip examples with no assistant tokens
+    labels = [l if s else -100
+              for l, s in zip(label_ids, sup_mask)]
+    r_ids  = rosa(input_ids)
+    return input_ids, labels, r_ids
+```
+
 ### 5.3 Hyperparameters
 
 | Parameter | Value |
@@ -324,6 +612,67 @@ Training a 56M-parameter model with 1,024-token sequences on consumer GPUs (test
 4. **Expandable segments**: `PYTORCH_ALLOC_CONF=expandable_segments:True` reduces CUDA memory fragmentation.
 
 5. **Fused AdamW**: When available on CUDA, the fused optimizer implementation reduces kernel launch overhead and memory usage.
+
+### 5.5 Training Loop
+
+The training loop (Listing 7) uses gradient accumulation to simulate a batch size of 32 on T4 hardware (real batch 8 × 4 accumulation steps), BFloat16 mixed precision, cosine LR scheduling, and gradient clipping. Validation is performed at the end of each epoch with a separate data loader.
+
+```python
+def train():
+    cfg = FWKVConfig()
+    model = FWKVLanguageModel(cfg).to(cfg.device)
+    optimizer = torch.optim.AdamW(
+        model.parameters(), lr=cfg.lr, weight_decay=0.1,
+        fused=(cfg.device == "cuda"))
+
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=len(train_loader) // cfg.accum_steps * cfg.epochs)
+
+    amp_ctx = torch.autocast(
+        device_type=cfg.device, dtype=torch.bfloat16,
+        enabled=(cfg.device == "cuda"))
+
+    for epoch in range(1, cfg.epochs + 1):
+        model.train()
+        optimizer.zero_grad(set_to_none=True)
+        running_loss = 0.0
+        accum_counter = 0
+
+        for step, (x, y, r) in enumerate(train_loader):
+            x, y, r = x.to(cfg.device), y.to(cfg.device), r.to(cfg.device)
+            with amp_ctx:
+                out  = model(input_ids=x, rosa_ids=r, labels=y)
+                loss = out.loss / cfg.accum_steps
+
+            loss.backward()
+            running_loss += out.loss.item()
+            accum_counter += 1
+
+            if accum_counter == cfg.accum_steps:
+                nn.utils.clip_grad_norm_(
+                    model.parameters(), cfg.grad_clip)
+                optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad(set_to_none=True)
+                accum_counter = 0
+
+        # Validation
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for x, y, r in val_loader:
+                x, y, r = x.to(cfg.device), y.to(cfg.device), r.to(cfg.device)
+                with amp_ctx:
+                    val_loss += model(
+                        input_ids=x, rosa_ids=r, labels=y).loss.item()
+
+        val_loss /= max(1, len(val_loader))
+        print(f"Val loss {val_loss:.4f} | ppl {math.exp(val_loss):.2f}")
+
+        if val_loss < best_val_loss:
+            save_hf(model, tokenizer, cfg,
+                    "fwkv_rosa_chat_best", val_loss=val_loss)
+```
 
 ---
 
@@ -377,6 +726,53 @@ The key trends:
 - **FWKV's simplicity is its strength**: the architecture requires no custom kernels; the entire model runs in pure PyTorch. This means FWKV benefits automatically from improvements in PyTorch's compiler stack (`torch.compile`, `torch.export`), while RWKV's custom kernels require manual porting.
 
 ### 6.4 Qualitative Sample
+
+The inference procedure (Listing 8) implements autoregressive generation with top-k sampling and a carried state (`past_key_values`), avoiding re-computation of the full prefix at each step. The constant-size per-layer state replaces the linearly growing KV cache of Transformer models.
+
+```python
+def generate_reply(model, tokenizer, ids: list[int],
+                   max_new_tokens: int = 150,
+                   temperature: float = 0.8,
+                   top_k: int = 50) -> list[int]:
+    model.eval()
+    device = next(model.parameters()).device
+    eos_id = tokenizer.eos_token_id
+
+    # Initial forward pass with full prompt
+    prompt = torch.tensor([ids], device=device)
+    r = torch.tensor([rosa(ids)], device=device)
+    out = model(input_ids=prompt, rosa_ids=r, use_cache=True)
+    states = out.past_key_values
+    next_logits = out.logits[0, -1]
+
+    generated: list[int] = []
+    for _ in range(max_new_tokens):
+        logits = next_logits / max(temperature, 1e-5)
+        if top_k is not None and top_k < logits.shape[-1]:
+            kth = torch.topk(logits, top_k).values[-1]
+            logits = torch.where(
+                logits < kth,
+                torch.full_like(logits, float("-inf")),
+                logits)
+        probs = torch.softmax(logits, dim=-1)
+        next_id = torch.multinomial(probs, 1).item()
+        generated.append(next_id)
+        if next_id == eos_id:
+            break
+
+        # Step-by-step decoding with cached state
+        ids = ids + [next_id]
+        next_rosa = rosa(ids)[-1]
+        step_input = torch.tensor([[next_id]], device=device)
+        step_rosa  = torch.tensor([[next_rosa]], device=device)
+        out = model(
+            input_ids=step_input, rosa_ids=step_rosa,
+            past_key_values=states, use_cache=True)
+        states = out.past_key_values
+        next_logits = out.logits[0, -1]
+
+    return generated
+```
 
 A sample interaction demonstrating the model's conversational capability (generated at 45.1 tok/s):
 
