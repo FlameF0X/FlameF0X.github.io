@@ -112,7 +112,7 @@
     <header class="w-full brutalist-border bg-cream border-t-0 border-x-0 sticky top-0 z-50">
         <div class="flex flex-wrap items-stretch justify-between text-xs md:text-sm">
             <!-- Brand / Logo -->
-            <a href="#" class="px-4 py-3 font-bold border-r border-[#1a1a1a] flex items-center hover:bg-cream-dark transition-colors">
+            <a href="https://flamef0x.github.io/" class="px-4 py-3 font-bold border-r border-[#1a1a1a] flex items-center hover:bg-cream-dark transition-colors">
                 flamef0x.github.io
             </a>
 
@@ -195,12 +195,20 @@
 
                     <!-- Bottom Bar Info -->
                     <div class="bg-[#12141d] text-white/70 border-t border-white/10 px-4 py-2 text-xs font-mono flex flex-wrap justify-between items-center z-10">
-                        <div class="truncate max-w-xl">
+                        <div class="truncate max-w-md">
                             PROMPT: <span id="prompt-preview" class="text-white italic">"..."</span>
                         </div>
-                        <button onclick="takeCanvasScreenshot()" class="hover:text-white underline text-xs">
-                            📷 Take Snapshot
-                        </button>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="setTopDownCamera()" class="hover:text-white underline text-xs">
+                                ⬇️ Top-Down View
+                            </button>
+                            <button onclick="takeTopDownScreenshot()" class="hover:text-white underline text-xs">
+                                🗺️ Top-Down Snapshot
+                            </button>
+                            <button onclick="takeCanvasScreenshot()" class="hover:text-white underline text-xs">
+                                📷 Snapshot
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -259,6 +267,14 @@
                             </div>
                         </div>
 
+                        <!-- Show Grid Floor Toggle -->
+                        <div class="space-y-1 mb-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="show-grid-check" onchange="toggleGridFloor(this.checked)" checked class="accent-terracotta cursor-pointer">
+                                <label for="show-grid-check" class="font-bold text-charcoal cursor-pointer">Show Floor Grid</label>
+                            </div>
+                        </div>
+
                         <!-- Surface Stats Card -->
                         <div class="border border-charcoal p-3 bg-cream space-y-2 mt-4">
                             <div class="font-bold uppercase tracking-wider text-[10px] text-charcoal-muted border-b border-charcoal/20 pb-1">
@@ -284,9 +300,12 @@
                     </div>
 
                     <!-- Quick Viewport Reset -->
-                    <div class="pt-2">
-                        <button onclick="resetCameraView()" class="w-full brutalist-btn py-2 text-xs">
-                            Reset Camera View
+                    <div class="pt-2 grid grid-cols-2 gap-2">
+                        <button onclick="resetCameraView()" class="w-full brutalist-btn py-2 text-[11px]">
+                            Reset View
+                        </button>
+                        <button onclick="setTopDownCamera()" class="w-full brutalist-btn py-2 text-[11px]">
+                            Top-Down
                         </button>
                     </div>
                 </div>
@@ -322,9 +341,10 @@
         let surfaceMesh = null;
         let wireframeMesh = null;
         let pointsMesh = null;
+        let gridHelper = null;
         let currentElevationScale = 1.5;
 
-        // Custom, Self-Contained Camera Orbit Controller (Eliminates ES6 class/constructor version mismatches)
+        // Custom, Self-Contained Camera Orbit Controller
         class SimpleOrbitControls {
             constructor(camera, domElement) {
                 this.camera = camera;
@@ -346,7 +366,7 @@
 
             updateCameraPosition() {
                 // Clamp elevation to avoid gimbal flipping
-                this.phi = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, this.phi));
+                this.phi = Math.max(0.001, Math.min(Math.PI / 2 - 0.05, this.phi));
                 this.radius = Math.max(6, Math.min(80, this.radius));
 
                 const x = this.target.x + this.radius * Math.sin(this.phi) * Math.cos(this.theta);
@@ -442,6 +462,15 @@
                 this.theta = Math.PI / 4;
                 this.phi = Math.PI / 3;
                 this.target.set(0, 1.5, 0);
+                this.updateCameraPosition();
+            }
+
+            setTopDownView() {
+                this.autoRotate = false;
+                this.radius = 26.0;
+                this.theta = -Math.PI / 2;
+                this.phi = 0.001;
+                this.target.set(0, 0, 0);
                 this.updateCameraPosition();
             }
         }
@@ -575,7 +604,7 @@
             scene.add(dirLight2);
 
             // Grid Floor Helper
-            const gridHelper = new THREE.GridHelper(24, 24, 0x333748, 0x1f2333);
+            gridHelper = new THREE.GridHelper(24, 24, 0x333748, 0x1f2333);
             gridHelper.position.y = -0.1;
             scene.add(gridHelper);
 
@@ -771,8 +800,34 @@
             if (customControls) customControls.autoRotate = enabled;
         }
 
+        function toggleGridFloor(visible) {
+            if (gridHelper) gridHelper.visible = visible;
+        }
+
         function resetCameraView() {
             if (customControls) customControls.reset();
+        }
+
+        function setTopDownCamera() {
+            if (customControls) {
+                customControls.setTopDownView();
+                const autoRotateCheck = document.getElementById('auto-rotate-check');
+                if (autoRotateCheck) autoRotateCheck.checked = false;
+                showToast("Oriented camera to top-down view");
+            }
+        }
+
+        function takeTopDownScreenshot() {
+            if (!renderer || !customControls) return;
+            setTopDownCamera();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+            
+            const dataURL = renderer.domElement.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = `topdown_loss_landscape_${datasetRecords[activeRecordIndex].model_id.replace(/\//g, '_')}.png`;
+            link.click();
+            showToast("🗺️ Top-down snapshot downloaded!");
         }
 
         function parseJSONLText(text) {
