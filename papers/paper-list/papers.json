@@ -1,0 +1,10 @@
+[
+  {
+    "id": "2507.00001",
+    "title": "FWKV: Simplicity Is All You Need for Efficient Language Modeling",
+    "authors": "Daniel Fox (FlameF0X)",
+    "date": "2026-07-24",
+    "summary": "The FWKV family of recurrent language models (29M–56M params) achieves up to 48.1 tok/s on CPU via a fixed-decay accumulator computed with an O(log T) vectorized parallel scan, eliminating both quadratic attention and the KV cache. The architecture pairs this recurrent core with a parameter-free suffix-automaton copy mechanism (ROSA) for exact long-range copying, and requires no custom CUDA kernels, no gating, and no position embeddings. Models are available under Apache 2.0.",
+    "file": "FWKV_ROSA_Technical_Paper.md"
+  }
+]
