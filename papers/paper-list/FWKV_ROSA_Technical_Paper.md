@@ -1,6 +1,6 @@
-> *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X)*  
-> *Models: [FWKV-29M](https://huggingface.co/FlameF0X/FWKV-29M) · [FWKV-50M](https://huggingface.co/FlameF0X/FWKV-50M) · [FWKV-TinyStories](https://huggingface.co/FlameF0X/FWKV-TinyStories) · [FWKV-ROSA](https://huggingface.co/FlameF0X/FWKV-ROSA)*  
-> *Project: [flamef0x.github.io](https://flamef0x.github.io/blog/)*  
+> *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X), [FWKV](https://huggingface.co/FWKV)*  
+> *Models: [FWKV-29M](https://huggingface.co/FWKV/FWKV-29M) · [FWKV-50M](https://huggingface.co/FWKV/FWKV-50M) · [FWKV-TinyStories](https://huggingface.co/FWKV/FWKV-TinyStories) · [FWKV-ROSA](https://huggingface.co/FWKV/FWKV-ROSA)*  
+> *Project: [FWKV](https://huggingface.co/FWKV)*  
 > *Date: July 2026*
 
 ---
@@ -1090,10 +1090,10 @@ All models are available on the Hugging Face Hub under Apache 2.0 license:
 
 | Model | Parameters | Training Data | Link |
 |-------|-----------|---------------|------|
-| FWKV-29M | 28.9M | Salesforce/wikitext | [HF](https://huggingface.co/FlameF0X/FWKV-29M) |
-| FWKV-50M | 50.6M | Salesforce/wikitext | [HF](https://huggingface.co/FlameF0X/FWKV-50M) |
-| FWKV-TinyStories | — | roneneldan/TinyStories | [HF](https://huggingface.co/FlameF0X/FWKV-TinyStories) |
-| **FWKV-ROSA** | **56.4M** | **HuggingFaceH4/ultrachat_200k** | **[HF](https://huggingface.co/FlameF0X/FWKV-ROSA)** |
+| FWKV-29M | 28.9M | Salesforce/wikitext | [HF](https://huggingface.co/FWKV/FWKV-29M) |
+| FWKV-50M | 50.6M | Salesforce/wikitext | [HF](https://huggingface.co/FWKV/FWKV-50M) |
+| FWKV-TinyStories | — | roneneldan/TinyStories | [HF](https://huggingface.co/FWKV/FWKV-TinyStories) |
+| **FWKV-ROSA** | **56.4M** | **HuggingFaceH4/ultrachat_200k** | **[HF](https://huggingface.co/FWKV/FWKV-ROSA)** |
 
 All models are compatible with HuggingFace Transformers and vLLM.
 
