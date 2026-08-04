@@ -335,6 +335,10 @@
                     <div class="space-y-3">
                         <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">titles_and_labels</span>
                         <div>
+                            <label class="text-[11px] text-dim block mb-1">Badge Tag / Header Category</label>
+                            <input type="text" id="input-badge" value="01. benchmark_index" oninput="updateConfig()" class="input-field font-mono">
+                        </div>
+                        <div>
                             <label class="text-[11px] text-dim block mb-1">Graph Main Title</label>
                             <input type="text" id="input-title" value="model benchmark performance" oninput="updateConfig()" class="input-field font-bold">
                         </div>
@@ -588,6 +592,7 @@
 
         // Default Configuration Object
         let config = {
+            badge: '01. benchmark_index',
             chartType: 'bar', // bar, horizontalBar, line, area, doughnut, radar
             title: 'model benchmark performance',
             subtitle: 'evaluating reasoning and code accuracy scores (2026)',
@@ -926,7 +931,7 @@
                 effectiveType = 'line';
             }
 
-            // Prepare datasets: chart borders now match filler colors
+            // Prepare datasets: chart borders match filler colors
             const preparedDatasets = config.series.map((s, idx) => {
                 const isLine = effectiveType === 'line';
                 const isArea = config.chartType === 'area';
@@ -939,7 +944,7 @@
                     label: s.name || `Series ${idx + 1}`,
                     data: s.data,
                     backgroundColor: fillColor,
-                    borderColor: borderMatchingColor, // Borders match filler color exactly
+                    borderColor: borderMatchingColor,
                     borderWidth: isLine ? 3 : 1,
                     fill: isArea,
                     tension: 0,
@@ -961,9 +966,9 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 4), // Crisp, high-DPI rendering
+                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 4),
                     indexAxis: indexAxis,
-                    animation: false, // Disabled chart animation
+                    animation: false,
                     layout: {
                         padding: { top: 15, bottom: 5, left: 5, right: 15 }
                     },
@@ -1043,6 +1048,7 @@
 
         function updateDOMOverlay() {
             // Text values
+            document.getElementById('card-badge').innerText = config.badge;
             document.getElementById('card-title').innerText = config.title;
             document.getElementById('card-subtitle').innerText = config.subtitle;
             document.getElementById('card-source').innerText = config.source;
@@ -1109,6 +1115,7 @@
 
         function updateConfig() {
             // Read UI inputs
+            config.badge = document.getElementById('input-badge').value;
             config.title = document.getElementById('input-title').value;
             config.subtitle = document.getElementById('input-subtitle').value;
             config.xAxisLabel = document.getElementById('input-xaxis').value;
@@ -1218,9 +1225,7 @@
             }
         }
 
-        /* ─────────────────────────────────────────────
-           SIDEBAR RESIZING LOGIC
-        ───────────────────────────────────────────── */
+        /* Resizer Drag Logic */
         const resizer = document.getElementById('resizer');
         const sidebar = document.getElementById('sidebar-panel');
         let isResizing = false;
@@ -1269,6 +1274,7 @@
         }
 
         function resetToDefaults() {
+            config.badge = '01. benchmark_index';
             config.title = 'model benchmark performance';
             config.subtitle = 'evaluating reasoning and code accuracy scores (2026)';
             config.xAxisLabel = 'models';
@@ -1287,6 +1293,7 @@
             config.textColor = '#1a1a1a';
             config.borderColor = '#c8c2b5';
 
+            document.getElementById('input-badge').value = config.badge;
             document.getElementById('input-title').value = config.title;
             document.getElementById('input-subtitle').value = config.subtitle;
             document.getElementById('input-xaxis').value = config.xAxisLabel;
