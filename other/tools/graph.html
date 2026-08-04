@@ -153,6 +153,15 @@
             background: #ffffff;
         }
 
+        /* Resizer handle styling */
+        #resizer {
+            transition: background-color 0.15s ease;
+        }
+        #resizer:hover #resizer-thumb,
+        #resizer:active #resizer-thumb {
+            background-color: #cc5118;
+        }
+
         /* Selection styling */
         ::selection {
             background: #cc5118;
@@ -187,11 +196,11 @@
         </div>
     </header>
 
-    <!-- Main Content Grid -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-grid">
+    <!-- Main Content Layout (Flex with Resizable Sidebar) -->
+    <main id="main-layout" class="flex-1 flex flex-col lg:flex-row gap-0 border-b border-grid relative overflow-hidden">
 
-        <!-- LEFT PANEL: Controls & Data Editors (Cols 1-5) -->
-        <section class="lg:col-span-5 border-r border-grid flex flex-col bg-paper">
+        <!-- LEFT PANEL: Controls & Data Editors -->
+        <section id="sidebar-panel" class="w-full lg:w-[420px] lg:min-w-[320px] lg:max-w-[700px] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-grid flex flex-col bg-paper">
             
             <!-- Tabs Bar -->
             <div class="flex border-b border-grid bg-paper2 overflow-x-auto">
@@ -474,8 +483,13 @@
             </div>
         </section>
 
-        <!-- RIGHT PANEL: Live Graph Card Canvas Preview (Cols 6-12) -->
-        <section class="lg:col-span-7 bg-paper2 flex flex-col justify-center items-center p-4 md:p-10 relative overflow-hidden min-h-[500px]">
+        <!-- RESIZER HANDLE BAR (Desktop) -->
+        <div id="resizer" class="hidden lg:flex w-3 bg-paper2 hover:bg-paper3 active:bg-paper3 cursor-col-resize items-center justify-center border-r border-grid select-none z-20 flex-shrink-0" title="Drag to resize sidebar">
+            <div id="resizer-thumb" class="w-1 h-10 bg-rule rounded-full transition-colors"></div>
+        </div>
+
+        <!-- RIGHT PANEL: Live Graph Card Canvas Preview -->
+        <section id="preview-panel" class="flex-1 min-w-0 bg-paper2 flex flex-col justify-center items-center p-4 md:p-10 relative overflow-y-auto min-h-[500px]">
             
             <!-- Grid Background Overlay Effect -->
             <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 16px 16px;"></div>
@@ -511,12 +525,12 @@
 
                         <!-- Header Logo Container -->
                         <div id="logo-container-top" class="flex-shrink-0">
-                            <img id="card-logo-img" src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" alt="logo" class="w-10 h-10 object-contain border border-ink p-1 bg-paper">
+                            <img id="card-logo-img" src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" alt="logo" class="w-10 h-10 object-contain">
                         </div>
                     </div>
 
                     <!-- GRAPH CANVAS CONTAINER -->
-                    <div id="canvas-container" class="relative w-full flex-1 my-2 min-h-[280px]">
+                    <div id="canvas-container" class="relative w-full flex-1 my-2 min-h-[220px]">
                         <canvas id="mainChart"></canvas>
                     </div>
 
@@ -608,6 +622,281 @@
             labels: ['LFM2.5-Claude', 'ChessSLM-RL', 'Qwen2-0.2B', 'TinyMoE-2x8', 'NanoSR-6x']
         };
 
+        function switchTab(tabId, event) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(t => t.classList.add('hidden'));
+
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(b => b.classList.remove('active'));
+
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        /* ─────────────────────────────────────────────
+           SERIES & DATA TABLE UI RENDERERS
+        ───────────────────────────────────────────── */
+        function renderSeriesListUI() {
+            const container = document.getElementById('series-list-container');
+            if (!container) return;
+
+            container.innerHTML = config.series.map((s, idx) => `
+                <div class="flex items-center gap-2 p-2 bg-paper2 border border-grid text-xs">
+                    <span class="font-bold text-dim w-4">${idx + 1}.</span>
+                    <input type="text" value="${s.name}" onchange="updateSeriesName(${idx}, this.value)" class="input-field py-1 flex-1 text-xs">
+                    ${config.series.length > 1 ? `
+                        <button onclick="removeSeries(${idx})" class="text-red-600 hover:text-ink px-1 font-bold" title="Remove Series"><i class="fa-solid fa-trash"></i></button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateSeriesName(index, val) {
+            if (config.series[index]) {
+                config.series[index].name = val || `Series ${index + 1}`;
+                updateConfig();
+            }
+        }
+
+        function removeSeries(index) {
+            if (config.series.length > 1) {
+                config.series.splice(index, 1);
+                renderSeriesListUI();
+                renderDataTableUI();
+                updateConfig();
+            }
+        }
+
+        function addNewSeries() {
+            const palette = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
+            const nextColor = palette[config.series.length % palette.length];
+            const newSeriesData = config.labels.map(() => Math.floor(Math.random() * 50) + 40);
+            const newColors = config.labels.map(() => nextColor);
+
+            config.series.push({
+                name: `Series ${config.series.length + 1}`,
+                data: newSeriesData,
+                colors: newColors
+            });
+
+            renderSeriesListUI();
+            renderDataTableUI();
+            updateConfig();
+        }
+
+        function renderDataTableUI() {
+            const tbody = document.getElementById('data-table-body');
+            if (!tbody) return;
+
+            const thVal1 = document.getElementById('th-val-1');
+            const thVal2 = document.getElementById('th-val-2');
+            
+            if (thVal1) thVal1.innerText = config.series[0]?.name || 'Val 1';
+            if (thVal2) {
+                if (config.series.length > 1) {
+                    thVal2.innerText = config.series[1]?.name || 'Val 2';
+                    thVal2.classList.remove('hidden');
+                } else {
+                    thVal2.classList.add('hidden');
+                }
+            }
+
+            tbody.innerHTML = config.labels.map((label, rIdx) => {
+                const val1 = config.series[0]?.data[rIdx] ?? 0;
+                const val2 = config.series[1]?.data[rIdx] ?? 0;
+                const itemColor = config.series[0]?.colors[rIdx] || '#cc5118';
+
+                return `
+                    <tr class="border-b border-grid/50">
+                        <td class="p-1">
+                            <input type="text" value="${label}" onchange="updateRowLabel(${rIdx}, this.value)" class="input-field py-1 text-xs">
+                        </td>
+                        <td class="p-1">
+                            <input type="number" step="any" value="${val1}" onchange="updateRowValue(0, ${rIdx}, this.value)" class="input-field py-1 text-xs w-20">
+                        </td>
+                        ${config.series.length > 1 ? `
+                            <td class="p-1">
+                                <input type="number" step="any" value="${val2}" onchange="updateRowValue(1, ${rIdx}, this.value)" class="input-field py-1 text-xs w-20">
+                            </td>
+                        ` : ''}
+                        <td class="p-1 text-center">
+                            <input type="color" value="${itemColor}" onchange="updateRowColor(${rIdx}, this.value)">
+                        </td>
+                        <td class="p-1 text-center">
+                            <button onclick="removeRow(${rIdx})" class="text-xs text-dim hover:text-primary"><i class="fa-solid fa-xmark"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateRowLabel(index, value) {
+            config.labels[index] = value;
+            updateConfig();
+        }
+
+        function updateRowValue(seriesIdx, rowIdx, value) {
+            if (config.series[seriesIdx] && config.series[seriesIdx].data) {
+                config.series[seriesIdx].data[rowIdx] = parseFloat(value) || 0;
+                updateConfig();
+            }
+        }
+
+        function updateRowColor(rowIdx, colorHex) {
+            config.series.forEach(s => {
+                if (s.colors) s.colors[rowIdx] = colorHex;
+            });
+            updateConfig();
+        }
+
+        function addNewRow() {
+            const nextLabel = `Item ${config.labels.length + 1}`;
+            config.labels.push(nextLabel);
+
+            const palette = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
+            const defaultColor = palette[config.labels.length % palette.length];
+
+            config.series.forEach(s => {
+                s.data.push(50);
+                if (!s.colors) s.colors = [];
+                s.colors.push(defaultColor);
+            });
+
+            renderDataTableUI();
+            updateConfig();
+        }
+
+        function removeRow(index) {
+            if (config.labels.length > 1) {
+                config.labels.splice(index, 1);
+                config.series.forEach(s => {
+                    if (s.data) s.data.splice(index, 1);
+                    if (s.colors) s.colors.splice(index, 1);
+                });
+                renderDataTableUI();
+                updateConfig();
+            }
+        }
+
+        function sortData(direction) {
+            if (!config.series[0] || !config.series[0].data) return;
+
+            let indices = config.labels.map((_, i) => i);
+            indices.sort((a, b) => {
+                const valA = config.series[0].data[a];
+                const valB = config.series[0].data[b];
+                return direction === 'asc' ? valA - valB : valB - valA;
+            });
+
+            config.labels = indices.map(i => config.labels[i]);
+            config.series.forEach(s => {
+                s.data = indices.map(i => s.data[i]);
+                if (s.colors) s.colors = indices.map(i => s.colors[i]);
+            });
+
+            renderDataTableUI();
+            updateConfig();
+        }
+
+        function importCSV() {
+            const text = document.getElementById('csv-import-area').value.trim();
+            if (!text) return;
+
+            const lines = text.split('\n');
+            const newLabels = [];
+            const newValues = [];
+
+            lines.forEach(line => {
+                const parts = line.split(/,|\t/);
+                if (parts.length >= 2) {
+                    const label = parts[0].trim();
+                    const val = parseFloat(parts[1].trim());
+                    if (label && !isNaN(val)) {
+                        newLabels.push(label);
+                        newValues.push(val);
+                    }
+                }
+            });
+
+            if (newLabels.length > 0) {
+                config.labels = newLabels;
+                const palette = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
+                const colors = newLabels.map((_, i) => palette[i % palette.length]);
+
+                config.series = [{
+                    name: 'Score',
+                    data: newValues,
+                    colors: colors
+                }];
+
+                renderSeriesListUI();
+                renderDataTableUI();
+                updateConfig();
+                showToast('CSV data imported successfully', 'circle-check');
+            }
+        }
+
+        function setChartType(type) {
+            config.chartType = type;
+
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                if (btn.getAttribute('data-type') === type) {
+                    btn.classList.add('border-primary', 'bg-paper2');
+                } else {
+                    btn.classList.remove('border-primary', 'bg-paper2');
+                }
+            });
+
+            updateConfig();
+        }
+
+        function toggleIndexAxis() {
+            if (config.chartType === 'bar') {
+                config.chartType = 'horizontalBar';
+            } else if (config.chartType === 'horizontalBar') {
+                config.chartType = 'bar';
+            }
+            updateConfig();
+        }
+
+        function setCardTheme(bg, text, border) {
+            config.bgColor = bg;
+            config.textColor = text;
+            config.borderColor = border;
+            updateDOMOverlay();
+            initChart();
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    customLogoDataUrl = e.target.result;
+                    config.showLogo = true;
+                    document.getElementById('check-logo').checked = true;
+                    updateDOMOverlay();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setLogoPreset(preset) {
+            if (preset === 'flamef0x') {
+                customLogoDataUrl = 'https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png';
+                config.showLogo = true;
+                document.getElementById('check-logo').checked = true;
+            } else if (preset === 'none') {
+                config.showLogo = false;
+                document.getElementById('check-logo').checked = false;
+            }
+            updateConfig();
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             // Register DataLabels plugin
             if (typeof ChartDataLabels !== 'undefined') {
@@ -672,6 +961,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 4), // Crisp, high-DPI rendering
                     indexAxis: indexAxis,
                     animation: false, // Disabled chart animation
                     layout: {
@@ -772,18 +1062,14 @@
             document.getElementById('card-source').style.color = config.textColor === '#ffffff' || config.textColor === '#f4efe6' ? '#aaaaaa' : '#666666';
             document.getElementById('card-watermark').style.color = config.textColor;
 
-            // Aspect Ratio handling
+            // True Aspect Ratio handling using CSS aspect-ratio
             const canvasContainer = document.getElementById('canvas-container');
-            if (config.aspectRatio === '16/9') {
-                canvasContainer.style.height = '320px';
-            } else if (config.aspectRatio === '4/3') {
-                canvasContainer.style.height = '380px';
-            } else if (config.aspectRatio === '1/1') {
-                canvasContainer.style.height = '440px';
-            } else if (config.aspectRatio === '21/9') {
-                canvasContainer.style.height = '240px';
-            } else {
+            if (config.aspectRatio === 'auto') {
+                canvasContainer.style.aspectRatio = 'auto';
                 canvasContainer.style.height = '300px';
+            } else {
+                canvasContainer.style.aspectRatio = config.aspectRatio.replace('/', ' / ');
+                canvasContainer.style.height = 'auto';
             }
 
             // Logo handling
@@ -809,6 +1095,11 @@
             } else {
                 topLogo.classList.add('hidden');
                 bottomLogo.classList.remove('hidden');
+            }
+
+            // Synchronize chart size after DOM container dimensions change
+            if (chartInstance) {
+                chartInstance.resize();
             }
 
             // Update dimension badge
@@ -841,254 +1132,8 @@
             config.showLogo = document.getElementById('check-logo').checked;
             config.logoPosition = document.getElementById('select-logo-pos').value;
 
+            updateDOMOverlay();
             initChart();
-        }
-
-        function renderSeriesListUI() {
-            const container = document.getElementById('series-list-container');
-            container.innerHTML = '';
-
-            config.series.forEach((s, sIdx) => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center gap-2 bg-paper2 p-2 border border-grid text-xs';
-                div.innerHTML = `
-                    <span class="font-bold text-dim">#${sIdx + 1}</span>
-                    <input type="text" value="${s.name}" onchange="updateSeriesName(${sIdx}, this.value)" class="input-field py-1 text-xs font-bold" placeholder="Series Name">
-                    ${config.series.length > 1 ? `<button onclick="removeSeries(${sIdx})" class="text-red-600 hover:text-red-800 px-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-                `;
-                container.appendChild(div);
-            });
-
-            // Update headers
-            document.getElementById('th-val-1').innerText = config.series[0]?.name || 'Val 1';
-            const th2 = document.getElementById('th-val-2');
-            if (config.series.length > 1) {
-                th2.innerText = config.series[1]?.name || 'Val 2';
-                th2.classList.remove('hidden');
-            } else {
-                th2.classList.add('hidden');
-            }
-        }
-
-        function renderDataTableUI() {
-            const tbody = document.getElementById('data-table-body');
-            tbody.innerHTML = '';
-
-            config.labels.forEach((label, rIdx) => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-grid/50';
-
-                let val1 = config.series[0]?.data[rIdx] ?? 0;
-                let val2 = config.series[1]?.data[rIdx] ?? 0;
-                let color = config.series[0]?.colors[rIdx] || '#cc5118';
-
-                tr.innerHTML = `
-                    <td class="p-1">
-                        <input type="text" value="${label}" onchange="updateRowLabel(${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs">
-                    </td>
-                    <td class="p-1">
-                        <input type="number" value="${val1}" onchange="updateRowValue(0, ${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs w-20">
-                    </td>
-                    ${config.series.length > 1 ? `
-                    <td class="p-1">
-                        <input type="number" value="${val2}" onchange="updateRowValue(1, ${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs w-20">
-                    </td>` : ''}
-                    <td class="p-1 text-center">
-                        <input type="color" value="${color}" onchange="updateRowColor(${rIdx}, this.value)">
-                    </td>
-                    <td class="p-1 text-center">
-                        <button onclick="removeRow(${rIdx})" class="text-dim hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateSeriesName(sIdx, newName) {
-            config.series[sIdx].name = newName;
-            renderSeriesListUI();
-            initChart();
-        }
-
-        function addNewSeries() {
-            if (config.series.length >= 2) {
-                showToast('Maximum 2 series supported for studio layout', 'exclamation');
-                return;
-            }
-            config.series.push({
-                name: 'Series 2',
-                data: config.labels.map(() => Math.floor(Math.random() * 50) + 10),
-                colors: config.labels.map(() => '#e7944e')
-            });
-            renderSeriesListUI();
-            renderDataTableUI();
-            initChart();
-        }
-
-        function removeSeries(sIdx) {
-            config.series.splice(sIdx, 1);
-            renderSeriesListUI();
-            renderDataTableUI();
-            initChart();
-        }
-
-        function updateRowLabel(rIdx, val) {
-            config.labels[rIdx] = val;
-            initChart();
-        }
-
-        function updateRowValue(sIdx, rIdx, val) {
-            config.series[sIdx].data[rIdx] = parseFloat(val) || 0;
-            initChart();
-        }
-
-        function updateRowColor(rIdx, color) {
-            config.series.forEach(s => {
-                s.colors[rIdx] = color;
-            });
-            initChart();
-        }
-
-        function addNewRow() {
-            config.labels.push(`New Item ${config.labels.length + 1}`);
-            const defaultColors = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
-            const nextColor = defaultColors[config.labels.length % defaultColors.length];
-
-            config.series.forEach(s => {
-                s.data.push(50);
-                s.colors.push(nextColor);
-            });
-
-            renderDataTableUI();
-            initChart();
-        }
-
-        function removeRow(rIdx) {
-            if (config.labels.length <= 1) {
-                showToast('At least one data row is required', 'warning');
-                return;
-            }
-            config.labels.splice(rIdx, 1);
-            config.series.forEach(s => {
-                s.data.splice(rIdx, 1);
-                s.colors.splice(rIdx, 1);
-            });
-            renderDataTableUI();
-            initChart();
-        }
-
-        function sortData(order) {
-            const indices = config.labels.map((_, i) => i);
-            indices.sort((a, b) => {
-                const valA = config.series[0].data[a];
-                const valB = config.series[0].data[b];
-                return order === 'asc' ? valA - valB : valB - valA;
-            });
-
-            config.labels = indices.map(i => config.labels[i]);
-            config.series.forEach(s => {
-                s.data = indices.map(i => s.data[i]);
-                s.colors = indices.map(i => s.colors[i]);
-            });
-
-            renderDataTableUI();
-            initChart();
-            showToast(`Sorted data (${order.toUpperCase()})`, 'check');
-        }
-
-        function importCSV() {
-            const raw = document.getElementById('csv-import-area').value.trim();
-            if (!raw) return;
-
-            const lines = raw.split('\n');
-            const newLabels = [];
-            const newValues = [];
-            const defaultColors = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
-            const newColors = [];
-
-            lines.forEach((line, idx) => {
-                const parts = line.split(',');
-                if (parts.length >= 2) {
-                    newLabels.push(parts[0].trim());
-                    newValues.push(parseFloat(parts[1].trim()) || 0);
-                    newColors.push(defaultColors[idx % defaultColors.length]);
-                }
-            });
-
-            if (newLabels.length > 0) {
-                config.labels = newLabels;
-                config.series = [{
-                    name: 'Value',
-                    data: newValues,
-                    colors: newColors
-                }];
-
-                renderSeriesListUI();
-                renderDataTableUI();
-                initChart();
-                showToast(`Parsed ${newLabels.length} rows successfully`, 'check');
-            } else {
-                showToast('Invalid CSV format. Use "Label, Value"', 'exclamation');
-            }
-        }
-
-        function setChartType(type) {
-            config.chartType = type;
-            document.querySelectorAll('.chart-type-btn').forEach(btn => {
-                if (btn.getAttribute('data-type') === type) {
-                    btn.classList.add('border-primary', 'bg-paper2');
-                    btn.querySelector('i').classList.add('text-primary');
-                } else {
-                    btn.classList.remove('border-primary', 'bg-paper2');
-                    btn.querySelector('i').classList.remove('text-primary');
-                }
-            });
-            initChart();
-        }
-
-        function setCardTheme(bg, text, border) {
-            config.bgColor = bg;
-            config.textColor = text;
-            config.borderColor = border;
-            initChart();
-            showToast('Applied color theme', 'palette');
-        }
-
-        function setLogoPreset(preset) {
-            if (preset === 'flamef0x') {
-                customLogoDataUrl = 'https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png';
-                config.showLogo = true;
-                document.getElementById('check-logo').checked = true;
-            } else if (preset === 'none') {
-                config.showLogo = false;
-                document.getElementById('check-logo').checked = false;
-            }
-            updateConfig();
-        }
-
-        function handleLogoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                customLogoDataUrl = e.target.result;
-                config.showLogo = true;
-                document.getElementById('check-logo').checked = true;
-                updateConfig();
-                showToast('Uploaded custom logo', 'image');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function switchTab(tabId, evt) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-            document.getElementById(tabId).classList.remove('hidden');
-            if (evt && evt.currentTarget) {
-                evt.currentTarget.classList.add('active');
-            }
         }
 
         async function exportGraphImage() {
@@ -1097,12 +1142,29 @@
             const cardNode = document.getElementById('export-card');
 
             try {
+                // Force container updates & synchronous canvas redrawing
+                updateDOMOverlay();
+                if (chartInstance) {
+                    chartInstance.resize();
+                    chartInstance.update('none');
+                }
+
+                // Short delay to ensure browser layout engine settles
+                await new Promise(resolve => setTimeout(resolve, 50));
+
                 const canvas = await html2canvas(cardNode, {
-                    scale: 2.5,
+                    scale: 4, // 4x scale for ultra-crisp 300+ DPI export
                     backgroundColor: null,
                     useCORS: true,
                     allowTaint: true,
-                    logging: false
+                    logging: false,
+                    imageTimeout: 0,
+                    onclone: (clonedDoc) => {
+                        const clonedCard = clonedDoc.getElementById('export-card');
+                        if (clonedCard) {
+                            clonedCard.style.boxShadow = 'none';
+                        }
+                    }
                 });
 
                 const image = canvas.toDataURL('image/png');
@@ -1112,7 +1174,7 @@
                 link.href = image;
                 link.click();
 
-                showToast('Exported image successfully!', 'check');
+                showToast('Exported ultra-sharp image successfully!', 'check');
             } catch (err) {
                 console.error(err);
                 showToast('Failed to generate image', 'triangle-exclamation');
@@ -1120,17 +1182,30 @@
         }
 
         async function copyImageToClipboard() {
-            showToast('Copying image to clipboard...', 'spinner');
+            showToast('Copying high-res image to clipboard...', 'spinner');
             const cardNode = document.getElementById('export-card');
 
             try {
-                const canvas = await html2canvas(cardNode, { scale: 2, useCORS: true });
+                updateDOMOverlay();
+                if (chartInstance) {
+                    chartInstance.resize();
+                    chartInstance.update('none');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                const canvas = await html2canvas(cardNode, { 
+                    scale: 4, 
+                    useCORS: true,
+                    allowTaint: true 
+                });
+                
                 canvas.toBlob(blob => {
                     if (navigator.clipboard && navigator.clipboard.write) {
                         navigator.clipboard.write([
                             new ClipboardItem({ 'image/png': blob })
                         ]).then(() => {
-                            showToast('Copied to clipboard!', 'clipboard');
+                            showToast('Copied crisp image to clipboard!', 'clipboard');
                         }).catch(err => {
                             showToast('Clipboard access denied', 'warning');
                         });
@@ -1141,6 +1216,51 @@
             } catch (err) {
                 showToast('Copy failed', 'exclamation');
             }
+        }
+
+        /* ─────────────────────────────────────────────
+           SIDEBAR RESIZING LOGIC
+        ───────────────────────────────────────────── */
+        const resizer = document.getElementById('resizer');
+        const sidebar = document.getElementById('sidebar-panel');
+        let isResizing = false;
+
+        if (resizer && sidebar) {
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const containerOffsetLeft = sidebar.getBoundingClientRect().left;
+                let pointerRelativeX = e.clientX - containerOffsetLeft;
+                
+                const minWidth = 320;
+                const maxWidth = Math.min(window.innerWidth - 380, 750);
+                
+                if (pointerRelativeX < minWidth) pointerRelativeX = minWidth;
+                if (pointerRelativeX > maxWidth) pointerRelativeX = maxWidth;
+
+                sidebar.style.width = `${pointerRelativeX}px`;
+                
+                if (chartInstance) {
+                    chartInstance.resize();
+                }
+                updateDOMOverlay();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = 'default';
+                    document.body.style.removeProperty('user-select');
+                    if (chartInstance) {
+                        chartInstance.resize();
+                    }
+                }
+            });
         }
 
         function downloadSVG() {
