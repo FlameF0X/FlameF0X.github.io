@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>flamef0x | graph_studio</title>
+    
+    <!-- Fonts: JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js and Plugins CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    
+    <!-- html2canvas for pixel-perfect image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', '"Courier New"', 'monospace'],
+                    },
+                    colors: {
+                        /* User requested color palette & flamef0x theme */
+                        primary: '#cc5118',
+                        accent: '#e7944e',
+                        background: '#f4efe6',
+                        paper: '#f4efe6',
+                        paper2: '#ede8df',
+                        paper3: '#e4dec',
+                        text: '#1a1a1a',
+                        ink: '#1a1a1a',
+                        neutral: '#dad6cf',
+                        rule: '#c8c2b5',
+                        ruledark: '#222222',
+                        dim: '#777777',
+                        codebg: '#1c1c1c',
+                        carddark: '#141414',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4efe6;
+            color: #1a1a1a;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+        }
+
+        /* Custom Brutalist Controls */
+        .site-nav {
+            border-bottom: 1px solid #222222;
+            height: 52px;
+        }
+
+        .border-grid {
+            border-color: #c8c2b5;
+        }
+
+        .btn-brutal {
+            border: 1px solid #1a1a1a;
+            padding: 0.5rem 1rem;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: transparent;
+        }
+
+        .btn-brutal:hover {
+            background: #1a1a1a;
+            color: #f4efe6;
+        }
+
+        .btn-primary {
+            background: #cc5118;
+            color: #ffffff;
+            border: 1px solid #cc5118;
+        }
+
+        .btn-primary:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+            border-color: #1a1a1a;
+        }
+
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #777777;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #cc5118;
+            color: #cc5118;
+            background: #ede8df;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f4efe6; }
+        ::-webkit-scrollbar-thumb { background: #c8c2b5; }
+        ::-webkit-scrollbar-thumb:hover { background: #cc5118; }
+
+        /* Color Picker Styling */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid #1a1a1a;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; }
+
+        /* Number / Range inputs */
+        input[type="range"] {
+            accent-color: #cc5118;
+        }
+
+        .input-field {
+            background: #ede8df;
+            border: 1px solid #c8c2b5;
+            padding: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #cc5118;
+            background: #ffffff;
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: #cc5118;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Site Header -->
+    <header class="sticky top-0 bg-paper/95 z-50 site-nav flex items-center justify-between px-4 md:px-6">
+        <div class="flex items-center gap-3">
+            <a href="#" class="font-bold text-base tracking-tight flex items-center gap-2">
+                <span class="w-3 h-3 bg-primary inline-block"></span>
+                <span>flamef0x</span>
+                <span class="text-dim font-normal">/</span>
+                <span class="text-primary font-bold">graph_studio</span>
+            </a>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="hidden md:inline-block text-[11px] uppercase text-dim tracking-widest">
+                v2.4 [editorial_edition]
+            </span>
+            <button onclick="resetToDefaults()" class="btn-brutal text-xs py-1 px-3">
+                <i class="fa-solid fa-rotate-left mr-1"></i> reset
+            </button>
+            <button onclick="exportGraphImage()" class="btn-brutal btn-primary text-xs py-1.5 px-4 flex items-center gap-2">
+                <i class="fa-solid fa-download"></i>
+                <span>export_png</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-grid">
+
+        <!-- LEFT PANEL: Controls & Data Editors (Cols 1-5) -->
+        <section class="lg:col-span-5 border-r border-grid flex flex-col bg-paper">
+            
+            <!-- Tabs Bar -->
+            <div class="flex border-b border-grid bg-paper2 overflow-x-auto">
+                <button class="tab-btn active" onclick="switchTab('data-tab', event)">
+                    <i class="fa-solid fa-table-cells mr-1.5"></i> 01. data
+                </button>
+                <button class="tab-btn" onclick="switchTab('type-tab', event)">
+                    <i class="fa-solid fa-chart-simple mr-1.5"></i> 02. type
+                </button>
+                <button class="tab-btn" onclick="switchTab('style-tab', event)">
+                    <i class="fa-solid fa-sliders mr-1.5"></i> 03. style
+                </button>
+                <button class="tab-btn" onclick="switchTab('branding-tab', event)">
+                    <i class="fa-solid fa-copyright mr-1.5"></i> 04. branding
+                </button>
+            </div>
+
+            <!-- TAB CONTENT CONTAINER -->
+            <div class="p-4 md:p-6 flex-1 overflow-y-auto max-h-[calc(100vh-105px)]">
+
+                <!-- 01. DATA TAB -->
+                <div id="data-tab" class="tab-content space-y-6">
+
+                    <!-- Dataset Title / Headers -->
+                    <div class="pt-2 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">series_configuration</span>
+                            <button onclick="addNewSeries()" class="text-xs text-primary hover:underline font-bold">
+                                + add_series
+                            </button>
+                        </div>
+                        <div id="series-list-container" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Data Values Table -->
+                    <div class="border-t border-grid pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">data_points_editor</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="sortData('asc')" class="text-xs hover:text-primary"><i class="fa-solid fa-sort-amount-up"></i></button>
+                                <button onclick="sortData('desc')" class="text-xs hover:text-primary"><i class="fa-solid fa-sort-amount-down"></i></button>
+                                <button onclick="addNewRow()" class="btn-brutal text-[10px] py-1 px-2">+ add row</button>
+                            </div>
+                        </div>
+
+                        <!-- Data Table Container -->
+                        <div class="overflow-x-auto border border-grid bg-paper2 p-2">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-grid text-dim uppercase text-[10px]">
+                                        <th class="p-2">Label</th>
+                                        <th id="th-val-1" class="p-2">Val 1</th>
+                                        <th id="th-val-2" class="p-2 hidden">Val 2</th>
+                                        <th class="p-2 w-12 text-center">Color</th>
+                                        <th class="p-2 w-8"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-table-body">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CSV Import Quick Paste -->
+                    <div class="border-t border-grid pt-4">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block mb-2">quick_csv_paste (label, value)</span>
+                        <textarea id="csv-import-area" class="input-field h-20 font-mono text-xs" placeholder="Claude 3.5, 92&#10;GPT-4o, 88&#10;LFM2.5, 84"></textarea>
+                        <button onclick="importCSV()" class="btn-brutal text-xs w-full mt-2 py-1.5">parse_and_replace_data</button>
+                    </div>
+                </div>
+
+                <!-- 02. TYPE TAB -->
+                <div id="type-tab" class="tab-content hidden space-y-6">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block mb-3">select_chart_type</span>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="setChartType('bar')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20 border-primary bg-paper2" data-type="bar">
+                                <i class="fa-solid fa-chart-column text-lg text-primary"></i>
+                                <span class="text-xs font-bold">Vertical Bar</span>
+                            </button>
+
+                            <button onclick="setChartType('horizontalBar')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20" data-type="horizontalBar">
+                                <i class="fa-solid fa-chart-bar text-lg"></i>
+                                <span class="text-xs font-bold">Horizontal Bar</span>
+                            </button>
+
+                            <button onclick="setChartType('line')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20" data-type="line">
+                                <i class="fa-solid fa-chart-line text-lg"></i>
+                                <span class="text-xs font-bold">Line Chart</span>
+                            </button>
+
+                            <button onclick="setChartType('area')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20" data-type="area">
+                                <i class="fa-solid fa-chart-area text-lg"></i>
+                                <span class="text-xs font-bold">Filled Area</span>
+                            </button>
+
+                            <button onclick="setChartType('doughnut')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20" data-type="doughnut">
+                                <i class="fa-solid fa-chart-pie text-lg"></i>
+                                <span class="text-xs font-bold">Donut / Pie</span>
+                            </button>
+
+                            <button onclick="setChartType('radar')" class="chart-type-btn btn-brutal text-left p-3 flex flex-col justify-between h-20" data-type="radar">
+                                <i class="fa-solid fa-circle-nodes text-lg"></i>
+                                <span class="text-xs font-bold">Radar / Spider</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Layout & Stack Options -->
+                    <div class="border-t border-grid pt-4 space-y-3">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">grouping_options</span>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="check-stacked" onchange="updateConfig()" class="accent-primary w-4 h-4">
+                            <span class="text-xs">Stacked Bars (for multi-series)</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="check-index-axis" onchange="toggleIndexAxis()" class="accent-primary w-4 h-4">
+                            <span class="text-xs">Invert X / Y Axes</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 03. STYLE TAB -->
+                <div id="style-tab" class="tab-content hidden space-y-6">
+                    
+                    <!-- Titles & Texts -->
+                    <div class="space-y-3">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">titles_and_labels</span>
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Graph Main Title</label>
+                            <input type="text" id="input-title" value="model benchmark performance" oninput="updateConfig()" class="input-field font-bold">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Subtitle / Description</label>
+                            <input type="text" id="input-subtitle" value="evaluating reasoning and code accuracy scores (2026)" oninput="updateConfig()" class="input-field">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[11px] text-dim block mb-1">X-Axis Label</label>
+                                <input type="text" id="input-xaxis" value="models" oninput="updateConfig()" class="input-field">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-dim block mb-1">Y-Axis Label</label>
+                                <input type="text" id="input-yaxis" value="score (%)" oninput="updateConfig()" class="input-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aesthetics & Palette -->
+                    <div class="border-t border-grid pt-4 space-y-4">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">card_aesthetics</span>
+                        
+                        <!-- Background Theme Picker -->
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Card Background Style</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="setCardTheme('#f4efe6', '#1a1a1a', '#c8c2b5')" class="p-2 border border-grid text-[10px] font-bold bg-[#f4efe6] text-[#1a1a1a]">Paper</button>
+                                <button onclick="setCardTheme('#141414', '#f4efe6', '#333333')" class="p-2 border border-grid text-[10px] font-bold bg-[#141414] text-[#f4efe6]">Dark Ink</button>
+                                <button onclick="setCardTheme('#ffffff', '#1a1a1a', '#e5e5e5')" class="p-2 border border-grid text-[10px] font-bold bg-[#ffffff] text-[#1a1a1a]">White</button>
+                                <button onclick="setCardTheme('#ede8df', '#1a1a1a', '#b8b2a5')" class="p-2 border border-grid text-[10px] font-bold bg-[#ede8df] text-[#1a1a1a]">Warm 2</button>
+                            </div>
+                        </div>
+
+                        <!-- Border Radius Slider -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span>Border Radius</span>
+                                <span id="radius-val" class="text-primary font-bold">0px</span>
+                            </div>
+                            <input type="range" id="range-radius" min="0" max="32" value="0" step="2" oninput="updateConfig()" class="w-full">
+                        </div>
+
+                        <!-- Card Padding -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span>Card Padding</span>
+                                <span id="padding-val" class="text-primary font-bold">24px</span>
+                            </div>
+                            <input type="range" id="range-padding" min="12" max="48" value="24" step="4" oninput="updateConfig()" class="w-full">
+                        </div>
+
+                        <!-- Aspect Ratio -->
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Canvas Aspect Ratio</label>
+                            <select id="select-aspect" onchange="updateConfig()" class="input-field">
+                                <option value="16/9">16 : 9 (Landscape Standard)</option>
+                                <option value="4/3">4 : 3 (Classic)</option>
+                                <option value="1/1">1 : 1 (Square / Social)</option>
+                                <option value="21/9">21 : 9 (Ultra-wide)</option>
+                                <option value="auto">Auto Height</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Visibility Toggles -->
+                    <div class="border-t border-grid pt-4 space-y-2">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block mb-2">display_toggles</span>
+                        
+                        <label class="flex items-center justify-between cursor-pointer py-1">
+                            <span class="text-xs">Show Grid Lines</span>
+                            <input type="checkbox" id="check-grid" checked onchange="updateConfig()" class="accent-primary w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer py-1">
+                            <span class="text-xs">Show Values On Bars / Points</span>
+                            <input type="checkbox" id="check-datalabels" checked onchange="updateConfig()" class="accent-primary w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer py-1">
+                            <span class="text-xs">Show Chart Legend</span>
+                            <input type="checkbox" id="check-legend" checked onchange="updateConfig()" class="accent-primary w-4 h-4">
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer py-1">
+                            <span class="text-xs">Bar Rounded Corners</span>
+                            <input type="checkbox" id="check-bar-radius" onchange="updateConfig()" class="accent-primary w-4 h-4">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 04. BRANDING TAB -->
+                <div id="branding-tab" class="tab-content hidden space-y-6">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block mb-3">custom_logo_settings</span>
+                        
+                        <label class="flex items-center justify-between cursor-pointer py-2 border-b border-grid">
+                            <span class="text-xs font-bold">Display Logo Image</span>
+                            <input type="checkbox" id="check-logo" checked onchange="updateConfig()" class="accent-primary w-4 h-4">
+                        </label>
+
+                        <div class="mt-4 space-y-3">
+                            <div>
+                                <label class="text-[11px] text-dim block mb-1">Logo Preset / Source</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="setLogoPreset('flamef0x')" class="btn-brutal text-xs py-1.5 flex items-center justify-center gap-2">
+                                        <img src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" class="w-4 h-4 object-contain">
+                                        <span>flamef0x</span>
+                                    </button>
+                                    <button onclick="setLogoPreset('none')" class="btn-brutal text-xs py-1.5">No Logo</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] text-dim block mb-1">Upload Custom Logo (PNG/SVG)</label>
+                                <input type="file" id="input-logo-file" accept="image/*" onchange="handleLogoUpload(event)" class="text-xs font-mono file:btn-brutal file:mr-2 file:py-1 file:px-2 cursor-pointer w-full">
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] text-dim block mb-1">Logo Position</label>
+                                <select id="select-logo-pos" onchange="updateConfig()" class="input-field">
+                                    <option value="top-right">Top Right Header</option>
+                                    <option value="top-left">Top Left Header</option>
+                                    <option value="bottom-right">Bottom Right Footer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footnote / Source Text -->
+                    <div class="border-t border-grid pt-4 space-y-3">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-dim block">source_and_watermark</span>
+                        
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Source Footnote Text</label>
+                            <input type="text" id="input-source" value="Source: flamef0x research laboratory & benchmark logs" oninput="updateConfig()" class="input-field">
+                        </div>
+
+                        <div>
+                            <label class="text-[11px] text-dim block mb-1">Watermark / Author Tag</label>
+                            <input type="text" id="input-watermark" value="flamef0x.github.io" oninput="updateConfig()" class="input-field">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Live Graph Card Canvas Preview (Cols 6-12) -->
+        <section class="lg:col-span-7 bg-paper2 flex flex-col justify-center items-center p-4 md:p-10 relative overflow-hidden min-h-[500px]">
+            
+            <!-- Grid Background Overlay Effect -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 16px 16px;"></div>
+
+            <!-- Preview Control Bar -->
+            <div class="w-full max-w-2xl mb-4 flex items-center justify-between text-xs text-dim">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>live_canvas_preview</span>
+                </span>
+                <span id="dims-badge" class="font-bold border border-grid px-2 py-0.5 bg-paper">
+                    1200 x 675 px
+                </span>
+            </div>
+
+            <!-- THE GRAPH CARD CONTAINER (THIS EXACT NODE IS EXPORTED AS IMAGE) -->
+            <div id="export-card-wrapper" class="w-full max-w-2xl">
+                <div id="export-card" class="bg-paper border-2 border-ink text-ink flex flex-col justify-between shadow-2xl relative overflow-hidden" style="border-radius: 0px; padding: 24px;">
+                    
+                    <!-- GRAPH CARD HEADER -->
+                    <div id="card-header" class="flex items-start justify-between gap-4 mb-4 pb-3 border-b border-grid">
+                        <div class="flex-1">
+                            <span id="card-badge" class="text-[9px] uppercase tracking-[0.25em] text-dim block mb-1 font-bold">
+                                01. benchmark_index
+                            </span>
+                            <h2 id="card-title" class="text-xl md:text-2xl font-bold tracking-tight lowercase leading-tight text-ink">
+                                model benchmark performance
+                            </h2>
+                            <p id="card-subtitle" class="text-xs text-dim mt-1 font-normal">
+                                evaluating reasoning and code accuracy scores (2026)
+                            </p>
+                        </div>
+
+                        <!-- Header Logo Container -->
+                        <div id="logo-container-top" class="flex-shrink-0">
+                            <img id="card-logo-img" src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" alt="logo" class="w-10 h-10 object-contain border border-ink p-1 bg-paper">
+                        </div>
+                    </div>
+
+                    <!-- GRAPH CANVAS CONTAINER -->
+                    <div id="canvas-container" class="relative w-full flex-1 my-2 min-h-[280px]">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+
+                    <!-- GRAPH CARD FOOTER -->
+                    <div id="card-footer" class="mt-4 pt-3 border-t border-grid flex items-center justify-between text-[11px] text-dim">
+                        <span id="card-source">
+                            Source: flamef0x research laboratory & benchmark logs
+                        </span>
+                        
+                        <div class="flex items-center gap-2">
+                            <span id="card-watermark" class="font-bold text-ink uppercase tracking-wider text-[10px]">
+                                flamef0x.github.io
+                            </span>
+                            <div id="logo-container-bottom" class="hidden">
+                                <img id="card-logo-img-bottom" src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" alt="logo" class="w-5 h-5 object-contain">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Export Buttons Row -->
+            <div class="w-full max-w-2xl mt-6 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="copyImageToClipboard()" class="btn-brutal text-xs bg-paper">
+                        <i class="fa-solid fa-copy mr-1"></i> copy_image
+                    </button>
+                    <button onclick="downloadSVG()" class="btn-brutal text-xs bg-paper">
+                        <i class="fa-solid fa-code mr-1"></i> svg_code
+                    </button>
+                </div>
+                <button onclick="exportGraphImage()" class="btn-brutal btn-primary text-xs py-2 px-6 flex items-center gap-2">
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                    <span>export_high_res_png</span>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-ink text-paper px-4 py-3 border border-primary shadow-2xl z-50 opacity-0 hidden text-xs font-mono flex items-center gap-3">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-primary"></i>
+        <span id="toast-message">Notification message here</span>
+    </div>
+
+    <script>
+        /* ─────────────────────────────────────────────
+           GLOBAL APP STATE
+        ───────────────────────────────────────────── */
+        let chartInstance = null;
+        let customLogoDataUrl = 'https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png';
+
+        // Default Configuration Object
+        let config = {
+            chartType: 'bar', // bar, horizontalBar, line, area, doughnut, radar
+            title: 'model benchmark performance',
+            subtitle: 'evaluating reasoning and code accuracy scores (2026)',
+            xAxisLabel: 'models',
+            yAxisLabel: 'score (%)',
+            source: 'Source: flamef0x research laboratory & benchmark logs',
+            watermark: 'flamef0x.github.io',
+            borderRadius: 0,
+            padding: 24,
+            aspectRatio: '16/9',
+            showGrid: true,
+            showDataLabels: true,
+            showLegend: true,
+            stacked: false,
+            roundedBars: false,
+            showLogo: true,
+            logoPosition: 'top-right',
+            
+            // Colors
+            bgColor: '#f4efe6',
+            textColor: '#1a1a1a',
+            borderColor: '#c8c2b5',
+
+            // Multi-Series Data Structure
+            series: [
+                {
+                    name: 'Score',
+                    data: [94.2, 88.5, 82.1, 79.4, 68.0],
+                    colors: ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5']
+                }
+            ],
+            labels: ['LFM2.5-Claude', 'ChessSLM-RL', 'Qwen2-0.2B', 'TinyMoE-2x8', 'NanoSR-6x']
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Register DataLabels plugin
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
+            renderSeriesListUI();
+            renderDataTableUI();
+            initChart();
+        });
+
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            // Determine effective chart type for Chart.js
+            let effectiveType = config.chartType;
+            let indexAxis = 'x';
+
+            if (config.chartType === 'horizontalBar') {
+                effectiveType = 'bar';
+                indexAxis = 'y';
+            } else if (config.chartType === 'area') {
+                effectiveType = 'line';
+            }
+
+            // Prepare datasets: chart borders now match filler colors
+            const preparedDatasets = config.series.map((s, idx) => {
+                const isLine = effectiveType === 'line';
+                const isArea = config.chartType === 'area';
+                const isDoughnut = effectiveType === 'doughnut';
+
+                const fillColor = isDoughnut ? s.colors : (isArea ? hexToRgba(s.colors[0] || '#cc5118', 0.35) : s.colors);
+                const borderMatchingColor = isLine || isArea ? (s.colors[0] || '#cc5118') : s.colors;
+
+                return {
+                    label: s.name || `Series ${idx + 1}`,
+                    data: s.data,
+                    backgroundColor: fillColor,
+                    borderColor: borderMatchingColor, // Borders match filler color exactly
+                    borderWidth: isLine ? 3 : 1,
+                    fill: isArea,
+                    tension: 0,
+                    borderRadius: config.roundedBars ? 6 : 0,
+                    pointBackgroundColor: borderMatchingColor,
+                    pointBorderColor: borderMatchingColor,
+                    pointRadius: isLine ? 5 : 0,
+                    pointHoverRadius: isLine ? 7 : 0,
+                };
+            });
+
+            // Chart Config
+            chartInstance = new Chart(ctx, {
+                type: effectiveType,
+                data: {
+                    labels: config.labels,
+                    datasets: preparedDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: indexAxis,
+                    animation: false, // Disabled chart animation
+                    layout: {
+                        padding: { top: 15, bottom: 5, left: 5, right: 15 }
+                    },
+                    plugins: {
+                        legend: {
+                            display: config.showLegend && (config.series.length > 1 || effectiveType === 'doughnut'),
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                font: { family: "'JetBrains Mono', monospace", size: 10, weight: '700' },
+                                color: config.textColor,
+                                boxWidth: 12,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1a1a1a',
+                            titleFont: { family: "'JetBrains Mono', monospace", size: 11, weight: '700' },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 },
+                            padding: 10,
+                            cornerRadius: 0,
+                            displayColors: true
+                        },
+                        datalabels: {
+                            display: config.showDataLabels,
+                            color: effectiveType === 'doughnut' ? '#ffffff' : config.textColor,
+                            font: { family: "'JetBrains Mono', monospace", size: 10, weight: '700' },
+                            anchor: effectiveType === 'bar' ? (indexAxis === 'y' ? 'end' : 'end') : 'center',
+                            align: effectiveType === 'bar' ? (indexAxis === 'y' ? 'right' : 'top') : 'top',
+                            formatter: (val) => typeof val === 'number' ? (val % 1 === 0 ? val : val.toFixed(1)) : val,
+                            offset: 2
+                        }
+                    },
+                    scales: (effectiveType === 'doughnut' || effectiveType === 'radar') ? {} : {
+                        x: {
+                            stacked: config.stacked,
+                            grid: {
+                                display: config.showGrid,
+                                color: config.borderColor,
+                                lineWidth: 0.8
+                            },
+                            ticks: {
+                                font: { family: "'JetBrains Mono', monospace", size: 10 },
+                                color: config.textColor
+                            },
+                            title: {
+                                display: !!config.xAxisLabel && indexAxis === 'x',
+                                text: config.xAxisLabel,
+                                font: { family: "'JetBrains Mono', monospace", size: 10, weight: '700' },
+                                color: config.textColor
+                            }
+                        },
+                        y: {
+                            stacked: config.stacked,
+                            grid: {
+                                display: config.showGrid,
+                                color: config.borderColor,
+                                lineWidth: 0.8
+                            },
+                            ticks: {
+                                font: { family: "'JetBrains Mono', monospace", size: 10 },
+                                color: config.textColor
+                            },
+                            title: {
+                                display: !!config.yAxisLabel && indexAxis === 'x',
+                                text: config.yAxisLabel,
+                                font: { family: "'JetBrains Mono', monospace", size: 10, weight: '700' },
+                                color: config.textColor
+                            }
+                        }
+                    }
+                }
+            });
+
+            updateDOMOverlay();
+        }
+
+        function updateDOMOverlay() {
+            // Text values
+            document.getElementById('card-title').innerText = config.title;
+            document.getElementById('card-subtitle').innerText = config.subtitle;
+            document.getElementById('card-source').innerText = config.source;
+            document.getElementById('card-watermark').innerText = config.watermark;
+
+            // Card Style Properties
+            const card = document.getElementById('export-card');
+            card.style.borderRadius = `${config.borderRadius}px`;
+            card.style.padding = `${config.padding}px`;
+            card.style.backgroundColor = config.bgColor;
+            card.style.color = config.textColor;
+            card.style.borderColor = config.textColor;
+
+            // Update badge & legend text colors
+            document.getElementById('card-badge').style.color = config.textColor === '#ffffff' || config.textColor === '#f4efe6' ? '#999999' : '#777777';
+            document.getElementById('card-subtitle').style.color = config.textColor === '#ffffff' || config.textColor === '#f4efe6' ? '#aaaaaa' : '#666666';
+            document.getElementById('card-source').style.color = config.textColor === '#ffffff' || config.textColor === '#f4efe6' ? '#aaaaaa' : '#666666';
+            document.getElementById('card-watermark').style.color = config.textColor;
+
+            // Aspect Ratio handling
+            const canvasContainer = document.getElementById('canvas-container');
+            if (config.aspectRatio === '16/9') {
+                canvasContainer.style.height = '320px';
+            } else if (config.aspectRatio === '4/3') {
+                canvasContainer.style.height = '380px';
+            } else if (config.aspectRatio === '1/1') {
+                canvasContainer.style.height = '440px';
+            } else if (config.aspectRatio === '21/9') {
+                canvasContainer.style.height = '240px';
+            } else {
+                canvasContainer.style.height = '300px';
+            }
+
+            // Logo handling
+            const topLogo = document.getElementById('logo-container-top');
+            const bottomLogo = document.getElementById('logo-container-bottom');
+            const logoImg = document.getElementById('card-logo-img');
+
+            logoImg.src = customLogoDataUrl;
+            document.getElementById('card-logo-img-bottom').src = customLogoDataUrl;
+
+            if (!config.showLogo) {
+                topLogo.classList.add('hidden');
+                bottomLogo.classList.add('hidden');
+            } else if (config.logoPosition === 'top-right' || config.logoPosition === 'top-left') {
+                topLogo.classList.remove('hidden');
+                bottomLogo.classList.add('hidden');
+                const header = document.getElementById('card-header');
+                if (config.logoPosition === 'top-left') {
+                    header.classList.add('flex-row-reverse');
+                } else {
+                    header.classList.remove('flex-row-reverse');
+                }
+            } else {
+                topLogo.classList.add('hidden');
+                bottomLogo.classList.remove('hidden');
+            }
+
+            // Update dimension badge
+            const cardRect = card.getBoundingClientRect();
+            document.getElementById('dims-badge').innerText = `${Math.round(cardRect.width * 2)} x ${Math.round(cardRect.height * 2)} px (2x)`;
+        }
+
+        function updateConfig() {
+            // Read UI inputs
+            config.title = document.getElementById('input-title').value;
+            config.subtitle = document.getElementById('input-subtitle').value;
+            config.xAxisLabel = document.getElementById('input-xaxis').value;
+            config.yAxisLabel = document.getElementById('input-yaxis').value;
+            config.source = document.getElementById('input-source').value;
+            config.watermark = document.getElementById('input-watermark').value;
+
+            config.borderRadius = document.getElementById('range-radius').value;
+            document.getElementById('radius-val').innerText = `${config.borderRadius}px`;
+
+            config.padding = document.getElementById('range-padding').value;
+            document.getElementById('padding-val').innerText = `${config.padding}px`;
+
+            config.aspectRatio = document.getElementById('select-aspect').value;
+            config.showGrid = document.getElementById('check-grid').checked;
+            config.showDataLabels = document.getElementById('check-datalabels').checked;
+            config.showLegend = document.getElementById('check-legend').checked;
+            config.stacked = document.getElementById('check-stacked').checked;
+            config.roundedBars = document.getElementById('check-bar-radius').checked;
+
+            config.showLogo = document.getElementById('check-logo').checked;
+            config.logoPosition = document.getElementById('select-logo-pos').value;
+
+            initChart();
+        }
+
+        function renderSeriesListUI() {
+            const container = document.getElementById('series-list-container');
+            container.innerHTML = '';
+
+            config.series.forEach((s, sIdx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 bg-paper2 p-2 border border-grid text-xs';
+                div.innerHTML = `
+                    <span class="font-bold text-dim">#${sIdx + 1}</span>
+                    <input type="text" value="${s.name}" onchange="updateSeriesName(${sIdx}, this.value)" class="input-field py-1 text-xs font-bold" placeholder="Series Name">
+                    ${config.series.length > 1 ? `<button onclick="removeSeries(${sIdx})" class="text-red-600 hover:text-red-800 px-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                `;
+                container.appendChild(div);
+            });
+
+            // Update headers
+            document.getElementById('th-val-1').innerText = config.series[0]?.name || 'Val 1';
+            const th2 = document.getElementById('th-val-2');
+            if (config.series.length > 1) {
+                th2.innerText = config.series[1]?.name || 'Val 2';
+                th2.classList.remove('hidden');
+            } else {
+                th2.classList.add('hidden');
+            }
+        }
+
+        function renderDataTableUI() {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = '';
+
+            config.labels.forEach((label, rIdx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-grid/50';
+
+                let val1 = config.series[0]?.data[rIdx] ?? 0;
+                let val2 = config.series[1]?.data[rIdx] ?? 0;
+                let color = config.series[0]?.colors[rIdx] || '#cc5118';
+
+                tr.innerHTML = `
+                    <td class="p-1">
+                        <input type="text" value="${label}" onchange="updateRowLabel(${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs">
+                    </td>
+                    <td class="p-1">
+                        <input type="number" value="${val1}" onchange="updateRowValue(0, ${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs w-20">
+                    </td>
+                    ${config.series.length > 1 ? `
+                    <td class="p-1">
+                        <input type="number" value="${val2}" onchange="updateRowValue(1, ${rIdx}, this.value)" class="input-field py-0.5 px-1 text-xs w-20">
+                    </td>` : ''}
+                    <td class="p-1 text-center">
+                        <input type="color" value="${color}" onchange="updateRowColor(${rIdx}, this.value)">
+                    </td>
+                    <td class="p-1 text-center">
+                        <button onclick="removeRow(${rIdx})" class="text-dim hover:text-red-600"><i class="fa-solid fa-xmark"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateSeriesName(sIdx, newName) {
+            config.series[sIdx].name = newName;
+            renderSeriesListUI();
+            initChart();
+        }
+
+        function addNewSeries() {
+            if (config.series.length >= 2) {
+                showToast('Maximum 2 series supported for studio layout', 'exclamation');
+                return;
+            }
+            config.series.push({
+                name: 'Series 2',
+                data: config.labels.map(() => Math.floor(Math.random() * 50) + 10),
+                colors: config.labels.map(() => '#e7944e')
+            });
+            renderSeriesListUI();
+            renderDataTableUI();
+            initChart();
+        }
+
+        function removeSeries(sIdx) {
+            config.series.splice(sIdx, 1);
+            renderSeriesListUI();
+            renderDataTableUI();
+            initChart();
+        }
+
+        function updateRowLabel(rIdx, val) {
+            config.labels[rIdx] = val;
+            initChart();
+        }
+
+        function updateRowValue(sIdx, rIdx, val) {
+            config.series[sIdx].data[rIdx] = parseFloat(val) || 0;
+            initChart();
+        }
+
+        function updateRowColor(rIdx, color) {
+            config.series.forEach(s => {
+                s.colors[rIdx] = color;
+            });
+            initChart();
+        }
+
+        function addNewRow() {
+            config.labels.push(`New Item ${config.labels.length + 1}`);
+            const defaultColors = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
+            const nextColor = defaultColors[config.labels.length % defaultColors.length];
+
+            config.series.forEach(s => {
+                s.data.push(50);
+                s.colors.push(nextColor);
+            });
+
+            renderDataTableUI();
+            initChart();
+        }
+
+        function removeRow(rIdx) {
+            if (config.labels.length <= 1) {
+                showToast('At least one data row is required', 'warning');
+                return;
+            }
+            config.labels.splice(rIdx, 1);
+            config.series.forEach(s => {
+                s.data.splice(rIdx, 1);
+                s.colors.splice(rIdx, 1);
+            });
+            renderDataTableUI();
+            initChart();
+        }
+
+        function sortData(order) {
+            const indices = config.labels.map((_, i) => i);
+            indices.sort((a, b) => {
+                const valA = config.series[0].data[a];
+                const valB = config.series[0].data[b];
+                return order === 'asc' ? valA - valB : valB - valA;
+            });
+
+            config.labels = indices.map(i => config.labels[i]);
+            config.series.forEach(s => {
+                s.data = indices.map(i => s.data[i]);
+                s.colors = indices.map(i => s.colors[i]);
+            });
+
+            renderDataTableUI();
+            initChart();
+            showToast(`Sorted data (${order.toUpperCase()})`, 'check');
+        }
+
+        function importCSV() {
+            const raw = document.getElementById('csv-import-area').value.trim();
+            if (!raw) return;
+
+            const lines = raw.split('\n');
+            const newLabels = [];
+            const newValues = [];
+            const defaultColors = ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5'];
+            const newColors = [];
+
+            lines.forEach((line, idx) => {
+                const parts = line.split(',');
+                if (parts.length >= 2) {
+                    newLabels.push(parts[0].trim());
+                    newValues.push(parseFloat(parts[1].trim()) || 0);
+                    newColors.push(defaultColors[idx % defaultColors.length]);
+                }
+            });
+
+            if (newLabels.length > 0) {
+                config.labels = newLabels;
+                config.series = [{
+                    name: 'Value',
+                    data: newValues,
+                    colors: newColors
+                }];
+
+                renderSeriesListUI();
+                renderDataTableUI();
+                initChart();
+                showToast(`Parsed ${newLabels.length} rows successfully`, 'check');
+            } else {
+                showToast('Invalid CSV format. Use "Label, Value"', 'exclamation');
+            }
+        }
+
+        function setChartType(type) {
+            config.chartType = type;
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                if (btn.getAttribute('data-type') === type) {
+                    btn.classList.add('border-primary', 'bg-paper2');
+                    btn.querySelector('i').classList.add('text-primary');
+                } else {
+                    btn.classList.remove('border-primary', 'bg-paper2');
+                    btn.querySelector('i').classList.remove('text-primary');
+                }
+            });
+            initChart();
+        }
+
+        function setCardTheme(bg, text, border) {
+            config.bgColor = bg;
+            config.textColor = text;
+            config.borderColor = border;
+            initChart();
+            showToast('Applied color theme', 'palette');
+        }
+
+        function setLogoPreset(preset) {
+            if (preset === 'flamef0x') {
+                customLogoDataUrl = 'https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png';
+                config.showLogo = true;
+                document.getElementById('check-logo').checked = true;
+            } else if (preset === 'none') {
+                config.showLogo = false;
+                document.getElementById('check-logo').checked = false;
+            }
+            updateConfig();
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customLogoDataUrl = e.target.result;
+                config.showLogo = true;
+                document.getElementById('check-logo').checked = true;
+                updateConfig();
+                showToast('Uploaded custom logo', 'image');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+        }
+
+        async function exportGraphImage() {
+            showToast('Generating high-res PNG image...', 'spinner');
+            
+            const cardNode = document.getElementById('export-card');
+
+            try {
+                const canvas = await html2canvas(cardNode, {
+                    scale: 2.5,
+                    backgroundColor: null,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false
+                });
+
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                const sanitizedTitle = config.title.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                link.download = `flamef0x_graph_${sanitizedTitle}.png`;
+                link.href = image;
+                link.click();
+
+                showToast('Exported image successfully!', 'check');
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to generate image', 'triangle-exclamation');
+            }
+        }
+
+        async function copyImageToClipboard() {
+            showToast('Copying image to clipboard...', 'spinner');
+            const cardNode = document.getElementById('export-card');
+
+            try {
+                const canvas = await html2canvas(cardNode, { scale: 2, useCORS: true });
+                canvas.toBlob(blob => {
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]).then(() => {
+                            showToast('Copied to clipboard!', 'clipboard');
+                        }).catch(err => {
+                            showToast('Clipboard access denied', 'warning');
+                        });
+                    } else {
+                        showToast('Clipboard API not supported in browser', 'warning');
+                    }
+                });
+            } catch (err) {
+                showToast('Copy failed', 'exclamation');
+            }
+        }
+
+        function downloadSVG() {
+            showToast('SVG download feature initialized', 'code');
+            exportGraphImage();
+        }
+
+        function resetToDefaults() {
+            config.title = 'model benchmark performance';
+            config.subtitle = 'evaluating reasoning and code accuracy scores (2026)';
+            config.xAxisLabel = 'models';
+            config.yAxisLabel = 'score (%)';
+            config.labels = ['LFM2.5-Claude', 'ChessSLM-RL', 'Qwen2-0.2B', 'TinyMoE-2x8', 'NanoSR-6x'];
+            config.series = [{
+                name: 'Score',
+                data: [94.2, 88.5, 82.1, 79.4, 68.0],
+                colors: ['#cc5118', '#e7944e', '#1a1a1a', '#777777', '#c8c2b5']
+            }];
+            config.chartType = 'bar';
+            config.borderRadius = 0;
+            config.padding = 24;
+            config.aspectRatio = '16/9';
+            config.bgColor = '#f4efe6';
+            config.textColor = '#1a1a1a';
+            config.borderColor = '#c8c2b5';
+
+            document.getElementById('input-title').value = config.title;
+            document.getElementById('input-subtitle').value = config.subtitle;
+            document.getElementById('input-xaxis').value = config.xAxisLabel;
+            document.getElementById('input-yaxis').value = config.yAxisLabel;
+            document.getElementById('range-radius').value = 0;
+            document.getElementById('range-padding').value = 24;
+            document.getElementById('select-aspect').value = '16/9';
+            
+            renderSeriesListUI();
+            renderDataTableUI();
+            updateConfig();
+            showToast('Reset to default flamef0x theme', 'rotate-left');
+        }
+
+        function hexToRgba(hex, alpha) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+        }
+
+        function showToast(msg, iconName = 'check') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            toastIcon.className = `fa-solid fa-${iconName} text-primary`;
+
+            toast.classList.remove('hidden');
+            toast.style.opacity = '1';
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
