@@ -1,9 +1,7 @@
-# FWKV: A Fixed-Decay Recurrent Architecture with Token Shift and Convolutional Scan
-
 > *Author: Daniel Fox (FlameF0X)*
 > *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X), [FWKV](https://huggingface.co/FWKV)*
 > *Project: [FWKV](https://huggingface.co/FWKV)*
-> *Date: October 2027*
+> *Date: October 2026*
 
 ---
 
@@ -465,4 +463,4 @@ FWKV is a recurrent language model whose architecture is defined by four choices
 
 ---
 
-*© 2027 Daniel B. (FlameF0X). Released under Apache 2.0.*
+*© 2026 Daniel B. (FlameF0X). Released under Apache 2.0.*
