@@ -1,13 +1,14 @@
-> *Author: Daniel Fox (FlameF0X)*
+> *Author: Daniel B. (FlameF0X)*
 > *Hugging Face: [FlameF0X](https://huggingface.co/FlameF0X), [FWKV](https://huggingface.co/FWKV)*
 > *Project: [FWKV](https://huggingface.co/FWKV)*
 > *Date: October 2026*
+> *Model Card: [Myosotis-1.5-base-Preview](https://huggingface.co/FWKV/Myosotis-1.5-base-Preview)*
 
 ---
 
 ## Abstract
 
-We describe the architecture of FWKV, a recurrent language model that replaces quadratic self-attention with a stack of per-channel linear recurrences. Each channel carries a single scalar memory whose decay is fixed at inference time, and the recurrence is evaluated in training as a causal fast Fourier transform (FFT) convolution in fp32. The block design combines pre-normalization, RWKV-style token shift, a unit-variance input gain, a per-head output normalization, and a receptance gate. Decay rates are initialized across timescales from 2 to 1000 tokens, so that different channels begin with different memory horizons. The output head is factorized and tied to the input embedding, and the training loss is computed in checkpointed chunks. We give the full forward equations, derive the equivalence between the convolutional training form and the recurrent inference form, analyze time and memory complexity, and describe the invariants we use to verify the implementation. The architecture requires no custom kernels and no positional encodings, and its per-token inference state is a fixed-size tensor for each layer.
+We describe the architecture of FWKV, a recurrent language model that replaces quadratic self-attention with a stack of per-channel linear recurrences. We present **Myosotis-1.5-base-Preview**, a 112M parameter implementation of this architecture. Each channel carries a single scalar memory whose decay is fixed at inference time, and the recurrence is evaluated in training as a causal fast Fourier transform (FFT) convolution in fp32. The block design combines pre-normalization, RWKV-style token shift, a unit-variance input gain, a per-head output normalization, and a receptance gate. Decay rates are initialized across timescales from 2 to 1000 tokens, so that different channels begin with different memory horizons. The output head is factorized and tied to the input embedding, and the training loss is computed in checkpointed chunks. We give the full forward equations, derive the equivalence between the convolutional training form and the recurrent inference form, analyze time and memory complexity, and describe the invariants we use to verify the implementation. Empirical benchmarks for Myosotis-1.5 demonstrate a prefill speed of 2,220 tok/s and a decode speed of 36.4 tok/s at 64 tokens, with decode speed remaining stable (and even slightly increasing) up to 11,264 tokens. The architecture requires no custom kernels and no positional encodings, and its per-token inference state is a fixed-size tensor for each layer.
 
 ---
 
@@ -21,8 +22,9 @@ FWKV occupies a narrow point in this space. Its recurrence is linear in the stat
 2. A multi-timescale initialization of the decay that assigns each channel a memory horizon log-uniformly between 2 and 1000 tokens.
 3. An FFT-based evaluation of the recurrence in fp32, with a proof that it equals the recurrent form.
 4. A set of architectural invariants and tests that guarantee cached decoding matches full-sequence evaluation.
+5. **An empirical evaluation of the Myosotis-1.5-base-Preview model, demonstrating highly stable decode speeds across long contexts.**
 
-This paper concerns the architecture only. It does not report training curves, benchmark scores, or the behavior of any particular checkpoint.
+This paper concerns the architecture and its empirical inference behavior. It does not report training curves.
 
 ---
 
@@ -54,7 +56,7 @@ At $t=0$, $h_{-1}$ is the carried-in shift state, which is zero when no state is
 
 ### 3.1 Overview
 
-An FWKV model is a stack of $L$ identical-form blocks between a factorized embedding and a tied output head. Figure 1 shows the top-level data path.
+An FWKV model is a stack of $L$ identical-form blocks between a factorized embedding and a tied output head. Figure 1 shows the top-level data path. **Myosotis-1.5-base-Preview** instantiates this architecture with $L$ blocks, a width of $d=768$, and 112M total parameters.
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 560" width="640" height="560" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="FWKV top-level architecture">
   <defs>
@@ -270,7 +272,7 @@ Per block, the time-mixing sub-layer has four $d \times d$ matrices ($W_k, W_v, 
 
 $$P_\text{block} = 12 d^2 + O(d).$$
 
-At $d = 768$ this is about $7.1\text{M}$ parameters per block.
+At $d = 768$ this is about $7.1\text{M}$ parameters per block. For Myosotis-1.5 (112M total params), the remaining parameters are accounted for by the factorized embedding/head ($\sim$19.6M) and final normalization layers.
 
 ---
 
@@ -349,6 +351,9 @@ The total state size is $3Ld$ values per sequence, independent of the number of 
 
 Prefill processes the prompt in one pass using the FFT path, which returns the final state of each block. Each generated token is then processed by a single-step update: the token shift uses the stored previous input, the scan reduces to $y_t = a_t + W \odot y_{t-1}$, and the channel mixer runs on one vector. The forward function accepts the carried state through a single argument so that the same code path serves training (no state) and generation (with state).
 
+**Empirical Inference Profile for Myosotis-1.5:**
+In benchmarks, Myosotis-1.5 achieves a prefill speed of 2,220 tok/s and a decode speed of 36.4 tok/s at a context length of 64 tokens. Unlike Transformer architectures, the decode speed does not degrade as context grows. At 11,264 tokens, the model retains 102% of its 64-token decode speed (37.3 tok/s).
+
 ### 5.3 Equivalence of the Two Forms
 
 **Claim.** For any input sequence, the outputs of step decoding, starting from the state produced by prefill, equal the outputs of a single full-sequence forward pass.
@@ -400,21 +405,63 @@ The model's forward method enters the autocast context inside the function itsel
 
 ---
 
-## 8. Discussion
+## 8. Empirical Results: Myosotis-1.5-base-Preview
 
-### 8.1 Why Fixed Decay
+We evaluate the Myosotis-1.5-base-Preview model using the [cpu-lm-benchmark](https://huggingface.co/spaces/FlameF0X/cpu-lm-benchmark). The model has 112M parameters and achieves an overall Speep Index score of 75.7 (Ladder 5/5).
+
+### 8.1 Core Performance Metrics
+*   **Quality:** 0.078
+*   **II (Intelligence Index):** 10.6
+*   **Prefill Speed (64 tokens):** 2,220 tok/s
+*   **Decode Speed (64 tokens):** 36.4 tok/s
+
+### 8.2 Performance Across Prompt Lengths
+Unlike standard Transformers, which suffer from KV cache growth and declining decode speeds at long contexts, Myosotis-1.5 maintains near-constant decode throughput:
+
+| Prompt Length | Prefill Speed (tok/s) | Decode Speed (tok/s) |
+| :--- | :--- | :--- |
+| 64 tokens | 2,220 | 36.4 |
+| 256 tokens | 9,272 | 38.7 |
+| 1024 tokens | 36,824 | 38.5 |
+| 4096 tokens | 148,648 | 39.2 |
+| 11,264 tokens | 355,875 | 37.3 |
+
+*   **Prefill Scaling:** Prefill speed scales log-linearly, reaching 355,875 tok/s at 11,264 tokens.
+*   **Decode Stability:** Decode speed remains within a narrow band of 36.4 to 39.2 tok/s across all measured lengths.
+
+### 8.3 Long Prompt Retention
+At the longest measured prompt (11,264 tokens), the model keeps **102%** of its 64-token decode speed. This confirms the theoretical $O(1)$ state size advantage of the FWKV architecture in practice.
+
+### 8.4 Extrapolation to 1.0M Tokens
+Based on trend line extrapolation (which the authors note is a rough guess beyond measured ranges), the model predicts:
+*   **Decode Speed:** ~39 tok/s
+*   **Prefill Speed:** ~31,957,780 tok/s
+
+### 8.5 Scatter Plot Positioning
+*   **Decode vs. II:** Placed in the "Most attractive" quadrant. It sits exactly on the Pareto frontier line, meaning no other model beats it on both speed and II.
+*   **Prefill vs. Decode:** Placed in the "Most attractive" quadrant (top right). On the Pareto frontier.
+*   **Model Size vs. Decode Speed:** Placed in the "Most attractive" quadrant. It sits above the fitted trend line, meaning it is faster than its size predicts.
+
+---
+
+## 9. Discussion
+
+### 9.1 Why Fixed Decay
 
 The decay $W_c$ does not depend on the input. This is a deliberate restriction. It makes the recurrence a convolution, which can be computed with standard FFT primitives and does not need a custom associative-scan kernel. The price is that the model cannot forget a specific token on demand. Forgetting is controlled instead by the receptance gate, which is data-dependent, and by the choice of channel. A channel with a short horizon forgets quickly regardless of content.
 
-### 8.2 Why Multi-Timescale Initialization
+### 9.2 Why Multi-Timescale Initialization
 
 Earlier versions gave every channel the same decay, which caused every layer to have roughly the same memory horizon of about eight tokens. Such a model can only use context within a short window unless training changes the decays substantially, and the gradients for the decay logits are weak. The logarithmic initialization assigns each layer a range of horizons from the first step, so local and long-range structure are both representable from the start.
 
-### 8.3 Why Unit-Gain Input
+### 9.3 Why Unit-Gain Input
 
 Without the $\sqrt{1-W^2}$ factor, the variance of the scan output for a channel with decay $W$ grows roughly as $1/(1-W^2)$. For channels with horizons near 1000 tokens, this would be about five hundred times the variance of short-horizon channels. The gain removes this dependence, so that the scale of the mixer output is set by the projections rather than by the timescale.
 
-### 8.4 Limitations
+### 9.4 Empirical Validation of Architectural Choices
+The benchmark results for Myosotis-1.5 validate the core architectural premise of FWKV. The flat decode speed across context lengths directly demonstrates the benefits of the fixed-size recurrent state and the absence of a KV cache. Furthermore, the model's placement on the Pareto frontier of the speed-quality trade-off suggests that the factorized head, multi-timescale initialization, and receptive gating successfully compensate for the expressivity limitations of fixed decay.
+
+### 9.5 Limitations
 
 1. **Fixed decay limits selectivity.** A channel's forgetting rate does not respond to content. Architectures with input-dependent transitions can express some patterns that FWKV can only approximate through the gate.
 2. **Factorized head is approximate.** The output path uses the transpose of a rectangular projection rather than an inverse, so the logit computation is a learned bottleneck, not an exact factorization.
@@ -423,9 +470,9 @@ Without the $\sqrt{1-W^2}$ factor, the variance of the scan output for a channel
 
 ---
 
-## 9. Conclusion
+## 10. Conclusion
 
-FWKV is a recurrent language model whose architecture is defined by four choices: a fixed, per-channel, input-independent decay with a multi-timescale initialization; a token-shifted time-mixing sub-layer whose recurrence is evaluated as an FFT convolution in training and as a single-step update in generation; unit-gain inputs and per-head output normalization that keep the mixer's scale independent of the decay; and a factorized, tied embedding and head with checkpointed loss. Together these give a model with a fixed-size state per layer, no attention, no positional table, and no custom kernels. The main open questions concern how much of the expressivity lost by fixed decay is recovered by the receptance gate and depth, and how the architecture scales on hardware with higher memory bandwidth.
+FWKV is a recurrent language model whose architecture is defined by four choices: a fixed, per-channel, input-independent decay with a multi-timescale initialization; a token-shifted time-mixing sub-layer whose recurrence is evaluated as an FFT convolution in training and as a single-step update in generation; unit-gain inputs and per-head output normalization that keep the mixer's scale independent of the decay; and a factorized, tied embedding and head with checkpointed loss. Together these give a model with a fixed-size state per layer, no attention, no positional table, and no custom kernels. The empirical results for Myosotis-1.5-base-Preview confirm that this architecture delivers exceptionally stable inference speeds, maintaining 102% of its decode throughput at 11,264 tokens compared to 64 tokens, while remaining highly competitive on the speed-quality Pareto frontier. The main open questions concern how much of the expressivity lost by fixed decay is recovered by the receptance gate and depth, and how the architecture scales on hardware with higher memory bandwidth.
 
 ---
 
