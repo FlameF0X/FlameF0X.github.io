@@ -1,5 +1,13 @@
 [
   {
+    "id": "2507.00002",
+    "title": "FWKV: A Fixed-Decay Recurrent Architecture with Token Shift and Convolutional Scan",
+    "authors": "Daniel B. (FlameF0X)",
+    "date": "2026-10-14",
+    "summary": "FWKV is a recurrent language model architecture that replaces self-attention with per-channel fixed-decay recurrences. Decays are initialized across timescales from 2 to 1000 tokens, the recurrence is evaluated as an fp32 FFT convolution during training and as a fixed-size state update during generation, and token shift, unit-gain inputs, and per-head normalization stabilize each block. The paper gives the full forward equations, the equivalence between training and inference forms, and complexity analysis, with no custom kernels or positional encodings required.",
+    "file": "FWKV2-Paper.md"
+  },
+  {
     "id": "2507.00001",
     "title": "FWKV: Simplicity Is All You Need for Efficient Language Modeling",
     "authors": "Daniel Fox (FlameF0X)",
