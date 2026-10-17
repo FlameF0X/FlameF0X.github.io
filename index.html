@@ -1,591 +1,176 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png" type="image/png">
-    <title>flamef0x.github.io | Hub</title>
+    <title>flame f0x — small language models</title>
 
-    <!-- Meta Tags -->
-    <meta property="og:title" content="flamef0x.github.io | Hub" />
-    <meta property="og:description" content="My project hub and more." />
-
-    <!-- Twitter (Discord often reads these as a fallback) -->
+    <meta property="og:title" content="flame f0x — small language models" />
+    <meta property="og:description" content="small language models, chess engines, distilled reasoning." />
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- Typography: JetBrains Mono (matches blog) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        mono: ['"JetBrains Mono"', '"Courier New"', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        /* base palette — matches blog page */
-                        paper: '#f5f0e8',
-                        paper2: '#ede8df',
-                        ink: '#1a1a1a',
-                        black: '#111111',
-                        muted: '#666666',
-                        dim: '#999999',
-                        rule: '#c8c2b5',
-                        ruledark: '#222222',
-                        codebg: '#1c1c1c',
-                        codetext: '#e0e0e0',
-                        /* theme colors pulled from the leaderboard chart */
-                        accent: '#cc5218',      /* dark orange — "my models (top)" */
-                        accent2: '#e8944a',     /* mid orange  — "my models (lower)" */
-                        accent3: '#f2c99a',     /* light orange */
-                        slate: '#6b6b6b',       /* "other models" gray */
-                        slatelight: '#a8a8a8',
+                        bg: '#faf8f3',
+                        card: '#ffffff',
+                        ink: '#0f0f0f',
+                        muted: '#5c5c5c',
+                        dim: '#9a9a9a',
+                        line: '#ece7dd',
+                        accent: '#d9531e',
                     }
                 }
             }
         }
     </script>
-
     <style type="text/tailwindcss">
-        body {
-            @apply bg-paper text-ink font-mono antialiased;
+        body { @apply bg-bg text-ink font-sans antialiased; }
+        ::selection { @apply bg-ink text-bg; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #d6d0c5; }
+
+        .pill {
+            @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted border border-line rounded-full hover:border-ink hover:text-ink transition-colors;
         }
 
-        h1, h2, h3, h4 {
-            @apply font-bold tracking-tight lowercase;
-        }
+        .proj-row { @apply flex items-center justify-between gap-4 py-3.5; }
+        .proj-row a.title { @apply font-medium text-[15px] hover:text-accent transition-colors; }
+        .proj-row .arrow { @apply text-dim group-hover:text-accent transition-colors; }
 
-        .section-label {
-            @apply text-[10px] uppercase tracking-[0.2em] text-dim mb-1 block;
-        }
-
-        .border-grid {
-            @apply border-rule;
-        }
-
-        ::selection {
-            @apply bg-ink text-paper;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #f5f0e8; }
-        ::-webkit-scrollbar-thumb { background: #c8c2b5; }
-
-        #legacy-content {
-            display: none;
-        }
-        #legacy-content.expanded {
-            display: block;
-        }
-
-        /* Nav — ported from blog page */
-        .site-nav {
-            border-bottom: 1px solid #222222;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-            height: 52px;
-        }
-        .site-nav .logo {
-            font-size: 15px;
-            font-weight: 700;
-            color: #111111;
-            text-decoration: none;
-            letter-spacing: -0.3px;
-        }
-        .site-nav .nav-links {
-            display: flex;
-            gap: 0;
-            list-style: none;
-            height: 100%;
-        }
-        .site-nav .nav-links a {
-            text-decoration: none;
-            color: #666666;
-            padding: 0 1.2rem;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            font-size: 13px;
-            border-left: 1px solid #222222;
-            transition: background 0.15s, color 0.15s;
-        }
-        .site-nav .nav-links a:hover { background: #ede8df; color: #1a1a1a; }
-        .site-nav .lang-btn {
-            font-size: 11px;
-            border: 1px solid #111111;
-            padding: 4px 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            transition: background 0.15s, color 0.15s;
-        }
-        .site-nav .lang-btn:hover { background: #111111; color: #f5f0e8; }
-        .site-nav .support-btn {
-            font-size: 11px;
-            border: 1px solid #111111;
-            padding: 4px 14px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            transition: background 0.15s, color 0.15s;
-        }
-        .site-nav .support-btn:hover { background: #111111; color: #f5f0e8; }
-        .site-nav .nav-cell {
-            display: flex;
-            align-items: center;
-            height: 52px;
-            padding: 0 1.5rem;
-            border-left: 1px solid #222222;
-        }
-
-        /* Projects log list */
-        .proj-row {
-            display: grid;
-            grid-template-columns: 3.5rem 1fr;
-            gap: 1.5rem;
-            padding: 2rem 0;
-            border-bottom: 1px solid #c8c2b5;
-            transition: background 0.15s;
-        }
-        .proj-row:hover {
-            background: #ede8df;
-        }
-        .proj-index {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #c8c2b5;
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-        }
-        .proj-row:hover .proj-index {
-            color: #cc5218;
-        }
-        .proj-links a {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border: 1px solid #1a1a1a;
-            padding: 6px 14px;
-            display: inline-block;
-            transition: background 0.15s, color 0.15s;
-        }
-        .proj-links a:hover {
-            background: #1a1a1a;
-            color: #f5f0e8;
-        }
+        .model-row { @apply flex items-baseline justify-between gap-4 py-2 font-mono text-[13px]; }
+        .model-row a { @apply text-ink hover:text-accent transition-colors; }
+        .model-row .meta { @apply text-dim text-[11px]; }
     </style>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C2TKQFH6ZF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-C2TKQFH6ZF');
+    </script>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-C2TKQFH6ZF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<body class="min-h-screen flex items-center justify-center px-4 py-10 md:py-16">
 
-  gtag('config', 'G-C2TKQFH6ZF');
-</script>
-<body class="min-h-screen">
+    <main class="w-full max-w-xl bg-card border border-line rounded-2xl p-7 md:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.06)]">
 
-    <!-- Header / Nav (blog style) -->
-    <header class="sticky top-0 bg-paper/95 z-50 site-nav">
-        <a href="https://flamef0x.github.io" class="logo">flamef0x.github.io</a>
-        <nav class="hidden md:flex nav-links">
-            <a href="/special" class="trans" data-en="special" data-zh="特别">special</a>
-            <a href="#projects" class="trans" data-en="projects" data-zh="项目">projects</a>
-            <a href="#huggingface" class="trans" data-en="models" data-zh="模型">models</a>
-            <a href="#skills" class="trans" data-en="stack" data-zh="技术栈">stack</a>
-            <a href="/blog">blog</a>
-        </nav>
-        <div class="flex items-center">
-            <div class="nav-cell">
-                <button id="lang-toggle" class="lang-btn">zh</button>
+        <!-- ─── HEADER ─── -->
+        <header class="flex items-start justify-between gap-4 mb-7">
+            <div class="flex items-center gap-3">
+                <img src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png"
+                     alt="flame f0x"
+                     class="w-12 h-12 rounded-xl border border-line">
+                <div>
+                    <h1 class="text-[17px] font-semibold tracking-tight leading-tight">flame f0x</h1>
+                    <p class="text-[13px] text-muted mt-0.5">small language models</p>
+                </div>
             </div>
-            <div class="nav-cell">
-                <a href="#support" class="support-btn trans" data-en="support_me" data-zh="赞助我">support_me</a>
-            </div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-widest text-muted border border-line rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent"></span> open
+            </span>
+        </header>
+
+        <!-- ─── BIO ─── -->
+        <p class="text-[15px] text-muted leading-relaxed mb-6">
+            i build tiny language models that can code, reason like claude, and play chess very well. solo researcher, running on borrowed gpus and good datasets.
+        </p>
+
+        <!-- ─── LINKS ─── -->
+        <div class="flex flex-wrap gap-2 mb-9">
+            <a href="https://github.com/FlameF0X" target="_blank" class="pill">github ↗</a>
+            <a href="https://hf.co/flamef0x" target="_blank" class="pill">huggingface ↗</a>
+            <a href="/blog" class="pill">blog</a>
+            <a href="https://ko-fi.com/flamef0x" target="_blank" class="pill">support</a>
         </div>
-    </header>
 
-    <!-- Main Content Grid -->
-    <main class="container mx-auto border-x border-b border-grid min-h-screen">
-
-        <!-- Banner -->
-        <section class="border-b border-grid relative">
-            <video src="https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/sequence.webm" class="w-full h-48 md:h-64 object-cover block" autoplay loop muted playsinline disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
-            <div class="absolute bottom-2 right-2 bg-ink/70 text-paper text-[10px] md:text-xs px-3 py-1.5 max-w-[90%] md:max-w-sm leading-snug">
-                made by me in blender. (i know it looks ai-generated since the cube has some weird artifacts, but that's because i rendered with 5 samples instead of 4096 — old laptop.)
+        <!-- ─── PROJECTS ─── -->
+        <section class="mb-9">
+            <div class="flex items-baseline justify-between mb-2">
+                <h2 class="text-[11px] font-semibold uppercase tracking-widest text-dim">projects</h2>
+                <span class="text-[10px] text-dim font-mono">04</span>
             </div>
-        </section>
-
-        <!-- Hero Section -->
-        <section class="border-b border-grid">
-            <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="01. identity" data-zh="01. 个人标识">01. identity</span>
-                <h1 class="text-4xl md:text-6xl mb-8 leading-none trans" data-en="hi, welcome" data-zh="嗨，欢迎">
-                    hi, welcome
-                </h1>
-                <p class="text-muted text-lg max-w-2xl leading-relaxed mb-12 trans" data-en="i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!" data-zh="我喜欢构建能够编写代码、具备类似于 Claude 推理能力（通过知识蒸馏）的小型语言模型，并致力于让它们极其擅长下国际象棋！">
-                    i like building small language models that can code, reason like claude (via distillation) and making it to play chess very well!
-                </p>
-                <div class="flex flex-wrap gap-1">
-                      <a href="#projects" class="px-6 py-3 bg-accent text-paper text-sm font-bold uppercase tracking-widest hover:bg-ink transition-colors trans" data-en="view operations" data-zh="查看运行项目">
-                          view operations
-                      </a>
-                      <a href="https://hf.co/flamef0x" target="_blank" class="px-6 py-3 border border-accent2 text-accent2 text-sm uppercase tracking-widest hover:bg-accent2 hover:text-paper transition-colors inline-flex items-center gap-2">
-                          huggingface
-                      </a>
-                      <a href="https://github.com/FlameF0X" target="_blank" class="px-6 py-3 border border-rule text-ink text-sm uppercase tracking-widest hover:border-ink transition-colors inline-flex items-center gap-2">
-                          github
-                      </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects (modular, data-driven log list) -->
-        <section id="projects" class="border-b border-grid">
-            <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="02. development_index" data-zh="02. 开发索引">02. development_index</span>
-                <h2 class="text-3xl mb-8 trans" data-en="projects" data-zh="核心项目">projects</h2>
-                <div id="projects-list" class="border-t border-rule"></div>
-            </div>
-        </section>
-
-        <!-- Models List (modular, data-driven) -->
-        <section id="huggingface" class="border-b border-grid">
-            <div class="p-6 md:p-12 bg-paper2">
-                <span class="section-label trans" data-en="03. model_zoo" data-zh="03. 模型库">03. model_zoo</span>
-                <h2 class="text-3xl mb-12 trans" data-en="hugging face models" data-zh="Hugging Face 模型列表">hugging face models</h2>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
-                            </tr>
-                        </thead>
-                        <tbody id="model-zoo-active" class="divide-y divide-rule/50"></tbody>
-                    </table>
-                </div>
-
-                <div id="legacy-content" class="mt-8 pt-8 border-t border-rule border-dotted">
-                    <table class="w-full text-left text-sm border-collapse text-dim">
-                        <thead>
-                            <tr class="border-b border-rule">
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="model_id">model_id</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="params">params</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="ctx_window">ctx_window</th>
-                                <th class="py-4 font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="hardware">hardware</th>
-                                <th class="py-4 text-right font-bold uppercase text-[10px] tracking-widest text-dim" data-hcol="access">access</th>
-                            </tr>
-                        </thead>
-                        <tbody id="model-zoo-legacy" class="divide-y divide-rule/50"></tbody>
-                    </table>
-                </div>
-
-                <div class="mt-8">
-                    <button id="toggle-legacy" class="text-[10px] uppercase tracking-widest border-b border-dotted border-dim text-dim hover:text-ink hover:border-ink transition-colors">
-                        + load_more_obscure_models
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Technical Capability -->
-        <section id="skills" class="border-b border-grid">
-            <div class="p-6 md:p-12">
-                <span class="section-label trans" data-en="04. capabilities" data-zh="04. 技术能力栈">04. capabilities</span>
-                <h2 class="text-2xl mb-8 trans" data-en="technical capability stack" data-zh="基础架构与硬技术栈">technical capability stack</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 border-t border-l border-rule">
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="01. language" data-zh="01. 编程语言">01. language</span>
-                        <span class="font-bold">python 3.10+</span>
+            <ul class="divide-y divide-line border-y border-line">
+                <li class="proj-row group">
+                    <div class="min-w-0">
+                        <a href="https://huggingface.co/collections/FlameF0X/liquid-claude" target="_blank" class="title">LFM2.5-1.2B-Distilled-Claude</a>
+                        <p class="text-xs text-dim mt-0.5">claude sonnet 4.6 reasoning distilled into 1.2b via LoRA</p>
                     </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="02. framework" data-zh="02. 开发框架">02. framework</span>
-                        <span class="font-bold">pytorch / cuda</span>
+                    <span class="arrow text-sm shrink-0">↗</span>
+                </li>
+                <li class="proj-row group">
+                    <div class="min-w-0">
+                        <a href="https://huggingface.co/FlameF0X/ChessSLM" target="_blank" class="title">ChessSLM</a>
+                        <p class="text-xs text-dim mt-0.5">small models trained to play chess · base / rl / neo / nano</p>
                     </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="03. distribution" data-zh="03. 分发托管">03. distribution</span>
-                        <span class="font-bold">huggingface</span>
+                    <span class="arrow text-sm shrink-0">↗</span>
+                </li>
+                <li class="proj-row group">
+                    <div class="min-w-0">
+                        <a href="https://huggingface.co/netgoat-ai/koda-waf" target="_blank" class="title">koda-waf</a>
+                        <p class="text-xs text-dim mt-0.5">small SOTA open-weights WAF model for NetGoat</p>
                     </div>
-                    <div class="p-6 border-r border-b border-rule">
-                        <span class="text-xs text-dim block mb-1 trans" data-en="04. processing" data-zh="04. 数据集处理">04. processing</span>
-                        <span class="font-bold">hf datasets</span>
+                    <span class="arrow text-sm shrink-0">↗</span>
+                </li>
+                <li class="proj-row group">
+                    <div class="min-w-0">
+                        <a href="https://www.npmjs.com/package/literallynothing.js" target="_blank" class="title">literallynothing.js</a>
+                        <p class="text-xs text-dim mt-0.5">the name is self-explanatory</p>
                     </div>
-                </div>
-            </div>
+                    <span class="arrow text-sm shrink-0">↗</span>
+                </li>
+            </ul>
         </section>
 
-        <!-- Support (compact) -->
-        <section id="support" class="px-6 md:px-12 py-8 text-center bg-ink text-codetext">
-            <span class="section-label !text-slatelight trans" data-en="05. contributions" data-zh="05. 资助研究">05. contributions</span>
-            <h2 class="text-2xl md:text-3xl mt-2 mb-3 trans" data-en="fuel the research" data-zh="助力模型算力资助">fuel the research</h2>
-            <p class="text-dim max-w-md mx-auto mb-6 text-xs leading-relaxed trans" data-en="computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence." data-zh="算力目前是模型迭代训练的主要瓶颈。如果我的开源成果对您的研究有所帮助，欢迎赞助下一次算力序列。">
-                computing power is the primary constraint. if my models aided your development, consider supporting the next training sequence.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-2">
-                <a href="https://ko-fi.com/flamef0x" target="_blank" class="px-6 py-2 bg-accent2 text-ink font-bold text-xs uppercase tracking-widest hover:bg-accent3 transition-colors trans" data-en="support_via_kofi" data-zh="通过_kofi_资助">
-                    support_via_kofi
-                </a>
-                <a href="https://cloud.vast.ai/?ref_id=222345" target="_blank" class="px-6 py-2 border border-slate text-paper text-xs uppercase tracking-widest hover:border-paper transition-colors trans" data-en="vast.ai_template" data-zh="vast.ai_算力模版">
-                    vast.ai_template
-                </a>
+        <!-- ─── MODELS ─── -->
+        <section class="mb-9">
+            <div class="flex items-baseline justify-between mb-2">
+                <h2 class="text-[11px] font-semibold uppercase tracking-widest text-dim">models</h2>
+                <a href="https://hf.co/flamef0x" target="_blank" class="text-[10px] text-dim font-mono hover:text-accent transition-colors">all ↗</a>
             </div>
+            <ul class="divide-y divide-line border-y border-line">
+                <li class="model-row">
+                    <a href="https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" target="_blank">LFM2.5-1.2B-Distilled-Claude-4.6</a>
+                    <span class="meta">1.2b · 12k</span>
+                </li>
+                <li class="model-row">
+                    <a href="https://huggingface.co/FlameF0X/TinyMoE-100m-2x8-retrained" target="_blank">TinyMoE-100m-2x8</a>
+                    <span class="meta">100m · 1k</span>
+                </li>
+                <li class="model-row">
+                    <a href="https://huggingface.co/FlameF0X/ChessSLM" target="_blank">ChessSLM</a>
+                    <span class="meta">30m · 1k</span>
+                </li>
+                <li class="model-row">
+                    <a href="https://huggingface.co/FlameF0X/MathGPT2" target="_blank">MathGPT2</a>
+                    <span class="meta">82m · 1k</span>
+                </li>
+                <li class="model-row">
+                    <a href="https://huggingface.co/FlameF0X/NanoSR-6x" target="_blank">NanoSR-6x</a>
+                    <span class="meta">superres</span>
+                </li>
+            </ul>
         </section>
+
+        <!-- ─── FOOTER ─── -->
+        <footer class="flex items-center justify-between text-[11px] text-dim pt-5 border-t border-line">
+            <span>© 2025 flame f0x</span>
+            <a href="https://github.com/FlameF0X/FlameF0X.github.io" target="_blank" class="hover:text-ink transition-colors">source ↗</a>
+        </footer>
 
     </main>
-
-    <script>
-        /* ─────────────────────────────────────────────
-           PROJECTS — modular data source.
-           To add a project, push an object into PROJECTS
-           below. To remove one, delete its object. That's it —
-           no HTML to touch.
-        ───────────────────────────────────────────── */
-        const PROJECTS = [
-            {
-                title: "LFM2.5-1.2B-Distilled-Claude",
-                desc_en: "a claude sonnet 4.6 adaptive reasoning distillation into a LFM2.5-1.2b-Thinking via LoRA.",
-                desc_zh: "基于 LoRA 训练，将 Claude Sonnet 4.6 的自适应推理能力蒸馏至 LFM2.5-1.2b-Thinking 中。",
-                links: [
-                    { label_en: "open collection", label_zh: "打开收藏集", url: "https://huggingface.co/collections/FlameF0X/liquid-claude" },
-                    { label_en: "open best model", label_zh: "打开最佳模型", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" }
-                ]
-            },
-            {
-                title: "ChessSLM",
-                desc_en: "small language models trained exclusively to play chess. available variants: base, rl, neo, and nano.",
-                desc_zh: "专门为国际象棋对局训练的小型语言模型。可用变体：基础版 (base)、强化学习版 (rl)、新版 (neo)、微型版 (nano)。",
-                links: [
-                    { label_en: "base", label_zh: "基础版", url: "https://huggingface.co/FlameF0X/ChessSLM" },
-                    { label_en: "rl", label_zh: "强化学习版", url: "https://huggingface.co/FlameF0X/ChessSLM-RL" },
-                    { label_en: "neo", label_zh: "新版", url: "https://huggingface.co/FlameF0X/ChessSLM-Neo" },
-                    { label_en: "nano", label_zh: "微型版", url: "https://huggingface.co/FlameF0X/ChessSLM-Nano" },
-                    { label_en: "play against it", label_zh: "与之人机对决", url: "https://lichess.org/?user=chessslm-1&variant=standard&gameMode=casual&time=unlimited#friend" }
-                ]
-            },
-            {
-                title: "koda-waf",
-                desc_en: "a small, SOTA open-weights WAF model development by me for NetGoat.",
-                desc_zh: "由我为 NetGoat 开发的小型、先进（SOTA）开源权重 Web 应用防火墙（WAF）模型。",
-                links: [
-                    { label_en: "open repo", label_zh: "打开开源仓库", url: "https://huggingface.co/netgoat-ai/koda-waf" }
-                ]
-            },
-            {
-                title: "literallynothing.js",
-                desc_en: "the name is self-explanatory.",
-                desc_zh: "顾名思义，里面真的什么都没有。",
-                links: [
-                    { label_en: "open npm", label_zh: "打开 npm", url: "https://www.npmjs.com/package/literallynothing.js" }
-                ]
-            }
-        ];
-
-        function renderProjectRow(project, index, lang) {
-            const desc = lang === 'zh' ? project.desc_zh : project.desc_en;
-            const links = project.links.map(l => {
-                const label = lang === 'zh' ? l.label_zh : l.label_en;
-                return `<a href="${l.url}" target="_blank">${label}</a>`;
-            }).join(' ');
-            const num = String(index + 1).padStart(2, '0');
-            return `
-                <div class="proj-row">
-                    <div class="proj-index">${num}</div>
-                    <div>
-                        <h3 class="text-xl mb-2 font-bold">${project.title}</h3>
-                        <p class="text-muted text-sm leading-relaxed mb-4 max-w-2xl">${desc}</p>
-                        <div class="proj-links flex flex-wrap gap-2">${links}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderProjects(lang) {
-            const el = document.getElementById('projects-list');
-            el.innerHTML = PROJECTS.map((p, i) => renderProjectRow(p, i, lang)).join('');
-        }
-
-        /* ─────────────────────────────────────────────
-           MODEL ZOO — modular data source.
-           To add a model, just push an object into
-           MODEL_ZOO below. `legacy: true` puts it in the
-           collapsible "obscure models" drawer instead of
-           the main table.
-        ───────────────────────────────────────────── */
-        const MODEL_ZOO = [
-            {
-                id: "TinyMoE-100m-2x8",
-                params: "100m a10m",
-                ctx: "1024",
-                hardware: "nvidia l4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/TinyMoE-100m-2x8-retrained" }
-                ],
-                legacy: false
-            },
-            {
-                id: "NanoSR-6x",
-                params: "N/A",
-                ctx: "NaN",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/NanoSR-6x" }
-                ],
-                legacy: true
-            },
-            {
-                id: "LFM2.5-1.2B-Distilled-Claude-4.6",
-                params: "1.2B",
-                ctx: "12k",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6" },
-                    { label_en: "view_gguf", label_zh: "查看GGUF", url: "https://huggingface.co/FlameF0X/LFM2.5-1.2B-Distilled-Claude-4.6-GGUF" }
-                ],
-                legacy: false
-            },
-            {
-                id: "ChessSLM",
-                params: "30.3m",
-                ctx: "1024",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
-                ],
-                legacy: true
-            },
-            {
-                id: "MathGPT2",
-                params: "81.9m",
-                ctx: "1024",
-                hardware: "nvidia t4",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/MathGPT2" }
-                ],
-                legacy: true
-            },
-            {
-                id: "ChessSLM (v1)",
-                params: "30m",
-                ctx: "1024",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/ChessSLM" }
-                ],
-                legacy: true
-            },
-            {
-                id: "FlameF0X/Qwen2-0.2B-it",
-                params: "~0.2B",
-                ctx: "2048",
-                hardware: "nvidia p100",
-                links: [
-                    { label_en: "view_card", label_zh: "查看模型卡", url: "https://huggingface.co/FlameF0X/Qwen2-0.2B-it" }
-                ],
-                legacy: true
-            }
-        ];
-
-        function renderModelRow(model, lang) {
-            const links = model.links.map(l => {
-                const label = lang === 'zh' ? l.label_zh : l.label_en;
-                return `<a href="${l.url}" class="underline">${label}</a>`;
-            }).join(' ');
-            return `
-                <tr>
-                    <td class="py-4 font-bold">${model.id}</td>
-                    <td class="py-4 text-muted">${model.params}</td>
-                    <td class="py-4 text-muted">${model.ctx}</td>
-                    <td class="py-4 text-muted">${model.hardware}</td>
-                    <td class="py-4 text-right">${links}</td>
-                </tr>
-            `;
-        }
-
-        function renderModelZoo(lang) {
-            const activeEl = document.getElementById('model-zoo-active');
-            const legacyEl = document.getElementById('model-zoo-legacy');
-            activeEl.innerHTML = MODEL_ZOO.filter(m => !m.legacy).map(m => renderModelRow(m, lang)).join('');
-            legacyEl.innerHTML = MODEL_ZOO.filter(m => m.legacy).map(m => renderModelRow(m, lang)).join('');
-        }
-
-        const HCOL_LABELS = {
-            model_id: { en: 'model_id', zh: '模型 id' },
-            params: { en: 'params', zh: '参数量' },
-            ctx_window: { en: 'ctx_window', zh: '上下文窗口' },
-            hardware: { en: 'hardware', zh: '训练硬件' },
-            access: { en: 'access', zh: '访问方式' }
-        };
-
-        function renderHeaders(lang) {
-            document.querySelectorAll('[data-hcol]').forEach(th => {
-                const key = th.getAttribute('data-hcol');
-                th.textContent = HCOL_LABELS[key][lang];
-            });
-        }
-
-        /* ── Toggle + language logic ── */
-        const toggleBtn = document.getElementById('toggle-legacy');
-        const legacyContent = document.getElementById('legacy-content');
-        const langToggleBtn = document.getElementById('lang-toggle');
-
-        let currentLang = localStorage.getItem('lang') || 'en';
-
-        function updateLegacyButtonText() {
-            if (!toggleBtn || !legacyContent) return;
-            const isExpanded = legacyContent.classList.contains('expanded');
-            if (currentLang === 'zh') {
-                toggleBtn.innerText = isExpanded ? '- 隐藏过往架构' : '+ 加载更多小众模型';
-            } else {
-                toggleBtn.innerText = isExpanded ? '- hide_legacy_architectures' : '+ load_more_obscure_models';
-            }
-        }
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('lang', lang);
-            document.documentElement.setAttribute('lang', lang);
-
-            document.querySelectorAll('.trans').forEach(el => {
-                const targetHTML = el.getAttribute(`data-${lang}`);
-                if (targetHTML) el.innerHTML = targetHTML;
-            });
-
-            renderHeaders(lang);
-            renderModelZoo(lang);
-            renderProjects(lang);
-
-            if (langToggleBtn) {
-                langToggleBtn.innerText = lang === 'en' ? 'zh' : 'en';
-            }
-
-            updateLegacyButtonText();
-        }
-
-        toggleBtn.addEventListener('click', () => {
-            legacyContent.classList.toggle('expanded');
-            updateLegacyButtonText();
-        });
-
-        langToggleBtn.addEventListener('click', () => {
-            const targetLang = currentLang === 'en' ? 'zh' : 'en';
-            setLanguage(targetLang);
-        });
-
-        setLanguage(currentLang);
-    </script>
 
 </body>
 </html>
