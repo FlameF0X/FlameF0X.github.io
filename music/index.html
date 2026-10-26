@@ -37,20 +37,21 @@
         }
     </script>
 
-    <!-- default palette, replaced at runtime by the ambient analyser -->
+    <!-- default palette; overwritten per-cover at runtime -->
     <style>
         :root {
             --c-bg:     hsl(38 30% 96.8%);
-            --c-card:   hsl(38 40% 99.3%);
-            --c-line:   hsl(38 26% 89.5%);
-            --c-ink:    hsl(38 18% 7%);
-            --c-muted:  hsl(38 10% 38%);
-            --c-dim:    hsl(38 8% 60%);
+            --c-card:   hsl(38 27% 99.5%);
+            --c-line:   hsl(38 18% 89.5%);
+            --c-ink:    hsl(38 12% 8%);
+            --c-muted:  hsl(38 18% 34%);
+            --c-dim:    hsl(38 14% 55%);
             --c-accent: hsl(19 72% 48%);
-            --c-scrim:  hsl(38 20% 8% / .38);
-            --c-scroll: hsl(38 20% 82%);
-            --g1:       hsl(19 85% 62%);
-            --g2:       hsl(38 75% 65%);
+            --c-scrim:  hsl(0 0% 0% / .45);
+            --c-scroll: hsl(38 15% 82%);
+            --c-shadow: 0 1px 2px rgba(0,0,0,.03), 0 8px 24px -12px rgba(0,0,0,.06);
+            --g1:       hsl(19 70% 62%);
+            --g2:       hsl(38 60% 75%);
         }
     </style>
 
@@ -95,57 +96,46 @@
     </style>
 
     <style>
-        /* ── ambient blobs ───────────────────────────────── */
+        main { box-shadow: var(--c-shadow); }
+
+        /* ── very subtle accent glow, tinted by the cover ── */
         #ambient {
             position: fixed;
             inset: 0;
             z-index: 0;
             overflow: hidden;
             pointer-events: none;
-            opacity: 1;
-            transition: opacity .8s ease;
+            transition: opacity .9s ease;
         }
         #ambient.off { opacity: 0; }
-
         #ambient .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(90px);
-            opacity: .5;
+            filter: blur(110px);
+            opacity: .13;
             transition: background-color .9s ease;
             will-change: background-color;
         }
-        #ambient .b1 {
-            width: 60vmax; height: 60vmax;
-            left: -18vmax; top: -22vmax;
-            background: var(--g1);
-        }
-        #ambient .b2 {
-            width: 50vmax; height: 50vmax;
-            right: -18vmax; bottom: -20vmax;
-            background: var(--g2);
-        }
+        #ambient .b1 { width: 70vmax; height: 70vmax; left: -22vmax; top: -26vmax; background: var(--g1); }
+        #ambient .b2 { width: 55vmax; height: 55vmax; right: -20vmax; bottom: -22vmax; background: var(--g2); }
 
-        /* ── smooth colour crossfade ─────────────────────── */
-        /* :where() keeps specificity at 0 so Tailwind's own
-           transition utilities (pills, hovers…) still win.   */
+        /* ── smooth colour crossfade ── */
+        /* :where() keeps specificity at 0 so Tailwind utilities still win */
         :where(html.theme-live) :where(*, *::before, *::after) {
             transition:
-                background-color 650ms ease,
-                border-color 650ms ease,
-                color 650ms ease,
-                fill 650ms ease,
-                stroke 650ms ease;
+                background-color 620ms ease,
+                border-color 620ms ease,
+                color 620ms ease,
+                fill 620ms ease,
+                stroke 620ms ease,
+                box-shadow 620ms ease;
         }
 
-        /* ── volume slider ───────────────────────────────── */
+        /* ── volume slider ── */
         input[type="range"].vol {
-            -webkit-appearance: none;
-            appearance: none;
+            -webkit-appearance: none; appearance: none;
             width: 68px; height: 3px;
-            border-radius: 999px;
-            outline: none;
-            cursor: pointer;
+            border-radius: 999px; outline: none; cursor: pointer;
             background: var(--c-line);
         }
         input[type="range"].vol::-webkit-slider-thumb {
@@ -159,13 +149,11 @@
         input[type="range"].vol:hover::-webkit-slider-thumb { background: var(--c-accent); }
         input[type="range"].vol::-moz-range-track { height: 3px; border-radius: 999px; background: transparent; }
         input[type="range"].vol::-moz-range-thumb {
-            width: 10px; height: 10px;
-            border: none; border-radius: 50%;
-            background: var(--c-ink);
-            cursor: pointer;
+            width: 10px; height: 10px; border: none; border-radius: 50%;
+            background: var(--c-ink); cursor: pointer;
         }
 
-        /* ── equaliser ───────────────────────────────────── */
+        /* ── equaliser ── */
         .bars i {
             display: block; width: 2px; background: var(--c-accent);
             border-radius: 1px; transform-origin: bottom;
@@ -184,13 +172,13 @@
 
 <body class="min-h-screen flex justify-center px-4 py-10 md:py-16">
 
-    <!-- ─── AMBIENT BACKGROUND ─── -->
+    <!-- ─── AMBIENT GLOW ─── -->
     <div id="ambient" aria-hidden="true">
         <span class="blob b1"></span>
         <span class="blob b2"></span>
     </div>
 
-    <main class="relative z-10 w-full max-w-xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.06)]">
+    <main class="relative z-10 w-full max-w-xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10">
 
         <!-- ─── HEADER ─── -->
         <header class="flex items-start justify-between gap-4 mb-7">
@@ -288,7 +276,7 @@
         <!-- ─── FOOTER ─── -->
         <footer class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-dim pt-5 mt-6 border-t border-line">
             <span>© 2025 flame f0x</span>
-            <button id="ambientBtn" type="button" class="hover:text-ink transition-colors" aria-pressed="true">ambient · on</button>
+            <button id="ambientBtn" type="button" class="hover:text-ink transition-colors" aria-pressed="true">glow · on</button>
             <a href="https://github.com/FlameF0X/FlameF0X.github.io" target="_blank" class="hover:text-ink transition-colors">source ↗</a>
         </footer>
 
@@ -336,7 +324,7 @@
     let dragging = false;
     let lastVol = 0.8;
 
-    let ambientOn = true;
+    let glowOn = true;
     let lastCoverUrl = '';
     let currentPalette = null;
     let themeToken = 0;
@@ -365,34 +353,190 @@
     );
 
     /* ══════════════════════════════════════════════════════════
-       AMBIENT — palette extraction from cover art
+       COLOUR MATH
        ══════════════════════════════════════════════════════════ */
     const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-    function buildPalette(o) {
-        const baseHue  = (o && o.baseHue  != null) ? o.baseHue  : 38;
-        const accHue   = (o && o.accHue   != null) ? o.accHue   : 19;
-        const accSat   = (o && o.accSat   != null) ? o.accSat   : 72;
-        const accLight = (o && o.accLight != null) ? o.accLight : 48;
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        const d = max - min;
+        let h = 0, s = 0;
+        if (d > 1e-6) {
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            if (max === r)      h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+            else if (max === g) h = ((b - r) / d + 2) * 60;
+            else                h = ((r - g) / d + 4) * 60;
+        }
+        return { h, s, l };
+    }
 
-        const H = baseHue;
-        const A = accHue;
+    /* most-populated 16³ colour bucket, smoothed with its neighbours */
+    function dominantColor(px, N, predicate) {
+        const NB = 16 * 16 * 16;
+        const counts = new Uint32Array(NB);
+        const sums = new Float64Array(NB * 3);
+        let total = 0;
+
+        for (let y = 0; y < N; y++) {
+            for (let x = 0; x < N; x++) {
+                if (!predicate(x, y)) continue;
+                const i = (y * N + x) * 4;
+                if (px[i + 3] < 120) continue;
+                const r = px[i], g = px[i + 1], b = px[i + 2];
+                const k = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+                counts[k]++;
+                sums[k * 3] += r; sums[k * 3 + 1] += g; sums[k * 3 + 2] += b;
+                total++;
+            }
+        }
+        if (total < 24) return null;
+
+        let best = -1, bestC = 0;
+        for (let k = 0; k < NB; k++) if (counts[k] > bestC) { bestC = counts[k]; best = k; }
+
+        const bR = (best >> 8) & 15, bG = (best >> 4) & 15, bB = best & 15;
+        let sr = 0, sg = 0, sb = 0, sw = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dg = -1; dg <= 1; dg++) {
+                for (let db = -1; db <= 1; db++) {
+                    const rr = bR + dr, gg = bG + dg, bb = bB + db;
+                    if (rr < 0 || rr > 15 || gg < 0 || gg > 15 || bb < 0 || bb > 15) continue;
+                    const k = (rr << 8) | (gg << 4) | bb;
+                    const c = counts[k];
+                    if (!c) continue;
+                    const w = c * ((dr === 0 && dg === 0 && db === 0) ? 1 : 0.45);
+                    sr += sums[k * 3] * w;
+                    sg += sums[k * 3 + 1] * w;
+                    sb += sums[k * 3 + 2] * w;
+                    sw += w;
+                }
+            }
+        }
+        return { r: sr / sw, g: sg / sw, b: sb / sw, total, share: bestC / total };
+    }
+
+    /* strongest saturated hue in the whole image → used for the accent */
+    function mostSaturated(px, N) {
+        const HB = 36;
+        const w = new Float64Array(HB);
+        const hs = new Float64Array(HB);
+        const hl = new Float64Array(HB);
+
+        for (let i = 0; i < px.length; i += 4) {
+            if (px[i + 3] < 120) continue;
+            const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const d = max - min;
+            if (d < 0.02) continue;
+            const l = (max + min) / 2;
+            const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            if (s < 0.22) continue;
+            let h;
+            if (max === r)      h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+            else if (max === g) h = ((b - r) / d + 2) * 60;
+            else                h = ((r - g) / d + 4) * 60;
+            const bin = Math.min(HB - 1, Math.floor(h / 10));
+            const weight = s * Math.max(0.15, 1 - Math.abs(l - 0.5) * 1.3);
+            w[bin] += weight;
+            hs[bin] += s * weight;
+            hl[bin] += l * weight;
+        }
+
+        let best = -1, bestW = 0, sumW = 0;
+        for (let i = 0; i < HB; i++) { sumW += w[i]; if (w[i] > bestW) { bestW = w[i]; best = i; } }
+        if (best < 0 || sumW < 0.5) return null;
+        return { h: best * 10 + 5, s: hs[best] / w[best], l: hl[best] / w[best] };
+    }
+
+    /* read the outer ring + a saturated accent out of a cover */
+    function analyzeImage(img) {
+        const N = 64;
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = N;
+        const ctx = cv.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, N, N);
+
+        let px;
+        try {
+            px = ctx.getImageData(0, 0, N, N).data;   // throws on tainted canvas
+        } catch (e) {
+            return null;
+        }
+
+        const m = Math.max(2, Math.round(N * 0.16));
+        const isMargin = (x, y) => x < m || x >= N - m || y < m || y >= N - m;
+
+        const margin = dominantColor(px, N, isMargin) || dominantColor(px, N, () => true);
+        if (!margin) return null;
+
         return {
-            bg:     `hsl(${H.toFixed(1)} 30% 96.8%)`,
-            card:   `hsl(${H.toFixed(1)} 40% 99.3%)`,
-            line:   `hsl(${H.toFixed(1)} 26% 89.5%)`,
-            ink:    `hsl(${H.toFixed(1)} 18% 7%)`,
-            muted:  `hsl(${H.toFixed(1)} 10% 38%)`,
-            dim:    `hsl(${H.toFixed(1)} 8% 60%)`,
-            accent: `hsl(${A.toFixed(1)} ${accSat.toFixed(0)}% ${accLight.toFixed(0)}%)`,
-            scrim:  `hsl(${H.toFixed(1)} 20% 8% / .38)`,
-            scroll: `hsl(${H.toFixed(1)} 20% 82%)`,
-            g1:     `hsl(${A.toFixed(1)} 85% 62%)`,
-            g2:     `hsl(${H.toFixed(1)} 75% 65%)`,
+            margin: rgbToHsl(margin.r, margin.g, margin.b),
+            accent: mostSaturated(px, N),
         };
     }
 
-    const DEFAULT_PALETTE = buildPalette();
+    /* ══════════════════════════════════════════════════════════
+       PALETTE — page takes the margin colour, contrast decides text
+       ══════════════════════════════════════════════════════════ */
+    function buildPalette(margin, accent) {
+        const H  = margin.h;
+        const S  = margin.s;
+        const L  = margin.l;
+        const dark = L < 0.5;
+
+        const A  = accent ? accent.h : (H + 32) % 360;
+        const AS = accent ? accent.s : 0.70;
+        const AL = accent ? accent.l : 0.50;
+
+        const hsl  = (h, s, l) => `hsl(${clamp(h, 0, 360).toFixed(1)} ${clamp(s * 100, 0, 100).toFixed(0)}% ${clamp(l * 100, 0, 100).toFixed(1)}%)`;
+
+        const bgS = clamp(S, 0.06, 0.55);
+        const bgL = dark ? clamp(L, 0.04, 0.32) : clamp(L, 0.70, 0.97);
+
+        let cardL, lineL, inkS, mutedL, dimL, accentL, accentS;
+
+        if (dark) {
+            cardL   = clamp(bgL + 0.055, 0.08, 0.38);
+            lineL   = clamp(bgL + 0.090, 0.12, 0.42);
+            inkS    = 0.16;
+            mutedL  = 0.70;
+            dimL    = 0.48;
+            accentL = clamp(Math.max(AL, 0.60), 0.58, 0.74);
+            accentS = clamp(Math.max(AS, 0.60), 0.55, 0.88);
+        } else {
+            cardL   = clamp(bgL + 0.025, 0.86, 0.995);
+            lineL   = clamp(bgL - 0.075, 0.68, 0.90);
+            inkS    = 0.14;
+            mutedL  = 0.34;
+            dimL    = 0.55;
+            accentL = clamp(Math.min(AL, 0.50), 0.38, 0.52);
+            accentS = clamp(Math.max(AS, 0.60), 0.55, 0.88);
+        }
+
+        return {
+            dark,
+            bg:     hsl(H, bgS, bgL),
+            card:   hsl(H, bgS * 0.9, cardL),
+            line:   hsl(H, bgS * 0.6, lineL),
+            ink:    hsl(H, inkS, dark ? 0.95 : 0.09),
+            muted:  hsl(H, dark ? 0.18 : 0.20, mutedL),
+            dim:    hsl(H, dark ? 0.14 : 0.16, dimL),
+            accent: hsl(A, accentS, accentL),
+            scrim:  'hsl(0 0% 0% / .45)',
+            scroll: hsl(H, bgS * 0.5, dark ? clamp(bgL + 0.14, 0.16, 0.42) : clamp(bgL - 0.13, 0.60, 0.86)),
+            g1:     hsl(A, 0.75, dark ? 0.55 : 0.78),
+            g2:     hsl(H, 0.60, dark ? 0.45 : 0.82),
+            shadow: dark
+                ? '0 1px 2px rgba(0,0,0,.28), 0 10px 30px -12px rgba(0,0,0,.55)'
+                : '0 1px 2px rgba(0,0,0,.03), 0 8px 24px -12px rgba(0,0,0,.06)',
+        };
+    }
+
+    const DEFAULT_MARGIN = { h: 38, s: 0.30, l: 0.968 };
+    const DEFAULT_ACCENT = { h: 19, s: 0.72, l: 0.48 };
+    const DEFAULT_PALETTE = buildPalette(DEFAULT_MARGIN, DEFAULT_ACCENT);
 
     function applyPalette(p) {
         const s = document.documentElement.style;
@@ -405,107 +549,12 @@
         s.setProperty('--c-accent', p.accent);
         s.setProperty('--c-scrim', p.scrim);
         s.setProperty('--c-scroll', p.scroll);
+        s.setProperty('--c-shadow', p.shadow);
         s.setProperty('--g1', p.g1);
         s.setProperty('--g2', p.g2);
+        document.documentElement.style.colorScheme = p.dark ? 'dark' : 'light';
         currentPalette = p;
         paintVol();
-    }
-
-    /** pick the strongest hue bucket, lightly smoothed across neighbours */
-    function bestBin(arr) {
-        const BINS = arr.length;
-        let best = 0, bestScore = -1, total = 0;
-        for (let i = 0; i < BINS; i++) {
-            total += arr[i];
-            const score = arr[(i - 1 + BINS) % BINS] * 0.5 + arr[i] + arr[(i + 1) % BINS] * 0.5;
-            if (score > bestScore) { bestScore = score; best = i; }
-        }
-        return { index: best, hue: best * 10 + 5, total };
-    }
-
-    function analyzeImage(img) {
-        const N = 48;
-        const cv = document.createElement('canvas');
-        cv.width = cv.height = N;
-        const ctx = cv.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0, N, N);
-
-        let px;
-        try {
-            px = ctx.getImageData(0, 0, N, N).data;   // throws if canvas is tainted
-        } catch (e) {
-            return null;
-        }
-
-        const BINS = 36;
-        const baseW = new Float64Array(BINS);
-        const accW  = new Float64Array(BINS);
-        const accS  = new Float64Array(BINS);
-        const accL  = new Float64Array(BINS);
-        let valid = 0;
-
-        for (let i = 0; i < px.length; i += 4) {
-            if (px[i + 3] < 100) continue;
-            const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            const l = (max + min) / 2;
-            if (l < 0.04 || l > 0.97) continue;
-
-            const d = max - min;
-            let h = 0, s = 0;
-            if (d > 1e-6) {
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                if (max === r)      h = (g - b) / d + (g < b ? 6 : 0);
-                else if (max === g) h = (b - r) / d + 2;
-                else                h = (r - g) / d + 4;
-                h *= 60;
-            }
-
-            valid++;
-            if (s < 0.06) continue;               // hue is meaningless for greys
-
-            const bin = Math.min(BINS - 1, Math.floor(h / 10));
-            const mid = Math.max(0.15, 1 - Math.abs(l - 0.5) * 1.1);
-
-            baseW[bin] += s * mid;
-
-            if (s > 0.15) {
-                const aw = s * Math.max(0, 1 - Math.abs(l - 0.52) * 1.8) * 1.5;
-                if (aw > 0) {
-                    accW[bin] += aw;
-                    accS[bin] += s * aw;
-                    accL[bin] += l * aw;
-                }
-            }
-        }
-
-        if (!valid) return null;
-
-        const base = bestBin(baseW);
-        const acc  = bestBin(accW);
-
-        let baseHue  = DEFAULT_PALETTE.baseHue;
-        let accHue   = 19, accSat = 72, accLight = 48;
-
-        const baseStrength = base.total / valid;
-        const accStrength  = acc.total / valid;
-
-        if (baseStrength > 0.03) baseHue = base.hue;
-
-        if (accStrength > 0.02) {
-            accHue   = acc.hue;
-            const s  = accS[acc.index] / acc.total;
-            const l  = accL[acc.index] / acc.total;
-            accSat   = clamp(s * 100 * 1.15, 55, 88);
-            accLight = clamp(l * 100, 40, 52);
-        } else if (baseStrength > 0.03) {
-            // near-grayscale artwork → keep the accent in the same family
-            accHue = baseHue;
-            accSat = 60;
-            accLight = 46;
-        }
-
-        return buildPalette({ baseHue, accHue, accSat, accLight });
     }
 
     function loadImage(url) {
@@ -520,37 +569,33 @@
 
     async function setThemeFromCover(url) {
         lastCoverUrl = url || '';
-        if (!ambientOn) return;
-
         const token = ++themeToken;
         const key = lastCoverUrl || '__default__';
-        let pal;
+        let pal = null;
 
         if (themeCache.has(key)) {
             pal = themeCache.get(key);
         } else if (lastCoverUrl) {
             try {
                 const img = await loadImage(lastCoverUrl);
-                pal = analyzeImage(img);
+                const data = analyzeImage(img);
+                if (data) pal = buildPalette(data.margin, data.accent);
             } catch (e) {
                 pal = null;
             }
             themeCache.set(key, pal);
         }
 
-        if (token !== themeToken) return;          // a newer cover won the race
+        if (token !== themeToken) return;      // a newer cover won the race
         applyPalette(pal || DEFAULT_PALETTE);
     }
 
-    function setAmbient(on) {
-        ambientOn = !!on;
-        el.ambient.classList.toggle('off', !ambientOn);
-        el.ambientBtn.textContent = 'ambient · ' + (ambientOn ? 'on' : 'off');
-        el.ambientBtn.setAttribute('aria-pressed', String(ambientOn));
-        try { localStorage.setItem('ff-music-ambient', ambientOn ? '1' : '0'); } catch (e) {}
-
-        if (ambientOn) setThemeFromCover(lastCoverUrl);
-        else applyPalette(DEFAULT_PALETTE);
+    function setGlow(on) {
+        glowOn = !!on;
+        el.ambient.classList.toggle('off', !glowOn);
+        el.ambientBtn.textContent = 'glow · ' + (glowOn ? 'on' : 'off');
+        el.ambientBtn.setAttribute('aria-pressed', String(glowOn));
+        try { localStorage.setItem('ff-music-glow', glowOn ? '1' : '0'); } catch (e) {}
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -976,7 +1021,7 @@
     });
     el.vol.addEventListener('input', () => setVolume(parseFloat(el.vol.value)));
 
-    el.ambientBtn.addEventListener('click', () => setAmbient(!ambientOn));
+    el.ambientBtn.addEventListener('click', () => setGlow(!glowOn));
 
     /* seek dragging */
     el.seek.addEventListener('pointerdown', (e) => {
@@ -1027,7 +1072,7 @@
             case 'KeyS':       el.shuffleBtn.click(); break;
             case 'KeyR':       el.repeatBtn.click(); break;
             case 'KeyM':       el.muteBtn.click(); break;
-            case 'KeyA':       setAmbient(!ambientOn); break;
+            case 'KeyA':       setGlow(!glowOn); break;
             case 'Escape':     showAlbumsView(); break;
         }
     });
@@ -1040,14 +1085,14 @@
         el.muteBtn.innerHTML = ICON_VOL;
         setCover('');
 
-        /* ambient preference */
+        /* glow preference */
         try {
-            const a = localStorage.getItem('ff-music-ambient');
-            if (a !== null) ambientOn = a === '1';
+            const g = localStorage.getItem('ff-music-glow');
+            if (g !== null) glowOn = g === '1';
         } catch (e) {}
-        el.ambient.classList.toggle('off', !ambientOn);
-        el.ambientBtn.textContent = 'ambient · ' + (ambientOn ? 'on' : 'off');
-        el.ambientBtn.setAttribute('aria-pressed', String(ambientOn));
+        el.ambient.classList.toggle('off', !glowOn);
+        el.ambientBtn.textContent = 'glow · ' + (glowOn ? 'on' : 'off');
+        el.ambientBtn.setAttribute('aria-pressed', String(glowOn));
 
         /* volume preference */
         let savedVol = 0.8;
@@ -1123,7 +1168,7 @@
             showError(err);
         }
 
-        /* enable colour crossfades only after the first paint */
+        /* enable colour crossfades after the first paint */
         requestAnimationFrame(() => {
             requestAnimationFrame(() => document.documentElement.classList.add('theme-live'));
         });
