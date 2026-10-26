@@ -120,7 +120,6 @@
         #ambient .b2 { width: 55vmax; height: 55vmax; right: -20vmax; bottom: -22vmax; background: var(--g2); }
 
         /* ── smooth colour crossfade ── */
-        /* :where() keeps specificity at 0 so Tailwind utilities still win */
         :where(html.theme-live) :where(*, *::before, *::after) {
             transition:
                 background-color 620ms ease,
@@ -465,7 +464,7 @@
             return null;
         }
 
-        const m = Math.max(2, Math.round(N * 0.16));
+        const m = Math.max(2, Math.round(N * 0.12)); // outer 12% margin
         const isMargin = (x, y) => x < m || x >= N - m || y < m || y >= N - m;
 
         const margin = dominantColor(px, N, isMargin) || dominantColor(px, N, () => true);
@@ -560,7 +559,7 @@
     function loadImage(url) {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            // Note: crossOrigin removed to allow same-origin canvas extraction
             img.onload = () => resolve(img);
             img.onerror = () => reject(new Error('image load failed'));
             img.src = url;
