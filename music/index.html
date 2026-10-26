@@ -24,24 +24,41 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        bg: '#faf8f3',
-                        card: '#ffffff',
-                        ink: '#0f0f0f',
-                        muted: '#5c5c5c',
-                        dim: '#9a9a9a',
-                        line: '#ece7dd',
-                        accent: '#d9531e',
+                        bg:     'var(--c-bg)',
+                        card:   'var(--c-card)',
+                        ink:    'var(--c-ink)',
+                        muted:  'var(--c-muted)',
+                        dim:    'var(--c-dim)',
+                        line:   'var(--c-line)',
+                        accent: 'var(--c-accent)',
                     }
                 }
             }
         }
     </script>
 
+    <!-- default palette, replaced at runtime by the ambient analyser -->
+    <style>
+        :root {
+            --c-bg:     hsl(38 30% 96.8%);
+            --c-card:   hsl(38 40% 99.3%);
+            --c-line:   hsl(38 26% 89.5%);
+            --c-ink:    hsl(38 18% 7%);
+            --c-muted:  hsl(38 10% 38%);
+            --c-dim:    hsl(38 8% 60%);
+            --c-accent: hsl(19 72% 48%);
+            --c-scrim:  hsl(38 20% 8% / .38);
+            --c-scroll: hsl(38 20% 82%);
+            --g1:       hsl(19 85% 62%);
+            --g2:       hsl(38 75% 65%);
+        }
+    </style>
+
     <style type="text/tailwindcss">
         body { @apply bg-bg text-ink font-sans antialiased; }
         ::selection { @apply bg-ink text-bg; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #d6d0c5; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: var(--c-scroll); border-radius: 999px; }
         ::-webkit-scrollbar-track { background: transparent; }
 
         .pill {
@@ -58,7 +75,10 @@
 
         .album-card { @apply block w-full text-left cursor-pointer; }
         .album-card .cover-wrap { @apply relative aspect-square rounded-xl overflow-hidden border border-line bg-bg; }
-        .album-card .cover-play { @apply absolute inset-0 flex items-center justify-center bg-ink/40 opacity-0 transition-opacity; }
+        .album-card .cover-play {
+            @apply absolute inset-0 flex items-center justify-center opacity-0 transition-opacity;
+            background: var(--c-scrim);
+        }
         .album-card:hover .cover-play, .album-card:focus-visible .cover-play { @apply opacity-100; }
         .album-card:hover .a-title { @apply text-accent; }
         .album-card.playing .cover-wrap { @apply border-accent; }
@@ -75,33 +95,79 @@
     </style>
 
     <style>
+        /* ── ambient blobs ───────────────────────────────── */
+        #ambient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity .8s ease;
+        }
+        #ambient.off { opacity: 0; }
+
+        #ambient .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: .5;
+            transition: background-color .9s ease;
+            will-change: background-color;
+        }
+        #ambient .b1 {
+            width: 60vmax; height: 60vmax;
+            left: -18vmax; top: -22vmax;
+            background: var(--g1);
+        }
+        #ambient .b2 {
+            width: 50vmax; height: 50vmax;
+            right: -18vmax; bottom: -20vmax;
+            background: var(--g2);
+        }
+
+        /* ── smooth colour crossfade ─────────────────────── */
+        /* :where() keeps specificity at 0 so Tailwind's own
+           transition utilities (pills, hovers…) still win.   */
+        :where(html.theme-live) :where(*, *::before, *::after) {
+            transition:
+                background-color 650ms ease,
+                border-color 650ms ease,
+                color 650ms ease,
+                fill 650ms ease,
+                stroke 650ms ease;
+        }
+
+        /* ── volume slider ───────────────────────────────── */
         input[type="range"].vol {
             -webkit-appearance: none;
             appearance: none;
-            width: 68px;
-            height: 3px;
+            width: 68px; height: 3px;
             border-radius: 999px;
             outline: none;
             cursor: pointer;
-            background: #ece7dd;
+            background: var(--c-line);
         }
         input[type="range"].vol::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
+            -webkit-appearance: none; appearance: none;
             width: 10px; height: 10px;
             border: none; border-radius: 50%;
-            background: #0f0f0f; cursor: pointer;
+            background: var(--c-ink);
+            cursor: pointer;
             transition: background .15s;
         }
-        input[type="range"].vol:hover::-webkit-slider-thumb { background: #d9531e; }
+        input[type="range"].vol:hover::-webkit-slider-thumb { background: var(--c-accent); }
         input[type="range"].vol::-moz-range-track { height: 3px; border-radius: 999px; background: transparent; }
         input[type="range"].vol::-moz-range-thumb {
-            width: 10px; height: 10px; border: none; border-radius: 50%;
-            background: #0f0f0f; cursor: pointer;
+            width: 10px; height: 10px;
+            border: none; border-radius: 50%;
+            background: var(--c-ink);
+            cursor: pointer;
         }
 
+        /* ── equaliser ───────────────────────────────────── */
         .bars i {
-            display: block; width: 2px; background: #d9531e;
+            display: block; width: 2px; background: var(--c-accent);
             border-radius: 1px; transform-origin: bottom;
             animation: eq .9s ease-in-out infinite;
         }
@@ -118,7 +184,13 @@
 
 <body class="min-h-screen flex justify-center px-4 py-10 md:py-16">
 
-    <main class="w-full max-w-xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.06)]">
+    <!-- ─── AMBIENT BACKGROUND ─── -->
+    <div id="ambient" aria-hidden="true">
+        <span class="blob b1"></span>
+        <span class="blob b2"></span>
+    </div>
+
+    <main class="relative z-10 w-full max-w-xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.06)]">
 
         <!-- ─── HEADER ─── -->
         <header class="flex items-start justify-between gap-4 mb-7">
@@ -214,9 +286,9 @@
         </section>
 
         <!-- ─── FOOTER ─── -->
-        <footer class="flex items-center justify-between gap-3 text-[11px] text-dim pt-5 mt-6 border-t border-line">
+        <footer class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-dim pt-5 mt-6 border-t border-line">
             <span>© 2025 flame f0x</span>
-            <span class="font-mono text-[10px] hidden sm:inline">space · ←→ · esc</span>
+            <button id="ambientBtn" type="button" class="hover:text-ink transition-colors" aria-pressed="true">ambient · on</button>
             <a href="https://github.com/FlameF0X/FlameF0X.github.io" target="_blank" class="hover:text-ink transition-colors">source ↗</a>
         </footer>
 
@@ -234,6 +306,7 @@
 
     const $ = (id) => document.getElementById(id);
     const el = {
+        ambient: $('ambient'), ambientBtn: $('ambientBtn'),
         cover: $('cover'), title: $('trackTitle'), artist: $('trackArtist'),
         seek: $('seek'), seekFill: $('seekFill'), seekThumb: $('seekThumb'),
         timeCurrent: $('timeCurrent'), timeDuration: $('timeDuration'),
@@ -252,16 +325,22 @@
     audio.preload = 'metadata';
 
     /* ─── state ─── */
-    let albums = [];            // [{title, artist, year, cover, tracks:[...]}]
-    let explicit = false;       // true → real album grid, false → single flat list
-    let albumIndex = 0;         // album currently displayed in track view
-    let queueAlbum = -1;        // album that owns the current queue
-    let current = -1;           // index inside queue
+    let albums = [];
+    let explicit = false;
+    let albumIndex = 0;
+    let queueAlbum = -1;
+    let current = -1;
     let shuffle = false;
-    let repeat = 'off';         // off | all | one
+    let repeat = 'off';
     let basePath = '';
     let dragging = false;
     let lastVol = 0.8;
+
+    let ambientOn = true;
+    let lastCoverUrl = '';
+    let currentPalette = null;
+    let themeToken = 0;
+    const themeCache = new Map();
 
     /* ─── icons ─── */
     const ICON_PLAY  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
@@ -285,7 +364,198 @@
          </svg>`
     );
 
-    /* ─── helpers ─── */
+    /* ══════════════════════════════════════════════════════════
+       AMBIENT — palette extraction from cover art
+       ══════════════════════════════════════════════════════════ */
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+    function buildPalette(o) {
+        const baseHue  = (o && o.baseHue  != null) ? o.baseHue  : 38;
+        const accHue   = (o && o.accHue   != null) ? o.accHue   : 19;
+        const accSat   = (o && o.accSat   != null) ? o.accSat   : 72;
+        const accLight = (o && o.accLight != null) ? o.accLight : 48;
+
+        const H = baseHue;
+        const A = accHue;
+        return {
+            bg:     `hsl(${H.toFixed(1)} 30% 96.8%)`,
+            card:   `hsl(${H.toFixed(1)} 40% 99.3%)`,
+            line:   `hsl(${H.toFixed(1)} 26% 89.5%)`,
+            ink:    `hsl(${H.toFixed(1)} 18% 7%)`,
+            muted:  `hsl(${H.toFixed(1)} 10% 38%)`,
+            dim:    `hsl(${H.toFixed(1)} 8% 60%)`,
+            accent: `hsl(${A.toFixed(1)} ${accSat.toFixed(0)}% ${accLight.toFixed(0)}%)`,
+            scrim:  `hsl(${H.toFixed(1)} 20% 8% / .38)`,
+            scroll: `hsl(${H.toFixed(1)} 20% 82%)`,
+            g1:     `hsl(${A.toFixed(1)} 85% 62%)`,
+            g2:     `hsl(${H.toFixed(1)} 75% 65%)`,
+        };
+    }
+
+    const DEFAULT_PALETTE = buildPalette();
+
+    function applyPalette(p) {
+        const s = document.documentElement.style;
+        s.setProperty('--c-bg', p.bg);
+        s.setProperty('--c-card', p.card);
+        s.setProperty('--c-line', p.line);
+        s.setProperty('--c-ink', p.ink);
+        s.setProperty('--c-muted', p.muted);
+        s.setProperty('--c-dim', p.dim);
+        s.setProperty('--c-accent', p.accent);
+        s.setProperty('--c-scrim', p.scrim);
+        s.setProperty('--c-scroll', p.scroll);
+        s.setProperty('--g1', p.g1);
+        s.setProperty('--g2', p.g2);
+        currentPalette = p;
+        paintVol();
+    }
+
+    /** pick the strongest hue bucket, lightly smoothed across neighbours */
+    function bestBin(arr) {
+        const BINS = arr.length;
+        let best = 0, bestScore = -1, total = 0;
+        for (let i = 0; i < BINS; i++) {
+            total += arr[i];
+            const score = arr[(i - 1 + BINS) % BINS] * 0.5 + arr[i] + arr[(i + 1) % BINS] * 0.5;
+            if (score > bestScore) { bestScore = score; best = i; }
+        }
+        return { index: best, hue: best * 10 + 5, total };
+    }
+
+    function analyzeImage(img) {
+        const N = 48;
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = N;
+        const ctx = cv.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, N, N);
+
+        let px;
+        try {
+            px = ctx.getImageData(0, 0, N, N).data;   // throws if canvas is tainted
+        } catch (e) {
+            return null;
+        }
+
+        const BINS = 36;
+        const baseW = new Float64Array(BINS);
+        const accW  = new Float64Array(BINS);
+        const accS  = new Float64Array(BINS);
+        const accL  = new Float64Array(BINS);
+        let valid = 0;
+
+        for (let i = 0; i < px.length; i += 4) {
+            if (px[i + 3] < 100) continue;
+            const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const l = (max + min) / 2;
+            if (l < 0.04 || l > 0.97) continue;
+
+            const d = max - min;
+            let h = 0, s = 0;
+            if (d > 1e-6) {
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                if (max === r)      h = (g - b) / d + (g < b ? 6 : 0);
+                else if (max === g) h = (b - r) / d + 2;
+                else                h = (r - g) / d + 4;
+                h *= 60;
+            }
+
+            valid++;
+            if (s < 0.06) continue;               // hue is meaningless for greys
+
+            const bin = Math.min(BINS - 1, Math.floor(h / 10));
+            const mid = Math.max(0.15, 1 - Math.abs(l - 0.5) * 1.1);
+
+            baseW[bin] += s * mid;
+
+            if (s > 0.15) {
+                const aw = s * Math.max(0, 1 - Math.abs(l - 0.52) * 1.8) * 1.5;
+                if (aw > 0) {
+                    accW[bin] += aw;
+                    accS[bin] += s * aw;
+                    accL[bin] += l * aw;
+                }
+            }
+        }
+
+        if (!valid) return null;
+
+        const base = bestBin(baseW);
+        const acc  = bestBin(accW);
+
+        let baseHue  = DEFAULT_PALETTE.baseHue;
+        let accHue   = 19, accSat = 72, accLight = 48;
+
+        const baseStrength = base.total / valid;
+        const accStrength  = acc.total / valid;
+
+        if (baseStrength > 0.03) baseHue = base.hue;
+
+        if (accStrength > 0.02) {
+            accHue   = acc.hue;
+            const s  = accS[acc.index] / acc.total;
+            const l  = accL[acc.index] / acc.total;
+            accSat   = clamp(s * 100 * 1.15, 55, 88);
+            accLight = clamp(l * 100, 40, 52);
+        } else if (baseStrength > 0.03) {
+            // near-grayscale artwork → keep the accent in the same family
+            accHue = baseHue;
+            accSat = 60;
+            accLight = 46;
+        }
+
+        return buildPalette({ baseHue, accHue, accSat, accLight });
+    }
+
+    function loadImage(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('image load failed'));
+            img.src = url;
+        });
+    }
+
+    async function setThemeFromCover(url) {
+        lastCoverUrl = url || '';
+        if (!ambientOn) return;
+
+        const token = ++themeToken;
+        const key = lastCoverUrl || '__default__';
+        let pal;
+
+        if (themeCache.has(key)) {
+            pal = themeCache.get(key);
+        } else if (lastCoverUrl) {
+            try {
+                const img = await loadImage(lastCoverUrl);
+                pal = analyzeImage(img);
+            } catch (e) {
+                pal = null;
+            }
+            themeCache.set(key, pal);
+        }
+
+        if (token !== themeToken) return;          // a newer cover won the race
+        applyPalette(pal || DEFAULT_PALETTE);
+    }
+
+    function setAmbient(on) {
+        ambientOn = !!on;
+        el.ambient.classList.toggle('off', !ambientOn);
+        el.ambientBtn.textContent = 'ambient · ' + (ambientOn ? 'on' : 'off');
+        el.ambientBtn.setAttribute('aria-pressed', String(ambientOn));
+        try { localStorage.setItem('ff-music-ambient', ambientOn ? '1' : '0'); } catch (e) {}
+
+        if (ambientOn) setThemeFromCover(lastCoverUrl);
+        else applyPalette(DEFAULT_PALETTE);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       HELPERS
+       ══════════════════════════════════════════════════════════ */
     const esc = (s) => String(s).replace(/[&<>"']/g, c =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -327,7 +597,9 @@
 
     const albumOfQueue = () => (queueAlbum >= 0 ? albums[queueAlbum] : null);
 
-    /* ─── views ─── */
+    /* ══════════════════════════════════════════════════════════
+       VIEWS
+       ══════════════════════════════════════════════════════════ */
     function showAlbumsView() {
         if (!explicit) return;
         el.viewAlbums.classList.remove('hidden');
@@ -343,9 +615,12 @@
         albumIndex = i;
         renderTracks();
         if (goToView) showTracksView();
+        setThemeFromCover(albums[i].cover || '');
     }
 
-    /* ─── render: albums ─── */
+    /* ══════════════════════════════════════════════════════════
+       RENDER: ALBUMS
+       ══════════════════════════════════════════════════════════ */
     function renderAlbums() {
         el.albumGrid.innerHTML = '';
         albums.forEach((al, i) => {
@@ -356,7 +631,7 @@
             card.setAttribute('aria-label', 'open album ' + al.title);
             card.innerHTML =
                 '<div class="cover-wrap">' +
-                    '<img alt="" class="w-full h-full object-cover" src="' + (al.cover || PLACEHOLDER) + '">' +
+                    '<img alt="" class="w-full h-full object-cover" src="' + esc(al.cover || PLACEHOLDER) + '">' +
                     '<button class="cover-play" aria-label="play album">' +
                         '<span class="w-9 h-9 rounded-full bg-white/90 text-ink flex items-center justify-center shadow-sm">' +
                             ICON_CARD_PLAY +
@@ -394,7 +669,9 @@
         });
     }
 
-    /* ─── render: tracks ─── */
+    /* ══════════════════════════════════════════════════════════
+       RENDER: TRACKS
+       ══════════════════════════════════════════════════════════ */
     function renderTracks() {
         const al = albums[albumIndex];
         if (!al) return;
@@ -445,13 +722,13 @@
         const row = el.list.children[i];
         if (!row) return;
         const d = row.querySelector('.dur');
-        if (d && albums[albumIndex] && albums[albumIndex].tracks[i]) {
-            const t = albums[albumIndex].tracks[i];
-            d.textContent = t.duration ? fmt(t.duration) : '--:--';
-        }
+        const t = albums[albumIndex] && albums[albumIndex].tracks[i];
+        if (d && t) d.textContent = t.duration ? fmt(t.duration) : '--:--';
     }
 
-    /* ─── now playing ─── */
+    /* ══════════════════════════════════════════════════════════
+       NOW PLAYING
+       ══════════════════════════════════════════════════════════ */
     function setCover(url) {
         const img = el.cover;
         img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
@@ -469,8 +746,10 @@
         }
         el.title.textContent = t.title;
         el.artist.textContent = t.artist || al.artist || al.title || '—';
-        setCover(t.cover || al.cover);
+        const art = t.cover || al.cover || '';
+        setCover(art);
         updateMediaSession(t, al);
+        setThemeFromCover(art);
     }
 
     function updateMediaSession(t, al) {
@@ -485,7 +764,9 @@
         } catch (e) {}
     }
 
-    /* ─── playback ─── */
+    /* ══════════════════════════════════════════════════════════
+       PLAYBACK
+       ══════════════════════════════════════════════════════════ */
     function playTrack(aIdx, tIdx) {
         const al = albums[aIdx];
         if (!al || !al.tracks[tIdx]) return;
@@ -528,15 +809,15 @@
     function onEnded() {
         const al = albumOfQueue();
         if (!al || !al.tracks.length) return;
-
         if (repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
         if (shuffle && al.tracks.length > 1) return playTrack(queueAlbum, randomIndex(al.tracks.length));
         if (current < al.tracks.length - 1) return playTrack(queueAlbum, current + 1);
         if (repeat === 'all') return playTrack(queueAlbum, 0);
-        /* stop at end of album */
     }
 
-    /* ─── progress ─── */
+    /* ══════════════════════════════════════════════════════════
+       PROGRESS
+       ══════════════════════════════════════════════════════════ */
     function updateProgress() {
         const d = audio.duration;
         const pct = (d && isFinite(d)) ? Math.min(100, (audio.currentTime / d) * 100) : 0;
@@ -565,11 +846,19 @@
         updateProgress();
     }
 
-    /* ─── volume ─── */
+    /* ══════════════════════════════════════════════════════════
+       VOLUME
+       ══════════════════════════════════════════════════════════ */
     function paintVol() {
-        const p = (el.vol.value * 100).toFixed(1);
+        const p = (parseFloat(el.vol.value) * 100).toFixed(1);
+        const ink  = (currentPalette && currentPalette.ink)  || '#0f0f0f';
+        const line = (currentPalette && currentPalette.line) || '#ece7dd';
         el.vol.style.background =
-            'linear-gradient(to right, #0f0f0f 0%, #0f0f0f ' + p + '%, #ece7dd ' + p + '%, #ece7dd 100%)';
+            'linear-gradient(to right,' +
+            ' ' + ink + ' 0%,' +
+            ' ' + ink + ' ' + p + '%,' +
+            ' ' + line + ' ' + p + '%,' +
+            ' ' + line + ' 100%)';
     }
 
     function setVolume(v) {
@@ -582,7 +871,9 @@
         try { localStorage.setItem('ff-music-vol', String(v)); } catch (e) {}
     }
 
-    /* ─── ui state ─── */
+    /* ══════════════════════════════════════════════════════════
+       UI STATE
+       ══════════════════════════════════════════════════════════ */
     function setPlayingUI(on) {
         el.playBtn.innerHTML = on ? ICON_PAUSE : ICON_PLAY;
         el.playBtn.setAttribute('aria-label', on ? 'pause' : 'play');
@@ -592,7 +883,9 @@
         }
     }
 
-    /* ─── durations ─── */
+    /* ══════════════════════════════════════════════════════════
+       DURATIONS
+       ══════════════════════════════════════════════════════════ */
     function loadDurations() {
         albums.forEach((al, ai) => al.tracks.forEach((t, ti) => {
             if (t.duration) return;
@@ -611,7 +904,9 @@
         }));
     }
 
-    /* ─── error ─── */
+    /* ══════════════════════════════════════════════════════════
+       ERROR
+       ══════════════════════════════════════════════════════════ */
     function showError(err) {
         explicit = true;
         showAlbumsView();
@@ -681,6 +976,8 @@
     });
     el.vol.addEventListener('input', () => setVolume(parseFloat(el.vol.value)));
 
+    el.ambientBtn.addEventListener('click', () => setAmbient(!ambientOn));
+
     /* seek dragging */
     el.seek.addEventListener('pointerdown', (e) => {
         if (!audio.duration || !isFinite(audio.duration)) return;
@@ -730,6 +1027,7 @@
             case 'KeyS':       el.shuffleBtn.click(); break;
             case 'KeyR':       el.repeatBtn.click(); break;
             case 'KeyM':       el.muteBtn.click(); break;
+            case 'KeyA':       setAmbient(!ambientOn); break;
             case 'Escape':     showAlbumsView(); break;
         }
     });
@@ -742,12 +1040,24 @@
         el.muteBtn.innerHTML = ICON_VOL;
         setCover('');
 
+        /* ambient preference */
+        try {
+            const a = localStorage.getItem('ff-music-ambient');
+            if (a !== null) ambientOn = a === '1';
+        } catch (e) {}
+        el.ambient.classList.toggle('off', !ambientOn);
+        el.ambientBtn.textContent = 'ambient · ' + (ambientOn ? 'on' : 'off');
+        el.ambientBtn.setAttribute('aria-pressed', String(ambientOn));
+
+        /* volume preference */
         let savedVol = 0.8;
         try {
             const v = localStorage.getItem('ff-music-vol');
             if (v !== null) savedVol = parseFloat(v);
         } catch (e) {}
         setVolume(isNaN(savedVol) ? 0.8 : savedVol);
+
+        applyPalette(DEFAULT_PALETTE);
 
         if ('mediaSession' in navigator) {
             try {
@@ -803,7 +1113,6 @@
 
             loadDurations();
 
-            /* prepare the first track without autoplay */
             queueAlbum = 0;
             current = 0;
             audio.src = albums[0].tracks[0].src;
@@ -813,6 +1122,11 @@
         } catch (err) {
             showError(err);
         }
+
+        /* enable colour crossfades only after the first paint */
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => document.documentElement.classList.add('theme-live'));
+        });
     }
 
     init();
