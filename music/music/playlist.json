@@ -3,9 +3,14 @@
     {
       "title": "Weather",
       "artist": "Flame.f",
+      "artist_url": "https://www.bandlab.com/flame_fox1",
+      "year": "2026",
       "cover": "weather.jpg",
       "tracks": [
-        { "title": "Munday", "file": "Munday.mp3" }
+        {
+          "title": "Munday",
+          "file": "Munday.mp3"
+        }
       ]
     }
   ]
