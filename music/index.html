@@ -449,33 +449,6 @@
         return { h: best * 10 + 5, s: hs[best] / w[best], l: hl[best] / w[best] };
     }
 
-    /* read the outer ring + a saturated accent out of a cover */
-    function analyzeImage(img) {
-        const N = 64;
-        const cv = document.createElement('canvas');
-        cv.width = cv.height = N;
-        const ctx = cv.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0, N, N);
-
-        let px;
-        try {
-            px = ctx.getImageData(0, 0, N, N).data;   // throws on tainted canvas
-        } catch (e) {
-            return null;
-        }
-
-        const m = Math.max(2, Math.round(N * 0.12)); // outer 12% margin
-        const isMargin = (x, y) => x < m || x >= N - m || y < m || y >= N - m;
-
-        const margin = dominantColor(px, N, isMargin) || dominantColor(px, N, () => true);
-        if (!margin) return null;
-
-        return {
-            margin: rgbToHsl(margin.r, margin.g, margin.b),
-            accent: mostSaturated(px, N),
-        };
-    }
-
     /* ══════════════════════════════════════════════════════════
        PALETTE — page takes the margin colour, contrast decides text
        ══════════════════════════════════════════════════════════ */
@@ -556,37 +529,59 @@
         paintVol();
     }
 
-    function loadImage(url) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            // Note: crossOrigin removed to allow same-origin canvas extraction
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error('image load failed'));
-            img.src = url;
-        });
-    }
-
+    /* ══════════════════════════════════════════════════════════
+       THEME EXTRACTION (FIXED FOR CORS)
+       ══════════════════════════════════════════════════════════ */
     async function setThemeFromCover(url) {
         lastCoverUrl = url || '';
         const token = ++themeToken;
         const key = lastCoverUrl || '__default__';
-        let pal = null;
 
-        if (themeCache.has(key)) {
-            pal = themeCache.get(key);
-        } else if (lastCoverUrl) {
-            try {
-                const img = await loadImage(lastCoverUrl);
-                const data = analyzeImage(img);
-                if (data) pal = buildPalette(data.margin, data.accent);
-            } catch (e) {
-                pal = null;
-            }
-            themeCache.set(key, pal);
+        if (!lastCoverUrl) {
+            applyPalette(DEFAULT_PALETTE);
+            return;
         }
 
-        if (token !== themeToken) return;      // a newer cover won the race
-        applyPalette(pal || DEFAULT_PALETTE);
+        if (themeCache.has(key)) {
+            applyPalette(themeCache.get(key));
+            return;
+        }
+
+        try {
+            // Fetch as blob to bypass canvas tainting issues (CORS)
+            const res = await fetch(lastCoverUrl);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const blob = await res.blob();
+            const img = await createImageBitmap(blob);
+
+            const N = 64;
+            const cv = document.createElement('canvas');
+            cv.width = cv.height = N;
+            const ctx = cv.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0, N, N);
+
+            const px = ctx.getImageData(0, 0, N, N).data;
+
+            // Outer 12% ring
+            const m = Math.max(2, Math.round(N * 0.12));
+            const isMargin = (x, y) => x < m || x >= N - m || y < m || y >= N - m;
+
+            const margin = dominantColor(px, N, isMargin) || dominantColor(px, N, () => true);
+            if (!margin) throw new Error('no margin color found');
+
+            const accent = mostSaturated(px, N);
+            const marginHsl = rgbToHsl(margin.r, margin.g, margin.b);
+            
+            const pal = buildPalette(marginHsl, accent);
+
+            if (token === themeToken) {
+                themeCache.set(key, pal);
+                applyPalette(pal);
+            }
+        } catch (e) {
+            console.error('Theme extraction failed:', e);
+            if (token === themeToken) applyPalette(DEFAULT_PALETTE);
+        }
     }
 
     function setGlow(on) {
