@@ -24,42 +24,24 @@
                         mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        bg:     'var(--c-bg)',
-                        card:   'var(--c-card)',
-                        ink:    'var(--c-ink)',
-                        muted:  'var(--c-muted)',
-                        dim:    'var(--c-dim)',
-                        line:   'var(--c-line)',
-                        accent: 'var(--c-accent)',
+                        bg: '#faf8f3',
+                        card: '#ffffff',
+                        ink: '#0f0f0f',
+                        muted: '#5c5c5c',
+                        dim: '#9a9a9a',
+                        line: '#ece7dd',
+                        accent: '#d9531e',
                     }
                 }
             }
         }
     </script>
 
-    <!-- default palette; overwritten per-cover at runtime -->
-    <style>
-        :root {
-            --c-bg:     hsl(38 30% 96.8%);
-            --c-card:   hsl(38 27% 99.5%);
-            --c-line:   hsl(38 18% 89.5%);
-            --c-ink:    hsl(38 12% 8%);
-            --c-muted:  hsl(38 18% 34%);
-            --c-dim:    hsl(38 14% 55%);
-            --c-accent: hsl(19 72% 48%);
-            --c-scrim:  hsl(0 0% 0% / .45);
-            --c-scroll: hsl(38 15% 82%);
-            --c-shadow: 0 1px 2px rgba(0,0,0,.03), 0 8px 24px -12px rgba(0,0,0,.06);
-            --g1:       hsl(19 70% 62%);
-            --g2:       hsl(38 60% 75%);
-        }
-    </style>
-
     <style type="text/tailwindcss">
         body { @apply bg-bg text-ink font-sans antialiased; }
         ::selection { @apply bg-ink text-bg; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--c-scroll); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #d6d0c5; border-radius: 999px; }
         ::-webkit-scrollbar-track { background: transparent; }
 
         .pill {
@@ -74,14 +56,13 @@
         }
         .ctrl.on { @apply text-accent; }
 
-        .album-card { @apply block w-full text-left cursor-pointer; }
-        .album-card .cover-wrap { @apply relative aspect-square rounded-xl overflow-hidden border border-line bg-bg; }
-        .album-card .cover-play {
-            @apply absolute inset-0 flex items-center justify-center opacity-0 transition-opacity;
-            background: var(--c-scrim);
-        }
-        .album-card:hover .cover-play, .album-card:focus-visible .cover-play { @apply opacity-100; }
+        .album-card { @apply block w-full text-left cursor-pointer outline-none; }
+        .album-card .cover-wrap { @apply relative aspect-square rounded-xl overflow-hidden border border-line bg-bg transition-colors; }
+        .album-card .cover-play { @apply absolute inset-0 flex items-center justify-center bg-ink/40 opacity-0 transition-opacity; }
+        .album-card:hover .cover-play,
+        .album-card:focus-visible .cover-play { @apply opacity-100; }
         .album-card:hover .a-title { @apply text-accent; }
+        .album-card.selected .cover-wrap { @apply border-ink; }
         .album-card.playing .cover-wrap { @apply border-accent; }
 
         .track-row { @apply flex items-center gap-3 px-1 py-2.5 cursor-pointer select-none; }
@@ -96,65 +77,33 @@
     </style>
 
     <style>
-        main { box-shadow: var(--c-shadow); }
-
-        /* ── very subtle accent glow, tinted by the cover ── */
-        #ambient {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-            transition: opacity .9s ease;
-        }
-        #ambient.off { opacity: 0; }
-        #ambient .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(110px);
-            opacity: .13;
-            transition: background-color .9s ease;
-            will-change: background-color;
-        }
-        #ambient .b1 { width: 70vmax; height: 70vmax; left: -22vmax; top: -26vmax; background: var(--g1); }
-        #ambient .b2 { width: 55vmax; height: 55vmax; right: -20vmax; bottom: -22vmax; background: var(--g2); }
-
-        /* ── smooth colour crossfade ── */
-        :where(html.theme-live) :where(*, *::before, *::after) {
-            transition:
-                background-color 620ms ease,
-                border-color 620ms ease,
-                color 620ms ease,
-                fill 620ms ease,
-                stroke 620ms ease,
-                box-shadow 620ms ease;
-        }
-
-        /* ── volume slider ── */
         input[type="range"].vol {
-            -webkit-appearance: none; appearance: none;
-            width: 68px; height: 3px;
-            border-radius: 999px; outline: none; cursor: pointer;
-            background: var(--c-line);
+            -webkit-appearance: none;
+            appearance: none;
+            width: 64px;
+            height: 3px;
+            border-radius: 999px;
+            outline: none;
+            cursor: pointer;
+            background: #ece7dd;
         }
         input[type="range"].vol::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
             width: 10px; height: 10px;
             border: none; border-radius: 50%;
-            background: var(--c-ink);
-            cursor: pointer;
+            background: #0f0f0f; cursor: pointer;
             transition: background .15s;
         }
-        input[type="range"].vol:hover::-webkit-slider-thumb { background: var(--c-accent); }
+        input[type="range"].vol:hover::-webkit-slider-thumb { background: #d9531e; }
         input[type="range"].vol::-moz-range-track { height: 3px; border-radius: 999px; background: transparent; }
         input[type="range"].vol::-moz-range-thumb {
             width: 10px; height: 10px; border: none; border-radius: 50%;
-            background: var(--c-ink); cursor: pointer;
+            background: #0f0f0f; cursor: pointer;
         }
 
-        /* ── equaliser ── */
         .bars i {
-            display: block; width: 2px; background: var(--c-accent);
+            display: block; width: 2px; background: #d9531e;
             border-radius: 1px; transform-origin: bottom;
             animation: eq .9s ease-in-out infinite;
         }
@@ -171,13 +120,7 @@
 
 <body class="min-h-screen flex justify-center px-4 py-10 md:py-16">
 
-    <!-- ─── AMBIENT GLOW ─── -->
-    <div id="ambient" aria-hidden="true">
-        <span class="blob b1"></span>
-        <span class="blob b2"></span>
-    </div>
-
-    <main class="relative z-10 w-full max-w-xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10">
+    <main class="w-full max-w-4xl my-auto bg-card border border-line rounded-2xl p-7 md:p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_24px_-12px_rgba(0,0,0,0.06)]">
 
         <!-- ─── HEADER ─── -->
         <header class="flex items-start justify-between gap-4 mb-7">
@@ -193,89 +136,99 @@
             <a href="/" class="pill">← home</a>
         </header>
 
-        <!-- ─── PLAYER ─── -->
-        <section class="mb-8">
-            <div class="flex items-center gap-4 mb-5">
-                <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl overflow-hidden border border-line bg-bg">
-                    <img id="cover" alt="" class="w-full h-full object-cover">
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] font-mono uppercase tracking-widest text-dim mb-1">now playing</p>
-                    <h2 id="trackTitle" class="text-[17px] font-semibold leading-snug truncate">nothing playing</h2>
-                    <p id="trackArtist" class="text-[13px] text-muted truncate mt-0.5">press play to start</p>
-                </div>
+        <div class="grid md:grid-cols-2 gap-8 md:gap-10">
+
+            <!-- ══════════ LEFT COLUMN ══════════ -->
+            <div class="min-w-0">
+
+                <!-- ─── PLAYER ─── -->
+                <section class="mb-8">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden border border-line bg-bg">
+                            <img id="cover" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[10px] font-mono uppercase tracking-widest text-dim mb-1">now playing</p>
+                            <h2 id="trackTitle" class="text-[17px] font-semibold leading-snug truncate">nothing playing</h2>
+                            <p id="trackArtist" class="text-[13px] text-muted truncate mt-0.5">press play to start</p>
+                        </div>
+                    </div>
+
+                    <div id="seek" class="group relative h-1.5 w-full rounded-full bg-line cursor-pointer touch-none mb-2">
+                        <div id="seekFill" class="absolute inset-y-0 left-0 rounded-full bg-ink group-hover:bg-accent transition-colors" style="width:0%"></div>
+                        <div id="seekThumb" class="pointer-events-none absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink opacity-0 transition-opacity group-hover:opacity-100" style="left:0%"></div>
+                    </div>
+                    <div class="flex items-center justify-between font-mono text-[11px] text-dim mb-4">
+                        <span id="timeCurrent">0:00</span>
+                        <span id="timeDuration">0:00</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <div class="flex items-center gap-1">
+                            <button id="shuffleBtn" class="ctrl" title="shuffle (s)" aria-label="shuffle">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>
+                            </button>
+                            <button id="prevBtn" class="ctrl" title="previous (p)" aria-label="previous">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.5v11a1 1 0 0 1-1.6.8L9 12.8a1 1 0 0 1 0-1.6l8.4-5.5a1 1 0 0 1 1.6.8z"/><rect x="5" y="5" width="2.2" height="14" rx="1.1"/></svg>
+                            </button>
+                            <button id="playBtn" class="w-11 h-11 rounded-full bg-ink text-bg flex items-center justify-center hover:bg-accent transition-colors" title="play / pause (space)" aria-label="play"></button>
+                            <button id="nextBtn" class="ctrl" title="next (n)" aria-label="next">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 6.5v11a1 1 0 0 0 1.6.8l8.4-5.5a1 1 0 0 0 0-1.6L6.6 5.7A1 1 0 0 0 5 6.5z"/><rect x="16.8" y="5" width="2.2" height="14" rx="1.1"/></svg>
+                            </button>
+                            <button id="repeatBtn" class="ctrl" title="repeat" aria-label="repeat">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="muteBtn" class="ctrl" title="mute (m)" aria-label="mute"></button>
+                            <input id="vol" type="range" class="vol" min="0" max="1" step="0.01" value="0.8" aria-label="volume">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ─── ALBUMS ─── -->
+                <section>
+                    <div class="flex items-baseline justify-between mb-3">
+                        <h2 class="text-[11px] font-semibold uppercase tracking-widest text-dim">albums</h2>
+                        <span id="albumCount" class="text-[10px] text-dim font-mono">loading…</span>
+                    </div>
+                    <div id="albumGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-3 sm:gap-4"></div>
+                </section>
             </div>
 
-            <div id="seek" class="group relative h-1.5 w-full rounded-full bg-line cursor-pointer touch-none mb-2">
-                <div id="seekFill" class="absolute inset-y-0 left-0 rounded-full bg-ink group-hover:bg-accent transition-colors" style="width:0%"></div>
-                <div id="seekThumb" class="pointer-events-none absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink opacity-0 transition-opacity group-hover:opacity-100" style="left:0%"></div>
-            </div>
-            <div class="flex items-center justify-between font-mono text-[11px] text-dim mb-4">
-                <span id="timeCurrent">0:00</span>
-                <span id="timeDuration">0:00</span>
-            </div>
+            <!-- ══════════ RIGHT COLUMN ══════════ -->
+            <aside id="albumPanel" class="min-w-0 md:border-l md:border-line md:pl-10">
+                <div id="albumDetail" class="hidden">
+                    <p class="text-[10px] font-mono uppercase tracking-widest text-dim mb-3">album</p>
 
-            <div class="flex items-center justify-between gap-3 flex-wrap">
-                <div class="flex items-center gap-1">
-                    <button id="shuffleBtn" class="ctrl" title="shuffle (s)" aria-label="shuffle">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>
-                    </button>
-                    <button id="prevBtn" class="ctrl" title="previous (p)" aria-label="previous">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.5v11a1 1 0 0 1-1.6.8L9 12.8a1 1 0 0 1 0-1.6l8.4-5.5a1 1 0 0 1 1.6.8z"/><rect x="5" y="5" width="2.2" height="14" rx="1.1"/></svg>
-                    </button>
-                    <button id="playBtn" class="w-11 h-11 rounded-full bg-ink text-bg flex items-center justify-center hover:bg-accent transition-colors" title="play / pause (space)" aria-label="play"></button>
-                    <button id="nextBtn" class="ctrl" title="next (n)" aria-label="next">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 6.5v11a1 1 0 0 0 1.6.8l8.4-5.5a1 1 0 0 0 0-1.6L6.6 5.7A1 1 0 0 0 5 6.5z"/><rect x="16.8" y="5" width="2.2" height="14" rx="1.1"/></svg>
-                    </button>
-                    <button id="repeatBtn" class="ctrl" title="repeat" aria-label="repeat">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-                    </button>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="muteBtn" class="ctrl" title="mute (m)" aria-label="mute"></button>
-                    <input id="vol" type="range" class="vol" min="0" max="1" step="0.01" value="0.8" aria-label="volume">
-                </div>
-            </div>
-        </section>
+                    <div class="flex items-end gap-4 mb-5">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl overflow-hidden border border-line bg-bg">
+                            <img id="albumCover" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0 pb-0.5">
+                            <h2 id="albumTitle" class="text-[17px] font-semibold leading-snug truncate">—</h2>
+                            <p id="albumMeta" class="text-[12px] text-muted truncate mt-0.5">—</p>
+                        </div>
+                    </div>
 
-        <!-- ─── ALBUM GRID ─── -->
-        <section id="viewAlbums">
-            <div class="flex items-baseline justify-between mb-3">
-                <h2 class="text-[11px] font-semibold uppercase tracking-widest text-dim">albums</h2>
-                <span id="albumCount" class="text-[10px] text-dim font-mono">loading…</span>
-            </div>
-            <div id="albumGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
-        </section>
-
-        <!-- ─── ALBUM TRACKS ─── -->
-        <section id="viewTracks" class="hidden">
-            <button id="backBtn" class="pill mb-4">← albums</button>
-
-            <div class="flex gap-4 mb-5">
-                <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-lg overflow-hidden border border-line bg-bg">
-                    <img id="albumCover" alt="" class="w-full h-full object-cover">
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] font-mono uppercase tracking-widest text-dim mb-0.5">album</p>
-                    <h2 id="albumTitle" class="text-[16px] font-semibold leading-snug truncate">—</h2>
-                    <p id="albumMeta" class="text-[12px] text-muted truncate mt-0.5">—</p>
-                    <div class="flex flex-wrap gap-2 mt-2.5">
+                    <div class="flex flex-wrap gap-2 mb-4">
                         <button id="playAlbumBtn" class="pill-solid">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>
                             play all
                         </button>
                         <button id="shuffleAlbumBtn" class="pill">shuffle</button>
                     </div>
-                </div>
-            </div>
 
-            <ul id="playlist" class="border-y border-line divide-y divide-line max-h-[300px] overflow-y-auto -mx-1"></ul>
-        </section>
+                    <ul id="playlist" class="border-y border-line divide-y divide-line max-h-[340px] overflow-y-auto -mx-1"></ul>
+                </div>
+            </aside>
+
+        </div>
 
         <!-- ─── FOOTER ─── -->
-        <footer class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-dim pt-5 mt-6 border-t border-line">
+        <footer class="flex items-center justify-between gap-3 text-[11px] text-dim pt-5 mt-8 border-t border-line">
             <span>© 2025 flame f0x</span>
-            <button id="ambientBtn" type="button" class="hover:text-ink transition-colors" aria-pressed="true">glow · on</button>
+            <span class="font-mono text-[10px] hidden sm:inline">space · ←→ · ↑↓ · n/p</span>
             <a href="https://github.com/FlameF0X/FlameF0X.github.io" target="_blank" class="hover:text-ink transition-colors">source ↗</a>
         </footer>
 
@@ -290,20 +243,19 @@
        ══════════════════════════════════════════════════════════ */
     const PLAYLIST_URL = './music/playlist.json';
     const LOGO = 'https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/refs/heads/main/assets/logo.png';
+    const MOBILE = window.matchMedia('(max-width: 767px)');
 
     const $ = (id) => document.getElementById(id);
     const el = {
-        ambient: $('ambient'), ambientBtn: $('ambientBtn'),
         cover: $('cover'), title: $('trackTitle'), artist: $('trackArtist'),
         seek: $('seek'), seekFill: $('seekFill'), seekThumb: $('seekThumb'),
         timeCurrent: $('timeCurrent'), timeDuration: $('timeDuration'),
         playBtn: $('playBtn'), prevBtn: $('prevBtn'), nextBtn: $('nextBtn'),
         shuffleBtn: $('shuffleBtn'), repeatBtn: $('repeatBtn'),
         muteBtn: $('muteBtn'), vol: $('vol'),
-        viewAlbums: $('viewAlbums'), viewTracks: $('viewTracks'),
         albumGrid: $('albumGrid'), albumCount: $('albumCount'),
-        backBtn: $('backBtn'), albumCover: $('albumCover'),
-        albumTitle: $('albumTitle'), albumMeta: $('albumMeta'),
+        albumPanel: $('albumPanel'), albumDetail: $('albumDetail'),
+        albumCover: $('albumCover'), albumTitle: $('albumTitle'), albumMeta: $('albumMeta'),
         playAlbumBtn: $('playAlbumBtn'), shuffleAlbumBtn: $('shuffleAlbumBtn'),
         list: $('playlist'),
     };
@@ -313,21 +265,14 @@
 
     /* ─── state ─── */
     let albums = [];
-    let explicit = false;
-    let albumIndex = 0;
-    let queueAlbum = -1;
-    let current = -1;
+    let viewAlbum = -1;         // album shown in the right panel
+    let queueAlbum = -1;        // album that owns the current queue
+    let current = -1;           // index inside the queue album
     let shuffle = false;
-    let repeat = 'off';
+    let repeat = 'off';         // off | all | one
     let basePath = '';
     let dragging = false;
     let lastVol = 0.8;
-
-    let glowOn = true;
-    let lastCoverUrl = '';
-    let currentPalette = null;
-    let themeToken = 0;
-    const themeCache = new Map();
 
     /* ─── icons ─── */
     const ICON_PLAY  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
@@ -351,250 +296,7 @@
          </svg>`
     );
 
-    /* ══════════════════════════════════════════════════════════
-       COLOUR MATH
-       ══════════════════════════════════════════════════════════ */
-    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-
-    function rgbToHsl(r, g, b) {
-        r /= 255; g /= 255; b /= 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
-        const l = (max + min) / 2;
-        const d = max - min;
-        let h = 0, s = 0;
-        if (d > 1e-6) {
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            if (max === r)      h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
-            else if (max === g) h = ((b - r) / d + 2) * 60;
-            else                h = ((r - g) / d + 4) * 60;
-        }
-        return { h, s, l };
-    }
-
-    /* most-populated 16³ colour bucket, smoothed with its neighbours */
-    function dominantColor(px, N, predicate) {
-        const NB = 16 * 16 * 16;
-        const counts = new Uint32Array(NB);
-        const sums = new Float64Array(NB * 3);
-        let total = 0;
-
-        for (let y = 0; y < N; y++) {
-            for (let x = 0; x < N; x++) {
-                if (!predicate(x, y)) continue;
-                const i = (y * N + x) * 4;
-                if (px[i + 3] < 120) continue;
-                const r = px[i], g = px[i + 1], b = px[i + 2];
-                const k = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
-                counts[k]++;
-                sums[k * 3] += r; sums[k * 3 + 1] += g; sums[k * 3 + 2] += b;
-                total++;
-            }
-        }
-        if (total < 24) return null;
-
-        let best = -1, bestC = 0;
-        for (let k = 0; k < NB; k++) if (counts[k] > bestC) { bestC = counts[k]; best = k; }
-
-        const bR = (best >> 8) & 15, bG = (best >> 4) & 15, bB = best & 15;
-        let sr = 0, sg = 0, sb = 0, sw = 0;
-        for (let dr = -1; dr <= 1; dr++) {
-            for (let dg = -1; dg <= 1; dg++) {
-                for (let db = -1; db <= 1; db++) {
-                    const rr = bR + dr, gg = bG + dg, bb = bB + db;
-                    if (rr < 0 || rr > 15 || gg < 0 || gg > 15 || bb < 0 || bb > 15) continue;
-                    const k = (rr << 8) | (gg << 4) | bb;
-                    const c = counts[k];
-                    if (!c) continue;
-                    const w = c * ((dr === 0 && dg === 0 && db === 0) ? 1 : 0.45);
-                    sr += sums[k * 3] * w;
-                    sg += sums[k * 3 + 1] * w;
-                    sb += sums[k * 3 + 2] * w;
-                    sw += w;
-                }
-            }
-        }
-        return { r: sr / sw, g: sg / sw, b: sb / sw, total, share: bestC / total };
-    }
-
-    /* strongest saturated hue in the whole image → used for the accent */
-    function mostSaturated(px, N) {
-        const HB = 36;
-        const w = new Float64Array(HB);
-        const hs = new Float64Array(HB);
-        const hl = new Float64Array(HB);
-
-        for (let i = 0; i < px.length; i += 4) {
-            if (px[i + 3] < 120) continue;
-            const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            const d = max - min;
-            if (d < 0.02) continue;
-            const l = (max + min) / 2;
-            const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            if (s < 0.22) continue;
-            let h;
-            if (max === r)      h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
-            else if (max === g) h = ((b - r) / d + 2) * 60;
-            else                h = ((r - g) / d + 4) * 60;
-            const bin = Math.min(HB - 1, Math.floor(h / 10));
-            const weight = s * Math.max(0.15, 1 - Math.abs(l - 0.5) * 1.3);
-            w[bin] += weight;
-            hs[bin] += s * weight;
-            hl[bin] += l * weight;
-        }
-
-        let best = -1, bestW = 0, sumW = 0;
-        for (let i = 0; i < HB; i++) { sumW += w[i]; if (w[i] > bestW) { bestW = w[i]; best = i; } }
-        if (best < 0 || sumW < 0.5) return null;
-        return { h: best * 10 + 5, s: hs[best] / w[best], l: hl[best] / w[best] };
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       PALETTE — page takes the margin colour, contrast decides text
-       ══════════════════════════════════════════════════════════ */
-    function buildPalette(margin, accent) {
-        const H  = margin.h;
-        const S  = margin.s;
-        const L  = margin.l;
-        const dark = L < 0.5;
-
-        const A  = accent ? accent.h : (H + 32) % 360;
-        const AS = accent ? accent.s : 0.70;
-        const AL = accent ? accent.l : 0.50;
-
-        const hsl  = (h, s, l) => `hsl(${clamp(h, 0, 360).toFixed(1)} ${clamp(s * 100, 0, 100).toFixed(0)}% ${clamp(l * 100, 0, 100).toFixed(1)}%)`;
-
-        const bgS = clamp(S, 0.06, 0.55);
-        const bgL = dark ? clamp(L, 0.04, 0.32) : clamp(L, 0.70, 0.97);
-
-        let cardL, lineL, inkS, mutedL, dimL, accentL, accentS;
-
-        if (dark) {
-            cardL   = clamp(bgL + 0.055, 0.08, 0.38);
-            lineL   = clamp(bgL + 0.090, 0.12, 0.42);
-            inkS    = 0.16;
-            mutedL  = 0.70;
-            dimL    = 0.48;
-            accentL = clamp(Math.max(AL, 0.60), 0.58, 0.74);
-            accentS = clamp(Math.max(AS, 0.60), 0.55, 0.88);
-        } else {
-            cardL   = clamp(bgL + 0.025, 0.86, 0.995);
-            lineL   = clamp(bgL - 0.075, 0.68, 0.90);
-            inkS    = 0.14;
-            mutedL  = 0.34;
-            dimL    = 0.55;
-            accentL = clamp(Math.min(AL, 0.50), 0.38, 0.52);
-            accentS = clamp(Math.max(AS, 0.60), 0.55, 0.88);
-        }
-
-        return {
-            dark,
-            bg:     hsl(H, bgS, bgL),
-            card:   hsl(H, bgS * 0.9, cardL),
-            line:   hsl(H, bgS * 0.6, lineL),
-            ink:    hsl(H, inkS, dark ? 0.95 : 0.09),
-            muted:  hsl(H, dark ? 0.18 : 0.20, mutedL),
-            dim:    hsl(H, dark ? 0.14 : 0.16, dimL),
-            accent: hsl(A, accentS, accentL),
-            scrim:  'hsl(0 0% 0% / .45)',
-            scroll: hsl(H, bgS * 0.5, dark ? clamp(bgL + 0.14, 0.16, 0.42) : clamp(bgL - 0.13, 0.60, 0.86)),
-            g1:     hsl(A, 0.75, dark ? 0.55 : 0.78),
-            g2:     hsl(H, 0.60, dark ? 0.45 : 0.82),
-            shadow: dark
-                ? '0 1px 2px rgba(0,0,0,.28), 0 10px 30px -12px rgba(0,0,0,.55)'
-                : '0 1px 2px rgba(0,0,0,.03), 0 8px 24px -12px rgba(0,0,0,.06)',
-        };
-    }
-
-    const DEFAULT_MARGIN = { h: 38, s: 0.30, l: 0.968 };
-    const DEFAULT_ACCENT = { h: 19, s: 0.72, l: 0.48 };
-    const DEFAULT_PALETTE = buildPalette(DEFAULT_MARGIN, DEFAULT_ACCENT);
-
-    function applyPalette(p) {
-        const s = document.documentElement.style;
-        s.setProperty('--c-bg', p.bg);
-        s.setProperty('--c-card', p.card);
-        s.setProperty('--c-line', p.line);
-        s.setProperty('--c-ink', p.ink);
-        s.setProperty('--c-muted', p.muted);
-        s.setProperty('--c-dim', p.dim);
-        s.setProperty('--c-accent', p.accent);
-        s.setProperty('--c-scrim', p.scrim);
-        s.setProperty('--c-scroll', p.scroll);
-        s.setProperty('--c-shadow', p.shadow);
-        s.setProperty('--g1', p.g1);
-        s.setProperty('--g2', p.g2);
-        document.documentElement.style.colorScheme = p.dark ? 'dark' : 'light';
-        currentPalette = p;
-        paintVol();
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       THEME EXTRACTION (FIXED FOR CORS)
-       ══════════════════════════════════════════════════════════ */
-    async function setThemeFromCover(url) {
-        lastCoverUrl = url || '';
-        const token = ++themeToken;
-        const key = lastCoverUrl || '__default__';
-
-        if (!lastCoverUrl) {
-            applyPalette(DEFAULT_PALETTE);
-            return;
-        }
-
-        if (themeCache.has(key)) {
-            applyPalette(themeCache.get(key));
-            return;
-        }
-
-        try {
-            // Fetch as blob to bypass canvas tainting issues (CORS)
-            const res = await fetch(lastCoverUrl);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const blob = await res.blob();
-            const img = await createImageBitmap(blob);
-
-            const N = 64;
-            const cv = document.createElement('canvas');
-            cv.width = cv.height = N;
-            const ctx = cv.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(img, 0, 0, N, N);
-
-            const px = ctx.getImageData(0, 0, N, N).data;
-
-            // Outer 12% ring
-            const m = Math.max(2, Math.round(N * 0.12));
-            const isMargin = (x, y) => x < m || x >= N - m || y < m || y >= N - m;
-
-            const margin = dominantColor(px, N, isMargin) || dominantColor(px, N, () => true);
-            if (!margin) throw new Error('no margin color found');
-
-            const accent = mostSaturated(px, N);
-            const marginHsl = rgbToHsl(margin.r, margin.g, margin.b);
-            
-            const pal = buildPalette(marginHsl, accent);
-
-            if (token === themeToken) {
-                themeCache.set(key, pal);
-                applyPalette(pal);
-            }
-        } catch (e) {
-            console.error('Theme extraction failed:', e);
-            if (token === themeToken) applyPalette(DEFAULT_PALETTE);
-        }
-    }
-
-    function setGlow(on) {
-        glowOn = !!on;
-        el.ambient.classList.toggle('off', !glowOn);
-        el.ambientBtn.textContent = 'glow · ' + (glowOn ? 'on' : 'off');
-        el.ambientBtn.setAttribute('aria-pressed', String(glowOn));
-        try { localStorage.setItem('ff-music-glow', glowOn ? '1' : '0'); } catch (e) {}
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       HELPERS
-       ══════════════════════════════════════════════════════════ */
+    /* ─── helpers ─── */
     const esc = (s) => String(s).replace(/[&<>"']/g, c =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -608,6 +310,11 @@
         if (!p) return '';
         if (/^(https?:)?\/\//i.test(p) || p.startsWith('data:') || p.startsWith('/')) return p;
         return basePath + p.replace(/^\.\//, '');
+    }
+
+    function setImg(img, url) {
+        img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
+        img.src = url || PLACEHOLDER;
     }
 
     function normalizeTrack(t) {
@@ -634,97 +341,106 @@
         };
     }
 
-    const albumOfQueue = () => (queueAlbum >= 0 ? albums[queueAlbum] : null);
+    const queue = () => (queueAlbum >= 0 ? albums[queueAlbum] : null);
+    const viewing = () => (viewAlbum >= 0 ? albums[viewAlbum] : null);
 
     /* ══════════════════════════════════════════════════════════
-       VIEWS
-       ══════════════════════════════════════════════════════════ */
-    function showAlbumsView() {
-        if (!explicit) return;
-        el.viewAlbums.classList.remove('hidden');
-        el.viewTracks.classList.add('hidden');
-    }
-    function showTracksView() {
-        el.viewAlbums.classList.add('hidden');
-        el.viewTracks.classList.remove('hidden');
-    }
-
-    function openAlbum(i, goToView = true) {
-        if (!albums[i]) return;
-        albumIndex = i;
-        renderTracks();
-        if (goToView) showTracksView();
-        setThemeFromCover(albums[i].cover || '');
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       RENDER: ALBUMS
+       ALBUM GRID
        ══════════════════════════════════════════════════════════ */
     function renderAlbums() {
         el.albumGrid.innerHTML = '';
+
         albums.forEach((al, i) => {
             const card = document.createElement('div');
-            card.className = 'album-card group focus:outline-none';
+            card.className = 'album-card group';
             card.tabIndex = 0;
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label', 'open album ' + al.title);
-            card.innerHTML =
-                '<div class="cover-wrap">' +
-                    '<img alt="" class="w-full h-full object-cover" src="' + esc(al.cover || PLACEHOLDER) + '">' +
-                    '<button class="cover-play" aria-label="play album">' +
-                        '<span class="w-9 h-9 rounded-full bg-white/90 text-ink flex items-center justify-center shadow-sm">' +
-                            ICON_CARD_PLAY +
-                        '</span>' +
-                    '</button>' +
-                '</div>' +
-                '<p class="a-title mt-2 text-[13px] font-medium truncate transition-colors">' + esc(al.title) + '</p>' +
-                '<p class="text-[11px] text-dim truncate">' +
-                    esc([al.artist || '', al.tracks.length + ' track' + (al.tracks.length === 1 ? '' : 's')]
-                        .filter(Boolean).join(' · ')) +
-                '</p>';
 
-            card.addEventListener('click', () => openAlbum(i));
+            const img = document.createElement('img');
+            img.alt = '';
+            img.className = 'w-full h-full object-cover';
+            setImg(img, al.cover);
+
+            const wrap = document.createElement('div');
+            wrap.className = 'cover-wrap';
+            wrap.appendChild(img);
+
+            const playBtn = document.createElement('button');
+            playBtn.className = 'cover-play';
+            playBtn.setAttribute('aria-label', 'play album');
+            playBtn.innerHTML =
+                '<span class="w-9 h-9 rounded-full bg-white/90 text-ink flex items-center justify-center shadow-sm">' +
+                    ICON_CARD_PLAY +
+                '</span>';
+            wrap.appendChild(playBtn);
+
+            const titleEl = document.createElement('p');
+            titleEl.className = 'a-title mt-2 text-[13px] font-medium truncate transition-colors';
+            titleEl.textContent = al.title;
+
+            const metaEl = document.createElement('p');
+            metaEl.className = 'text-[11px] text-dim truncate';
+            metaEl.textContent = [al.artist, al.tracks.length + ' track' + (al.tracks.length === 1 ? '' : 's')]
+                .filter(Boolean).join(' · ');
+
+            card.appendChild(wrap);
+            card.appendChild(titleEl);
+            card.appendChild(metaEl);
+
+            card.addEventListener('click', () => selectAlbum(i));
             card.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAlbum(i); }
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAlbum(i); }
             });
 
-            const playBtn = card.querySelector('.cover-play');
             playBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                openAlbum(i, false);
-                if (queueAlbum === i && current === 0) toggle();
-                else playTrack(i, 0);
+                if (queueAlbum === i) { selectAlbum(i, false); toggle(); }
+                else { selectAlbum(i, false); playTrack(i, 0); }
             });
 
             el.albumGrid.appendChild(card);
         });
+
         el.albumCount.textContent = albums.length + ' album' + (albums.length === 1 ? '' : 's');
-        paintAlbumCards();
+        paintCards();
     }
 
-    function paintAlbumCards() {
+    function paintCards() {
         Array.from(el.albumGrid.children).forEach((card, i) => {
+            card.classList.toggle('selected', i === viewAlbum);
             card.classList.toggle('playing', i === queueAlbum);
         });
     }
 
     /* ══════════════════════════════════════════════════════════
-       RENDER: TRACKS
+       RIGHT PANEL — album detail
        ══════════════════════════════════════════════════════════ */
-    function renderTracks() {
-        const al = albums[albumIndex];
-        if (!al) return;
+    function selectAlbum(i, scrollOnMobile = true) {
+        if (!albums[i]) return;
+        viewAlbum = i;
+        renderDetail();
+        paintCards();
+        if (scrollOnMobile && MOBILE.matches) {
+            el.albumPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function renderDetail() {
+        const al = viewing();
+        if (!al) {
+            el.albumDetail.classList.add('hidden');
+            return;
+        }
+        el.albumDetail.classList.remove('hidden');
 
         el.albumTitle.textContent = al.title;
-        const meta = [];
-        if (al.artist) meta.push(al.artist);
-        if (al.year) meta.push(al.year);
-        meta.push(al.tracks.length + ' track' + (al.tracks.length === 1 ? '' : 's'));
-        el.albumMeta.textContent = meta.join(' · ');
-
-        const img = el.albumCover;
-        img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
-        img.src = al.cover || PLACEHOLDER;
+        el.albumMeta.textContent = [
+            al.artist,
+            al.year,
+            al.tracks.length + ' track' + (al.tracks.length === 1 ? '' : 's'),
+        ].filter(Boolean).join(' · ');
+        setImg(el.albumCover, al.cover);
 
         el.list.innerHTML = '';
         al.tracks.forEach((t, i) => {
@@ -742,8 +458,8 @@
                 '<span class="dur shrink-0 font-mono text-[11px] text-dim">' + (t.duration ? fmt(t.duration) : '--:--') + '</span>';
 
             li.addEventListener('click', () => {
-                if (queueAlbum === albumIndex && i === current) toggle();
-                else playTrack(albumIndex, i);
+                if (queueAlbum === viewAlbum && i === current) toggle();
+                else playTrack(viewAlbum, i);
             });
             el.list.appendChild(li);
         });
@@ -753,42 +469,34 @@
 
     function paintRows() {
         Array.from(el.list.children).forEach((row, i) => {
-            row.classList.toggle('active', albumIndex === queueAlbum && i === current);
+            row.classList.toggle('active', queueAlbum === viewAlbum && i === current);
         });
     }
 
     function updateRowDuration(i) {
         const row = el.list.children[i];
-        if (!row) return;
+        const al = viewing();
+        if (!row || !al || !al.tracks[i]) return;
         const d = row.querySelector('.dur');
-        const t = albums[albumIndex] && albums[albumIndex].tracks[i];
-        if (d && t) d.textContent = t.duration ? fmt(t.duration) : '--:--';
+        if (d) d.textContent = al.tracks[i].duration ? fmt(al.tracks[i].duration) : '--:--';
     }
 
     /* ══════════════════════════════════════════════════════════
        NOW PLAYING
        ══════════════════════════════════════════════════════════ */
-    function setCover(url) {
-        const img = el.cover;
-        img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
-        img.src = url || PLACEHOLDER;
-    }
-
     function updateNowPlaying() {
-        const al = albumOfQueue();
+        const al = queue();
         const t = al && al.tracks[current];
         if (!t) {
             el.title.textContent = 'nothing playing';
             el.artist.textContent = 'press play to start';
-            setCover('');
+            setImg(el.cover, '');
             return;
         }
         el.title.textContent = t.title;
         el.artist.textContent = t.artist || al.artist || al.title || '—';
-        const art = t.cover || al.cover || '';
-        setCover(art);
+        setImg(el.cover, t.cover || al.cover);
         updateMediaSession(t, al);
-        setThemeFromCover(art);
     }
 
     function updateMediaSession(t, al) {
@@ -815,24 +523,24 @@
         audio.play().catch(() => {});
         updateNowPlaying();
         paintRows();
-        paintAlbumCards();
+        paintCards();
     }
 
     function toggle() {
-        if (!albumOfQueue()) return;
+        if (!queue()) return;
         if (audio.paused) audio.play().catch(() => {});
         else audio.pause();
     }
 
     function next() {
-        const al = albumOfQueue();
+        const al = queue();
         if (!al || !al.tracks.length) return;
         if (shuffle && al.tracks.length > 1) return playTrack(queueAlbum, randomIndex(al.tracks.length));
         playTrack(queueAlbum, current + 1);
     }
 
     function prev() {
-        const al = albumOfQueue();
+        const al = queue();
         if (!al || !al.tracks.length) return;
         if (audio.currentTime > 3) { audio.currentTime = 0; updateProgress(); return; }
         playTrack(queueAlbum, current - 1);
@@ -846,8 +554,9 @@
     }
 
     function onEnded() {
-        const al = albumOfQueue();
+        const al = queue();
         if (!al || !al.tracks.length) return;
+
         if (repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
         if (shuffle && al.tracks.length > 1) return playTrack(queueAlbum, randomIndex(al.tracks.length));
         if (current < al.tracks.length - 1) return playTrack(queueAlbum, current + 1);
@@ -889,15 +598,9 @@
        VOLUME
        ══════════════════════════════════════════════════════════ */
     function paintVol() {
-        const p = (parseFloat(el.vol.value) * 100).toFixed(1);
-        const ink  = (currentPalette && currentPalette.ink)  || '#0f0f0f';
-        const line = (currentPalette && currentPalette.line) || '#ece7dd';
+        const p = (el.vol.value * 100).toFixed(1);
         el.vol.style.background =
-            'linear-gradient(to right,' +
-            ' ' + ink + ' 0%,' +
-            ' ' + ink + ' ' + p + '%,' +
-            ' ' + line + ' ' + p + '%,' +
-            ' ' + line + ' 100%)';
+            'linear-gradient(to right, #0f0f0f 0%, #0f0f0f ' + p + '%, #ece7dd ' + p + '%, #ece7dd 100%)';
     }
 
     function setVolume(v) {
@@ -933,7 +636,7 @@
             probe.onloadedmetadata = () => {
                 if (isFinite(probe.duration)) {
                     t.duration = probe.duration;
-                    if (ai === albumIndex) updateRowDuration(ti);
+                    if (ai === viewAlbum) updateRowDuration(ti);
                 }
                 probe.removeAttribute('src');
                 try { probe.load(); } catch (e) {}
@@ -947,8 +650,6 @@
        ERROR
        ══════════════════════════════════════════════════════════ */
     function showError(err) {
-        explicit = true;
-        showAlbumsView();
         el.albumCount.textContent = '0 albums';
         el.albumGrid.innerHTML =
             '<div class="col-span-full py-4 text-center">' +
@@ -961,6 +662,7 @@
                     '    {\n' +
                     '      "title": "album name",\n' +
                     '      "artist": "you",\n' +
+                    '      "year": "2025",\n' +
                     '      "cover": "cover.jpg",\n' +
                     '      "tracks": [\n' +
                     '        { "title": "song", "file": "song.mp3" }\n' +
@@ -978,22 +680,21 @@
     el.playBtn.addEventListener('click', toggle);
     el.prevBtn.addEventListener('click', prev);
     el.nextBtn.addEventListener('click', next);
-    el.backBtn.addEventListener('click', showAlbumsView);
 
     el.playAlbumBtn.addEventListener('click', () => {
-        const al = albums[albumIndex];
+        const al = viewing();
         if (!al || !al.tracks.length) return;
-        if (queueAlbum === albumIndex && current === 0) toggle();
-        else playTrack(albumIndex, 0);
+        if (queueAlbum === viewAlbum && current === 0) toggle();
+        else playTrack(viewAlbum, 0);
     });
 
     el.shuffleAlbumBtn.addEventListener('click', () => {
-        const al = albums[albumIndex];
+        const al = viewing();
         if (!al || !al.tracks.length) return;
         shuffle = true;
         el.shuffleBtn.classList.add('on');
         el.shuffleBtn.setAttribute('aria-pressed', 'true');
-        playTrack(albumIndex, Math.floor(Math.random() * al.tracks.length));
+        playTrack(viewAlbum, Math.floor(Math.random() * al.tracks.length));
     });
 
     el.shuffleBtn.addEventListener('click', () => {
@@ -1015,8 +716,6 @@
     });
     el.vol.addEventListener('input', () => setVolume(parseFloat(el.vol.value)));
 
-    el.ambientBtn.addEventListener('click', () => setGlow(!glowOn));
-
     /* seek dragging */
     el.seek.addEventListener('pointerdown', (e) => {
         if (!audio.duration || !isFinite(audio.duration)) return;
@@ -1037,11 +736,11 @@
     audio.addEventListener('loadedmetadata', () => {
         el.timeDuration.textContent = fmt(audio.duration);
         updateProgress();
-        const al = albumOfQueue();
+        const al = queue();
         const t = al && al.tracks[current];
         if (t && !t.duration && isFinite(audio.duration)) {
             t.duration = audio.duration;
-            if (queueAlbum === albumIndex) updateRowDuration(current);
+            if (queueAlbum === viewAlbum) updateRowDuration(current);
         }
     });
     audio.addEventListener('timeupdate', () => { if (!dragging) updateProgress(); });
@@ -1066,8 +765,6 @@
             case 'KeyS':       el.shuffleBtn.click(); break;
             case 'KeyR':       el.repeatBtn.click(); break;
             case 'KeyM':       el.muteBtn.click(); break;
-            case 'KeyA':       setGlow(!glowOn); break;
-            case 'Escape':     showAlbumsView(); break;
         }
     });
 
@@ -1077,26 +774,14 @@
     async function init() {
         el.playBtn.innerHTML = ICON_PLAY;
         el.muteBtn.innerHTML = ICON_VOL;
-        setCover('');
+        setImg(el.cover, '');
 
-        /* glow preference */
-        try {
-            const g = localStorage.getItem('ff-music-glow');
-            if (g !== null) glowOn = g === '1';
-        } catch (e) {}
-        el.ambient.classList.toggle('off', !glowOn);
-        el.ambientBtn.textContent = 'glow · ' + (glowOn ? 'on' : 'off');
-        el.ambientBtn.setAttribute('aria-pressed', String(glowOn));
-
-        /* volume preference */
         let savedVol = 0.8;
         try {
             const v = localStorage.getItem('ff-music-vol');
             if (v !== null) savedVol = parseFloat(v);
         } catch (e) {}
         setVolume(isNaN(savedVol) ? 0.8 : savedVol);
-
-        applyPalette(DEFAULT_PALETTE);
 
         if ('mediaSession' in navigator) {
             try {
@@ -1118,10 +803,8 @@
 
             if (Array.isArray(data)) {
                 albums = [normalizeAlbum({ title: 'all tracks', tracks: data })];
-                explicit = false;
             } else if (Array.isArray(data.albums)) {
                 albums = data.albums.map(normalizeAlbum);
-                explicit = true;
             } else if (Array.isArray(data.tracks) || Array.isArray(data.songs)) {
                 albums = [normalizeAlbum({
                     title: data.title || 'all tracks',
@@ -1129,7 +812,6 @@
                     cover: data.cover || '',
                     tracks: data.tracks || data.songs,
                 })];
-                explicit = false;
             } else {
                 throw new Error('no albums or tracks in json');
             }
@@ -1137,35 +819,20 @@
             albums = albums.filter(a => a.tracks.length);
             if (!albums.length) throw new Error('library is empty');
 
-            if (explicit) {
-                renderAlbums();
-                albumIndex = 0;
-                renderTracks();
-                showAlbumsView();
-            } else {
-                el.viewAlbums.classList.add('hidden');
-                el.backBtn.classList.add('hidden');
-                albumIndex = 0;
-                renderTracks();
-                showTracksView();
-            }
-
+            renderAlbums();
+            selectAlbum(0, false);      // open first album in the right panel
             loadDurations();
 
+            /* prepare first track without autoplay */
             queueAlbum = 0;
             current = 0;
             audio.src = albums[0].tracks[0].src;
             updateNowPlaying();
             paintRows();
-            paintAlbumCards();
+            paintCards();
         } catch (err) {
             showError(err);
         }
-
-        /* enable colour crossfades after the first paint */
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => document.documentElement.classList.add('theme-live'));
-        });
     }
 
     init();
