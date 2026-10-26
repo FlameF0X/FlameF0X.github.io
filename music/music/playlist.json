@@ -2,7 +2,7 @@
   "albums": [
     {
       "title": "Weather",
-      "artist": "Me - Flame.f (BandLab)",
+      "artist": "Flame.f",
       "cover": "weather.jpg",
       "tracks": [
         { "title": "Munday", "file": "Munday.mp3" }
