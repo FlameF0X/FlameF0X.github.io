@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NANO-SR.v6 // OPTICAL TELEMETRY RECON</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -38,10 +36,9 @@
     </script>
 
     <style>
-        /* Tech Blueprint Grid Background */
         .blueprint-bg {
             background-color: #030303;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
                 radial-gradient(rgba(163, 230, 53, 0.03) 1px, transparent 0);
@@ -49,11 +46,7 @@
             background-position: center center;
         }
 
-        /* Subtle Scanline Overlay */
-        .scanlines {
-            position: relative;
-            overflow: hidden;
-        }
+        .scanlines { position: relative; overflow: hidden; }
         .scanlines::before {
             content: " ";
             display: block;
@@ -65,23 +58,11 @@
             pointer-events: none;
         }
 
-        /* Custom scrollbars */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #030303;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f1f26;
-            border-radius: 999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a3e635;
-        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #1f1f26; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a3e635; }
 
-        /* Tactical HUD Crosshair container */
         .zoom-container {
             position: relative;
             cursor: crosshair;
@@ -91,9 +72,7 @@
             border: 1px solid #1f1f26;
             transition: border-color 0.3s ease;
         }
-        .zoom-container:hover {
-            border-color: #a3e635;
-        }
+        .zoom-container:hover { border-color: #a3e635; }
         .zoom-image {
             width: 100%;
             height: 100%;
@@ -103,7 +82,6 @@
             pointer-events: none;
         }
 
-        /* Reticle overlay for Tactical Zoom */
         .hud-overlay {
             position: absolute;
             inset: 0;
@@ -112,21 +90,19 @@
             z-index: 10;
         }
 
-        /* Glowing LEDs */
-        .led-pulse {
-            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        .led-pulse { animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse-glow {
             0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px rgba(163, 230, 53, 0.6)); }
             50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(163, 230, 53, 0)); }
         }
 
-        /* Grid Pattern for Checkerboard */
         .checkerboard-pattern {
             background-image: repeating-conic-gradient(#09090b 0% 25%, #141419 0% 50%);
             background-position: 0 0, 10px 10px;
             background-size: 20px 20px;
         }
+
+        select:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body class="blueprint-bg text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-acid-500 selection:text-black">
@@ -134,8 +110,7 @@
     <!-- Top Technical Nav / Status Bar -->
     <header class="border-b border-obsidian-800/85 bg-obsidian-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
-            <!-- Logo & Model Spec -->
+
             <div class="flex items-center gap-4">
                 <div class="relative p-2.5 bg-acid-500 text-black font-mono font-extrabold text-sm tracking-tighter shadow-[0_0_15px_rgba(163,230,53,0.2)]">
                     N_SR //
@@ -150,15 +125,12 @@
                 </div>
             </div>
 
-            <!-- Global Status & View Controls -->
             <div class="flex flex-wrap items-center gap-4">
-                <!-- AI Engine State indicator -->
                 <div id="aiStatus" class="hidden flex items-center gap-2 px-3 py-1 bg-acid-500/10 border border-acid-500/30 rounded font-mono text-[10px] text-acid-400 uppercase tracking-widest">
                     <span class="w-1.5 h-1.5 rounded-full bg-acid-500 led-pulse"></span>
-                    Synthesizing 6x Subpixels...
+                    <span id="aiStatusText">Synthesizing...</span>
                 </div>
-                
-                <!-- Interpolation Selector -->
+
                 <div class="flex items-center gap-1.5 bg-obsidian-900 border border-obsidian-800 p-1 rounded-sm">
                     <span class="text-[10px] font-mono text-slate-500 px-2 uppercase">Render:</span>
                     <button id="pixelMode" class="px-2.5 py-1 font-mono text-[10px] uppercase transition-all duration-200 bg-acid-500 text-black font-semibold">
@@ -173,13 +145,11 @@
         </div>
     </header>
 
-    <!-- Main Workspace Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
 
         <!-- Column 1: System Input Controls -->
         <section class="lg:col-span-1 space-y-6">
-            
-            <!-- Input Module -->
+
             <div class="bg-obsidian-950 border border-obsidian-800 rounded-sm p-5 space-y-6 relative">
                 <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
                     MODULE [01] // INPUT
@@ -189,11 +159,9 @@
                     <label class="block text-[11px] font-mono uppercase tracking-widest text-slate-400">
                         Capture Low-Res Source
                     </label>
-                    
-                    <!-- Advanced Drag & Drop Zone -->
+
                     <div id="dropZone1" class="group relative h-48 border border-dashed border-obsidian-700 hover:border-acid-500/50 bg-obsidian-900/40 rounded-sm flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden">
-                        
-                        <!-- Local Image Preview Layer -->
+
                         <div id="previewContainer1" class="hidden absolute inset-0 z-10 p-2 bg-obsidian-950 checkerboard-pattern">
                             <img id="img1Preview" class="w-full h-full object-contain filter brightness-95">
                             <div class="absolute bottom-2 left-2 bg-black/85 border border-obsidian-700 px-2 py-0.5 rounded font-mono text-[8px] text-slate-400">
@@ -201,9 +169,8 @@
                             </div>
                         </div>
 
-                        <!-- Empty Prompt Layer -->
                         <div id="uploadPrompt1" class="flex flex-col items-center text-center p-4 space-y-3 z-0">
-                            <div class="p-3 bg-obsidian-850 border border-obsidian-800 rounded-full group-hover:border-acid-500/40 group-hover:bg-acid-500/5 transition-all">
+                            <div class="p-3 bg-obsidian-900 border border-obsidian-800 rounded-full group-hover:border-acid-500/40 group-hover:bg-acid-500/5 transition-all">
                                 <svg class="text-slate-500 group-hover:text-acid-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             </div>
                             <div>
@@ -212,6 +179,26 @@
                             </div>
                         </div>
                         <input type="file" id="file1" class="hidden" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Model & Task Selection -->
+                <div class="space-y-4 pt-2 border-t border-obsidian-900">
+                    <div class="space-y-1.5">
+                        <label for="modelSelect" class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Model</label>
+                        <select id="modelSelect" class="w-full bg-obsidian-900 border border-obsidian-800 text-slate-200 font-mono text-[11px] px-2 py-1.5 rounded-sm focus:outline-none focus:border-acid-500/60">
+                            <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x (6x super-resolution)</option>
+                            <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet (restoration)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="taskSelect" class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Task (RestoreNet only)</label>
+                        <select id="taskSelect" class="w-full bg-obsidian-900 border border-obsidian-800 text-slate-200 font-mono text-[11px] px-2 py-1.5 rounded-sm focus:outline-none focus:border-acid-500/60">
+                            <option value="denoise">denoise</option>
+                            <option value="upscale">upscale (2x)</option>
+                            <option value="enhance">enhance</option>
+                        </select>
                     </div>
                 </div>
 
@@ -229,15 +216,14 @@
                         </div>
                     </div>
 
-                    <!-- Technical Specs Display -->
                     <div class="p-3.5 bg-obsidian-900 border border-obsidian-800/80 rounded-sm font-mono space-y-1.5 text-[10px]">
                         <h4 class="text-slate-400 border-b border-obsidian-800 pb-1 uppercase tracking-wider text-[9px] font-bold">ENGINE SPECIFICATIONS</h4>
                         <div class="flex justify-between">
-                            <span class="text-slate-500">Upscale Mode:</span>
-                            <span class="text-white font-semibold">Sub-Pixel 6x SR</span>
+                            <span class="text-slate-500">Mode:</span>
+                            <span id="specMode" class="text-white font-semibold">Sub-Pixel 6x SR</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-500">Core Engine:</span>
+                            <span class="text-slate-500">Space:</span>
                             <span class="text-white">FlameF0X/NanoSR-6x</span>
                         </div>
                         <div class="flex justify-between">
@@ -249,13 +235,12 @@
 
             </div>
 
-            <!-- Tech Tip Box -->
             <div class="p-4 bg-obsidian-950 border border-obsidian-800/80 rounded-sm font-mono space-y-2 relative">
                 <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 text-[9px] text-slate-500 tracking-wider">
                     SYSTEM INFO
                 </div>
                 <p class="text-[10px] text-slate-400 leading-relaxed">
-                    Hover and move your pointer over the output monitors to activate **synchronous tactical zoom**. This maps reconstruction details down to individual predicted matrix nodes.
+                    Hover and move your pointer over the output monitors to activate <span class="text-acid-400">synchronous tactical zoom</span>. This maps reconstruction details down to individual pixels.
                 </p>
             </div>
 
@@ -264,10 +249,8 @@
         <!-- Column 2-4: Main Diagnostics & Comparison Display -->
         <section class="lg:col-span-3 space-y-6">
 
-            <!-- State 1: Empty Slate (Needs Image) -->
             <div id="emptyState" class="h-full min-h-[500px] flex flex-col items-center justify-center border border-obsidian-800/80 rounded-sm text-center p-8 bg-obsidian-950/40 relative overflow-hidden group">
                 <div class="absolute inset-0 blueprint-bg opacity-40 pointer-events-none"></div>
-                <!-- Neon laser target scan graphic -->
                 <div class="relative w-28 h-28 mb-6 border border-obsidian-800 flex items-center justify-center">
                     <div class="absolute inset-2 border border-dashed border-obsidian-700"></div>
                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-px bg-acid-500/50"></div>
@@ -279,17 +262,15 @@
                 <div class="space-y-2 z-10 max-w-sm">
                     <h3 class="text-sm font-mono uppercase tracking-widest text-slate-300">Awaiting Target Acquisition</h3>
                     <p class="text-xs text-slate-500 leading-relaxed font-sans">
-                        Please upload or drop an image in the control dock to run the super-resolution deep learning model.
+                        Upload or drop an image in the control dock, pick a model, and the reconstruction will run automatically.
                     </p>
                 </div>
             </div>
 
-            <!-- State 2: Reconstruction Active (Loader) -->
             <div id="processingState" class="hidden h-full min-h-[500px] flex flex-col items-center justify-center border border-acid-500/20 rounded-sm p-8 bg-obsidian-950 scanlines relative overflow-hidden">
                 <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
-                
+
                 <div class="relative mb-8">
-                    <!-- Spinning technical loader -->
                     <div class="w-24 h-24 rounded-full border-2 border-dashed border-acid-500/20 animate-spin flex items-center justify-center">
                         <div class="w-16 h-16 rounded-full border border-dotted border-acid-500/50 animate-ping"></div>
                     </div>
@@ -300,8 +281,8 @@
 
                 <div class="text-center space-y-3 z-10 max-w-md">
                     <h3 class="text-lg font-mono tracking-widest text-white uppercase">RECONSTRUCTING HIGH-FREQUENCY DETAILS</h3>
-                    <p class="text-xs text-slate-400 font-sans leading-relaxed">
-                        Querying the model... We are optimizing edges, synthesizing texture data, and constructing sub-pixel enhancements using FlameF0X/NanoSR-6x.
+                    <p id="processingDesc" class="text-xs text-slate-400 font-sans leading-relaxed">
+                        Querying the model on FlameF0X/NanoSR-6x...
                     </p>
                     <div class="w-48 h-1 bg-obsidian-900 border border-obsidian-850 rounded-full mx-auto overflow-hidden">
                         <div class="h-full bg-acid-500 w-1/3 animate-pulse rounded-full"></div>
@@ -309,10 +290,8 @@
                 </div>
             </div>
 
-            <!-- State 3: Diagnostic Results Telemetry -->
             <div id="resultsView" class="hidden space-y-6">
-                
-                <!-- Horizontal Info HUD -->
+
                 <div class="flex flex-wrap items-center justify-between gap-4 bg-obsidian-950 border border-obsidian-800 p-4 rounded-sm relative">
                     <div class="absolute top-0 left-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
                         HUD MODULE [02] // METRICS
@@ -325,7 +304,6 @@
                         </div>
                     </div>
 
-                    <!-- Telemetry Coordinates Tracking HUD -->
                     <div class="flex items-center gap-6 text-[11px] font-mono text-slate-400">
                         <div>
                             COORD: <span id="hudCoords" class="text-white">- : -</span>
@@ -339,17 +317,14 @@
                     </div>
                 </div>
 
-                <!-- 3-Way Diagnostic Screen Panel Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <!-- Viewport 1: Bicubic Baseline -->
+
                     <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
                         <div class="flex justify-between items-center px-1">
                             <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_01 [BASELINE]</span>
                             <span class="text-[9px] font-mono text-slate-600">BICUBIC_SMOOTH</span>
                         </div>
                         <div class="zoom-container group">
-                            <!-- Overlay markers -->
                             <div class="hud-overlay"></div>
                             <img id="zImg1" class="zoom-image">
                             <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
@@ -358,30 +333,26 @@
                         </div>
                     </div>
 
-                    <!-- Viewport 2: AI Enhanced Result (Hero Window) -->
                     <div class="bg-obsidian-950 border border-acid-500/30 p-2 rounded-sm space-y-2 relative">
                         <div class="flex justify-between items-center px-1">
                             <span class="text-[9px] font-mono tracking-wider text-acid-400 uppercase font-semibold">SYS_MON_02 [RECON_OUTPUT]</span>
                             <span class="text-[9px] font-mono text-acid-500 font-bold">ACTIVE_SR</span>
                         </div>
                         <div class="zoom-container">
-                            <!-- Overlay markers -->
                             <div class="hud-overlay" style="border-color: rgba(163,230,53,0.15)"></div>
                             <img id="zImg2" class="zoom-image">
-                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-acid-500 text-black text-[9px] font-mono font-bold rounded-sm shadow-md">
+                            <div id="heroLabel" class="absolute bottom-2 left-2 px-2 py-0.5 bg-acid-500 text-black text-[9px] font-mono font-bold rounded-sm shadow-md">
                                 NANO-SR 6x AI ENHANCED
                             </div>
                         </div>
                     </div>
 
-                    <!-- Viewport 3: Difference Map -->
                     <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
                         <div class="flex justify-between items-center px-1">
                             <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_03 [DELTA_SPECTRUM]</span>
                             <span class="text-[9px] font-mono text-slate-600">HI_FREQ_DELTA</span>
                         </div>
                         <div class="zoom-container">
-                            <!-- Overlay markers -->
                             <div class="hud-overlay"></div>
                             <img id="zDiff" class="zoom-image">
                             <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
@@ -392,7 +363,6 @@
 
                 </div>
 
-                <!-- Custom Info Banner detailing scientific output -->
                 <div class="border-l-2 border-acid-500 bg-obsidian-950 p-6 rounded-sm relative overflow-hidden">
                     <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
                     <div class="flex items-start gap-4 relative z-10">
@@ -402,7 +372,7 @@
                         <div class="space-y-1.5">
                             <h4 class="text-sm font-mono font-bold text-white uppercase tracking-wider">Delta Reconstruction Telemetry Matrix</h4>
                             <p class="text-xs text-slate-400 leading-relaxed">
-                                The <span class="text-acid-400 font-semibold">High-Frequency Delta Map</span> highlights exactly where the optical intelligence generated synthesized textures. Rather than merely smoothing or introducing artifacts like bicubic filters, the super-resolution engine generates new crisp structures and organic bounds along high contrast vectors.
+                                The <span class="text-acid-400 font-semibold">High-Frequency Delta Map</span> highlights where the model changed pixels relative to a plain bicubic baseline. Brighter areas show where the output differs most from simple interpolation.
                             </p>
                         </div>
                     </div>
@@ -414,70 +384,87 @@
 
     </main>
 
-    <!-- UI Custom Toast Notifications -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- Technical Footer -->
     <footer class="border-t border-obsidian-800/80 bg-obsidian-950/80 backdrop-blur-md px-6 py-4 mt-12 text-slate-500 text-[10px] font-mono">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between gap-4">
             <div class="flex items-center gap-4">
                 <span>SYSTEM CORE: ONLINE</span>
                 <span>•</span>
-                <span>MODEL WEIGHTS: FlameF0X/NanoSR-6x</span>
+                <span>SPACE: FlameF0X/NanoSR-6x</span>
             </div>
             <div>
-                <span>TACTICAL RECON ENGINE — ALL INTEL SYNTHESIZED LOCALLY</span>
+                <span>TACTICAL RECON ENGINE — ALL INTEL SYNTHESIZED REMOTELY</span>
             </div>
         </div>
     </footer>
 
-    <!-- Gradio API & Client Code -->
     <script type="module">
         import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-        // Global Application State
+        const SPACE_ID = "FlameF0X/NanoSR-6x";
+        const API_NAME = "/process_image";
+        const MODEL_SR = "NanoSR-6x (6x super-resolution)";
+        const MODEL_RESTORE = "Nano-RestoreNet (denoise / upscale / enhance)";
+
         const state = {
-            sourceImg: null,
-            aiResultImg: null,
+            sourceUrl: null,       // data URL for the preview and baseline
+            sourceFile: null,      // File object sent to the Space
+            aiResultUrl: null,     // URL of the processed image from the Space
             interpolation: 'pixelated',
-            isProcessing: false
+            model: MODEL_SR,
+            task: 'denoise',
+            isProcessing: false,
+            pending: false         // a model/task change happened mid-run
         };
 
-        // DOM elements cache
         const el = {
             file1: document.getElementById('file1'),
             drop1: document.getElementById('dropZone1'),
             tolerance: document.getElementById('tolerance'),
             toleranceVal: document.getElementById('toleranceVal'),
+            modelSelect: document.getElementById('modelSelect'),
+            taskSelect: document.getElementById('taskSelect'),
+            specMode: document.getElementById('specMode'),
+            heroLabel: document.getElementById('heroLabel'),
+            processingDesc: document.getElementById('processingDesc'),
             pixelMode: document.getElementById('pixelMode'),
             smoothMode: document.getElementById('smoothMode'),
             resultsView: document.getElementById('resultsView'),
             emptyState: document.getElementById('emptyState'),
             processingState: document.getElementById('processingState'),
             aiStatus: document.getElementById('aiStatus'),
+            aiStatusText: document.getElementById('aiStatusText'),
             statusText: document.getElementById('currentStatusText'),
             toastContainer: document.getElementById('toastContainer'),
             hudCoords: document.getElementById('hudCoords')
         };
 
-        // Event Listeners setup
+        // Connect once and reuse the client
+        let clientPromise = null;
+        function getClient() {
+            if (!clientPromise) {
+                clientPromise = Client.connect(SPACE_ID).catch(err => {
+                    clientPromise = null;
+                    throw err;
+                });
+            }
+            return clientPromise;
+        }
+
+        // Upload handlers
         el.drop1.onclick = () => el.file1.click();
-        
         el.file1.onchange = (e) => {
             const file = e.target.files[0];
             if (file) handleSourceUpload(file);
         };
-
-        // Drag and drop mechanics for uploading raw content
         el.drop1.ondragover = (e) => {
             e.preventDefault();
             el.drop1.classList.add('border-acid-500', 'bg-acid-500/5');
         };
-
         el.drop1.ondragleave = () => {
             el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
         };
-
         el.drop1.ondrop = (e) => {
             e.preventDefault();
             el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
@@ -489,9 +476,31 @@
             }
         };
 
+        // Model and task controls
+        el.modelSelect.onchange = () => {
+            state.model = el.modelSelect.value;
+            syncControls();
+            if (state.sourceFile) runModel();
+        };
+        el.taskSelect.onchange = () => {
+            state.task = el.taskSelect.value;
+            syncControls();
+            if (state.sourceFile && state.model === MODEL_RESTORE) runModel();
+        };
+
+        function syncControls() {
+            const isRestore = state.model === MODEL_RESTORE;
+            el.taskSelect.disabled = !isRestore;
+            el.specMode.innerText = isRestore ? `Restoration (${state.task})` : 'Sub-Pixel 6x SR';
+            el.heroLabel.innerText = isRestore
+                ? `NANO-RESTORE · ${state.task.toUpperCase()}`
+                : 'NANO-SR 6x AI ENHANCED';
+        }
+
+        // Sensitivity and render mode
         el.tolerance.oninput = (e) => {
             el.toleranceVal.innerText = e.target.value;
-            if (state.aiResultImg) runAnalysis();
+            if (state.aiResultUrl) runAnalysis();
         };
 
         el.pixelMode.onclick = () => setInterp('pixelated');
@@ -499,8 +508,6 @@
 
         function setInterp(mode) {
             state.interpolation = mode;
-            
-            // Rebrand Mode Selector Styling
             if (mode === 'pixelated') {
                 el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
                 el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
@@ -508,71 +515,87 @@
                 el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
                 el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
             }
-
-            if (state.aiResultImg) {
+            if (state.aiResultUrl) {
                 runAnalysis();
                 showToast(`Interpolation changed to ${mode.toUpperCase()}`);
             }
         }
 
-        async function handleSourceUpload(file) {
-            showToast("Reading source file raw pixels...", "info");
-            
+        // Upload
+        function handleSourceUpload(file) {
+            state.sourceFile = file;
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                state.sourceImg = e.target.result;
+                state.sourceUrl = e.target.result;
                 document.getElementById('img1Preview').src = e.target.result;
                 document.getElementById('previewContainer1').classList.remove('hidden');
                 document.getElementById('uploadPrompt1').classList.add('hidden');
             };
             reader.readAsDataURL(file);
 
-            // Call Gradio AI model space
-            await startAiUpscale(file);
+            runModel();
         }
 
-        async function startAiUpscale(fileBlob) {
+        // Call the Space
+        async function runModel() {
+            if (state.isProcessing) {
+                state.pending = true;
+                return;
+            }
+            if (!state.sourceFile) return;
+
+            state.isProcessing = true;
+            state.pending = false;
+            toggleUiState('processing');
+            setStatus('Processing...', 'text-acid-500 led-pulse');
+            el.aiStatusText.innerText = state.model === MODEL_RESTORE
+                ? `Running ${state.task}...`
+                : 'Synthesizing 6x Subpixels...';
+            el.processingDesc.innerText = `Querying ${SPACE_ID}...`;
+
             try {
-                toggleUiState('processing');
-                el.statusText.innerText = "Processing...";
-                el.statusText.className = "text-acid-500 led-pulse";
-                
-                // Connection tracking
-                const client = await Client.connect("FlameF0X/NanoSR-6x");
-                
-                const result = await client.predict("/upscale_image", {
-                    input_img: fileBlob,
+                const client = await getClient();
+                const result = await client.predict(API_NAME, {
+                    input_img: state.sourceFile,
+                    model_choice: state.model,
+                    task: state.task
                 });
 
-                const output = result.data[0];
-                state.aiResultImg = typeof output === 'string' ? output : (output.url || output.data);
-                
-                // Run detailed differential analysis
+                const out = result.data[0];
+                state.aiResultUrl = typeof out === 'string' ? out : out.url;
+
                 await runAnalysis();
                 toggleUiState('results');
-                el.statusText.innerText = "Online";
-                el.statusText.className = "text-acid-500";
-                showToast("6x Upscale & Telemetry mapped successfully!", "success");
+                setStatus('Online', 'text-acid-500');
+                showToast("Reconstruction mapped successfully!", "success");
             } catch (err) {
-                console.error("AI Upscale Error:", err);
-                showToast("The AI model endpoint timed out. Retrying in 10s is recommended.", "error");
+                console.error("Space call failed:", err);
+                showToast(`Model request failed: ${err.message || 'unknown error'}`, "error");
                 toggleUiState('empty');
-                el.statusText.innerText = "Failed";
-                el.statusText.className = "text-red-500";
+                setStatus('Failed', 'text-red-500');
+            } finally {
+                state.isProcessing = false;
+                if (state.pending) runModel();
             }
         }
 
+        function setStatus(text, className) {
+            el.statusText.innerText = text;
+            el.statusText.className = className;
+        }
+
+        // Differential analysis
         async function runAnalysis() {
-            if (!state.sourceImg || !state.aiResultImg) return;
+            if (!state.sourceUrl || !state.aiResultUrl) return;
 
-            const imgS = await loadImage(state.sourceImg);
-            const imgA = await loadImage(state.aiResultImg);
+            const imgS = await loadImage(state.sourceUrl);
+            const imgA = await loadImage(state.aiResultUrl);
 
-            // Output targets are based on the upscaled model 6x size
             const w = imgA.width;
             const h = imgA.height;
             const thresh = parseInt(el.tolerance.value);
-            
+
             document.getElementById('resTag').innerText = `${w} x ${h} PX`;
 
             const c1 = document.createElement('canvas');
@@ -581,36 +604,34 @@
             c1.width = c2.width = cD.width = w;
             c1.height = c2.height = cD.height = h;
 
-            const ctx1 = c1.getContext('2d');
-            const ctx2 = c2.getContext('2d');
+            const ctx1 = c1.getContext('2d', { willReadFrequently: true });
+            const ctx2 = c2.getContext('2d', { willReadFrequently: true });
             const ctxD = cD.getContext('2d');
 
-            // Viewport 1: Bicubic Baseline Construction
+            // Baseline: source scaled to the output size
             ctx1.imageSmoothingEnabled = state.interpolation !== 'pixelated';
             ctx1.imageSmoothingQuality = 'high';
             ctx1.drawImage(imgS, 0, 0, w, h);
 
-            // Viewport 2: Pure Model Space Outputs
+            // Model output
             ctx2.drawImage(imgA, 0, 0, w, h);
 
-            // Viewport 3: Differential Analyzer Matrix
+            // Difference map
             const d1 = ctx1.getImageData(0, 0, w, h).data;
             const d2 = ctx2.getImageData(0, 0, w, h).data;
             const out = ctxD.createImageData(w, h);
             const od = out.data;
 
-            for(let i=0; i<d1.length; i+=4) {
-                const diff = (Math.abs(d1[i]-d2[i]) + Math.abs(d1[i+1]-d2[i+1]) + Math.abs(d1[i+2]-d2[i+2])) / 3;
-                
+            for (let i = 0; i < d1.length; i += 4) {
+                const diff = (Math.abs(d1[i] - d2[i]) + Math.abs(d1[i + 1] - d2[i + 1]) + Math.abs(d1[i + 2] - d2[i + 2])) / 3;
+
                 if (diff > thresh) {
-                    // tactical acid yellow spectrum indicators
                     od[i] = Math.min(255, diff * 1.5);
-                    od[i+1] = Math.min(255, diff * 4.5);
-                    od[i+2] = Math.min(255, diff * 0.1);
-                    od[i+3] = 255;
+                    od[i + 1] = Math.min(255, diff * 4.5);
+                    od[i + 2] = Math.min(255, diff * 0.1);
+                    od[i + 3] = 255;
                 } else {
-                    // Deep telemetry void space
-                    od[i] = 3; od[i+1] = 3; od[i+2] = 5; od[i+3] = 255;
+                    od[i] = 3; od[i + 1] = 3; od[i + 2] = 5; od[i + 3] = 255;
                 }
             }
             ctxD.putImageData(out, 0, 0);
@@ -635,15 +656,15 @@
         }
 
         function loadImage(src) {
-            return new Promise((res) => {
+            return new Promise((res, rej) => {
                 const i = new Image();
                 i.crossOrigin = "anonymous";
                 i.onload = () => res(i);
+                i.onerror = () => rej(new Error("Could not load image"));
                 i.src = src;
             });
         }
 
-        // Custom tactical toaster feedback alert system
         function showToast(message, type = "info") {
             const toast = document.createElement('div');
             let typeStyles = "border-obsidian-800 bg-obsidian-950 text-slate-300";
@@ -653,28 +674,25 @@
             toast.className = `p-3 border rounded-sm font-mono text-[10px] tracking-wider uppercase transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2 shadow-lg ${typeStyles}`;
             toast.innerHTML = `
                 <span class="w-1.5 h-1.5 rounded-full ${type === "error" ? 'bg-red-500' : 'bg-acid-500'} led-pulse"></span>
-                <span>${message}</span>
+                <span></span>
             `;
+            toast.querySelector('span:last-child').innerText = message;
             el.toastContainer.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 50);
 
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 50);
             setTimeout(() => {
                 toast.classList.add('translate-y-2', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
 
-        // Synchronized Zoom Reticle Logic across monitors
+        // Synchronized zoom across monitors
         document.querySelectorAll('.zoom-container').forEach(container => {
             const handleZoom = e => {
                 const rect = container.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-                // Update Telemetry coordinate metrics in HUD
                 el.hudCoords.innerText = `${Math.round(x)}% : ${Math.round(y)}%`;
 
                 document.querySelectorAll('.zoom-image').forEach(img => {
@@ -684,7 +702,7 @@
             };
 
             container.addEventListener('mousemove', handleZoom);
-            
+
             container.addEventListener('mouseleave', () => {
                 el.hudCoords.innerText = `- : -`;
                 document.querySelectorAll('.zoom-image').forEach(img => {
@@ -692,13 +710,13 @@
                 });
             });
 
-            // Fluid tactile drag for multi-touch responsive displays
             container.addEventListener('touchmove', e => {
                 e.preventDefault();
-                const touch = e.touches[0];
-                handleZoom(touch);
+                handleZoom(e.touches[0]);
             }, { passive: false });
         });
+
+        syncControls();
     </script>
 </body>
 </html>
