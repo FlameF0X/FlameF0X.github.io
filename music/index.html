@@ -210,6 +210,29 @@
   .vol::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 0; }
   .vol:hover::-webkit-slider-thumb { background: var(--green); }
 
+  /* ─── share ─── */
+  .share-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 13px;
+    color: var(--text); border: 1px solid #5a5a5a; transition: border-color .15s, transform .1s, color .15s;
+  }
+  .share-btn:hover { border-color: var(--text); transform: scale(1.03); }
+  .share-btn.copied { color: var(--green); border-color: var(--green); }
+  .np-share { color: var(--muted); display: inline-flex; padding: 6px; border-radius: 50%; flex-shrink: 0; }
+  .np-share:hover { color: var(--text); }
+  .track .dur { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+  .track .row-share {
+    opacity: 0; color: var(--muted); padding: 4px; border-radius: 4px; display: inline-flex; transition: opacity .15s, color .15s;
+  }
+  .track:hover .row-share, .track.active .row-share, .track .row-share:focus-visible { opacity: 1; }
+  .track .row-share:hover { color: var(--text); }
+  .toast {
+    position: fixed; left: 50%; bottom: 104px; transform: translateX(-50%) translateY(12px);
+    background: #fff; color: #000; padding: 10px 16px; border-radius: 6px; font-weight: 600;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   /* ─── mobile ─── */
   @media (max-width: 760px) {
     body { overflow: auto; }
@@ -223,6 +246,7 @@
     .tracks { padding: 0 8px 40px; }
     .track-head { display: none; }
     .track { grid-template-columns: 32px minmax(0,1fr) 50px; padding: 8px; }
+    .track .row-share { opacity: 1; }
     .player { grid-template-columns: 1fr auto; height: 72px; padding: 0 12px; }
     .controls .seek-row { display: none; }
     .extras { display: none; }
@@ -232,6 +256,8 @@
     .play-main { width: 40px; height: 40px; }
     .cards { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
     .fab { opacity: 1; transform: none; width: 40px; height: 40px; top: auto; bottom: 8px; right: 8px; }
+    .toast { bottom: 84px; }
+    .np-share { display: none; }
   }
 </style>
 </head>
@@ -306,10 +332,15 @@
   </div>
 
   <div class="extras">
+    <button class="np-share" id="npShare" aria-label="share now playing" title="share song">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>
+    </button>
     <button class="icon-btn" id="muteBtn" aria-label="mute" title="mute (m)"></button>
     <input id="vol" class="vol" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="volume">
   </div>
 </footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -324,6 +355,7 @@
     cards: $('cards'), libList: $('libList'), greeting: $('greeting'),
     navHome: $('navHome'),
     npCover: $('npCover'), npTitle: $('npTitle'), npArtist: $('npArtist'),
+    npShare: $('npShare'), toast: $('toast'),
     playBtn: $('playBtn'), prevBtn: $('prevBtn'), nextBtn: $('nextBtn'),
     shuffleBtn: $('shuffleBtn'), repeatBtn: $('repeatBtn'),
     muteBtn: $('muteBtn'), vol: $('vol'),
@@ -336,6 +368,8 @@
 
   /* ─── state ─── */
   let albums = [];
+  let albumSlugs = [];
+  let trackSlugs = [];
   let viewIdx = -1;       // -1 = home
   let queueIdx = -1;      // album that owns the queue
   let current = -1;       // track index inside queue album
@@ -344,6 +378,7 @@
   let basePath = '';
   let dragging = false;
   let lastVol = 0.8;
+  let toastTimer = 0;
 
   /* ─── icons ─── */
   const ICON_PLAY  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
@@ -355,6 +390,7 @@
   const ICON_VOL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   const ICON_MUTE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>';
   const ICON_CARD_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
+  const ICON_SHARE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>';
 
   const PLACEHOLDER = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#282828"/><g fill="#535353"><ellipse cx="45" cy="86" rx="11" ry="8.5" transform="rotate(-18 45 86)"/><ellipse cx="82" cy="78" rx="11" ry="8.5" transform="rotate(-18 82 78)"/><rect x="53" y="36" width="4.5" height="50"/><rect x="90" y="28" width="4.5" height="50"/><path d="M53 36 L94.5 28 L94.5 42 L53 50 Z"/></g></svg>`
@@ -428,6 +464,91 @@
 
   const queue = () => (queueIdx >= 0 ? albums[queueIdx] : null);
 
+  /* ══════════════ ROUTING ══════════════ */
+  // #                     → home
+  // #album-slug           → album page
+  // #album-slug/song-slug → album page with that song highlighted
+  const slugify = (s) => String(s || '').toLowerCase()
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'untitled';
+
+  function uniqueSlugs(list) {
+    const seen = {};
+    return list.map((s) => {
+      seen[s] = (seen[s] || 0) + 1;
+      return seen[s] > 1 ? s + '-' + seen[s] : s;
+    });
+  }
+
+  function buildSlugs() {
+    albumSlugs = uniqueSlugs(albums.map((al) => slugify(al.title)));
+    trackSlugs = albums.map((al) => uniqueSlugs(al.tracks.map((t) => slugify(t.title))));
+  }
+
+  function albumHash(i) { return '#' + albumSlugs[i]; }
+  function trackHash(ai, ti) { return '#' + albumSlugs[ai] + '/' + trackSlugs[ai][ti]; }
+
+  function shareUrl(hash) {
+    return location.href.split('#')[0] + hash;
+  }
+
+  async function shareLink(hash, label) {
+    const url = shareUrl(hash);
+    const data = { title: label, text: label + ' — flame f0x', url };
+    try {
+      if (navigator.share && (!navigator.canShare || navigator.canShare(data))) {
+        await navigator.share(data);
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      flashToast('Link copied');
+    } catch (e) {
+      window.prompt('Copy this link:', url);
+    }
+  }
+
+  function flashToast(msg) {
+    el.toast.textContent = msg;
+    el.toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.toast.classList.remove('show'), 1800);
+  }
+
+  function setHash(h) {
+    if (location.hash === h || (!h && !location.hash)) return;
+    history.replaceState(null, '', location.pathname + location.search + h);
+  }
+
+  function applyHash() {
+    const raw = decodeURIComponent(location.hash.replace(/^#/, ''));
+    if (!raw) { showHome(); return; }
+    const [aSlug, tSlug] = raw.split('/');
+    const ai = albumSlugs.indexOf(aSlug);
+    if (ai < 0) { showHome(); return; }
+    showAlbum(ai);
+    if (tSlug) {
+      const ti = trackSlugs[ai].indexOf(tSlug);
+      if (ti >= 0) highlightTrack(ai, ti);
+    }
+  }
+
+  // Highlight a song from a shared link without auto-playing it.
+  function highlightTrack(ai, ti) {
+    queueIdx = ai;
+    current = ti;
+    audio.src = albums[ai].tracks[ti].src;
+    updateNowPlaying();
+    paintRows();
+    paintPlayAlbum();
+    paintSidebar();
+    const row = $('trackList') && $('trackList').children[ti];
+    if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
   /* ══════════════ VIEWS ══════════════ */
   function showHome() {
     viewIdx = -1;
@@ -437,6 +558,7 @@
     el.main.scrollTop = 0;
     renderHome();
     paintSidebar();
+    setHash('');
   }
 
   function showAlbum(i) {
@@ -448,6 +570,7 @@
     el.main.scrollTop = 0;
     renderAlbum();
     paintSidebar();
+    setHash(albumHash(i));
   }
 
   /* ─── sidebar library ─── */
@@ -533,6 +656,10 @@
         <button class="icon-btn" id="albumShuffle" aria-label="shuffle album" title="shuffle">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>
         </button>
+        <button class="share-btn" id="albumShare" aria-label="share album">
+          ${ICON_SHARE}
+          Share
+        </button>
       </div>
       <div class="tracks">
         <div class="track-head"><span style="text-align:center">#</span><span>Title</span><span style="text-align:right">⏱</span></div>
@@ -552,11 +679,18 @@
         '<div class="info"><span class="t-title">' + esc(t.title) + '</span>' +
         (t.artist ? '<span class="t-artist">' + artistLink(t.artist, t.artistUrl) + '</span>' : '') +
         '</div>' +
-        '<div class="dur">' + (t.duration ? fmt(t.duration) : '--:--') + '</div>';
+        '<div class="dur">' +
+          '<span>' + (t.duration ? fmt(t.duration) : '--:--') + '</span>' +
+          '<button class="row-share" aria-label="share ' + esc(t.title) + '" title="share song">' + ICON_SHARE + '</button>' +
+        '</div>';
       row.addEventListener('click', (e) => {
-        if (e.target.closest('a')) return;
+        if (e.target.closest('a, .row-share')) return;
         if (queueIdx === viewIdx && i === current) toggle();
         else playTrack(viewIdx, i);
+      });
+      row.querySelector('.row-share').addEventListener('click', (e) => {
+        e.stopPropagation();
+        shareLink(trackHash(viewIdx, i), t.title);
       });
       list.appendChild(row);
     });
@@ -569,6 +703,7 @@
       shuffle = true; paintShuffle();
       playTrack(viewIdx, Math.floor(Math.random() * al.tracks.length));
     });
+    $('albumShare').addEventListener('click', () => shareLink(albumHash(viewIdx), al.title));
 
     paintRows();
     paintPlayAlbum();
@@ -593,7 +728,7 @@
     const list = $('trackList');
     const al = albums[viewIdx];
     if (!list || !al || !list.children[i]) return;
-    const d = list.children[i].querySelector('.dur');
+    const d = list.children[i].querySelector('.dur span');
     if (d) d.textContent = al.tracks[i].duration ? fmt(al.tracks[i].duration) : '--:--';
   }
 
@@ -639,6 +774,7 @@
     paintRows();
     paintPlayAlbum();
     paintSidebar();
+    if (viewIdx === aIdx) setHash(trackHash(aIdx, tIdx));
   }
 
   function toggle() {
@@ -791,6 +927,11 @@
   });
   el.vol.addEventListener('input', () => setVolume(parseFloat(el.vol.value)));
 
+  el.npShare.addEventListener('click', () => {
+    if (queueIdx < 0 || current < 0) return;
+    shareLink(trackHash(queueIdx, current), queue().tracks[current].title);
+  });
+
   el.seek.addEventListener('pointerdown', (e) => {
     if (!audio.duration || !isFinite(audio.duration)) return;
     dragging = true;
@@ -820,6 +961,8 @@
   audio.addEventListener('play', () => setPlayingUI(true));
   audio.addEventListener('pause', () => setPlayingUI(false));
   audio.addEventListener('ended', onEnded);
+
+  window.addEventListener('hashchange', applyHash);
 
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -891,14 +1034,18 @@
       if (!albums.length) throw new Error('library is empty');
 
       renderLibrary();
-      showHome();
+      buildSlugs();
       loadDurations();
 
-      // prepare first track without autoplay
-      queueIdx = 0;
-      current = 0;
-      audio.src = albums[0].tracks[0].src;
-      updateNowPlaying();
+      if (location.hash) {
+        applyHash();
+      } else {
+        showHome();
+        queueIdx = 0;
+        current = 0;
+        audio.src = albums[0].tracks[0].src;
+        updateNowPlaying();
+      }
     } catch (err) {
       showError(err);
     }
