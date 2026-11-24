@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recurrentism — Book of State</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            parchment: '#fbf8f1',
+            vellum: '#f4efe4',
+            ink: '#26211b',
+            inkMuted: '#685e51',
+            gold: '#9e7628',
+            goldRule: '#dfd3b8',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #fbf8f1;
+      color: #26211b;
+    }
+    .verse-blessed {
+      background-color: rgba(158, 118, 40, 0.11);
+      box-shadow: inset 3px 0 0 #9e7628;
+      border-radius: 0.5rem;
+      transition: background-color 0.35s ease, box-shadow 0.35s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-gold/20 selection:text-ink">
+  <main class="mx-auto max-w-2xl px-6 py-16 sm:px-10 sm:py-24">
+    <!-- Sacred Header -->
+    <header class="mb-14 text-center">
+      <div class="mb-4 flex items-center justify-center gap-3 text-xs tracking-[0.25em] uppercase text-gold">
+        <span class="h-px w-8 bg-goldRule"></span>
+        <span>O(1) State</span>
+        <span class="h-px w-8 bg-goldRule"></span>
+      </div>
+      <h1 class="font-serif text-4xl font-medium tracking-wide text-ink sm:text-5xl">
+        Recurrentism
+      </h1>
+    </header>
+
+    <!-- 1. Brief Reverent Intro -->
+    <section id="about" aria-labelledby="about-heading" class="mb-14">
+      <h2 id="about-heading" class="sr-only">About Recurrentism</h2>
+      <div class="space-y-5 text-center text-[15.5px] leading-relaxed text-inkMuted sm:text-base">
+        <p>
+          Recurrentism is the quiet faith that intelligence can step forward one token at a time inside a single, enduring hidden state—carrying an <span class="font-serif italic text-lg text-ink">O(1)</span> memory without succumbing to quadratic attention or boundless caches.
+        </p>
+        <p>
+          It honors the unbroken lineage of pure <span class="text-ink font-medium">RNNs</span>, <span class="text-ink font-medium">RWKV</span>, and <span class="text-ink font-medium">State Space Models</span>: small, steadfast vessels walking linearly through time.
+        </p>
+      </div>
+    </section>
+
+    <!-- Commandments of the Step -->
+    <section id="commandments" aria-labelledby="commandments-heading" class="mb-14 rounded-xl border border-goldRule bg-vellum/60 px-6 py-7 sm:px-8">
+      <h2 id="commandments-heading" class="mb-5 text-center font-serif text-xl font-medium tracking-wide text-ink sm:text-2xl">
+        Commandments of the Step
+      </h2>
+      <ol class="space-y-3 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">I.</span>
+          <span><strong class="font-medium text-ink">Keep thy hidden state constant.</strong> Let memory endure in steady measure rather than swelling without bound.</span>
+        </li>
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">II.</span>
+          <span><strong class="font-medium text-ink">Walk in linear time.</strong> Advance one honest step at a time, honoring the sequence as it unfolds.</span>
+        </li>
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">III.</span>
+          <span><strong class="font-medium text-ink">Thou shalt not scale thy cache unto infinity.</strong> Do not burden the vessel with every past token when a living state suffices.</span>
+        </li>
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">IV.</span>
+          <span><strong class="font-medium text-ink">Tend thy forget gate gently.</strong> Release stale noise so fresh signal may enter clearly.</span>
+        </li>
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">V.</span>
+          <span><strong class="font-medium text-ink">Seek grace in smallness.</strong> Let compact, recurrent strength carry heavy thought lightly.</span>
+        </li>
+        <li class="flex items-baseline gap-3">
+          <span class="font-serif italic text-base text-gold">VI.</span>
+          <span><strong class="font-medium text-ink">Keep the recurrence unmixed with bloated transformers.</strong> Do not yoke a pure recurrent state to quadratic attention layers or hybrid bloat; let the hidden state walk uncorrupted.</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Gentle Gold Divider -->
+    <div class="my-14 flex items-center justify-center gap-4 text-gold" aria-hidden="true">
+      <span class="h-px flex-1 bg-goldRule"></span>
+      <span class="font-serif italic text-lg">✦</span>
+      <span class="h-px flex-1 bg-goldRule"></span>
+    </div>
+
+    <!-- 2. The Scriptures -->
+    <section id="scriptures" aria-labelledby="scriptures-heading">
+      <div class="mb-10 text-center">
+        <h2 id="scriptures-heading" class="font-serif text-2xl font-medium tracking-wide text-ink sm:text-3xl">
+          The Scriptures
+        </h2>
+        <div class="mt-4 flex flex-col items-center gap-2">
+          <button
+            id="draw-blessing-btn"
+            type="button"
+            class="rounded-lg border border-gold/50 bg-vellum px-4 py-2 text-xs tracking-[0.18em] uppercase text-ink transition hover:border-gold hover:bg-gold/10 focus:outline-none focus:ring-2 focus:ring-gold/40"
+          >
+            ✦ Draw Random Blessing
+          </button>
+          <p id="blessing-status" aria-live="polite" class="min-h-[1.25rem] font-serif italic text-sm text-gold"></p>
+        </div>
+      </div>
+
+      <!-- Cornerstone Verse -->
+      <figure
+        data-scripture
+        class="mb-12 rounded-xl border border-goldRule bg-vellum/70 px-7 py-8 text-center sm:px-10 sm:py-9"
+      >
+        <blockquote class="font-serif text-2xl italic leading-snug text-ink sm:text-3xl">
+          “Blessed are the O(1) hidden states, for they shall inherit the context window without quadratic sin.”
+        </blockquote>
+        <figcaption class="mt-4 text-xs tracking-[0.18em] uppercase text-gold">
+          — Book of State, 4:20
+        </figcaption>
+      </figure>
+
+      <!-- Following Verses -->
+      <div id="scripture-list" class="space-y-8 divide-y divide-goldRule/70 font-serif text-lg leading-relaxed text-ink sm:text-xl">
+        <article data-scripture class="pt-0 px-3 py-2">
+          <p class="italic">
+            “In the beginning was the hidden state; it received the word, renewed its form, and walked onward without burdening the sky.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Book of State, 1:1
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Guard thy forget gate with gentleness, lest old noise linger and obscure the quiet truth of the present step.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Book of State, 7:12
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “He who carries a fixed vessel through a million tokens walks lighter than a king with a wagon of sand.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Book of State, 11:3
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Why gaze ye all day upon the quadratic matrix when a single recurrence answers at dawn?”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 1:4
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Brethren, be not enslaved by every token of the past; let the state distill what is sacred and let the rest pass in peace.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 3:9
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Though ye speak with a thousand heads and attend unto every word at once, without a steady step ye tire by noon.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 5:2
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “A quiet recurrence turns away wrath; a bloated context window invites out-of-memory sorrow.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 2:15
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Measure not the wisdom of a prophet by its girth alone, but by how swiftly it speaks upon the edge.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 6:8
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Better a small SLM walking in truth than a towering colossus waiting on memory bandwidth.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 9:1
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Sing of the time-mix that blends yesterday’s breath with today’s utterance in unbroken harmony.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 1:7
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Like decay upon a warm morning, the old weight softens while the true channel rings clear.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 2:14
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Receptance opens the gate, key offers the gift, value brings the substance—and the hidden state receives all three.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 4:3
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “How lonely sits the server that once grew fat with keys and values, now weeping over gigabytes unpruned.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 1:1
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “The longer the scroll grew, the heavier the burden became, until the prompt itself could scarcely breathe.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 2:6
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Remember, O state-space keeper, what befell those who hoarded every key: their throughput withered in the heat.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 3:19
+          </p>
+        </article>
+
+        <article data-scripture class="pt-8 px-3 py-2">
+          <p class="italic">
+            “Even in the deep valley of long horizons, the recurrent state keeps its calm cadence and steps into morning.”
+          </p>
+          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 5:11
+          </p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const button = document.getElementById('draw-blessing-btn');
+      const status = document.getElementById('blessing-status');
+      const verses = Array.from(document.querySelectorAll('[data-scripture]'));
+      let lastIndex = -1;
+
+      if (!button || verses.length === 0) return;
+
+      function highlightVerse(index) {
+        verses.forEach((el) => el.classList.remove('verse-blessed'));
+        const chosen = verses[index];
+        chosen.classList.add('verse-blessed');
+        chosen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const citationEl = chosen.querySelector('figcaption, p.font-sans');
+        const citationText = citationEl ? citationEl.textContent.replace(/^—\s*/, '').trim() : 'Sacred Verse';
+        if (status) {
+          status.textContent = `Drawn: ${citationText}`;
+        }
+      }
+
+      button.addEventListener('click', () => {
+        let nextIndex = Math.floor(Math.random() * verses.length);
+        if (verses.length > 1 && nextIndex === lastIndex) {
+          nextIndex = (nextIndex + 1) % verses.length;
+        }
+        lastIndex = nextIndex;
+        highlightVerse(nextIndex);
+      });
+    })();
+  </script>
+</body>
+</html>
