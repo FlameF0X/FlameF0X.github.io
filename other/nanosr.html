@@ -165,7 +165,19 @@
     .info-icon { width: 29px; height: 29px; flex: 0 0 auto; display: grid; place-items: center; color: var(--accent); background: rgba(199,243,107,.10); border-radius: 9px; }
     .info-card h4 { margin: 1px 0 5px; font-size: 10px; font-weight: 750; }
     .info-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
-    .toast-wrap { position: fixed; z-index: 50; right: 20px; bottom: 20px; display: grid; gap: 8px; }
+    .asset-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(3,7,4,.78); backdrop-filter: blur(10px); }
+    .asset-modal[hidden] { display: none; }
+    .asset-dialog { width: min(900px, 100%); max-height: min(82vh, 760px); overflow: auto; padding: 20px; border: 1px solid var(--border); border-radius: 17px; background: #111912; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+    .asset-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 16px; }
+    .asset-dialog-head h3 { margin: 0; font-size: 15px; }
+    .asset-dialog-head p { margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+    .asset-option { min-width: 0; padding: 8px; text-align: left; color: var(--text); border: 1px solid var(--border); border-radius: 11px; background: #0c130e; }
+    .asset-option:hover { border-color: var(--accent); background: #172119; }
+    .asset-option img { display: block; width: 100%; height: 112px; object-fit: contain; border-radius: 7px; background: #080d09; }
+    .asset-option span { display: block; overflow: hidden; margin-top: 8px; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .asset-message { grid-column: 1 / -1; padding: 25px 10px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+    .toast-wrap { position: fixed; z-index: 70; right: 20px; bottom: 20px; display: grid; gap: 8px; }
     .toast { max-width: min(380px, calc(100vw - 40px)); padding: 11px 14px; color: var(--text); background: #18211a; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); font-size: 11px; animation: toast-in .18s ease-out; }
     .toast.error { border-color: rgba(255,130,126,.45); color: #ffaaa6; }
     .toast.success { border-color: rgba(199,243,107,.4); color: var(--accent); }
@@ -201,9 +213,8 @@
   <header class="topbar">
     <div class="shell topbar-inner">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">N</div>
         <div>
-          <h1>NanoSR <span style="color:var(--muted);font-weight:500">/ FlameF0X</span></h1>
+          <h1>NanoSR <span style="color:var(--muted);font-weight:500"></span></h1>
           <p>Super-resolution and image restoration</p>
         </div>
       </div>
@@ -238,7 +249,7 @@
         <input id="fileInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
         <div class="button-row">
           <button id="browseBtn" class="btn" type="button">Browse files</button>
-          <button id="sampleBtn" class="btn primary" type="button">Use sample</button>
+          <button id="sampleBtn" class="btn primary" type="button">Repository assets</button>
         </div>
 
         <div class="divider"></div>
@@ -285,16 +296,16 @@
           </div>
           <div class="display-actions">
             <span id="statusChip" class="status-chip"><span class="status-dot"></span><span id="statusText">Waiting for image</span></span>
-            <button id="downloadBtn" class="btn subtle" type="button" hidden>Download result</button>
+            <button id="downloadBtn" class="btn subtle" type="button" hidden>Export image</button>
           </div>
         </div>
 
         <div id="emptyState" class="panel empty-state">
           <div class="empty-inner">
-            <img class="sample-art" src="assets/sample.png" alt="Built-in geometric image test chart">
+            <img class="sample-art" src="assets/sample.png" alt="Image asset preview">
             <h4>Start with an image</h4>
-            <p>Upload your own image or use the included sample chart. The sample is a local PNG in the <code>assets</code> folder, so it works without an internet image service.</p>
-            <button id="emptySampleBtn" class="btn primary" type="button">Load sample image</button>
+            <p>Upload your own image or choose one from the FlameF0X repository assets folder.</p>
+            <button id="emptySampleBtn" class="btn primary" type="button">Choose repository image</button>
           </div>
         </div>
 
@@ -336,6 +347,18 @@
   </main>
 
   <footer><div class="shell footer-inner"><span>NanoSR Image Lab</span><span>Powered by FlameF0X / NanoSR-6x</span></div></footer>
+  <div id="assetModal" class="asset-modal" hidden>
+    <section class="asset-dialog" role="dialog" aria-modal="true" aria-labelledby="assetDialogTitle">
+      <div class="asset-dialog-head">
+        <div>
+          <h3 id="assetDialogTitle">Choose an image</h3>
+          <p>Images discovered in FlameF0X.github.io/assets. Selecting one loads it into NanoSR.</p>
+        </div>
+        <button id="closeAssetModal" class="btn subtle" type="button" aria-label="Close image picker">Close</button>
+      </div>
+      <div id="assetGrid" class="asset-grid"><div class="asset-message">Loading repository images…</div></div>
+    </section>
+  </div>
   <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
 
   <script type="module">
@@ -343,6 +366,9 @@
 
     const SPACE_ID = "FlameF0X/NanoSR-6x";
     const API_NAME = "/process_image";
+    const REPO_CONTENTS_API = "https://api.github.com/repos/FlameF0X/FlameF0X.github.io/contents/";
+    const REPO_ASSET_RAW = "https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/main/assets/";
+    const REPO_LOGO_URL = `${REPO_ASSET_RAW}logo.png`;
     const MODEL_SR = "NanoSR-6x (6x super-resolution)";
     const MODEL_RESTORE = "Nano-RestoreNet (denoise / upscale / enhance)";
 
@@ -350,6 +376,7 @@
     const ui = {
       dropZone: $("dropZone"), fileInput: $("fileInput"), browseBtn: $("browseBtn"), sampleBtn: $("sampleBtn"),
       emptySampleBtn: $("emptySampleBtn"), sourcePreview: $("sourcePreview"), sourceCaption: $("sourceCaption"),
+      assetModal: $("assetModal"), assetGrid: $("assetGrid"), closeAssetModal: $("closeAssetModal"),
       modelSelect: $("modelSelect"), taskSelect: $("taskSelect"), tolerance: $("tolerance"), toleranceValue: $("toleranceValue"),
       nearestBtn: $("nearestBtn"), smoothBtn: $("smoothBtn"), runBtn: $("runBtn"), topStatus: $("topStatus"),
       statusChip: $("statusChip"), statusText: $("statusText"), emptyState: $("emptyState"), processingState: $("processingState"),
@@ -369,7 +396,8 @@
       running: false,
       queued: false,
       revision: 0,
-      clientPromise: null
+      clientPromise: null,
+      repositoryAssets: null
     };
 
     function toast(message, type = "info") {
@@ -457,20 +485,89 @@
       }
     }
 
-    async function loadSample() {
+    async function getRepositoryAssets() {
+      if (state.repositoryAssets) return state.repositoryAssets;
+      const directories = ["assets"];
+      const visited = new Set();
+      const discovered = [];
+      const imageExtensions = /\.(png|jpe?g|webp|gif|bmp|avif)$/i;
+
+      // Walk subfolders too, so the picker covers the whole repository assets tree.
+      while (directories.length) {
+        const directory = directories.shift();
+        if (visited.has(directory)) continue;
+        visited.add(directory);
+        const encodedPath = directory.split("/").map(encodeURIComponent).join("/");
+        const response = await fetch(`${REPO_CONTENTS_API}${encodedPath}?ref=main`, {
+          headers: { Accept: "application/vnd.github+json" }
+        });
+        if (!response.ok) {
+          if (response.status === 403 || response.status === 429) throw new Error("GitHub's unauthenticated API limit was reached. Try again later or use Browse files.");
+          throw new Error(`Could not read ${directory} (HTTP ${response.status}).`);
+        }
+        const entries = await response.json();
+        for (const entry of entries) {
+          if (entry.type === "dir") {
+            directories.push(entry.path);
+          } else if (entry.type === "file" && imageExtensions.test(entry.name) && entry.name.toLowerCase() !== "logo.png") {
+            const relativePath = entry.path.replace(/^assets\//, "");
+            const encodedFilePath = relativePath.split("/").map(encodeURIComponent).join("/");
+            discovered.push({
+              name: relativePath,
+              url: entry.download_url || `${REPO_ASSET_RAW}${encodedFilePath}`
+            });
+          }
+        }
+      }
+      state.repositoryAssets = discovered.sort((a, b) => a.name.localeCompare(b.name));
+      return state.repositoryAssets;
+    }
+
+    async function openAssetPicker() {
+      ui.assetModal.hidden = false;
+      ui.assetGrid.replaceChildren(Object.assign(document.createElement("div"), { className: "asset-message", textContent: "Loading repository images…" }));
       try {
-        ui.sampleBtn.disabled = true;
-        ui.emptySampleBtn.disabled = true;
-        const response = await fetch("assets/sample.png");
-        if (!response.ok) throw new Error("Could not load assets/sample.png. Serve the project folder from a local web server.");
+        const assets = await getRepositoryAssets();
+        ui.assetGrid.replaceChildren();
+        if (!assets.length) {
+          ui.assetGrid.append(Object.assign(document.createElement("div"), {
+            className: "asset-message",
+            textContent: "No raster images were found in the repository assets folder. You can still use Browse files to upload an image."
+          }));
+          return;
+        }
+        for (const asset of assets) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "asset-option";
+          const image = document.createElement("img");
+          image.loading = "lazy";
+          image.alt = "";
+          image.src = asset.url;
+          const label = document.createElement("span");
+          label.textContent = asset.name;
+          button.append(image, label);
+          button.addEventListener("click", () => loadRepositoryAsset(asset));
+          ui.assetGrid.append(button);
+        }
+      } catch (error) {
+        ui.assetGrid.replaceChildren(Object.assign(document.createElement("div"), {
+          className: "asset-message",
+          textContent: `${error.message} You can still use Browse files.`
+        }));
+      }
+    }
+
+    async function loadRepositoryAsset(asset) {
+      try {
+        const response = await fetch(asset.url);
+        if (!response.ok) throw new Error(`Could not download ${asset.name} (HTTP ${response.status}).`);
         const blob = await response.blob();
-        const file = new File([blob], "sample.png", { type: "image/png" });
+        const file = new File([blob], asset.name, { type: blob.type || "image/png" });
+        ui.assetModal.hidden = true;
         await loadSourceFile(file);
       } catch (error) {
-        toast(error.message || "Could not load the sample image.", "error");
-      } finally {
-        ui.sampleBtn.disabled = false;
-        ui.emptySampleBtn.disabled = false;
+        toast(error.message || "Could not load that repository image.", "error");
       }
     }
 
@@ -636,21 +733,64 @@
 
     async function downloadOutput() {
       if (!state.outputUrl) return;
+      const buttonLabel = ui.downloadBtn.textContent;
+      ui.downloadBtn.disabled = true;
+      ui.downloadBtn.textContent = "Preparing export…";
       try {
-        const response = await fetch(state.outputUrl);
-        if (!response.ok) throw new Error("The output host did not allow a direct download.");
-        const blobUrl = URL.createObjectURL(await response.blob());
+        // Load the original model output and the local watermark asset at full resolution.
+        // The output must be CORS-readable for canvas export; otherwise the browser blocks
+        // pixel access and we cannot safely promise a watermarked download.
+        const output = await loadImage(state.outputUrl);
+        let logo;
+        try {
+          logo = await loadImage(REPO_LOGO_URL);
+        } catch (remoteLogoError) {
+          console.warn("Repository logo unavailable; using the bundled fallback logo.", remoteLogoError);
+          logo = await loadImage(new URL("assets/logo.png", document.baseURI).href);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = output.naturalWidth;
+        canvas.height = output.naturalHeight;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Could not create the export canvas.");
+        context.drawImage(output, 0, 0, canvas.width, canvas.height);
+
+        // Size the mark proportionally, with comfortable padding from the lower-right edge.
+        const logoWidth = Math.min(canvas.width * 0.12, 180);
+        const logoHeight = logoWidth * (logo.naturalHeight / logo.naturalWidth);
+        const margin = Math.max(10, Math.round(Math.min(canvas.width, canvas.height) * 0.025));
+        const x = Math.max(0, canvas.width - logoWidth - margin);
+        const y = Math.max(0, canvas.height - logoHeight - margin);
+        context.save();
+        context.globalAlpha = 0.9;
+        context.drawImage(logo, x, y, logoWidth, logoHeight);
+        context.restore();
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Could not encode the watermarked PNG.")), "image/png");
+        });
+        const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
+        const safeName = (state.sourceName || "image").replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, "-").replace(/^-|-$/g, "") || "image";
         link.href = blobUrl;
-        link.download = "nanosr-enhanced.png";
+        link.download = `${safeName}-nanosr-watermarked.png`;
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+        toast("Watermarked PNG exported.", "success");
       } catch (error) {
-        // Some hosted model outputs do not expose CORS headers. Opening the image is the fallback.
-        window.open(state.outputUrl, "_blank", "noopener,noreferrer");
-        toast("Opened the result in a new tab. Use your browser's Save image option.");
+        console.error("Watermarked export failed:", error);
+        const message = error?.message || "Could not export this image.";
+        if (message.toLowerCase().includes("taint") || message.toLowerCase().includes("cross-origin") || message.toLowerCase().includes("load")) {
+          toast("The image host blocked canvas access, so a watermarked export is unavailable for this result.", "error");
+        } else {
+          toast(message, "error");
+        }
+      } finally {
+        ui.downloadBtn.disabled = false;
+        ui.downloadBtn.textContent = buttonLabel;
       }
     }
 
@@ -682,8 +822,15 @@
       const file = event.dataTransfer?.files?.[0];
       if (file) loadSourceFile(file);
     });
-    ui.sampleBtn.addEventListener("click", loadSample);
-    ui.emptySampleBtn.addEventListener("click", loadSample);
+    ui.sampleBtn.addEventListener("click", openAssetPicker);
+    ui.emptySampleBtn.addEventListener("click", openAssetPicker);
+    ui.closeAssetModal.addEventListener("click", () => { ui.assetModal.hidden = true; });
+    ui.assetModal.addEventListener("click", (event) => {
+      if (event.target === ui.assetModal) ui.assetModal.hidden = true;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !ui.assetModal.hidden) ui.assetModal.hidden = true;
+    });
     ui.modelSelect.addEventListener("change", () => {
       syncControls();
       if (state.sourceFile) { state.revision += 1; requestRun(); }
