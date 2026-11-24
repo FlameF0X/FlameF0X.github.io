@@ -1,722 +1,726 @@
-<!DOCTYPE html>
-<html lang="en" class="h-full">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NANO-SR.v6 // OPTICAL TELEMETRY RECON</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    },
-                    colors: {
-                        obsidian: {
-                            950: '#030303',
-                            900: '#09090b',
-                            800: '#141419',
-                            700: '#1f1f26',
-                        },
-                        acid: {
-                            400: '#c5f34c',
-                            500: '#a3e635',
-                            600: '#84cc16',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        .blueprint-bg {
-            background-color: #030303;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                radial-gradient(rgba(163, 230, 53, 0.03) 1px, transparent 0);
-            background-size: 24px 24px, 24px 24px, 48px 48px;
-            background-position: center center;
-        }
-
-        .scanlines { position: relative; overflow: hidden; }
-        .scanlines::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 2;
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none;
-        }
-
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #030303; }
-        ::-webkit-scrollbar-thumb { background: #1f1f26; border-radius: 999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a3e635; }
-
-        .zoom-container {
-            position: relative;
-            cursor: crosshair;
-            overflow: hidden;
-            aspect-ratio: 1 / 1;
-            background-color: #09090b;
-            border: 1px solid #1f1f26;
-            transition: border-color 0.3s ease;
-        }
-        .zoom-container:hover { border-color: #a3e635; }
-        .zoom-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transform-origin: 50% 50%;
-            transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-        }
-
-        .hud-overlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            border: 1px solid rgba(163, 230, 53, 0.05);
-            z-index: 10;
-        }
-
-        .led-pulse { animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px rgba(163, 230, 53, 0.6)); }
-            50% { opacity: 0.3; filter: drop-shadow(0 0 0px rgba(163, 230, 53, 0)); }
-        }
-
-        .checkerboard-pattern {
-            background-image: repeating-conic-gradient(#09090b 0% 25%, #141419 0% 50%);
-            background-position: 0 0, 10px 10px;
-            background-size: 20px 20px;
-        }
-
-        select:disabled { opacity: 0.4; cursor: not-allowed; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101511">
+  <title>NanoSR | Image Enhancement</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c100d;
+      --surface: #131a15;
+      --surface-2: #19221b;
+      --surface-3: #202b22;
+      --border: #2b382d;
+      --border-soft: #202a22;
+      --text: #edf2e9;
+      --muted: #9aa79a;
+      --subtle: #6f7d70;
+      --accent: #c7f36b;
+      --accent-strong: #a9dc47;
+      --danger: #ff827e;
+      --radius: 16px;
+      --shadow: 0 18px 50px rgba(0,0,0,.23);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(900px 550px at 85% -10%, rgba(133,190,79,.10), transparent 65%),
+        radial-gradient(700px 500px at -15% 20%, rgba(69,115,78,.10), transparent 62%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 3px;
+    }
+    .shell { width: min(1440px, calc(100% - 48px)); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      border-bottom: 1px solid rgba(68,87,69,.55);
+      background: rgba(12,16,13,.82); backdrop-filter: blur(18px);
+    }
+    .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto;
+      border-radius: 13px; color: #16200f; background: var(--accent);
+      font-weight: 900; font-size: 18px; letter-spacing: -.08em;
+      box-shadow: 0 0 28px rgba(199,243,107,.14);
+    }
+    .brand h1 { margin: 0; font-size: 15px; font-weight: 750; letter-spacing: -.025em; }
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .top-status { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(199,243,107,.65); }
+    main { padding: 34px 0 50px; }
+    .intro { margin: 0 0 25px; }
+    .eyebrow { margin: 0 0 9px; color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: .16em; font-weight: 750; }
+    .intro h2 { margin: 0; font-size: clamp(25px, 3vw, 36px); letter-spacing: -.055em; line-height: 1.12; }
+    .intro p { margin: 11px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; max-width: 630px; }
+    .workspace { display: grid; grid-template-columns: 310px minmax(0,1fr); align-items: start; gap: 20px; }
+    .panel {
+      background: linear-gradient(150deg, rgba(25,34,27,.96), rgba(17,23,18,.98));
+      border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .controls { padding: 19px; position: sticky; top: 96px; }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .panel-heading h3 { margin: 0; font-size: 13px; font-weight: 750; letter-spacing: -.01em; }
+    .tiny-label { color: var(--subtle); font-size: 9px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .dropzone {
+      position: relative; min-height: 185px; padding: 15px; border: 1px dashed #4b5c4a;
+      border-radius: 13px; background: rgba(7,11,8,.3); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; overflow: hidden;
+      transition: border-color .18s, background .18s;
+    }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(199,243,107,.055); }
+    .dropzone.has-image { padding: 8px; min-height: 185px; }
+    .drop-icon { width: 39px; height: 39px; display: grid; place-items: center; border-radius: 12px; color: var(--accent); background: rgba(199,243,107,.10); margin-bottom: 12px; }
+    .dropzone strong { font-size: 12px; font-weight: 700; }
+    .dropzone small { margin-top: 6px; color: var(--subtle); font-size: 10px; line-height: 1.5; }
+    #sourcePreview { display: none; width: 100%; height: 168px; object-fit: contain; border-radius: 8px; background-color: #0a0e0b; }
+    .source-caption { display: none; position: absolute; left: 15px; right: 15px; bottom: 13px; padding: 6px 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: #f2f4ed; background: rgba(5,8,5,.78); border: 1px solid rgba(255,255,255,.1); border-radius: 7px; font-size: 10px; }
+    .dropzone.has-image #sourcePreview { display: block; }
+    .dropzone.has-image .drop-copy { display: none; }
+    .dropzone.has-image .source-caption { display: block; }
+    .file-input { display: none; }
+    .button-row { display: flex; gap: 8px; margin-top: 10px; }
+    .btn {
+      min-height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border);
+      color: var(--text); background: var(--surface-2); font-size: 11px; font-weight: 700;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .btn:hover { border-color: #60745d; background: var(--surface-3); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { color: #17200f; background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: #d5fa88; }
+    .btn.subtle { color: var(--muted); background: transparent; }
+    .btn:disabled { opacity: .48; cursor: not-allowed; }
+    .button-row .btn { flex: 1; }
+    .divider { height: 1px; background: var(--border-soft); margin: 19px 0; }
+    .field { margin-top: 15px; }
+    .field:first-of-type { margin-top: 0; }
+    .field label, .field .label-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: #c4cec1; font-size: 10px; font-weight: 700; }
+    .field select {
+      width: 100%; height: 39px; padding: 0 11px; border: 1px solid var(--border); border-radius: 9px;
+      color: var(--text); background: #101711; font-size: 11px;
+    }
+    .field select:disabled { opacity: .45; cursor: not-allowed; }
+    .field input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+    .range-ends { display: flex; justify-content: space-between; color: var(--subtle); font-size: 9px; margin-top: 3px; }
+    .value-pill { color: var(--accent); background: rgba(199,243,107,.10); padding: 3px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+    .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 10px; border: 1px solid var(--border-soft); background: #0e140f; }
+    .segmented button { min-height: 31px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 10px; font-weight: 700; }
+    .segmented button.active { color: #17200f; background: var(--accent); }
+    .helper { margin: 15px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.6; }
+    .run-btn { width: 100%; margin-top: 18px; min-height: 42px; }
+    .display { min-width: 0; }
+    .display-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+    .display-top h3 { margin: 0; font-size: 13px; font-weight: 750; }
+    .display-top p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .display-actions { display: flex; align-items: center; gap: 8px; }
+    .status-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .status-chip .status-dot { width: 6px; height: 6px; }
+    .status-chip.busy { color: var(--accent); border-color: rgba(199,243,107,.35); }
+    .empty-state, .processing-state { min-height: 570px; padding: 30px; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .empty-inner { max-width: 440px; }
+    .sample-art { width: min(100%, 340px); aspect-ratio: 16 / 10; object-fit: cover; border: 1px solid var(--border); border-radius: 13px; margin: 0 auto 22px; box-shadow: 0 15px 45px rgba(0,0,0,.3); }
+    .empty-state h4 { margin: 0; font-size: 16px; letter-spacing: -.02em; }
+    .empty-state p { margin: 9px auto 17px; max-width: 340px; color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .empty-state .btn { min-width: 150px; }
+    .processing-state { display: none; flex-direction: column; gap: 15px; }
+    .spinner { width: 43px; height: 43px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .85s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-state h4 { margin: 0; font-size: 14px; }
+    .processing-state p { margin: 0; color: var(--muted); font-size: 11px; }
+    .results { display: none; }
+    .metrics-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; margin-bottom: 12px; }
+    .metrics-left { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+    .metrics-left strong { color: var(--text); font-weight: 700; }
+    .metrics-right { display: flex; gap: 16px; flex-wrap: wrap; color: var(--subtle); font-size: 10px; }
+    .metrics-right strong { color: #dce5d7; font-weight: 650; }
+    .image-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 11px; }
+    .image-card { min-width: 0; padding: 10px; }
+    .image-card.featured { border-color: rgba(199,243,107,.42); box-shadow: 0 15px 42px rgba(0,0,0,.25), inset 0 0 0 1px rgba(199,243,107,.035); }
+    .image-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 24px; margin-bottom: 8px; }
+    .image-card-head h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; font-size: 10px; font-weight: 750; }
+    .image-card-head span { color: var(--subtle); font-size: 8px; white-space: nowrap; }
+    .image-stage {
+      position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden;
+      border-radius: 9px; border: 1px solid var(--border-soft); background-color: #090d0a;
+      background-image: linear-gradient(45deg,#131a15 25%,transparent 25%),linear-gradient(-45deg,#131a15 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#131a15 75%),linear-gradient(-45deg,transparent 75%,#131a15 75%);
+      background-size: 18px 18px; background-position: 0 0,0 9px,9px -9px,-9px 0;
+      cursor: crosshair;
+    }
+    .image-stage img { width: 100%; height: 100%; object-fit: contain; transform: scale(1); transform-origin: center; transition: transform .12s ease-out; pointer-events: none; }
+    .stage-note { position: absolute; bottom: 8px; left: 8px; padding: 5px 7px; color: #d5ddd0; background: rgba(7,10,8,.8); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; font-size: 8px; pointer-events: none; }
+    .image-card.featured .stage-note { color: #1b250f; background: var(--accent); border-color: transparent; font-weight: 800; }
+    .delta-note { display: none; color: var(--muted); font-size: 9px; line-height: 1.5; margin: 9px 2px 0; }
+    .info-card { display: flex; gap: 12px; align-items: flex-start; padding: 15px 16px; margin-top: 12px; }
+    .info-icon { width: 29px; height: 29px; flex: 0 0 auto; display: grid; place-items: center; color: var(--accent); background: rgba(199,243,107,.10); border-radius: 9px; }
+    .info-card h4 { margin: 1px 0 5px; font-size: 10px; font-weight: 750; }
+    .info-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .toast-wrap { position: fixed; z-index: 50; right: 20px; bottom: 20px; display: grid; gap: 8px; }
+    .toast { max-width: min(380px, calc(100vw - 40px)); padding: 11px 14px; color: var(--text); background: #18211a; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); font-size: 11px; animation: toast-in .18s ease-out; }
+    .toast.error { border-color: rgba(255,130,126,.45); color: #ffaaa6; }
+    .toast.success { border-color: rgba(199,243,107,.4); color: var(--accent); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    footer { border-top: 1px solid var(--border-soft); padding: 17px 0 22px; color: var(--subtle); font-size: 9px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    @media (max-width: 1050px) {
+      .workspace { grid-template-columns: 285px minmax(0,1fr); }
+      .image-grid { grid-template-columns: 1fr 1fr; }
+      .image-card:last-child { grid-column: 1 / -1; }
+      .image-card:last-child .image-stage { aspect-ratio: 16 / 9; }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 28px, 620px); }
+      .topbar-inner { min-height: 66px; }
+      .top-status { font-size: 0; gap: 0; }
+      .workspace { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .empty-state, .processing-state { min-height: 390px; }
+      main { padding-top: 25px; }
+    }
+    @media (max-width: 520px) {
+      .image-grid { grid-template-columns: 1fr; }
+      .image-card:last-child { grid-column: auto; }
+      .image-card:last-child .image-stage, .image-stage { aspect-ratio: 1 / 1; }
+      .display-top { align-items: flex-start; flex-direction: column; }
+      .metrics-right { gap: 9px; }
+      .intro h2 { font-size: 27px; }
+    }
+  </style>
 </head>
-<body class="blueprint-bg text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-acid-500 selection:text-black">
-
-    <!-- Top Technical Nav / Status Bar -->
-    <header class="border-b border-obsidian-800/85 bg-obsidian-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-            <div class="flex items-center gap-4">
-                <div class="relative p-2.5 bg-acid-500 text-black font-mono font-extrabold text-sm tracking-tighter shadow-[0_0_15px_rgba(163,230,53,0.2)]">
-                    N_SR //
-                    <div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-white border-r border-b border-black"></div>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg font-bold tracking-tight text-white uppercase">NanoSR Optical Engine</h1>
-                        <span class="text-[9px] bg-obsidian-800 border border-obsidian-700 px-1.5 py-0.5 rounded font-mono text-slate-400">v6.2-PRO</span>
-                    </div>
-                    <p class="text-xs text-slate-400 font-mono tracking-widest uppercase">System Status: <span class="text-acid-500">Telemetry Active</span></p>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-4">
-                <div id="aiStatus" class="hidden flex items-center gap-2 px-3 py-1 bg-acid-500/10 border border-acid-500/30 rounded font-mono text-[10px] text-acid-400 uppercase tracking-widest">
-                    <span class="w-1.5 h-1.5 rounded-full bg-acid-500 led-pulse"></span>
-                    <span id="aiStatusText">Synthesizing...</span>
-                </div>
-
-                <div class="flex items-center gap-1.5 bg-obsidian-900 border border-obsidian-800 p-1 rounded-sm">
-                    <span class="text-[10px] font-mono text-slate-500 px-2 uppercase">Render:</span>
-                    <button id="pixelMode" class="px-2.5 py-1 font-mono text-[10px] uppercase transition-all duration-200 bg-acid-500 text-black font-semibold">
-                        NEAREST (Pixelated)
-                    </button>
-                    <button id="smoothMode" class="px-2.5 py-1 font-mono text-[10px] uppercase transition-all duration-200 text-slate-400 hover:text-white">
-                        BILINEAR (Smooth)
-                    </button>
-                </div>
-            </div>
-
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">N</div>
+        <div>
+          <h1>NanoSR <span style="color:var(--muted);font-weight:500">/ FlameF0X</span></h1>
+          <p>Super-resolution and image restoration</p>
         </div>
-    </header>
+      </div>
+      <div class="top-status"><span class="status-dot"></span><span id="topStatus">Ready to process</span></div>
+    </div>
+  </header>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <main class="shell">
+    <section class="intro">
+      <p class="eyebrow">Image enhancement workspace</p>
+      <h2>Make low-res images<br>look a little less low-res.</h2>
+      <p>Choose an image, select a model, and compare the reconstruction against a conventional resized baseline. No mysterious dashboard machinery required.</p>
+    </section>
 
-        <!-- Column 1: System Input Controls -->
-        <section class="lg:col-span-1 space-y-6">
-
-            <div class="bg-obsidian-950 border border-obsidian-800 rounded-sm p-5 space-y-6 relative">
-                <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
-                    MODULE [01] // INPUT
-                </div>
-
-                <div class="space-y-3">
-                    <label class="block text-[11px] font-mono uppercase tracking-widest text-slate-400">
-                        Capture Low-Res Source
-                    </label>
-
-                    <div id="dropZone1" class="group relative h-48 border border-dashed border-obsidian-700 hover:border-acid-500/50 bg-obsidian-900/40 rounded-sm flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden">
-
-                        <div id="previewContainer1" class="hidden absolute inset-0 z-10 p-2 bg-obsidian-950 checkerboard-pattern">
-                            <img id="img1Preview" class="w-full h-full object-contain filter brightness-95">
-                            <div class="absolute bottom-2 left-2 bg-black/85 border border-obsidian-700 px-2 py-0.5 rounded font-mono text-[8px] text-slate-400">
-                                BASE_RAW_IMAGE
-                            </div>
-                        </div>
-
-                        <div id="uploadPrompt1" class="flex flex-col items-center text-center p-4 space-y-3 z-0">
-                            <div class="p-3 bg-obsidian-900 border border-obsidian-800 rounded-full group-hover:border-acid-500/40 group-hover:bg-acid-500/5 transition-all">
-                                <svg class="text-slate-500 group-hover:text-acid-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            </div>
-                            <div>
-                                <span class="text-xs font-semibold text-slate-300 block">Drag & Drop Image</span>
-                                <span class="text-[10px] text-slate-500 font-mono">or click to open browser</span>
-                            </div>
-                        </div>
-                        <input type="file" id="file1" class="hidden" accept="image/*">
-                    </div>
-                </div>
-
-                <!-- Model & Task Selection -->
-                <div class="space-y-4 pt-2 border-t border-obsidian-900">
-                    <div class="space-y-1.5">
-                        <label for="modelSelect" class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Model</label>
-                        <select id="modelSelect" class="w-full bg-obsidian-900 border border-obsidian-800 text-slate-200 font-mono text-[11px] px-2 py-1.5 rounded-sm focus:outline-none focus:border-acid-500/60">
-                            <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x (6x super-resolution)</option>
-                            <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet (restoration)</option>
-                        </select>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="taskSelect" class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Task (RestoreNet only)</label>
-                        <select id="taskSelect" class="w-full bg-obsidian-900 border border-obsidian-800 text-slate-200 font-mono text-[11px] px-2 py-1.5 rounded-sm focus:outline-none focus:border-acid-500/60">
-                            <option value="denoise">denoise</option>
-                            <option value="upscale">upscale (2x)</option>
-                            <option value="enhance">enhance</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Parameters Controls -->
-                <div class="space-y-4 pt-2 border-t border-obsidian-900">
-                    <div>
-                        <div class="flex justify-between mb-1.5 items-baseline">
-                            <label class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Delta Sensitivity</label>
-                            <span id="toleranceVal" class="text-xs font-mono font-bold text-acid-500 bg-acid-500/10 px-1.5 rounded">10</span>
-                        </div>
-                        <input type="range" id="tolerance" min="1" max="50" value="10" class="w-full accent-acid-500 h-1 bg-obsidian-800 rounded-lg appearance-none cursor-pointer">
-                        <div class="flex justify-between text-[8px] font-mono text-slate-600 mt-1">
-                            <span>MIN (1)</span>
-                            <span>MAX (50)</span>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 bg-obsidian-900 border border-obsidian-800/80 rounded-sm font-mono space-y-1.5 text-[10px]">
-                        <h4 class="text-slate-400 border-b border-obsidian-800 pb-1 uppercase tracking-wider text-[9px] font-bold">ENGINE SPECIFICATIONS</h4>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Mode:</span>
-                            <span id="specMode" class="text-white font-semibold">Sub-Pixel 6x SR</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Space:</span>
-                            <span class="text-white">FlameF0X/NanoSR-6x</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Telemetry:</span>
-                            <span id="currentStatusText" class="text-acid-500 font-bold uppercase">Ready</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="p-4 bg-obsidian-950 border border-obsidian-800/80 rounded-sm font-mono space-y-2 relative">
-                <div class="absolute top-0 right-4 transform -translate-y-1/2 bg-obsidian-950 px-2 text-[9px] text-slate-500 tracking-wider">
-                    SYSTEM INFO
-                </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed">
-                    Hover and move your pointer over the output monitors to activate <span class="text-acid-400">synchronous tactical zoom</span>. This maps reconstruction details down to individual pixels.
-                </p>
-            </div>
-
-        </section>
-
-        <!-- Column 2-4: Main Diagnostics & Comparison Display -->
-        <section class="lg:col-span-3 space-y-6">
-
-            <div id="emptyState" class="h-full min-h-[500px] flex flex-col items-center justify-center border border-obsidian-800/80 rounded-sm text-center p-8 bg-obsidian-950/40 relative overflow-hidden group">
-                <div class="absolute inset-0 blueprint-bg opacity-40 pointer-events-none"></div>
-                <div class="relative w-28 h-28 mb-6 border border-obsidian-800 flex items-center justify-center">
-                    <div class="absolute inset-2 border border-dashed border-obsidian-700"></div>
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-px bg-acid-500/50"></div>
-                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-px bg-acid-500/50"></div>
-                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-acid-500/50"></div>
-                    <div class="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-px bg-acid-500/50"></div>
-                    <svg class="text-slate-600 opacity-60 z-10" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                </div>
-                <div class="space-y-2 z-10 max-w-sm">
-                    <h3 class="text-sm font-mono uppercase tracking-widest text-slate-300">Awaiting Target Acquisition</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-sans">
-                        Upload or drop an image in the control dock, pick a model, and the reconstruction will run automatically.
-                    </p>
-                </div>
-            </div>
-
-            <div id="processingState" class="hidden h-full min-h-[500px] flex flex-col items-center justify-center border border-acid-500/20 rounded-sm p-8 bg-obsidian-950 scanlines relative overflow-hidden">
-                <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
-
-                <div class="relative mb-8">
-                    <div class="w-24 h-24 rounded-full border-2 border-dashed border-acid-500/20 animate-spin flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full border border-dotted border-acid-500/50 animate-ping"></div>
-                    </div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="font-mono text-[10px] text-acid-500 tracking-tighter">PROCESSING</span>
-                    </div>
-                </div>
-
-                <div class="text-center space-y-3 z-10 max-w-md">
-                    <h3 class="text-lg font-mono tracking-widest text-white uppercase">RECONSTRUCTING HIGH-FREQUENCY DETAILS</h3>
-                    <p id="processingDesc" class="text-xs text-slate-400 font-sans leading-relaxed">
-                        Querying the model on FlameF0X/NanoSR-6x...
-                    </p>
-                    <div class="w-48 h-1 bg-obsidian-900 border border-obsidian-850 rounded-full mx-auto overflow-hidden">
-                        <div class="h-full bg-acid-500 w-1/3 animate-pulse rounded-full"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="resultsView" class="hidden space-y-6">
-
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-obsidian-950 border border-obsidian-800 p-4 rounded-sm relative">
-                    <div class="absolute top-0 left-4 transform -translate-y-1/2 bg-obsidian-950 px-2 font-mono text-[9px] text-slate-500 tracking-wider">
-                        HUD MODULE [02] // METRICS
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1 text-[10px] font-mono text-acid-400 bg-acid-400/10 border border-acid-500/35 px-2.5 py-1 uppercase rounded-sm">
-                            <span class="w-1.5 h-1.5 bg-acid-500 rounded-full led-pulse"></span>
-                            Telemetry Synchronized
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-6 text-[11px] font-mono text-slate-400">
-                        <div>
-                            COORD: <span id="hudCoords" class="text-white">- : -</span>
-                        </div>
-                        <div>
-                            ZOOM: <span class="text-white">6.0x</span>
-                        </div>
-                        <div>
-                            RESOLUTION: <span id="resTag" class="text-acid-500">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_01 [BASELINE]</span>
-                            <span class="text-[9px] font-mono text-slate-600">BICUBIC_SMOOTH</span>
-                        </div>
-                        <div class="zoom-container group">
-                            <div class="hud-overlay"></div>
-                            <img id="zImg1" class="zoom-image">
-                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
-                                BICUBIC INTERPOLATION
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-obsidian-950 border border-acid-500/30 p-2 rounded-sm space-y-2 relative">
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-[9px] font-mono tracking-wider text-acid-400 uppercase font-semibold">SYS_MON_02 [RECON_OUTPUT]</span>
-                            <span class="text-[9px] font-mono text-acid-500 font-bold">ACTIVE_SR</span>
-                        </div>
-                        <div class="zoom-container">
-                            <div class="hud-overlay" style="border-color: rgba(163,230,53,0.15)"></div>
-                            <img id="zImg2" class="zoom-image">
-                            <div id="heroLabel" class="absolute bottom-2 left-2 px-2 py-0.5 bg-acid-500 text-black text-[9px] font-mono font-bold rounded-sm shadow-md">
-                                NANO-SR 6x AI ENHANCED
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-obsidian-950 border border-obsidian-800 p-2 rounded-sm space-y-2 relative">
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-[9px] font-mono tracking-wider text-slate-400 uppercase">SYS_MON_03 [DELTA_SPECTRUM]</span>
-                            <span class="text-[9px] font-mono text-slate-600">HI_FREQ_DELTA</span>
-                        </div>
-                        <div class="zoom-container">
-                            <div class="hud-overlay"></div>
-                            <img id="zDiff" class="zoom-image">
-                            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/90 border border-obsidian-800 text-[9px] font-mono text-slate-400 rounded-sm">
-                                DELTA ENHANCEMENT MAP
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="border-l-2 border-acid-500 bg-obsidian-950 p-6 rounded-sm relative overflow-hidden">
-                    <div class="absolute inset-0 blueprint-bg opacity-30 pointer-events-none"></div>
-                    <div class="flex items-start gap-4 relative z-10">
-                        <div class="p-2.5 bg-acid-500/10 border border-acid-500/30 text-acid-500 rounded-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                        </div>
-                        <div class="space-y-1.5">
-                            <h4 class="text-sm font-mono font-bold text-white uppercase tracking-wider">Delta Reconstruction Telemetry Matrix</h4>
-                            <p class="text-xs text-slate-400 leading-relaxed">
-                                The <span class="text-acid-400 font-semibold">High-Frequency Delta Map</span> highlights where the model changed pixels relative to a plain bicubic baseline. Brighter areas show where the output differs most from simple interpolation.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-
-    <footer class="border-t border-obsidian-800/80 bg-obsidian-950/80 backdrop-blur-md px-6 py-4 mt-12 text-slate-500 text-[10px] font-mono">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <span>SYSTEM CORE: ONLINE</span>
-                <span>•</span>
-                <span>SPACE: FlameF0X/NanoSR-6x</span>
-            </div>
-            <div>
-                <span>TACTICAL RECON ENGINE — ALL INTEL SYNTHESIZED REMOTELY</span>
-            </div>
+    <div class="workspace">
+      <aside class="panel controls" aria-label="Image and model settings">
+        <div class="panel-heading">
+          <h3>Source image</h3>
+          <span class="tiny-label">01 / Input</span>
         </div>
-    </footer>
+        <div id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Choose or drop an image">
+          <div class="drop-copy">
+            <div class="drop-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M20 16.5v2A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-2"/></svg>
+            </div>
+            <strong>Drop an image here</strong>
+            <small>or click to browse · PNG, JPG, WEBP</small>
+          </div>
+          <img id="sourcePreview" alt="Selected source preview">
+          <span id="sourceCaption" class="source-caption"></span>
+        </div>
+        <input id="fileInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+        <div class="button-row">
+          <button id="browseBtn" class="btn" type="button">Browse files</button>
+          <button id="sampleBtn" class="btn primary" type="button">Use sample</button>
+        </div>
 
-    <script type="module">
-        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+        <div class="divider"></div>
+        <div class="panel-heading">
+          <h3>Model settings</h3>
+          <span class="tiny-label">02 / Configure</span>
+        </div>
+        <div class="field">
+          <label for="modelSelect">Model</label>
+          <select id="modelSelect">
+            <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x · 6× super-resolution</option>
+            <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet · restoration</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="taskSelect">Restoration task</label>
+          <select id="taskSelect" disabled>
+            <option value="denoise">Denoise</option>
+            <option value="upscale">Upscale · 2×</option>
+            <option value="enhance">Enhance</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label-line"><label for="tolerance" style="margin:0">Difference sensitivity</label><span id="toleranceValue" class="value-pill">10</span></div>
+          <input id="tolerance" type="range" min="1" max="50" value="10">
+          <div class="range-ends"><span>More detail</span><span>Less noise</span></div>
+        </div>
+        <div class="field">
+          <div class="label-line"><span>Baseline rendering</span><span class="tiny-label">Comparison only</span></div>
+          <div class="segmented" role="group" aria-label="Baseline interpolation mode">
+            <button id="nearestBtn" class="active" type="button" aria-pressed="true">Nearest</button>
+            <button id="smoothBtn" type="button" aria-pressed="false">Smooth</button>
+          </div>
+        </div>
+        <button id="runBtn" class="btn primary run-btn" type="button" disabled>Run enhancement</button>
+        <p class="helper">The model runs through the hosted NanoSR Gradio Space. Your original image is used to build the comparison baseline in this browser.</p>
+      </aside>
 
-        const SPACE_ID = "FlameF0X/NanoSR-6x";
-        const API_NAME = "/process_image";
-        const MODEL_SR = "NanoSR-6x (6x super-resolution)";
-        const MODEL_RESTORE = "Nano-RestoreNet (denoise / upscale / enhance)";
+      <section class="display" aria-label="Image comparison results">
+        <div class="display-top">
+          <div>
+            <h3>Comparison</h3>
+            <p>Source baseline, model output, and pixel difference.</p>
+          </div>
+          <div class="display-actions">
+            <span id="statusChip" class="status-chip"><span class="status-dot"></span><span id="statusText">Waiting for image</span></span>
+            <button id="downloadBtn" class="btn subtle" type="button" hidden>Download result</button>
+          </div>
+        </div>
 
-        const state = {
-            sourceUrl: null,       // data URL for the preview and baseline
-            sourceFile: null,      // File object sent to the Space
-            aiResultUrl: null,     // URL of the processed image from the Space
-            interpolation: 'pixelated',
-            model: MODEL_SR,
-            task: 'denoise',
-            isProcessing: false,
-            pending: false         // a model/task change happened mid-run
-        };
+        <div id="emptyState" class="panel empty-state">
+          <div class="empty-inner">
+            <img class="sample-art" src="assets/sample.png" alt="Built-in geometric image test chart">
+            <h4>Start with an image</h4>
+            <p>Upload your own image or use the included sample chart. The sample is a local PNG in the <code>assets</code> folder, so it works without an internet image service.</p>
+            <button id="emptySampleBtn" class="btn primary" type="button">Load sample image</button>
+          </div>
+        </div>
 
-        const el = {
-            file1: document.getElementById('file1'),
-            drop1: document.getElementById('dropZone1'),
-            tolerance: document.getElementById('tolerance'),
-            toleranceVal: document.getElementById('toleranceVal'),
-            modelSelect: document.getElementById('modelSelect'),
-            taskSelect: document.getElementById('taskSelect'),
-            specMode: document.getElementById('specMode'),
-            heroLabel: document.getElementById('heroLabel'),
-            processingDesc: document.getElementById('processingDesc'),
-            pixelMode: document.getElementById('pixelMode'),
-            smoothMode: document.getElementById('smoothMode'),
-            resultsView: document.getElementById('resultsView'),
-            emptyState: document.getElementById('emptyState'),
-            processingState: document.getElementById('processingState'),
-            aiStatus: document.getElementById('aiStatus'),
-            aiStatusText: document.getElementById('aiStatusText'),
-            statusText: document.getElementById('currentStatusText'),
-            toastContainer: document.getElementById('toastContainer'),
-            hudCoords: document.getElementById('hudCoords')
-        };
+        <div id="processingState" class="panel processing-state" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <h4>Processing image</h4>
+          <p id="processingText">Connecting to NanoSR…</p>
+        </div>
 
-        // Connect once and reuse the client
-        let clientPromise = null;
-        function getClient() {
-            if (!clientPromise) {
-                clientPromise = Client.connect(SPACE_ID).catch(err => {
-                    clientPromise = null;
-                    throw err;
-                });
-            }
-            return clientPromise;
-        }
+        <div id="results" class="results">
+          <div class="panel metrics-bar">
+            <div class="metrics-left"><span class="status-dot"></span><strong>Comparison ready</strong><span id="modelUsed">NanoSR-6x</span></div>
+            <div class="metrics-right"><span>Output <strong id="resolutionValue">—</strong></span><span>Zoom <strong>3×</strong></span><span>Pointer <strong id="pointerValue">—</strong></span></div>
+          </div>
+          <div class="image-grid">
+            <article class="panel image-card">
+              <div class="image-card-head"><h4>Resized baseline</h4><span id="baselineLabel">NEAREST</span></div>
+              <div class="image-stage zoom-stage"><img id="baselineImage" alt="Resized source baseline"><span class="stage-note">STANDARD RESIZE</span></div>
+            </article>
+            <article class="panel image-card featured">
+              <div class="image-card-head"><h4>AI reconstruction</h4><span>MODEL OUTPUT</span></div>
+              <div class="image-stage zoom-stage"><img id="outputImage" alt="AI-enhanced result"><span class="stage-note" id="outputLabel">NANOSR 6×</span></div>
+            </article>
+            <article class="panel image-card">
+              <div class="image-card-head"><h4>Difference map</h4><span>PIXEL DELTA</span></div>
+              <div class="image-stage"><img id="deltaImage" alt="Difference map between baseline and model output"><span class="stage-note">CHANGED PIXELS</span></div>
+              <p id="deltaNote" class="delta-note"></p>
+            </article>
+          </div>
+          <div class="panel info-card">
+            <div class="info-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>
+            </div>
+            <div><h4>Reading the difference map</h4><p>Brighter regions mark pixels where the model output differs from a basic resized version. This shows where changes occurred, not whether every change is objectively better.</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
 
-        // Upload handlers
-        el.drop1.onclick = () => el.file1.click();
-        el.file1.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) handleSourceUpload(file);
-        };
-        el.drop1.ondragover = (e) => {
-            e.preventDefault();
-            el.drop1.classList.add('border-acid-500', 'bg-acid-500/5');
-        };
-        el.drop1.ondragleave = () => {
-            el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
-        };
-        el.drop1.ondrop = (e) => {
-            e.preventDefault();
-            el.drop1.classList.remove('border-acid-500', 'bg-acid-500/5');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleSourceUpload(file);
-            } else {
-                showToast("System Error: Invalid image format submitted.", "error");
-            }
-        };
+  <footer><div class="shell footer-inner"><span>NanoSR Image Lab</span><span>Powered by FlameF0X / NanoSR-6x</span></div></footer>
+  <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
 
-        // Model and task controls
-        el.modelSelect.onchange = () => {
-            state.model = el.modelSelect.value;
-            syncControls();
-            if (state.sourceFile) runModel();
-        };
-        el.taskSelect.onchange = () => {
-            state.task = el.taskSelect.value;
-            syncControls();
-            if (state.sourceFile && state.model === MODEL_RESTORE) runModel();
-        };
+  <script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-        function syncControls() {
-            const isRestore = state.model === MODEL_RESTORE;
-            el.taskSelect.disabled = !isRestore;
-            el.specMode.innerText = isRestore ? `Restoration (${state.task})` : 'Sub-Pixel 6x SR';
-            el.heroLabel.innerText = isRestore
-                ? `NANO-RESTORE · ${state.task.toUpperCase()}`
-                : 'NANO-SR 6x AI ENHANCED';
-        }
+    const SPACE_ID = "FlameF0X/NanoSR-6x";
+    const API_NAME = "/process_image";
+    const MODEL_SR = "NanoSR-6x (6x super-resolution)";
+    const MODEL_RESTORE = "Nano-RestoreNet (denoise / upscale / enhance)";
 
-        // Sensitivity and render mode
-        el.tolerance.oninput = (e) => {
-            el.toleranceVal.innerText = e.target.value;
-            if (state.aiResultUrl) runAnalysis();
-        };
+    const $ = (id) => document.getElementById(id);
+    const ui = {
+      dropZone: $("dropZone"), fileInput: $("fileInput"), browseBtn: $("browseBtn"), sampleBtn: $("sampleBtn"),
+      emptySampleBtn: $("emptySampleBtn"), sourcePreview: $("sourcePreview"), sourceCaption: $("sourceCaption"),
+      modelSelect: $("modelSelect"), taskSelect: $("taskSelect"), tolerance: $("tolerance"), toleranceValue: $("toleranceValue"),
+      nearestBtn: $("nearestBtn"), smoothBtn: $("smoothBtn"), runBtn: $("runBtn"), topStatus: $("topStatus"),
+      statusChip: $("statusChip"), statusText: $("statusText"), emptyState: $("emptyState"), processingState: $("processingState"),
+      processingText: $("processingText"), results: $("results"), modelUsed: $("modelUsed"), resolutionValue: $("resolutionValue"),
+      pointerValue: $("pointerValue"), baselineImage: $("baselineImage"), outputImage: $("outputImage"), deltaImage: $("deltaImage"),
+      baselineLabel: $("baselineLabel"), outputLabel: $("outputLabel"), deltaNote: $("deltaNote"), downloadBtn: $("downloadBtn"), toastWrap: $("toastWrap")
+    };
 
-        el.pixelMode.onclick = () => setInterp('pixelated');
-        el.smoothMode.onclick = () => setInterp('smooth');
+    const state = {
+      sourceFile: null,
+      sourceUrl: null,
+      sourceName: "",
+      outputUrl: null,
+      model: MODEL_SR,
+      task: "denoise",
+      interpolation: "pixelated",
+      running: false,
+      queued: false,
+      revision: 0,
+      clientPromise: null
+    };
 
-        function setInterp(mode) {
-            state.interpolation = mode;
-            if (mode === 'pixelated') {
-                el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
-                el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
-            } else {
-                el.pixelMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase text-slate-400 hover:text-white';
-                el.smoothMode.className = 'px-2.5 py-1 font-mono text-[10px] uppercase bg-acid-500 text-black font-semibold';
-            }
-            if (state.aiResultUrl) {
-                runAnalysis();
-                showToast(`Interpolation changed to ${mode.toUpperCase()}`);
-            }
-        }
+    function toast(message, type = "info") {
+      const node = document.createElement("div");
+      node.className = `toast ${type}`;
+      node.textContent = message;
+      ui.toastWrap.appendChild(node);
+      window.setTimeout(() => node.remove(), 4200);
+    }
 
-        // Upload
-        function handleSourceUpload(file) {
-            state.sourceFile = file;
+    function setStatus(message, mode = "ready") {
+      ui.statusText.textContent = message;
+      ui.topStatus.textContent = mode === "busy" ? "Processing image" : mode === "error" ? "Processing failed" : "Ready to process";
+      ui.statusChip.classList.toggle("busy", mode === "busy");
+      const dot = ui.statusChip.querySelector(".status-dot");
+      dot.style.background = mode === "error" ? "var(--danger)" : "var(--accent)";
+      ui.runBtn.disabled = !state.sourceFile || state.running;
+    }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                state.sourceUrl = e.target.result;
-                document.getElementById('img1Preview').src = e.target.result;
-                document.getElementById('previewContainer1').classList.remove('hidden');
-                document.getElementById('uploadPrompt1').classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
+    function showView(view) {
+      ui.emptyState.style.display = view === "empty" ? "flex" : "none";
+      ui.processingState.style.display = view === "processing" ? "flex" : "none";
+      ui.results.style.display = view === "results" ? "block" : "none";
+      if (view !== "results") ui.downloadBtn.hidden = true;
+    }
 
-            runModel();
-        }
+    function syncControls() {
+      state.model = ui.modelSelect.value;
+      state.task = ui.taskSelect.value;
+      const restore = state.model === MODEL_RESTORE;
+      ui.taskSelect.disabled = !restore;
+      ui.outputLabel.textContent = restore ? `RESTORE · ${state.task.toUpperCase()}` : "NANOSR 6×";
+      ui.modelUsed.textContent = restore ? `Nano-RestoreNet · ${state.task}` : "NanoSR-6x";
+    }
 
-        // Call the Space
-        async function runModel() {
-            if (state.isProcessing) {
-                state.pending = true;
-                return;
-            }
-            if (!state.sourceFile) return;
+    function setInterpolation(mode) {
+      state.interpolation = mode;
+      const nearest = mode === "pixelated";
+      ui.nearestBtn.classList.toggle("active", nearest);
+      ui.smoothBtn.classList.toggle("active", !nearest);
+      ui.nearestBtn.setAttribute("aria-pressed", String(nearest));
+      ui.smoothBtn.setAttribute("aria-pressed", String(!nearest));
+      ui.baselineLabel.textContent = nearest ? "NEAREST" : "SMOOTH";
+      if (state.outputUrl && state.sourceUrl) renderComparison(state.sourceUrl, state.outputUrl);
+    }
 
-            state.isProcessing = true;
-            state.pending = false;
-            toggleUiState('processing');
-            setStatus('Processing...', 'text-acid-500 led-pulse');
-            el.aiStatusText.innerText = state.model === MODEL_RESTORE
-                ? `Running ${state.task}...`
-                : 'Synthesizing 6x Subpixels...';
-            el.processingDesc.innerText = `Querying ${SPACE_ID}...`;
+    function updateSourcePreview(url, name) {
+      ui.sourcePreview.src = url;
+      ui.sourceCaption.textContent = name;
+      ui.dropZone.classList.add("has-image");
+      ui.runBtn.disabled = false;
+    }
 
-            try {
-                const client = await getClient();
-                const result = await client.predict(API_NAME, {
-                    input_img: state.sourceFile,
-                    model_choice: state.model,
-                    task: state.task
-                });
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Could not read this image file."));
+        reader.readAsDataURL(file);
+      });
+    }
 
-                const out = result.data[0];
-                state.aiResultUrl = typeof out === 'string' ? out : out.url;
+    async function loadSourceFile(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        toast("Choose a valid image file.", "error");
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        toast("This file is larger than 25 MB. Choose a smaller image.", "error");
+        return;
+      }
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        state.revision += 1;
+        state.sourceFile = file;
+        state.sourceUrl = dataUrl;
+        state.sourceName = file.name || "image";
+        state.outputUrl = null;
+        updateSourcePreview(dataUrl, state.sourceName);
+        showView("empty");
+        setStatus("Image loaded");
+        requestRun();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    }
 
-                await runAnalysis();
-                toggleUiState('results');
-                setStatus('Online', 'text-acid-500');
-                showToast("Reconstruction mapped successfully!", "success");
-            } catch (err) {
-                console.error("Space call failed:", err);
-                showToast(`Model request failed: ${err.message || 'unknown error'}`, "error");
-                toggleUiState('empty');
-                setStatus('Failed', 'text-red-500');
-            } finally {
-                state.isProcessing = false;
-                if (state.pending) runModel();
-            }
-        }
+    async function loadSample() {
+      try {
+        ui.sampleBtn.disabled = true;
+        ui.emptySampleBtn.disabled = true;
+        const response = await fetch("assets/sample.png");
+        if (!response.ok) throw new Error("Could not load assets/sample.png. Serve the project folder from a local web server.");
+        const blob = await response.blob();
+        const file = new File([blob], "sample.png", { type: "image/png" });
+        await loadSourceFile(file);
+      } catch (error) {
+        toast(error.message || "Could not load the sample image.", "error");
+      } finally {
+        ui.sampleBtn.disabled = false;
+        ui.emptySampleBtn.disabled = false;
+      }
+    }
 
-        function setStatus(text, className) {
-            el.statusText.innerText = text;
-            el.statusText.className = className;
-        }
-
-        // Differential analysis
-        async function runAnalysis() {
-            if (!state.sourceUrl || !state.aiResultUrl) return;
-
-            const imgS = await loadImage(state.sourceUrl);
-            const imgA = await loadImage(state.aiResultUrl);
-
-            const w = imgA.width;
-            const h = imgA.height;
-            const thresh = parseInt(el.tolerance.value);
-
-            document.getElementById('resTag').innerText = `${w} x ${h} PX`;
-
-            const c1 = document.createElement('canvas');
-            const c2 = document.createElement('canvas');
-            const cD = document.createElement('canvas');
-            c1.width = c2.width = cD.width = w;
-            c1.height = c2.height = cD.height = h;
-
-            const ctx1 = c1.getContext('2d', { willReadFrequently: true });
-            const ctx2 = c2.getContext('2d', { willReadFrequently: true });
-            const ctxD = cD.getContext('2d');
-
-            // Baseline: source scaled to the output size
-            ctx1.imageSmoothingEnabled = state.interpolation !== 'pixelated';
-            ctx1.imageSmoothingQuality = 'high';
-            ctx1.drawImage(imgS, 0, 0, w, h);
-
-            // Model output
-            ctx2.drawImage(imgA, 0, 0, w, h);
-
-            // Difference map
-            const d1 = ctx1.getImageData(0, 0, w, h).data;
-            const d2 = ctx2.getImageData(0, 0, w, h).data;
-            const out = ctxD.createImageData(w, h);
-            const od = out.data;
-
-            for (let i = 0; i < d1.length; i += 4) {
-                const diff = (Math.abs(d1[i] - d2[i]) + Math.abs(d1[i + 1] - d2[i + 1]) + Math.abs(d1[i + 2] - d2[i + 2])) / 3;
-
-                if (diff > thresh) {
-                    od[i] = Math.min(255, diff * 1.5);
-                    od[i + 1] = Math.min(255, diff * 4.5);
-                    od[i + 2] = Math.min(255, diff * 0.1);
-                    od[i + 3] = 255;
-                } else {
-                    od[i] = 3; od[i + 1] = 3; od[i + 2] = 5; od[i + 3] = 255;
-                }
-            }
-            ctxD.putImageData(out, 0, 0);
-
-            document.getElementById('zImg1').src = c1.toDataURL();
-            document.getElementById('zImg2').src = c2.toDataURL();
-            document.getElementById('zDiff').src = cD.toDataURL();
-        }
-
-        function toggleUiState(mode) {
-            el.emptyState.classList.add('hidden');
-            el.processingState.classList.add('hidden');
-            el.resultsView.classList.add('hidden');
-            el.aiStatus.classList.add('hidden');
-
-            if (mode === 'empty') el.emptyState.classList.remove('hidden');
-            if (mode === 'processing') {
-                el.processingState.classList.remove('hidden');
-                el.aiStatus.classList.remove('hidden');
-            }
-            if (mode === 'results') el.resultsView.classList.remove('hidden');
-        }
-
-        function loadImage(src) {
-            return new Promise((res, rej) => {
-                const i = new Image();
-                i.crossOrigin = "anonymous";
-                i.onload = () => res(i);
-                i.onerror = () => rej(new Error("Could not load image"));
-                i.src = src;
-            });
-        }
-
-        function showToast(message, type = "info") {
-            const toast = document.createElement('div');
-            let typeStyles = "border-obsidian-800 bg-obsidian-950 text-slate-300";
-            if (type === "success") typeStyles = "border-acid-500/50 bg-obsidian-950 text-acid-400";
-            if (type === "error") typeStyles = "border-red-500/50 bg-obsidian-950 text-red-400";
-
-            toast.className = `p-3 border rounded-sm font-mono text-[10px] tracking-wider uppercase transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2 shadow-lg ${typeStyles}`;
-            toast.innerHTML = `
-                <span class="w-1.5 h-1.5 rounded-full ${type === "error" ? 'bg-red-500' : 'bg-acid-500'} led-pulse"></span>
-                <span></span>
-            `;
-            toast.querySelector('span:last-child').innerText = message;
-            el.toastContainer.appendChild(toast);
-
-            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 50);
-            setTimeout(() => {
-                toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Synchronized zoom across monitors
-        document.querySelectorAll('.zoom-container').forEach(container => {
-            const handleZoom = e => {
-                const rect = container.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-                el.hudCoords.innerText = `${Math.round(x)}% : ${Math.round(y)}%`;
-
-                document.querySelectorAll('.zoom-image').forEach(img => {
-                    img.style.transformOrigin = `${x}% ${y}%`;
-                    img.style.transform = 'scale(6)';
-                });
-            };
-
-            container.addEventListener('mousemove', handleZoom);
-
-            container.addEventListener('mouseleave', () => {
-                el.hudCoords.innerText = `- : -`;
-                document.querySelectorAll('.zoom-image').forEach(img => {
-                    img.style.transform = 'scale(1)';
-                });
-            });
-
-            container.addEventListener('touchmove', e => {
-                e.preventDefault();
-                handleZoom(e.touches[0]);
-            }, { passive: false });
+    function getClient() {
+      if (!state.clientPromise) {
+        state.clientPromise = Client.connect(SPACE_ID).catch((error) => {
+          state.clientPromise = null;
+          throw error;
         });
+      }
+      return state.clientPromise;
+    }
 
-        syncControls();
-    </script>
+    function requestRun() {
+      if (!state.sourceFile) return;
+      if (state.running) {
+        state.queued = true;
+        return;
+      }
+      runQueue();
+    }
+
+    async function runQueue() {
+      if (state.running || !state.sourceFile) return;
+      state.running = true;
+      ui.runBtn.disabled = true;
+      try {
+        do {
+          state.queued = false;
+          const revision = state.revision;
+          const file = state.sourceFile;
+          const sourceUrl = state.sourceUrl;
+          const model = state.model;
+          const task = state.task;
+          showView("processing");
+          setStatus("Connecting to model…", "busy");
+          ui.processingText.textContent = `Sending ${file.name || "image"} to ${SPACE_ID}…`;
+          try {
+            const client = await getClient();
+            const result = await client.predict(API_NAME, {
+              input_img: file,
+              model_choice: model,
+              task
+            });
+            const output = result?.data?.[0];
+            const outputUrl = typeof output === "string" ? output : output?.url;
+            if (!outputUrl) throw new Error("The model returned no output image.");
+            if (revision !== state.revision) {
+              state.queued = true;
+              continue;
+            }
+            state.outputUrl = outputUrl;
+            ui.processingText.textContent = "Building the comparison views…";
+            await renderComparison(sourceUrl, outputUrl);
+            if (revision !== state.revision) {
+              state.queued = true;
+              continue;
+            }
+            showView("results");
+            ui.downloadBtn.hidden = false;
+            setStatus("Comparison ready");
+            toast("Image enhancement complete.", "success");
+          } catch (error) {
+            if (revision !== state.revision) {
+              state.queued = true;
+              continue;
+            }
+            console.error("NanoSR request failed:", error);
+            showView("empty");
+            setStatus("Processing failed", "error");
+            toast(error.message || "The model request failed.", "error");
+          }
+        } while (state.queued);
+      } finally {
+        state.running = false;
+        ui.runBtn.disabled = !state.sourceFile;
+        if (state.queued && state.sourceFile) requestRun();
+      }
+    }
+
+    function loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("Could not load an image for comparison."));
+        image.src = url;
+      });
+    }
+
+    async function renderComparison(sourceUrl, outputUrl) {
+      const [source, output] = await Promise.all([loadImage(sourceUrl), loadImage(outputUrl)]);
+      const originalWidth = output.naturalWidth;
+      const originalHeight = output.naturalHeight;
+      ui.resolutionValue.textContent = `${originalWidth.toLocaleString()} × ${originalHeight.toLocaleString()} px`;
+      ui.baselineImage.src = makeBaseline(source, originalWidth, originalHeight);
+      ui.outputImage.src = outputUrl;
+      ui.deltaImage.removeAttribute("src");
+      ui.deltaNote.style.display = "none";
+      ui.deltaNote.textContent = "";
+
+      // Limit the analysis canvas size to avoid excessive memory use with very large outputs.
+      const scale = Math.min(1, Math.sqrt(12000000 / (originalWidth * originalHeight)));
+      const width = Math.max(1, Math.round(originalWidth * scale));
+      const height = Math.max(1, Math.round(originalHeight * scale));
+      const baseCanvas = document.createElement("canvas");
+      const outputCanvas = document.createElement("canvas");
+      const deltaCanvas = document.createElement("canvas");
+      for (const canvas of [baseCanvas, outputCanvas, deltaCanvas]) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      const baseContext = baseCanvas.getContext("2d", { willReadFrequently: true });
+      const outputContext = outputCanvas.getContext("2d", { willReadFrequently: true });
+      const deltaContext = deltaCanvas.getContext("2d");
+      baseContext.imageSmoothingEnabled = state.interpolation !== "pixelated";
+      baseContext.imageSmoothingQuality = "high";
+      baseContext.drawImage(source, 0, 0, width, height);
+      outputContext.drawImage(output, 0, 0, width, height);
+
+      try {
+        const basePixels = baseContext.getImageData(0, 0, width, height).data;
+        const outputPixels = outputContext.getImageData(0, 0, width, height).data;
+        const delta = deltaContext.createImageData(width, height);
+        const sensitivity = Number(ui.tolerance.value);
+        for (let index = 0; index < basePixels.length; index += 4) {
+          const difference = (Math.abs(basePixels[index] - outputPixels[index]) +
+            Math.abs(basePixels[index + 1] - outputPixels[index + 1]) +
+            Math.abs(basePixels[index + 2] - outputPixels[index + 2])) / 3;
+          if (difference > sensitivity) {
+            delta.data[index] = Math.min(255, difference * 1.5);
+            delta.data[index + 1] = Math.min(255, difference * 4.5);
+            delta.data[index + 2] = Math.min(255, difference * .1);
+            delta.data[index + 3] = 255;
+          } else {
+            delta.data[index] = 4;
+            delta.data[index + 1] = 7;
+            delta.data[index + 2] = 5;
+            delta.data[index + 3] = 255;
+          }
+        }
+        deltaContext.putImageData(delta, 0, 0);
+        ui.deltaImage.src = deltaCanvas.toDataURL("image/png");
+      } catch (error) {
+        console.warn("Difference map unavailable (likely a cross-origin image):", error);
+        ui.deltaNote.textContent = "The model output is visible, but the browser did not allow pixel-level analysis of this hosted image.";
+        ui.deltaNote.style.display = "block";
+      }
+      ui.baselineImage.style.imageRendering = state.interpolation === "pixelated" ? "pixelated" : "auto";
+    }
+
+    function makeBaseline(source, width, height) {
+      const canvas = document.createElement("canvas");
+      const scale = Math.min(1, Math.sqrt(12000000 / (width * height)));
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+      const context = canvas.getContext("2d");
+      context.imageSmoothingEnabled = state.interpolation !== "pixelated";
+      context.imageSmoothingQuality = "high";
+      context.drawImage(source, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/png");
+    }
+
+    async function downloadOutput() {
+      if (!state.outputUrl) return;
+      try {
+        const response = await fetch(state.outputUrl);
+        if (!response.ok) throw new Error("The output host did not allow a direct download.");
+        const blobUrl = URL.createObjectURL(await response.blob());
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = "nanosr-enhanced.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+      } catch (error) {
+        // Some hosted model outputs do not expose CORS headers. Opening the image is the fallback.
+        window.open(state.outputUrl, "_blank", "noopener,noreferrer");
+        toast("Opened the result in a new tab. Use your browser's Save image option.");
+      }
+    }
+
+    ui.browseBtn.addEventListener("click", () => ui.fileInput.click());
+    ui.dropZone.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      ui.fileInput.click();
+    });
+    ui.dropZone.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        ui.fileInput.click();
+      }
+    });
+    ui.fileInput.addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (file) loadSourceFile(file);
+      event.target.value = "";
+    });
+    ["dragenter", "dragover"].forEach((name) => ui.dropZone.addEventListener(name, (event) => {
+      event.preventDefault();
+      ui.dropZone.classList.add("dragover");
+    }));
+    ["dragleave", "drop"].forEach((name) => ui.dropZone.addEventListener(name, (event) => {
+      event.preventDefault();
+      ui.dropZone.classList.remove("dragover");
+    }));
+    ui.dropZone.addEventListener("drop", (event) => {
+      const file = event.dataTransfer?.files?.[0];
+      if (file) loadSourceFile(file);
+    });
+    ui.sampleBtn.addEventListener("click", loadSample);
+    ui.emptySampleBtn.addEventListener("click", loadSample);
+    ui.modelSelect.addEventListener("change", () => {
+      syncControls();
+      if (state.sourceFile) { state.revision += 1; requestRun(); }
+    });
+    ui.taskSelect.addEventListener("change", () => {
+      syncControls();
+      if (state.sourceFile && state.model === MODEL_RESTORE) { state.revision += 1; requestRun(); }
+    });
+    ui.runBtn.addEventListener("click", () => requestRun());
+    ui.tolerance.addEventListener("input", () => {
+      ui.toleranceValue.textContent = ui.tolerance.value;
+      if (state.outputUrl && state.sourceUrl) renderComparison(state.sourceUrl, state.outputUrl);
+    });
+    ui.nearestBtn.addEventListener("click", () => setInterpolation("pixelated"));
+    ui.smoothBtn.addEventListener("click", () => setInterpolation("smooth"));
+    ui.downloadBtn.addEventListener("click", downloadOutput);
+
+    // Hovering any comparison image zooms all comparison views around the same point.
+    document.querySelectorAll(".zoom-stage").forEach((stage) => {
+      stage.addEventListener("pointermove", (event) => {
+        const bounds = stage.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+        const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+        document.querySelectorAll(".zoom-stage img").forEach((image) => {
+          image.style.transformOrigin = `${x}% ${y}%`;
+          image.style.transform = "scale(3)";
+        });
+        ui.pointerValue.textContent = `${Math.round(x)}%, ${Math.round(y)}%`;
+      });
+      stage.addEventListener("pointerleave", () => {
+        document.querySelectorAll(".zoom-stage img").forEach((image) => image.style.transform = "scale(1)");
+        ui.pointerValue.textContent = "—";
+      });
+    });
+
+    syncControls();
+    setStatus("Waiting for image");
+  </script>
 </body>
 </html>
