@@ -1,20 +1,26 @@
 {
+  "artists": {
+    "Flame.f": {
+      "image": "flame.jpg",
+      "monthly_listeners": "1.2k",
+      "about": "Flame.f, also knows as FlameF0X or Daniel is a bedroom producer from Romania making prog-metal and experimental sounds.\n\nWeather is their WIP and debut album, recorded in 2026-2027.",
+      "links": [
+        { "label": "BandLab", "url": "https://www.bandlab.com/flame_fox1" },
+        { "label": "YouTube", "url": "https://www.youtube.com/@flame.f-l8p" },
+        { "label": "SoundCloud", "url": "https://soundcloud.com/flame_f" },
+        { "label": "Website", "url": "https://flamef0x.github.io" }
+      ]
+    }
+  },
   "albums": [
     {
       "title": "Weather",
       "artist": "Flame.f",
-      "artist_url": "https://www.bandlab.com/flame_fox1",
       "year": "2026",
       "cover": "weather.jpg",
       "tracks": [
-        {
-          "title": "Munday",
-          "file": "Munday.mp3"
-        },
-        {
-          "title": "Interlude I",
-          "file": "Interlude_I.mp3"
-        }
+        { "title": "Munday", "file": "Munday.mp3" },
+        { "title": "Interlude I", "file": "Interlude_I.mp3" }
       ]
     }
   ]
