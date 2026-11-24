@@ -41,7 +41,6 @@
   ::-webkit-scrollbar { width: 10px; }
   ::-webkit-scrollbar-thumb { background: #424242; border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
   ::-webkit-scrollbar-track { background: transparent; }
-  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
   /* ─── layout ─── */
   .app {
@@ -121,7 +120,6 @@
   .album-head .kind { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
   .album-head h1 { margin: 8px 0 14px; font-size: clamp(28px, 5vw, 64px); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; word-break: break-word; }
   .album-head .info { color: var(--muted); font-size: 14px; }
-  .album-head .info b { color: var(--text); font-weight: 700; }
 
   .album-actions { display: flex; align-items: center; gap: 24px; padding: 20px 32px; }
   .play-big {
@@ -131,7 +129,6 @@
   .play-big:hover { transform: scale(1.06); background: var(--green-hover); }
   .icon-btn { color: var(--muted); transition: color .15s; display: inline-flex; }
   .icon-btn:hover { color: var(--text); }
-  .icon-btn.on { color: var(--green); }
 
   .tracks { padding: 0 32px 40px; }
   .track-head, .track {
@@ -153,18 +150,56 @@
   .track .info { min-width: 0; }
   .track .t-title { color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
   .track .t-artist { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 2px; }
-  .track .dur { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .track .dur { display: flex; align-items: center; justify-content: flex-end; gap: 8px; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .track .row-share {
+    opacity: 0; color: var(--muted); padding: 4px; border-radius: 4px; display: inline-flex; transition: opacity .15s, color .15s;
+  }
+  .track:hover .row-share, .track.active .row-share, .track .row-share:focus-visible { opacity: 1; }
+  .track .row-share:hover { color: var(--text); }
   @keyframes eq { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
   @media (prefers-reduced-motion: reduce) { .track .idx .eq i { animation: none; transform: scaleY(.7); } }
+
+  /* ─── artist page ─── */
+  .artist-hero {
+    position: relative; min-height: 320px; display: flex; align-items: flex-end;
+    padding: 40px 32px 24px; background: #2a2a2a center / cover no-repeat;
+  }
+  .artist-hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(18,18,18,.15) 0%, rgba(18,18,18,.85) 70%, var(--bg) 100%);
+  }
+  .artist-hero > div { position: relative; z-index: 1; min-width: 0; }
+  .artist-hero h1 {
+    margin: 8px 0 10px; font-size: clamp(44px, 9vw, 110px); line-height: 1; font-weight: 800;
+    letter-spacing: -0.04em; word-break: break-word;
+  }
+  .artist-hero .ml { color: var(--muted); font-size: 14px; }
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 32px 40px; }
+  .about-card { background: var(--card); border-radius: 8px; padding: 20px; min-width: 0; }
+  .about-card h2 { margin: 0 0 14px; font-size: 20px; font-weight: 700; }
+  .about-card p { margin: 0; color: var(--muted); line-height: 1.6; white-space: pre-line; }
+  .link-list { display: flex; flex-direction: column; gap: 6px; }
+  .link-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border-radius: 6px; background: var(--card-hover);
+    color: var(--text); text-decoration: none; font-weight: 600; transition: background .15s;
+  }
+  .link-item:hover { background: #3a3a3a; }
+  .link-item .host { color: var(--muted); font-weight: 400; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .link-item .arrow { color: var(--muted); flex-shrink: 0; }
+  .artist-section { padding: 0 32px; }
+  .artist-section .section-title { margin: 28px 0 12px; }
+
+  /* ─── artist links ─── */
+  .artist-link {
+    color: inherit; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left;
+  }
+  .artist-link:hover { color: var(--text); text-decoration: underline; }
+  .album-head .info .artist-link { color: var(--text); font-weight: 700; }
 
   .empty { padding: 60px 32px; color: var(--muted); }
   .empty pre { background: var(--card); border-radius: 8px; padding: 16px; overflow-x: auto; color: var(--muted); font-size: 12px; }
   .empty .accent { color: var(--green); }
-
-  /* ─── artist links ─── */
-  .artist-link { color: inherit; text-decoration: none; }
-  a.artist-link:hover { color: var(--text); text-decoration: underline; }
-  .album-head .info a.artist-link { color: var(--text); font-weight: 700; }
 
   /* ─── player bar ─── */
   .player {
@@ -217,15 +252,8 @@
     color: var(--text); border: 1px solid #5a5a5a; transition: border-color .15s, transform .1s, color .15s;
   }
   .share-btn:hover { border-color: var(--text); transform: scale(1.03); }
-  .share-btn.copied { color: var(--green); border-color: var(--green); }
   .np-share { color: var(--muted); display: inline-flex; padding: 6px; border-radius: 50%; flex-shrink: 0; }
   .np-share:hover { color: var(--text); }
-  .track .dur { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-  .track .row-share {
-    opacity: 0; color: var(--muted); padding: 4px; border-radius: 4px; display: inline-flex; transition: opacity .15s, color .15s;
-  }
-  .track:hover .row-share, .track.active .row-share, .track .row-share:focus-visible { opacity: 1; }
-  .track .row-share:hover { color: var(--text); }
   .toast {
     position: fixed; left: 50%; bottom: 104px; transform: translateX(-50%) translateY(12px);
     background: #fff; color: #000; padding: 10px 16px; border-radius: 6px; font-weight: 600;
@@ -247,6 +275,9 @@
     .track-head { display: none; }
     .track { grid-template-columns: 32px minmax(0,1fr) 50px; padding: 8px; }
     .track .row-share { opacity: 1; }
+    .artist-hero { padding: 24px 16px; min-height: 260px; }
+    .artist-section { padding: 0 16px; }
+    .about { grid-template-columns: 1fr; padding: 0 16px 40px; }
     .player { grid-template-columns: 1fr auto; height: 72px; padding: 0 12px; }
     .controls .seek-row { display: none; }
     .extras { display: none; }
@@ -281,10 +312,7 @@
     </a>
 
     <div class="library">
-      <div class="library-head">
-        <span>Your library</span>
-        <span id="libCount" class="sr"></span>
-      </div>
+      <div class="library-head"><span>Your library</span></div>
       <div class="library-list" id="libList"></div>
     </div>
   </aside>
@@ -297,6 +325,7 @@
       <div class="cards" id="cards"></div>
     </div>
     <div id="albumView" hidden></div>
+    <div id="artistView" hidden></div>
   </main>
 </div>
 
@@ -351,9 +380,8 @@
 
   const $ = (id) => document.getElementById(id);
   const el = {
-    main: $('main'), homeView: $('homeView'), albumView: $('albumView'),
-    cards: $('cards'), libList: $('libList'), greeting: $('greeting'),
-    navHome: $('navHome'),
+    main: $('main'), homeView: $('homeView'), albumView: $('albumView'), artistView: $('artistView'),
+    cards: $('cards'), libList: $('libList'), greeting: $('greeting'), navHome: $('navHome'),
     npCover: $('npCover'), npTitle: $('npTitle'), npArtist: $('npArtist'),
     npShare: $('npShare'), toast: $('toast'),
     playBtn: $('playBtn'), prevBtn: $('prevBtn'), nextBtn: $('nextBtn'),
@@ -370,27 +398,31 @@
   let albums = [];
   let albumSlugs = [];
   let trackSlugs = [];
-  let viewIdx = -1;       // -1 = home
-  let queueIdx = -1;      // album that owns the queue
-  let current = -1;       // track index inside queue album
+  let registry = {};        // artistKey -> { key, name, image, about, monthly, links[] }
+  let view = 'home';        // home | album | artist
+  let viewAlbum = -1;
+  let viewArtist = null;
+  let queue = [];           // [{ ai, ti, t, al }]
+  let qPos = -1;
   let shuffle = false;
-  let repeat = 'off';     // off | all | one
+  let repeat = 'off';       // off | all | one
   let basePath = '';
   let dragging = false;
   let lastVol = 0.8;
   let toastTimer = 0;
 
   /* ─── icons ─── */
-  const ICON_PLAY  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
+  const ICON_PLAY      = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
   const ICON_PLAY_BIG  = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
-  const ICON_PAUSE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
+  const ICON_PAUSE     = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
   const ICON_PAUSE_BIG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
-  const ICON_REPEAT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>';
+  const ICON_REPEAT    = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>';
   const ICON_REPEAT_ONE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/><path d="M11 10.5h1.5v3.5"/></svg>';
-  const ICON_VOL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
-  const ICON_MUTE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>';
+  const ICON_VOL       = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const ICON_MUTE     = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>';
   const ICON_CARD_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.6v14.8L20 12z"/></svg>';
-  const ICON_SHARE = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>';
+  const ICON_SHARE    = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>';
+  const ICON_LINK     = '<svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>';
 
   const PLACEHOLDER = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#282828"/><g fill="#535353"><ellipse cx="45" cy="86" rx="11" ry="8.5" transform="rotate(-18 45 86)"/><ellipse cx="82" cy="78" rx="11" ry="8.5" transform="rotate(-18 82 78)"/><rect x="53" y="36" width="4.5" height="50"/><rect x="90" y="28" width="4.5" height="50"/><path d="M53 36 L94.5 28 L94.5 42 L53 50 Z"/></g></svg>`
@@ -407,67 +439,6 @@
 
   const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 
-  function resolveUrl(p) {
-    if (!p) return '';
-    if (/^(https?:)?\/\//i.test(p) || p.startsWith('data:') || p.startsWith('/')) return p;
-    return basePath + p.replace(/^\.\//, '');
-  }
-
-  function setImg(img, url) {
-    img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
-    img.src = url || PLACEHOLDER;
-  }
-
-  function parseArtist(a, urlField) {
-    if (a && typeof a === 'object') return { name: a.name || a.title || '', url: a.url || a.link || '' };
-    return { name: a || '', url: urlField || '' };
-  }
-
-  function safeUrl(u) {
-    return /^https?:\/\//i.test(String(u || '')) ? String(u) : '';
-  }
-
-  function artistLink(name, url) {
-    const n = esc(name || 'flame f0x');
-    const u = safeUrl(url);
-    if (!u) return '<span class="artist-link">' + n + '</span>';
-    return '<a class="artist-link" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + n + '</a>';
-  }
-
-  function normalizeTrack(t) {
-    if (typeof t === 'string') t = { file: t };
-    const file = t.file || t.src || t.url || '';
-    const fallback = decodeURIComponent((file.split('/').pop() || '').replace(/\.[^.]+$/, ''));
-    const ar = parseArtist(t.artist || t.author || t.by, t.artist_url);
-    return {
-      title: t.title || t.name || fallback || 'untitled',
-      artist: ar.name,
-      artistUrl: safeUrl(ar.url),
-      src: resolveUrl(file),
-      cover: resolveUrl(t.cover || t.artwork || t.art || t.image || ''),
-      duration: typeof t.duration === 'number' ? t.duration : null,
-    };
-  }
-
-  function normalizeAlbum(a) {
-    const raw = Array.isArray(a) ? { tracks: a } : a;
-    const ar = parseArtist(raw.artist || raw.author, raw.artist_url);
-    return {
-      title: raw.title || raw.name || 'untitled album',
-      artist: ar.name,
-      artistUrl: safeUrl(ar.url),
-      year: raw.year || '',
-      cover: resolveUrl(raw.cover || raw.artwork || raw.image || ''),
-      tracks: (raw.tracks || raw.songs || raw.items || []).map(normalizeTrack),
-    };
-  }
-
-  const queue = () => (queueIdx >= 0 ? albums[queueIdx] : null);
-
-  /* ══════════════ ROUTING ══════════════ */
-  // #                     → home
-  // #album-slug           → album page
-  // #album-slug/song-slug → album page with that song highlighted
   const slugify = (s) => String(s || '').toLowerCase()
     .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'untitled';
@@ -480,17 +451,98 @@
     });
   }
 
+  function resolveUrl(p) {
+    if (!p) return '';
+    if (/^(https?:)?\/\//i.test(p) || p.startsWith('data:') || p.startsWith('/')) return p;
+    return basePath + p.replace(/^\.\//, '');
+  }
+
+  function setImg(img, url) {
+    img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
+    img.src = url || PLACEHOLDER;
+  }
+
+  function safeUrl(u) {
+    return /^https?:\/\//i.test(String(u || '')) ? String(u) : '';
+  }
+
+  function hostOf(u) {
+    try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; }
+  }
+
+  /* ══════════════ ARTIST REGISTRY ══════════════
+     Artists are keyed by slug of their name. The same artist can be
+     referenced from many albums/tracks; links, bio and image are merged. */
+  function addLink(a, l) {
+    const url = safeUrl(typeof l === 'string' ? l : (l && (l.url || l.href || l.link)));
+    if (!url || a.links.some((x) => x.url === url)) return;
+    const label = (l && typeof l === 'object' && (l.label || l.name || l.title)) || hostOf(url);
+    a.links.push({ label: String(label), url });
+  }
+
+  function registerArtist(raw, extraUrls) {
+    const obj = raw && typeof raw === 'object' ? raw : { name: raw };
+    const name = String(obj.name || obj.title || '').trim();
+    if (!name) return null;
+    const key = slugify(name);
+    const a = registry[key] || (registry[key] = { key, name, image: '', about: '', monthly: '', links: [] });
+    if (obj.image || obj.cover) a.image = resolveUrl(obj.image || obj.cover);
+    if (obj.about || obj.bio) a.about = String(obj.about || obj.bio);
+    if (obj.monthly_listeners) a.monthly = String(obj.monthly_listeners);
+    (obj.links || []).forEach((l) => addLink(a, l));
+    if (obj.url) addLink(a, obj.url);
+    [].concat(extraUrls || []).forEach((u) => addLink(a, u));
+    return key;
+  }
+
+  const artistName = (key) => (registry[key] ? registry[key].name : key);
+
+  function artistLink(key) {
+    return '<button class="artist-link" data-artist="' + esc(key) + '">' + esc(artistName(key)) + '</button>';
+  }
+
+  /* ══════════════ NORMALIZE ══════════════ */
+  function normalizeTrack(t, albumArtistKey) {
+    if (typeof t === 'string') t = { file: t };
+    const file = t.file || t.src || t.url || '';
+    const fallback = decodeURIComponent((file.split('/').pop() || '').replace(/\.[^.]+$/, ''));
+    const hasOwn = !!(t.artist || t.author);
+    return {
+      title: t.title || t.name || fallback || 'untitled',
+      artistKey: hasOwn ? registerArtist(t.artist || t.author, t.artist_urls || t.artist_url) : albumArtistKey,
+      src: resolveUrl(file),
+      cover: resolveUrl(t.cover || t.artwork || t.image || ''),
+      duration: typeof t.duration === 'number' ? t.duration : null,
+    };
+  }
+
+  function normalizeAlbum(a) {
+    const raw = Array.isArray(a) ? { tracks: a } : a;
+    const artistKey = registerArtist(raw.artist || raw.author || 'flame f0x', raw.artist_urls || raw.artist_url);
+    return {
+      title: raw.title || raw.name || 'untitled album',
+      artistKey,
+      year: raw.year || '',
+      cover: resolveUrl(raw.cover || raw.artwork || raw.image || ''),
+      tracks: (raw.tracks || raw.songs || raw.items || []).map((t) => normalizeTrack(t, artistKey)),
+    };
+  }
+
+  /* ══════════════ ROUTING ══════════════
+     #                       → home
+     #album-slug             → album
+     #album-slug/song-slug   → album with song loaded
+     #artist/artist-slug     → artist page */
   function buildSlugs() {
     albumSlugs = uniqueSlugs(albums.map((al) => slugify(al.title)));
     trackSlugs = albums.map((al) => uniqueSlugs(al.tracks.map((t) => slugify(t.title))));
   }
 
-  function albumHash(i) { return '#' + albumSlugs[i]; }
-  function trackHash(ai, ti) { return '#' + albumSlugs[ai] + '/' + trackSlugs[ai][ti]; }
+  const albumHash  = (i) => '#' + albumSlugs[i];
+  const trackHash  = (ai, ti) => '#' + albumSlugs[ai] + '/' + trackSlugs[ai][ti];
+  const artistHash = (key) => '#artist/' + key;
 
-  function shareUrl(hash) {
-    return location.href.split('#')[0] + hash;
-  }
+  function shareUrl(hash) { return location.href.split('#')[0] + hash; }
 
   async function shareLink(hash, label) {
     const url = shareUrl(hash);
@@ -526,51 +578,65 @@
   function applyHash() {
     const raw = decodeURIComponent(location.hash.replace(/^#/, ''));
     if (!raw) { showHome(); return; }
+    if (raw.startsWith('artist/')) {
+      const key = raw.slice(7);
+      if (registry[key]) showArtist(key, true); else showHome();
+      return;
+    }
     const [aSlug, tSlug] = raw.split('/');
     const ai = albumSlugs.indexOf(aSlug);
     if (ai < 0) { showHome(); return; }
-    showAlbum(ai);
+    showAlbum(ai, true);
     if (tSlug) {
       const ti = trackSlugs[ai].indexOf(tSlug);
       if (ti >= 0) highlightTrack(ai, ti);
     }
   }
 
-  // Highlight a song from a shared link without auto-playing it.
+  // Load a shared song without auto-playing it.
   function highlightTrack(ai, ti) {
-    queueIdx = ai;
-    current = ti;
-    audio.src = albums[ai].tracks[ti].src;
+    queue = albumEntries(ai);
+    qPos = ti;
+    audio.src = queue[ti].t.src;
     updateNowPlaying();
-    paintRows();
-    paintPlayAlbum();
-    paintSidebar();
-    const row = $('trackList') && $('trackList').children[ti];
+    paintAll();
+    const row = document.querySelector('#trackList .track[data-ti="' + ti + '"]');
     if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   /* ══════════════ VIEWS ══════════════ */
-  function showHome() {
-    viewIdx = -1;
-    el.homeView.hidden = false;
-    el.albumView.hidden = true;
-    el.navHome.classList.add('on');
+  function setView(name) {
+    el.homeView.hidden = name !== 'home';
+    el.albumView.hidden = name !== 'album';
+    el.artistView.hidden = name !== 'artist';
+    el.navHome.classList.toggle('on', name === 'home');
     el.main.scrollTop = 0;
+  }
+
+  function showHome() {
+    view = 'home'; viewAlbum = -1; viewArtist = null;
+    setView('home');
     renderHome();
     paintSidebar();
     setHash('');
   }
 
-  function showAlbum(i) {
+  function showAlbum(i, fromHash) {
     if (!albums[i]) return;
-    viewIdx = i;
-    el.homeView.hidden = true;
-    el.albumView.hidden = false;
-    el.navHome.classList.remove('on');
-    el.main.scrollTop = 0;
+    view = 'album'; viewAlbum = i; viewArtist = null;
+    setView('album');
     renderAlbum();
     paintSidebar();
     setHash(albumHash(i));
+  }
+
+  function showArtist(key, fromHash) {
+    if (!registry[key]) return;
+    view = 'artist'; viewAlbum = -1; viewArtist = key;
+    setView('artist');
+    renderArtist(key);
+    paintSidebar();
+    setHash(artistHash(key));
   }
 
   /* ─── sidebar library ─── */
@@ -583,7 +649,7 @@
       b.innerHTML =
         '<img alt="" src="">' +
         '<div class="meta"><div class="name">' + esc(al.title) + '</div>' +
-        '<div class="sub">Album · ' + esc(al.artist || 'flame f0x') + '</div></div>';
+        '<div class="sub">Album · ' + esc(artistName(al.artistKey)) + '</div></div>';
       setImg(b.querySelector('img'), al.cover);
       b.addEventListener('click', () => showAlbum(i));
       el.libList.appendChild(b);
@@ -592,54 +658,95 @@
 
   function paintSidebar() {
     Array.from(el.libList.children).forEach((b) => {
-      b.classList.toggle('on', +b.dataset.i === viewIdx);
+      b.classList.toggle('on', view === 'album' && +b.dataset.i === viewAlbum);
     });
+  }
+
+  /* ─── album card (home + discography) ─── */
+  function makeCard(i) {
+    const al = albums[i];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
+
+    const cover = document.createElement('div');
+    cover.className = 'cover';
+    const img = document.createElement('img');
+    img.alt = '';
+    setImg(img, al.cover);
+    cover.appendChild(img);
+
+    const fab = document.createElement('button');
+    fab.className = 'fab';
+    fab.setAttribute('aria-label', 'play ' + al.title);
+    fab.innerHTML = ICON_CARD_PLAY;
+    fab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const list = albumEntries(i);
+      if (sameQueue(list)) toggle(); else playList(list, 0);
+    });
+
+    const t = document.createElement('div'); t.className = 't'; t.textContent = al.title;
+    const s = document.createElement('div'); s.className = 's';
+    s.textContent = artistName(al.artistKey) || plural(al.tracks.length, 'track');
+
+    card.append(cover, fab, t, s);
+    card.addEventListener('click', () => showAlbum(i));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showAlbum(i); }
+    });
+    return card;
   }
 
   /* ─── home grid ─── */
   function renderHome() {
     const h = new Date().getHours();
     el.greeting.textContent = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-
     el.cards.innerHTML = '';
-    albums.forEach((al, i) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.setAttribute('role', 'button');
-      card.tabIndex = 0;
+    albums.forEach((_, i) => el.cards.appendChild(makeCard(i)));
+  }
 
-      const cover = document.createElement('div');
-      cover.className = 'cover';
-      const img = document.createElement('img');
-      img.alt = '';
-      setImg(img, al.cover);
-      cover.appendChild(img);
+  /* ─── track rows (shared by album and artist pages) ─── */
+  function buildRows(container, list, mode) {
+    container.innerHTML = '';
+    list.forEach((e, i) => {
+      const row = document.createElement('div');
+      row.className = 'track';
+      row.dataset.ai = e.ai;
+      row.dataset.ti = e.ti;
 
-      const fab = document.createElement('button');
-      fab.className = 'fab';
-      fab.setAttribute('aria-label', 'play ' + al.title);
-      fab.innerHTML = ICON_CARD_PLAY;
-      fab.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (queueIdx === i) toggle(); else playTrack(i, 0);
+      let sub = '';
+      if (mode === 'artist') sub = '<span class="t-artist">' + esc(e.al.title) + '</span>';
+      else if (e.t.artistKey !== e.al.artistKey) sub = '<span class="t-artist">' + artistLink(e.t.artistKey) + '</span>';
+
+      row.innerHTML =
+        '<div class="idx"><span class="n">' + (i + 1) + '</span>' +
+        '<span class="eq"><i></i><i></i><i></i></span></div>' +
+        '<div class="info"><span class="t-title">' + esc(e.t.title) + '</span>' + sub + '</div>' +
+        '<div class="dur"><span>' + (e.t.duration ? fmt(e.t.duration) : '--:--') + '</span>' +
+          '<button class="row-share" aria-label="share ' + esc(e.t.title) + '" title="share song">' + ICON_SHARE + '</button>' +
+        '</div>';
+
+      row.addEventListener('click', (ev) => {
+        if (ev.target.closest('[data-artist], .row-share')) return;
+        const cur = queue[qPos];
+        if (cur && cur.ai === e.ai && cur.ti === e.ti) toggle();
+        else playList(list, i);
       });
-
-      const t = document.createElement('div'); t.className = 't'; t.textContent = al.title;
-      const s = document.createElement('div'); s.className = 's';
-      s.textContent = al.artist || plural(al.tracks.length, 'track');
-
-      card.append(cover, fab, t, s);
-      card.addEventListener('click', () => showAlbum(i));
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showAlbum(i); }
+      row.querySelector('.row-share').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        shareLink(trackHash(e.ai, e.ti), e.t.title);
       });
-      el.cards.appendChild(card);
+      container.appendChild(row);
     });
+    paintRows();
   }
 
   /* ─── album page ─── */
   function renderAlbum() {
-    const al = albums[viewIdx];
+    const ai = viewAlbum;
+    const al = albums[ai];
     const totalSec = al.tracks.reduce((s, t) => s + (t.duration || 0), 0);
 
     el.albumView.innerHTML = `
@@ -648,7 +755,7 @@
         <div style="min-width:0">
           <div class="kind">Album${al.year ? ' · ' + esc(al.year) : ''}</div>
           <h1>${esc(al.title)}</h1>
-          <div class="info">${artistLink(al.artist, al.artistUrl)} · ${plural(al.tracks.length, 'song')}${totalSec ? ' · ' + fmt(totalSec) : ''}</div>
+          <div class="info">${artistLink(al.artistKey)} · ${plural(al.tracks.length, 'song')}${totalSec ? ' · ' + fmt(totalSec) : ''}</div>
         </div>
       </div>
       <div class="album-actions">
@@ -656,10 +763,7 @@
         <button class="icon-btn" id="albumShuffle" aria-label="shuffle album" title="shuffle">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>
         </button>
-        <button class="share-btn" id="albumShare" aria-label="share album">
-          ${ICON_SHARE}
-          Share
-        </button>
+        <button class="share-btn" id="albumShare" aria-label="share album">${ICON_SHARE} Share</button>
       </div>
       <div class="tracks">
         <div class="track-head"><span style="text-align:center">#</span><span>Title</span><span style="text-align:right">⏱</span></div>
@@ -667,87 +771,180 @@
       </div>`;
 
     setImg($('albumCover'), al.cover);
-
-    const list = $('trackList');
-    al.tracks.forEach((t, i) => {
-      const row = document.createElement('div');
-      row.className = 'track';
-      row.dataset.i = i;
-      row.innerHTML =
-        '<div class="idx"><span class="n">' + (i + 1) + '</span>' +
-        '<span class="eq"><i></i><i></i><i></i></span></div>' +
-        '<div class="info"><span class="t-title">' + esc(t.title) + '</span>' +
-        (t.artist ? '<span class="t-artist">' + artistLink(t.artist, t.artistUrl) + '</span>' : '') +
-        '</div>' +
-        '<div class="dur">' +
-          '<span>' + (t.duration ? fmt(t.duration) : '--:--') + '</span>' +
-          '<button class="row-share" aria-label="share ' + esc(t.title) + '" title="share song">' + ICON_SHARE + '</button>' +
-        '</div>';
-      row.addEventListener('click', (e) => {
-        if (e.target.closest('a, .row-share')) return;
-        if (queueIdx === viewIdx && i === current) toggle();
-        else playTrack(viewIdx, i);
-      });
-      row.querySelector('.row-share').addEventListener('click', (e) => {
-        e.stopPropagation();
-        shareLink(trackHash(viewIdx, i), t.title);
-      });
-      list.appendChild(row);
-    });
+    buildRows($('trackList'), albumEntries(ai), 'album');
 
     $('albumPlay').addEventListener('click', () => {
-      if (queueIdx === viewIdx && current >= 0) toggle();
-      else playTrack(viewIdx, 0);
+      const list = albumEntries(ai);
+      if (sameQueue(list)) toggle(); else playList(list, 0);
     });
     $('albumShuffle').addEventListener('click', () => {
       shuffle = true; paintShuffle();
-      playTrack(viewIdx, Math.floor(Math.random() * al.tracks.length));
+      playList(albumEntries(ai), Math.floor(Math.random() * al.tracks.length));
     });
-    $('albumShare').addEventListener('click', () => shareLink(albumHash(viewIdx), al.title));
+    $('albumShare').addEventListener('click', () => shareLink(albumHash(ai), al.title));
 
-    paintRows();
-    paintPlayAlbum();
+    paintPlayButtons();
   }
 
-  function paintRows() {
-    const list = $('trackList');
-    if (!list) return;
-    Array.from(list.children).forEach((row, i) => {
-      row.classList.toggle('active', queueIdx === viewIdx && i === current);
+  /* ─── artist page (Spotify-style) ─── */
+  function renderArtist(key) {
+    const a = registry[key];
+    const list = artistEntries(key);
+    const discography = albums.map((_, i) => i).filter((i) => albums[i].artistKey === key);
+
+    const linksHtml = a.links.length
+      ? a.links.map((l) =>
+          '<a class="link-item" href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer">' +
+          '<span>' + esc(l.label) + '</span>' +
+          '<span class="host">' + esc(hostOf(l.url)) + '</span>' + ICON_LINK + '</a>'
+        ).join('')
+      : '<p>No links yet.</p>';
+
+    el.artistView.innerHTML = `
+      <section class="artist-hero" id="artistHero">
+        <div>
+          <div class="kind" style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Artist</div>
+          <h1>${esc(a.name)}</h1>
+          ${a.monthly ? '<div class="ml">' + esc(a.monthly) + ' monthly listeners</div>' : ''}
+        </div>
+      </section>
+      <div class="album-actions">
+        <button class="play-big" id="artistPlay" aria-label="play artist"></button>
+        <button class="icon-btn" id="artistShuffle" aria-label="shuffle artist" title="shuffle">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/></svg>
+        </button>
+        <button class="share-btn" id="artistShare" aria-label="share artist">${ICON_SHARE} Share</button>
+      </div>
+
+      <div class="artist-section">
+        <h2 class="section-title">Popular</h2>
+        <div class="tracks" style="padding:0">
+          <div class="track-head"><span style="text-align:center">#</span><span>Title</span><span style="text-align:right">⏱</span></div>
+          <div id="artistTracks"></div>
+        </div>
+      </div>
+
+      ${discography.length ? `
+      <div class="artist-section">
+        <h2 class="section-title">Discography</h2>
+        <div class="cards" id="artistAlbums"></div>
+      </div>` : ''}
+
+      <div class="about">
+        <div class="about-card">
+          <h2>About</h2>
+          ${a.about ? '<p>' + esc(a.about) + '</p>' : '<p>No bio yet.</p>'}
+        </div>
+        <div class="about-card">
+          <h2>Links</h2>
+          <div class="link-list">${linksHtml}</div>
+        </div>
+      </div>`;
+
+    const hero = $('artistHero');
+    if (a.image) hero.style.backgroundImage = 'url("' + a.image.replace(/"/g, '%22') + '")';
+
+    buildRows($('artistTracks'), list, 'artist');
+
+    if (discography.length) {
+      const grid = $('artistAlbums');
+      discography.forEach((i) => grid.appendChild(makeCard(i)));
+    }
+
+    $('artistPlay').addEventListener('click', () => {
+      if (!list.length) return;
+      if (sameQueue(list)) toggle(); else playList(list, 0);
     });
+    $('artistShuffle').addEventListener('click', () => {
+      if (!list.length) return;
+      shuffle = true; paintShuffle();
+      playList(list, Math.floor(Math.random() * list.length));
+    });
+    $('artistShare').addEventListener('click', () => shareLink(artistHash(key), a.name));
+
+    paintPlayButtons();
   }
 
-  function paintPlayAlbum() {
-    const b = $('albumPlay');
-    if (!b) return;
-    const on = queueIdx === viewIdx && !audio.paused;
-    b.innerHTML = on ? ICON_PAUSE_BIG : ICON_PLAY_BIG;
+  /* ══════════════ QUEUE ══════════════ */
+  const entry = (ai, ti) => ({ ai, ti, t: albums[ai].tracks[ti], al: albums[ai] });
+  const albumEntries = (ai) => albums[ai].tracks.map((_, ti) => entry(ai, ti));
+  function artistEntries(key) {
+    const out = [];
+    albums.forEach((al, ai) => al.tracks.forEach((t, ti) => {
+      if (t.artistKey === key) out.push(entry(ai, ti));
+    }));
+    return out;
   }
 
-  function updateRowDuration(i) {
-    const list = $('trackList');
-    const al = albums[viewIdx];
-    if (!list || !al || !list.children[i]) return;
-    const d = list.children[i].querySelector('.dur span');
-    if (d) d.textContent = al.tracks[i].duration ? fmt(al.tracks[i].duration) : '--:--';
+  function sameQueue(list) {
+    return queue.length > 0 && queue.length === list.length &&
+      list.every((e, i) => e.ai === queue[i].ai && e.ti === queue[i].ti);
+  }
+
+  function playList(list, pos) {
+    if (!list.length) return;
+    queue = list;
+    qPos = pos;
+    loadCurrent(true);
+  }
+
+  function loadCurrent(autoplay) {
+    const e = queue[qPos];
+    if (!e) return;
+    audio.src = e.t.src;
+    if (autoplay) audio.play().catch(() => {});
+    updateNowPlaying();
+    if (view === 'album' && e.ai === viewAlbum) setHash(trackHash(e.ai, e.ti));
+    paintAll();
+  }
+
+  function toggle() {
+    if (!queue.length) return;
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
+  }
+
+  function randomIndex(len) {
+    if (len < 2) return qPos;
+    let i = qPos;
+    while (i === qPos) i = Math.floor(Math.random() * len);
+    return i;
+  }
+
+  function playAt(p) { qPos = p; loadCurrent(true); }
+
+  function next() {
+    if (!queue.length) return;
+    if (shuffle && queue.length > 1) return playAt(randomIndex(queue.length));
+    if (qPos < queue.length - 1) return playAt(qPos + 1);
+    if (repeat === 'all') return playAt(0);
+  }
+
+  function prev() {
+    if (!queue.length) return;
+    if (audio.currentTime > 3) { audio.currentTime = 0; updateProgress(); return; }
+    if (qPos > 0) playAt(qPos - 1);
+    else { audio.currentTime = 0; updateProgress(); }
+  }
+
+  function onEnded() {
+    if (repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+    next();
   }
 
   /* ══════════════ NOW PLAYING ══════════════ */
   function updateNowPlaying() {
-    const al = queue();
-    const t = al && al.tracks[current];
-    if (!t) {
+    const e = queue[qPos];
+    if (!e) {
       el.npTitle.textContent = 'Nothing playing';
       el.npArtist.textContent = '—';
       setImg(el.npCover, '');
       return;
     }
-    el.npTitle.textContent = t.title;
-    const name = t.artist || al.artist;
-    const url = t.artist ? t.artistUrl : al.artistUrl;
-    el.npArtist.innerHTML = artistLink(name || '—', url);
-    setImg(el.npCover, t.cover || al.cover);
-    updateMediaSession(t, al);
+    el.npTitle.textContent = e.t.title;
+    el.npArtist.innerHTML = artistLink(e.t.artistKey);
+    setImg(el.npCover, e.t.cover || e.al.cover);
+    updateMediaSession(e.t, e.al);
   }
 
   function updateMediaSession(t, al) {
@@ -755,60 +952,58 @@
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: t.title,
-        artist: t.artist || al.artist || 'flame f0x',
+        artist: artistName(t.artistKey),
         album: al.title || 'flame f0x — music',
         artwork: [{ src: t.cover || al.cover || LOGO, sizes: '512x512' }],
       });
     } catch (e) {}
   }
 
-  /* ══════════════ PLAYBACK ══════════════ */
-  function playTrack(aIdx, tIdx) {
-    const al = albums[aIdx];
-    if (!al || !al.tracks[tIdx]) return;
-    queueIdx = aIdx;
-    current = tIdx;
-    audio.src = al.tracks[tIdx].src;
-    audio.play().catch(() => {});
-    updateNowPlaying();
+  /* ══════════════ PAINTING ══════════════ */
+  function paintAll() {
     paintRows();
-    paintPlayAlbum();
+    paintPlayButtons();
     paintSidebar();
-    if (viewIdx === aIdx) setHash(trackHash(aIdx, tIdx));
   }
 
-  function toggle() {
-    if (!queue()) return;
-    if (audio.paused) audio.play().catch(() => {});
-    else audio.pause();
+  function paintRows() {
+    const cur = queue[qPos];
+    document.querySelectorAll('#trackList .track, #artistTracks .track').forEach((row) => {
+      row.classList.toggle('active', !!cur && +row.dataset.ai === cur.ai && +row.dataset.ti === cur.ti);
+    });
   }
 
-  function randomIndex(len) {
-    if (len < 2) return current;
-    let i = current;
-    while (i === current) i = Math.floor(Math.random() * len);
-    return i;
+  function paintPlayButtons() {
+    const playing = !audio.paused;
+    if (view === 'album') {
+      const b = $('albumPlay');
+      if (b) b.innerHTML = sameQueue(albumEntries(viewAlbum)) && playing ? ICON_PAUSE_BIG : ICON_PLAY_BIG;
+    }
+    if (view === 'artist') {
+      const b = $('artistPlay');
+      if (b) b.innerHTML = sameQueue(artistEntries(viewArtist)) && playing ? ICON_PAUSE_BIG : ICON_PLAY_BIG;
+    }
   }
 
-  function next() {
-    const al = queue();
-    if (!al || !al.tracks.length) return;
-    if (shuffle && al.tracks.length > 1) return playTrack(queueIdx, randomIndex(al.tracks.length));
-    if (current < al.tracks.length - 1) return playTrack(queueIdx, current + 1);
-    if (repeat === 'all') return playTrack(queueIdx, 0);
+  function paintShuffle() {
+    el.shuffleBtn.classList.toggle('on', shuffle);
+    el.shuffleBtn.setAttribute('aria-pressed', String(shuffle));
   }
 
-  function prev() {
-    const al = queue();
-    if (!al || !al.tracks.length) return;
-    if (audio.currentTime > 3) { audio.currentTime = 0; updateProgress(); return; }
-    if (current > 0) playTrack(queueIdx, current - 1);
-    else { audio.currentTime = 0; updateProgress(); }
+  function paintRepeat() {
+    el.repeatBtn.classList.toggle('on', repeat !== 'off');
+    el.repeatBtn.innerHTML = repeat === 'one' ? ICON_REPEAT_ONE : ICON_REPEAT;
+    el.repeatBtn.title = 'repeat: ' + repeat;
   }
 
-  function onEnded() {
-    if (repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
-    next();
+  function setPlayingUI(on) {
+    el.playBtn.innerHTML = on ? ICON_PAUSE : ICON_PLAY;
+    el.playBtn.setAttribute('aria-label', on ? 'pause' : 'play');
+    document.body.classList.toggle('playing', on);
+    paintPlayButtons();
+    if ('mediaSession' in navigator) {
+      try { navigator.mediaSession.playbackState = on ? 'playing' : 'paused'; } catch (e) {}
+    }
   }
 
   /* ══════════════ PROGRESS ══════════════ */
@@ -857,29 +1052,12 @@
     try { localStorage.setItem('ff-music-vol', String(v)); } catch (e) {}
   }
 
-  /* ══════════════ UI STATE ══════════════ */
-  function paintShuffle() {
-    el.shuffleBtn.classList.toggle('on', shuffle);
-    el.shuffleBtn.setAttribute('aria-pressed', String(shuffle));
-  }
-
-  function paintRepeat() {
-    el.repeatBtn.classList.toggle('on', repeat !== 'off');
-    el.repeatBtn.innerHTML = repeat === 'one' ? ICON_REPEAT_ONE : ICON_REPEAT;
-    el.repeatBtn.title = 'repeat: ' + repeat;
-  }
-
-  function setPlayingUI(on) {
-    el.playBtn.innerHTML = on ? ICON_PAUSE : ICON_PLAY;
-    el.playBtn.setAttribute('aria-label', on ? 'pause' : 'play');
-    document.body.classList.toggle('playing', on);
-    paintPlayAlbum();
-    if ('mediaSession' in navigator) {
-      try { navigator.mediaSession.playbackState = on ? 'playing' : 'paused'; } catch (e) {}
-    }
-  }
-
   /* ══════════════ DURATIONS ══════════════ */
+  function setRowDuration(ai, ti, sec) {
+    document.querySelectorAll('.track[data-ai="' + ai + '"][data-ti="' + ti + '"] .dur > span')
+      .forEach((s) => { s.textContent = fmt(sec); });
+  }
+
   function loadDurations() {
     albums.forEach((al, ai) => al.tracks.forEach((t, ti) => {
       if (t.duration) return;
@@ -888,7 +1066,7 @@
       probe.onloadedmetadata = () => {
         if (isFinite(probe.duration)) {
           t.duration = probe.duration;
-          if (ai === viewIdx) updateRowDuration(ti);
+          setRowDuration(ai, ti, t.duration);
         }
         probe.removeAttribute('src');
         try { probe.load(); } catch (e) {}
@@ -899,13 +1077,12 @@
 
   /* ══════════════ ERROR ══════════════ */
   function showError(err) {
-    el.homeView.hidden = false;
-    el.albumView.hidden = true;
-    el.cards.outerHTML = '<div id="cards" class="empty">' +
+    setView('home');
+    el.cards.className = 'empty';
+    el.cards.innerHTML =
       '<p style="margin:0 0 8px;font-size:16px;font-weight:600;color:#fff">Couldn\'t load the library</p>' +
       '<p class="accent" style="margin:0 0 16px;font-family:monospace;font-size:12px">' + esc(String(err && err.message || err)) + '</p>' +
-      '<pre>expected at <span class="accent">./music/playlist.json</span>\n\n{\n  "albums": [\n    {\n      "title": "album name",\n      "artist": "you",\n      "artist_url": "https://example.com",\n      "year": "2025",\n      "cover": "cover.jpg",\n      "tracks": [\n        { "title": "song", "file": "song.mp3" }\n      ]\n    }\n  ]\n}</pre>' +
-      '</div>';
+      '<pre>expected at <span class="accent">./music/playlist.json</span>\n\n{\n  "artists": {\n    "Flame.f": {\n      "image": "flame.jpg",\n      "about": "bio…",\n      "links": [{ "label": "BandLab", "url": "https://www.bandlab.com/flame_fox1" }]\n    }\n  },\n  "albums": [\n    {\n      "title": "album name",\n      "artist": "Flame.f",\n      "year": "2026",\n      "cover": "cover.jpg",\n      "tracks": [{ "title": "song", "file": "song.mp3" }]\n    }\n  ]\n}</pre>';
   }
 
   /* ══════════════ WIRING ══════════════ */
@@ -928,8 +1105,17 @@
   el.vol.addEventListener('input', () => setVolume(parseFloat(el.vol.value)));
 
   el.npShare.addEventListener('click', () => {
-    if (queueIdx < 0 || current < 0) return;
-    shareLink(trackHash(queueIdx, current), queue().tracks[current].title);
+    const e = queue[qPos];
+    if (!e) return;
+    shareLink(trackHash(e.ai, e.ti), e.t.title);
+  });
+
+  // One delegated handler for every artist name in the app.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-artist]');
+    if (!b) return;
+    e.preventDefault();
+    showArtist(b.dataset.artist);
   });
 
   el.seek.addEventListener('pointerdown', (e) => {
@@ -950,11 +1136,10 @@
   audio.addEventListener('loadedmetadata', () => {
     el.tDur.textContent = fmt(audio.duration);
     updateProgress();
-    const al = queue();
-    const t = al && al.tracks[current];
-    if (t && !t.duration && isFinite(audio.duration)) {
-      t.duration = audio.duration;
-      if (queueIdx === viewIdx) updateRowDuration(current);
+    const e = queue[qPos];
+    if (e && !e.t.duration && isFinite(audio.duration)) {
+      e.t.duration = audio.duration;
+      setRowDuration(e.ai, e.ti, e.t.duration);
     }
   });
   audio.addEventListener('timeupdate', () => { if (!dragging) updateProgress(); });
@@ -1014,23 +1199,31 @@
 
       basePath = PLAYLIST_URL.replace(/[^/]*$/, '');
 
+      // 1) standalone artist profiles (optional)
+      if (data.artists && typeof data.artists === 'object') {
+        Object.entries(data.artists).forEach(([name, info]) =>
+          registerArtist(Object.assign({ name }, info || {})));
+      }
+
+      // 2) albums
+      let raw;
       if (Array.isArray(data)) {
-        albums = [normalizeAlbum({ title: 'all tracks', tracks: data })];
+        raw = [{ title: 'all tracks', tracks: data }];
       } else if (Array.isArray(data.albums)) {
-        albums = data.albums.map(normalizeAlbum);
+        raw = data.albums;
       } else if (Array.isArray(data.tracks) || Array.isArray(data.songs)) {
-        albums = [normalizeAlbum({
+        raw = [{
           title: data.title || 'all tracks',
           artist: data.artist || '',
           artist_url: data.artist_url || '',
           cover: data.cover || '',
           tracks: data.tracks || data.songs,
-        })];
+        }];
       } else {
         throw new Error('no albums or tracks in json');
       }
 
-      albums = albums.filter(a => a.tracks.length);
+      albums = raw.map(normalizeAlbum).filter((a) => a.tracks.length);
       if (!albums.length) throw new Error('library is empty');
 
       renderLibrary();
@@ -1041,9 +1234,9 @@
         applyHash();
       } else {
         showHome();
-        queueIdx = 0;
-        current = 0;
-        audio.src = albums[0].tracks[0].src;
+        queue = albumEntries(0);
+        qPos = 0;
+        audio.src = queue[0].t.src;
         updateNowPlaying();
       }
     } catch (err) {
