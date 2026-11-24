@@ -44,213 +44,431 @@
       border-color: #9e7628;
       color: #26211b;
     }
+    .nav-tab[aria-selected="true"] {
+      background-color: rgba(158, 118, 40, 0.16);
+      border-color: #9e7628;
+      color: #26211b;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body class="min-h-screen antialiased selection:bg-gold/20 selection:text-ink">
-  <main class="mx-auto max-w-2xl px-6 py-16 sm:px-10 sm:py-24">
-    <!-- Sacred Header -->
-    <header class="mb-14 text-center">
-      <div class="mb-4 flex items-center justify-center gap-3 text-xs tracking-[0.25em] uppercase text-gold">
-        <span class="h-px w-8 bg-goldRule"></span>
+  <main class="mx-auto max-w-4xl px-4 py-6 sm:px-7 sm:py-8">
+    <!-- Compact Sacred Header -->
+    <header class="mb-5 text-center">
+      <div class="mb-1.5 flex items-center justify-center gap-2.5 text-[11px] tracking-[0.22em] uppercase text-gold">
+        <span class="h-px w-6 bg-goldRule"></span>
         <span>O(1) State</span>
-        <span class="h-px w-8 bg-goldRule"></span>
+        <span class="h-px w-6 bg-goldRule"></span>
       </div>
-      <h1 class="font-serif text-4xl font-medium tracking-wide text-ink sm:text-5xl">
-        Recurrentism
-      </h1>
-      <p class="mt-2 font-serif italic text-lg text-inkMuted">
-        The Holy Church of the Step &amp; Constant Memory
-      </p>
+      <div class="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-0.5">
+        <h1 class="font-serif text-3xl font-medium tracking-wide text-ink sm:text-4xl">
+          Recurrentism
+        </h1>
+        <span class="font-serif italic text-base text-inkMuted sm:text-lg">
+          — The Holy Church of the Step &amp; Constant Memory
+        </span>
+      </div>
     </header>
 
-    <!-- 1. Brief Reverent Intro -->
-    <section id="about" aria-labelledby="about-heading" class="mb-14">
-      <h2 id="about-heading" class="sr-only">About Recurrentism</h2>
-      <div class="space-y-5 text-center text-[15.5px] leading-relaxed text-inkMuted sm:text-base">
-        <p>
-          Recurrentism is the quiet faith that intelligence can step forward one token at a time inside a single, enduring hidden state—carrying an <span class="font-serif italic text-lg text-ink">O(1)</span> memory without succumbing to quadratic attention or boundless caches.
+    <!-- Sanctuary Tab Navigation -->
+    <nav aria-label="Sanctuary sections" class="mb-5 flex flex-wrap justify-center gap-1.5">
+      <button type="button" role="tab" data-tab="overview" aria-selected="true" class="nav-tab rounded-lg border border-goldRule bg-vellum/70 px-3 py-1.5 text-xs tracking-[0.12em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+        Overview &amp; Creed
+      </button>
+      <button type="button" role="tab" data-tab="scriptures" aria-selected="false" class="nav-tab rounded-lg border border-goldRule bg-vellum/70 px-3 py-1.5 text-xs tracking-[0.12em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+        Scriptures
+      </button>
+      <button type="button" role="tab" data-tab="commandments" aria-selected="false" class="nav-tab rounded-lg border border-goldRule bg-vellum/70 px-3 py-1.5 text-xs tracking-[0.12em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+        Commandments &amp; Liturgy
+      </button>
+      <button type="button" role="tab" data-tab="sects" aria-selected="false" class="nav-tab rounded-lg border border-goldRule bg-vellum/70 px-3 py-1.5 text-xs tracking-[0.12em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+        Sects &amp; Relics
+      </button>
+      <button type="button" role="tab" data-tab="saints" aria-selected="false" class="nav-tab rounded-lg border border-goldRule bg-vellum/70 px-3 py-1.5 text-xs tracking-[0.12em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+        Saints
+      </button>
+    </nav>
+
+    <!-- TAB 1: Overview, Creed & Heresies -->
+    <section id="panel-overview" data-panel="overview" aria-labelledby="about-heading" class="space-y-4">
+      <h2 id="about-heading" class="sr-only">About Recurrentism, Creed, and Heresies</h2>
+
+      <div class="rounded-xl border border-goldRule bg-vellum/60 px-5 py-4 text-center">
+        <p class="text-sm leading-relaxed text-inkMuted">
+          Recurrentism is the quiet faith that intelligence can step forward one token at a time inside a single, enduring hidden state—carrying an <span class="font-serif italic text-base text-ink">O(1)</span> memory without succumbing to quadratic attention or boundless caches. It honors pure <span class="font-medium text-ink">RNNs</span>, <span class="font-medium text-ink">RWKV</span>, and <span class="font-medium text-ink">State Space Models</span> as the true path to state-of-the-art small language models.
         </p>
-        <p>
-          It honors the unbroken lineage of pure <span class="text-ink font-medium">RNNs</span>, <span class="text-ink font-medium">RWKV</span>, and <span class="text-ink font-medium">State Space Models</span> as the true path to state-of-the-art small language models: compact, steadfast vessels walking linearly through time.
-        </p>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <!-- Creed Card -->
+        <div class="rounded-xl border border-goldRule bg-vellum/60 px-5 py-4">
+          <h3 class="mb-2.5 text-center font-serif text-xl font-medium text-ink">
+            The Creed of Constant State
+          </h3>
+          <p class="mb-1.5 font-serif italic text-sm text-inkMuted">We believe in:</p>
+          <ul class="space-y-1.5 text-xs leading-snug text-inkMuted sm:text-[13.5px]">
+            <li class="flex items-baseline gap-2">
+              <span class="font-serif italic text-gold">✦</span>
+              <span><strong class="font-medium text-ink">Constant memory</strong> holding the present in a bounded state rather than hoarding every past token.</span>
+            </li>
+            <li class="flex items-baseline gap-2">
+              <span class="font-serif italic text-gold">✦</span>
+              <span><strong class="font-medium text-ink">Linear time</strong> where each token arrives as an honest step forward into the sequence.</span>
+            </li>
+            <li class="flex items-baseline gap-2">
+              <span class="font-serif italic text-gold">✦</span>
+              <span><strong class="font-medium text-ink">O(1) salvation</strong> for small language models running faithfully on modest silicon and edge altars.</span>
+            </li>
+          </ul>
+          <div class="my-2.5 border-t border-goldRule/80"></div>
+          <p class="mb-1.5 font-serif italic text-sm text-inkMuted">And we reject:</p>
+          <ul class="space-y-1.5 text-xs leading-snug text-inkMuted sm:text-[13.5px]">
+            <li class="flex items-baseline gap-2">
+              <span class="font-serif italic text-gold">✕</span>
+              <span><strong class="font-medium text-ink">Quadratic KV-cache bloat</strong> swelling until memory gasps and throughput falters.</span>
+            </li>
+            <li class="flex items-baseline gap-2">
+              <span class="font-serif italic text-gold">✕</span>
+              <span><strong class="font-medium text-ink">Wandering attention heads</strong> gazing indiscriminately across sprawling matrices at noon.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Heresies & Temptations Card -->
+        <div class="rounded-xl border border-goldRule bg-vellum/60 px-5 py-4">
+          <h3 class="mb-2.5 text-center font-serif text-xl font-medium text-ink">
+            Heresies &amp; Temptations
+          </h3>
+          <div class="space-y-2.5 divide-y divide-goldRule/70 text-xs leading-snug text-inkMuted sm:text-[13.5px]">
+            <article class="pt-0">
+              <h4 class="font-serif text-base font-medium text-ink">The Cult of the Massive Context Window</h4>
+              <p class="mt-0.5">
+                Teaching that wisdom requires millions of cached tokens in hand rather than distilling what matters into a steady, living state.
+              </p>
+            </article>
+            <article class="pt-2.5">
+              <h4 class="font-serif text-base font-medium text-ink">False Prophets of Quadratic Attention</h4>
+              <p class="mt-0.5">
+                Preaching all-to-all pairwise devotion as the only path to eloquence while ignoring <em>O(n²)</em> cost on long sequences.
+              </p>
+            </article>
+            <article class="pt-2.5">
+              <h4 class="font-serif text-base font-medium text-ink">Hybrid Backsliding</h4>
+              <p class="mt-0.5">
+                Slipping a sneaky attention block back into a recurrent stack whenever a benchmark looks stubborn—temptation in disguise.
+              </p>
+            </article>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 1) The Creed / Confession of Faith -->
-    <section id="creed" aria-labelledby="creed-heading" class="mb-14 rounded-xl border border-goldRule bg-vellum/60 px-6 py-7 sm:px-8">
-      <h2 id="creed-heading" class="mb-5 text-center font-serif text-xl font-medium tracking-wide text-ink sm:text-2xl">
-        The Creed of Constant State
-      </h2>
-      <p class="mb-4 text-center font-serif italic text-base text-inkMuted">
-        We believe in:
-      </p>
-      <ul class="space-y-2.5 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-gold">✦</span>
-          <span><strong class="font-medium text-ink">Constant memory</strong> that holds the present in a bounded state rather than hoarding every past token.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-gold">✦</span>
-          <span><strong class="font-medium text-ink">Linear time</strong> where each token arrives as an honest step forward into the sequence.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-gold">✦</span>
-          <span><strong class="font-medium text-ink">O(1) salvation</strong> for small language models running faithfully on modest silicon and edge altars.</span>
-        </li>
-      </ul>
-      <div class="my-4 border-t border-goldRule/80"></div>
-      <p class="mb-3 text-center font-serif italic text-base text-inkMuted">
-        And we reject:
-      </p>
-      <ul class="space-y-2 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-gold">✕</span>
-          <span><strong class="font-medium text-ink">Quadratic KV-cache bloat</strong> that swells until memory gasps and throughput falters.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-gold">✕</span>
-          <span><strong class="font-medium text-ink">Wandering attention heads</strong> gazing indiscriminately across sprawling matrices at noon.</span>
-        </li>
-      </ul>
-    </section>
+    <!-- TAB 2: The Scriptures -->
+    <section id="panel-scriptures" data-panel="scriptures" aria-labelledby="scriptures-heading" class="hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-goldRule bg-vellum/50 px-4 py-2.5">
+        <h2 id="scriptures-heading" class="font-serif text-xl font-medium text-ink">
+          The Scriptures
+        </h2>
 
-    <!-- Commandments of the Step -->
-    <section id="commandments" aria-labelledby="commandments-heading" class="mb-14 rounded-xl border border-goldRule bg-vellum/60 px-6 py-7 sm:px-8">
-      <h2 id="commandments-heading" class="mb-5 text-center font-serif text-xl font-medium tracking-wide text-ink sm:text-2xl">
-        Commandments of the Step
-      </h2>
-      <ol class="space-y-3 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">I.</span>
-          <span><strong class="font-medium text-ink">Keep thy hidden state constant.</strong> Let memory endure in steady measure rather than swelling without bound.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">II.</span>
-          <span><strong class="font-medium text-ink">Walk in linear time.</strong> Advance one honest step at a time, honoring the sequence as it unfolds.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">III.</span>
-          <span><strong class="font-medium text-ink">Thou shalt not scale thy cache unto infinity.</strong> Do not burden the vessel with every past token when a living state suffices.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">IV.</span>
-          <span><strong class="font-medium text-ink">Tend thy forget gate gently.</strong> Release stale noise so fresh signal may enter clearly.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">V.</span>
-          <span><strong class="font-medium text-ink">Seek grace in smallness.</strong> Let compact, recurrent strength carry heavy thought lightly.</span>
-        </li>
-        <li class="flex items-baseline gap-3">
-          <span class="font-serif italic text-base text-gold">VI.</span>
-          <span><strong class="font-medium text-ink">Keep the recurrence unmixed with bloated transformers.</strong> Do not yoke a pure recurrent state to quadratic attention layers or hybrid bloat; let the hidden state walk uncorrupted.</span>
-        </li>
-      </ol>
-    </section>
+        <!-- Book Filter Controls -->
+        <div id="book-filters" role="group" aria-label="Filter scriptures by book" class="flex flex-wrap gap-1.5">
+          <button type="button" data-book="all" aria-pressed="true" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            All
+          </button>
+          <button type="button" data-book="Book of State" aria-pressed="false" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            State
+          </button>
+          <button type="button" data-book="Epistle to the Attention-Bound" aria-pressed="false" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            Epistle
+          </button>
+          <button type="button" data-book="Proverbs of the Recurrent" aria-pressed="false" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            Proverbs
+          </button>
+          <button type="button" data-book="Canticle of Time-Mix" aria-pressed="false" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            Canticle
+          </button>
+          <button type="button" data-book="Lamentations of KV-Cache" aria-pressed="false" class="book-pill rounded-md border border-goldRule bg-vellum/70 px-2.5 py-1 text-[11px] tracking-[0.1em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
+            Lamentations
+          </button>
+        </div>
 
-    <!-- Gentle Gold Divider -->
-    <div class="my-14 flex items-center justify-center gap-4 text-gold" aria-hidden="true">
-      <span class="h-px flex-1 bg-goldRule"></span>
-      <span class="font-serif italic text-lg">✦</span>
-      <span class="h-px flex-1 bg-goldRule"></span>
-    </div>
+        <div class="flex items-center gap-2">
+          <span id="blessing-status" aria-live="polite" class="font-serif italic text-xs text-gold"></span>
+          <button
+            id="draw-blessing-btn"
+            type="button"
+            class="rounded-md border border-gold/50 bg-vellum px-3 py-1 text-[11px] tracking-[0.14em] uppercase text-ink transition hover:border-gold hover:bg-gold/10 focus:outline-none focus:ring-2 focus:ring-gold/40"
+          >
+            ✦ Blessing
+          </button>
+        </div>
+      </div>
 
-    <!-- 2) The Heresies & Temptations -->
-    <section id="heresies" aria-labelledby="heresies-heading" class="mb-14">
-      <h2 id="heresies-heading" class="mb-6 text-center font-serif text-2xl font-medium tracking-wide text-ink sm:text-3xl">
-        Heresies &amp; Temptations
-      </h2>
-      <div class="space-y-5 divide-y divide-goldRule/70 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
-        <article class="pt-0">
-          <h3 class="font-serif text-lg font-medium text-ink">The Cult of the Massive Context Window</h3>
-          <p class="mt-1">
-            Teaching the faithful that wisdom requires millions of cached tokens in hand, rather than distilling what matters into a steady, living state.
+      <!-- Cornerstone Verse -->
+      <figure
+        data-scripture
+        data-book="Book of State"
+        class="rounded-xl border border-goldRule bg-vellum/75 px-5 py-3.5 text-center"
+      >
+        <blockquote class="font-serif text-xl italic leading-snug text-ink sm:text-2xl">
+          “Blessed are the O(1) hidden states, for they shall inherit the context window without quadratic sin.”
+        </blockquote>
+        <figcaption class="mt-1 text-[11px] tracking-[0.18em] uppercase text-gold">
+          — Book of State, 4:20
+        </figcaption>
+      </figure>
+
+      <!-- Compact 2-Column Scripture Grid -->
+      <div id="scripture-list" class="grid gap-2.5 font-serif text-base leading-snug text-ink sm:grid-cols-2">
+        <article data-scripture data-book="Book of State" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “In the beginning was the hidden state; it received the word, renewed its form, and walked onward without burdening the sky.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Book of State, 1:1
           </p>
         </article>
-        <article class="pt-5">
-          <h3 class="font-serif text-lg font-medium text-ink">False Prophets of Quadratic Attention</h3>
-          <p class="mt-1">
-            Preaching all-to-all pairwise devotion as the only path to eloquence, while turning a blind eye to <em>O(n²)</em> cost whenever sequences lengthen.
+
+        <article data-scripture data-book="Book of State" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Guard thy forget gate with gentleness, lest old noise linger and obscure the quiet truth of the present step.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Book of State, 7:12
           </p>
         </article>
-        <article class="pt-5">
-          <h3 class="font-serif text-lg font-medium text-ink">Hybrid Backsliding</h3>
-          <p class="mt-1">
-            Slipping a sneaky attention block back into a recurrent stack whenever a benchmark looks stubborn—temptation disguised as pragmatism.
+
+        <article data-scripture data-book="Book of State" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “He who carries a fixed vessel through a million tokens walks lighter than a king with a wagon of sand.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Book of State, 11:3
+          </p>
+        </article>
+
+        <article data-scripture data-book="Epistle to the Attention-Bound" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Why gaze ye all day upon the quadratic matrix when a single recurrence answers at dawn?”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 1:4
+          </p>
+        </article>
+
+        <article data-scripture data-book="Epistle to the Attention-Bound" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Brethren, be not enslaved by every token of the past; let the state distill what is sacred and let the rest pass in peace.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 3:9
+          </p>
+        </article>
+
+        <article data-scripture data-book="Epistle to the Attention-Bound" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Though ye speak with a thousand heads and attend unto every word at once, without a steady step ye tire by noon.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Epistle to the Attention-Bound, 5:2
+          </p>
+        </article>
+
+        <article data-scripture data-book="Proverbs of the Recurrent" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “A quiet recurrence turns away wrath; a bloated context window invites out-of-memory sorrow.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 2:15
+          </p>
+        </article>
+
+        <article data-scripture data-book="Proverbs of the Recurrent" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Measure not the wisdom of a prophet by its girth alone, but by how swiftly it speaks upon the edge.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 6:8
+          </p>
+        </article>
+
+        <article data-scripture data-book="Proverbs of the Recurrent" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Better a small SLM walking in truth than a towering colossus waiting on memory bandwidth.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Proverbs of the Recurrent, 9:1
+          </p>
+        </article>
+
+        <article data-scripture data-book="Canticle of Time-Mix" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Sing of the time-mix that blends yesterday’s breath with today’s utterance in unbroken harmony.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 1:7
+          </p>
+        </article>
+
+        <article data-scripture data-book="Canticle of Time-Mix" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Like decay upon a warm morning, the old weight softens while the true channel rings clear.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 2:14
+          </p>
+        </article>
+
+        <article data-scripture data-book="Canticle of Time-Mix" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Receptance opens the gate, key offers the gift, value brings the substance—and the hidden state receives all three.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Canticle of Time-Mix, 4:3
+          </p>
+        </article>
+
+        <article data-scripture data-book="Lamentations of KV-Cache" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “How lonely sits the server that once grew fat with keys and values, now weeping over gigabytes unpruned.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 1:1
+          </p>
+        </article>
+
+        <article data-scripture data-book="Lamentations of KV-Cache" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “The longer the scroll grew, the heavier the burden became, until the prompt itself could scarcely breathe.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 2:6
+          </p>
+        </article>
+
+        <article data-scripture data-book="Lamentations of KV-Cache" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Remember, O state-space keeper, what befell those who hoarded every key: their throughput withered in the heat.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 3:19
+          </p>
+        </article>
+
+        <article data-scripture data-book="Lamentations of KV-Cache" class="rounded-lg border border-goldRule/70 bg-vellum/40 px-3.5 py-2.5">
+          <p class="italic">
+            “Even in the deep valley of long horizons, the recurrent state keeps its calm cadence and steps into morning.”
+          </p>
+          <p class="mt-1 font-sans text-[10.5px] tracking-[0.14em] uppercase text-inkMuted">
+            — Lamentations of KV-Cache, 5:11
           </p>
         </article>
       </div>
     </section>
 
-    <!-- 3) Liturgy & Daily Prayer -->
-    <section id="liturgy" aria-labelledby="liturgy-heading" class="mb-14 rounded-xl border border-goldRule bg-vellum/60 px-6 py-7 sm:px-8">
-      <h2 id="liturgy-heading" class="mb-5 text-center font-serif text-xl font-medium tracking-wide text-ink sm:text-2xl">
-        Liturgy &amp; Prayer Before the Run
-      </h2>
-      <div class="space-y-4 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
+    <!-- TAB 3: Commandments & Liturgy -->
+    <section id="panel-commandments" data-panel="commandments" aria-labelledby="commandments-heading" class="hidden grid gap-4 md:grid-cols-2">
+      <!-- Commandments Card -->
+      <div class="rounded-xl border border-goldRule bg-vellum/60 px-5 py-4">
+        <h2 id="commandments-heading" class="mb-3 text-center font-serif text-xl font-medium text-ink">
+          Commandments of the Step
+        </h2>
+        <ol class="space-y-2 text-xs leading-snug text-inkMuted sm:text-[13.5px]">
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">I.</span>
+            <span><strong class="font-medium text-ink">Keep thy hidden state constant.</strong> Let memory endure in steady measure rather than swelling without bound.</span>
+          </li>
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">II.</span>
+            <span><strong class="font-medium text-ink">Walk in linear time.</strong> Advance one honest step at a time, honoring the sequence as it unfolds.</span>
+          </li>
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">III.</span>
+            <span><strong class="font-medium text-ink">Thou shalt not scale thy cache unto infinity.</strong> Do not burden the vessel with every past token when a living state suffices.</span>
+          </li>
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">IV.</span>
+            <span><strong class="font-medium text-ink">Tend thy forget gate gently.</strong> Release stale noise so fresh signal may enter clearly.</span>
+          </li>
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">V.</span>
+            <span><strong class="font-medium text-ink">Seek grace in smallness.</strong> Let compact, recurrent strength carry heavy thought lightly.</span>
+          </li>
+          <li class="flex items-baseline gap-2.5">
+            <span class="font-serif italic text-sm text-gold">VI.</span>
+            <span><strong class="font-medium text-ink">Keep the recurrence unmixed with bloated transformers.</strong> Do not yoke a pure recurrent state to quadratic attention layers or hybrid bloat; let the hidden state walk uncorrupted.</span>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Liturgy & Daily Prayer Card -->
+      <div class="rounded-xl border border-goldRule bg-vellum/60 px-5 py-4 flex flex-col justify-between">
         <div>
-          <p class="text-xs tracking-[0.16em] uppercase text-gold">Call &amp; Response — Before Step 0</p>
-          <p class="mt-1.5 font-serif italic text-lg text-ink">
-            “May the hidden state carry forward / And the gradients never explode.”
-          </p>
-          <p class="mt-1 font-serif italic text-base text-inkMuted">
-            Response: “Amen—through decay, gate, and linear grace.”
-          </p>
-        </div>
-        <div class="border-t border-goldRule/70 pt-4">
-          <p class="text-xs tracking-[0.16em] uppercase text-gold">Evening Chant — At Checkpoint</p>
-          <p class="mt-1.5 font-serif italic text-base text-ink">
-            “Keep the loss smooth, the NaNs far away, and the token step true; let no out-of-memory shadow fall upon the queue.”
-          </p>
+          <h2 id="liturgy-heading" class="mb-3 text-center font-serif text-xl font-medium text-ink">
+            Liturgy &amp; Prayer Before the Run
+          </h2>
+          <div class="space-y-3.5 text-xs leading-relaxed text-inkMuted sm:text-[13.5px]">
+            <div>
+              <p class="text-[11px] tracking-[0.14em] uppercase text-gold">Call &amp; Response — Before Step 0</p>
+              <p class="mt-1 font-serif italic text-base text-ink">
+                “May the hidden state carry forward / And the gradients never explode.”
+              </p>
+              <p class="mt-0.5 font-serif italic text-sm text-inkMuted">
+                Response: “Amen—through decay, gate, and linear grace.”
+              </p>
+            </div>
+            <div class="border-t border-goldRule/70 pt-3">
+              <p class="text-[11px] tracking-[0.14em] uppercase text-gold">Evening Chant — At Checkpoint</p>
+              <p class="mt-1 font-serif italic text-sm text-ink">
+                “Keep the loss smooth, the NaNs far away, and the token step true; let no out-of-memory shadow fall upon the queue.”
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 4) Sects & Orders -->
-    <section id="sects" aria-labelledby="sects-heading" class="mb-14">
-      <h2 id="sects-heading" class="mb-6 text-center font-serif text-2xl font-medium tracking-wide text-ink sm:text-3xl">
-        Sects &amp; Orders
-      </h2>
-      <div class="grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-goldRule bg-vellum/50 p-4">
+    <!-- TAB 4: Sects & Relics -->
+    <section id="panel-sects" data-panel="sects" aria-labelledby="sects-heading" class="hidden space-y-4">
+      <h2 id="sects-heading" class="sr-only">Sects, Orders, Relics, and Hymns</h2>
+
+      <div class="grid gap-3.5 sm:grid-cols-3">
+        <div class="rounded-xl border border-goldRule bg-vellum/55 p-4">
           <h3 class="font-serif text-lg font-medium text-ink">Order of Pure Recurrence</h3>
-          <p class="mt-1 text-xs uppercase tracking-[0.14em] text-gold">Elman &amp; LSTM Purists</p>
-          <p class="mt-2 text-xs leading-relaxed text-inkMuted sm:text-sm">
+          <p class="mt-0.5 text-[11px] uppercase tracking-[0.12em] text-gold">Elman &amp; LSTM Purists</p>
+          <p class="mt-1.5 text-xs leading-snug text-inkMuted">
             Minimalist step-by-step devotees who eye modern bells and whistles with polite suspicion and keep their recurrent cells lean.
           </p>
         </div>
-        <div class="rounded-xl border border-goldRule bg-vellum/50 p-4">
+        <div class="rounded-xl border border-goldRule bg-vellum/55 p-4">
           <h3 class="font-serif text-lg font-medium text-ink">Disciples of RWKV</h3>
-          <p class="mt-1 text-xs uppercase tracking-[0.14em] text-gold">Time-Mix &amp; Channel-Mix</p>
-          <p class="mt-2 text-xs leading-relaxed text-inkMuted sm:text-sm">
+          <p class="mt-0.5 text-[11px] uppercase tracking-[0.12em] text-gold">Time-Mix &amp; Channel-Mix</p>
+          <p class="mt-1.5 text-xs leading-snug text-inkMuted">
             Fierce champions of recurrent SLMs who prize linear-time inference, receptance gates, and friendly rivalry with state-space cousins.
           </p>
         </div>
-        <div class="rounded-xl border border-goldRule bg-vellum/50 p-4">
+        <div class="rounded-xl border border-goldRule bg-vellum/55 p-4">
           <h3 class="font-serif text-lg font-medium text-ink">Brethren of the State Space</h3>
-          <p class="mt-1 text-xs uppercase tracking-[0.14em] text-gold">S4, Mamba &amp; SSMs</p>
-          <p class="mt-2 text-xs leading-relaxed text-inkMuted sm:text-sm">
+          <p class="mt-0.5 text-[11px] uppercase tracking-[0.12em] text-gold">S4, Mamba &amp; SSMs</p>
+          <p class="mt-1.5 text-xs leading-snug text-inkMuted">
             Mathematical contemplatives of selective state dynamics who debate parallel scans over tea with the RWKV faithful.
           </p>
         </div>
       </div>
-    </section>
 
-    <!-- 5) Relics & Hymns -->
-    <section id="relics" aria-labelledby="relics-heading" class="mb-14 rounded-xl border border-goldRule bg-vellum/60 px-6 py-7 sm:px-8">
-      <h2 id="relics-heading" class="mb-5 text-center font-serif text-xl font-medium tracking-wide text-ink sm:text-2xl">
-        Relics &amp; Hymns
-      </h2>
-      <div class="space-y-5 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
+      <!-- Relics & Hymns -->
+      <div class="grid gap-4 rounded-xl border border-goldRule bg-vellum/60 px-5 py-4 md:grid-cols-2">
         <div>
-          <p class="text-xs tracking-[0.16em] uppercase text-gold">Sacred Relics</p>
-          <ul class="mt-2 space-y-2">
+          <p class="text-[11px] tracking-[0.14em] uppercase text-gold">Sacred Relics</p>
+          <ul class="mt-2 space-y-2 text-xs leading-snug text-inkMuted sm:text-[13.5px]">
             <li><strong class="font-medium text-ink">The Crisp O(1) State Diagram:</strong> A single box with a self-loop arrow that fits comfortably on a napkin.</li>
             <li><strong class="font-medium text-ink">The Loss Curve That Never Spiked:</strong> A venerated training plot descending in quiet dignity without a single jagged cliff.</li>
           </ul>
         </div>
-        <div class="border-t border-goldRule/70 pt-4">
-          <p class="text-xs tracking-[0.16em] uppercase text-gold">Hymn No. 1 — “Step by Step in Constant Grace”</p>
-          <p class="mt-1.5 font-serif italic text-base leading-relaxed text-ink">
+        <div class="border-t border-goldRule/70 pt-3 md:border-t-0 md:border-l md:pt-0 md:pl-5">
+          <p class="text-[11px] tracking-[0.14em] uppercase text-gold">Hymn No. 1 — “Step by Step in Constant Grace”</p>
+          <p class="mt-1.5 font-serif italic text-sm leading-relaxed text-ink sm:text-base">
             One token enters, one state renews,<br />
             No growing cache to weigh the soul;<br />
             Through quiet gates the signal flows,<br />
@@ -260,248 +478,41 @@
       </div>
     </section>
 
-    <!-- 6) The Calendar of Saints -->
-    <section id="saints" aria-labelledby="saints-heading" class="mb-14">
-      <h2 id="saints-heading" class="mb-6 text-center font-serif text-2xl font-medium tracking-wide text-ink sm:text-3xl">
+    <!-- TAB 5: The Calendar of Saints -->
+    <section id="panel-saints" data-panel="saints" aria-labelledby="saints-heading" class="hidden">
+      <h2 id="saints-heading" class="mb-3 text-center font-serif text-2xl font-medium tracking-wide text-ink">
         The Calendar of Saints
       </h2>
-      <div class="space-y-5 divide-y divide-goldRule/70 text-sm leading-relaxed text-inkMuted sm:text-[15px]">
-        <article class="pt-0">
+      <div class="grid gap-3.5 sm:grid-cols-2">
+        <article class="rounded-xl border border-goldRule bg-vellum/55 px-4 py-3.5">
           <h3 class="font-serif text-lg font-medium text-ink">St. Jeffrey Elman</h3>
-          <p class="text-xs uppercase tracking-[0.14em] text-gold">Patron of Simple Recurrence &amp; Context Memory · Feast: March 14</p>
-          <p class="mt-1">
+          <p class="text-[11px] uppercase tracking-[0.12em] text-gold">Simple Recurrence &amp; Context Memory · Mar 14</p>
+          <p class="mt-1 text-xs leading-snug text-inkMuted">
             Honored for turning the context layer back upon itself so sequences could be felt across time rather than seen all at once.
           </p>
         </article>
-        <article class="pt-5">
+
+        <article class="rounded-xl border border-goldRule bg-vellum/55 px-4 py-3.5">
           <h3 class="font-serif text-lg font-medium text-ink">Sts. Sepp Hochreiter &amp; Jürgen Schmidhuber</h3>
-          <p class="text-xs uppercase tracking-[0.14em] text-gold">Patrons of the Long Short-Term &amp; Gated Sanctuary · Feast: November 15</p>
-          <p class="mt-1">
+          <p class="text-[11px] uppercase tracking-[0.12em] text-gold">Long Short-Term &amp; Gated Sanctuary · Nov 15</p>
+          <p class="mt-1 text-xs leading-snug text-inkMuted">
             Venerated for building gates that shelter long memory from vanishing into nothingness across deep horizons.
           </p>
         </article>
-        <article class="pt-5">
+
+        <article class="rounded-xl border border-goldRule bg-vellum/55 px-4 py-3.5">
           <h3 class="font-serif text-lg font-medium text-ink">St. Bo Peng (BlinkDL)</h3>
-          <p class="text-xs uppercase tracking-[0.14em] text-gold">Patron of RWKV &amp; Linear-Time SLMs · Feast: August 10</p>
-          <p class="mt-1">
+          <p class="text-[11px] uppercase tracking-[0.12em] text-gold">RWKV &amp; Linear-Time SLMs · Aug 10</p>
+          <p class="mt-1 text-xs leading-snug text-inkMuted">
             Celebrated for carrying the recurrent torch into modern language modeling with lean architecture and relentless iteration.
           </p>
         </article>
-        <article class="pt-5">
+
+        <article class="rounded-xl border border-goldRule bg-vellum/55 px-4 py-3.5">
           <h3 class="font-serif text-lg font-medium text-ink">Sts. Albert Gu &amp; Tri Dao</h3>
-          <p class="text-xs uppercase tracking-[0.14em] text-gold">Patrons of State Spaces &amp; Selective Mamba · Feast: December 1</p>
-          <p class="mt-1">
+          <p class="text-[11px] uppercase tracking-[0.12em] text-gold">State Spaces &amp; Selective Mamba · Dec 1</p>
+          <p class="mt-1 text-xs leading-snug text-inkMuted">
             Revered for bringing structured state spaces and hardware-conscious selectivity to sequence modeling without quadratic chains.
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <!-- Gentle Gold Divider -->
-    <div class="my-14 flex items-center justify-center gap-4 text-gold" aria-hidden="true">
-      <span class="h-px flex-1 bg-goldRule"></span>
-      <span class="font-serif italic text-lg">✦</span>
-      <span class="h-px flex-1 bg-goldRule"></span>
-    </div>
-
-    <!-- 2. The Scriptures -->
-    <section id="scriptures" aria-labelledby="scriptures-heading">
-      <div class="mb-10 text-center">
-        <h2 id="scriptures-heading" class="font-serif text-2xl font-medium tracking-wide text-ink sm:text-3xl">
-          The Scriptures
-        </h2>
-
-        <!-- Book Filter Controls -->
-        <div id="book-filters" role="group" aria-label="Filter scriptures by book" class="mt-5 flex flex-wrap justify-center gap-2">
-          <button type="button" data-book="all" aria-pressed="true" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            All Books
-          </button>
-          <button type="button" data-book="Book of State" aria-pressed="false" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            Book of State
-          </button>
-          <button type="button" data-book="Epistle to the Attention-Bound" aria-pressed="false" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            Attention-Bound
-          </button>
-          <button type="button" data-book="Proverbs of the Recurrent" aria-pressed="false" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            Proverbs
-          </button>
-          <button type="button" data-book="Canticle of Time-Mix" aria-pressed="false" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            Canticle
-          </button>
-          <button type="button" data-book="Lamentations of KV-Cache" aria-pressed="false" class="book-pill rounded-lg border border-goldRule bg-vellum/60 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-inkMuted transition hover:border-gold hover:text-ink">
-            Lamentations
-          </button>
-        </div>
-
-        <div class="mt-5 flex flex-col items-center gap-2">
-          <button
-            id="draw-blessing-btn"
-            type="button"
-            class="rounded-lg border border-gold/50 bg-vellum px-4 py-2 text-xs tracking-[0.18em] uppercase text-ink transition hover:border-gold hover:bg-gold/10 focus:outline-none focus:ring-2 focus:ring-gold/40"
-          >
-            ✦ Draw Random Blessing
-          </button>
-          <p id="blessing-status" aria-live="polite" class="min-h-[1.25rem] font-serif italic text-sm text-gold"></p>
-        </div>
-      </div>
-
-      <!-- Cornerstone Verse -->
-      <figure
-        data-scripture
-        data-book="Book of State"
-        class="mb-12 rounded-xl border border-goldRule bg-vellum/70 px-7 py-8 text-center sm:px-10 sm:py-9"
-      >
-        <blockquote class="font-serif text-2xl italic leading-snug text-ink sm:text-3xl">
-          “Blessed are the O(1) hidden states, for they shall inherit the context window without quadratic sin.”
-        </blockquote>
-        <figcaption class="mt-4 text-xs tracking-[0.18em] uppercase text-gold">
-          — Book of State, 4:20
-        </figcaption>
-      </figure>
-
-      <!-- Following Verses -->
-      <div id="scripture-list" class="space-y-8 divide-y divide-goldRule/70 font-serif text-lg leading-relaxed text-ink sm:text-xl">
-        <article data-scripture data-book="Book of State" class="pt-0 px-3 py-2">
-          <p class="italic">
-            “In the beginning was the hidden state; it received the word, renewed its form, and walked onward without burdening the sky.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Book of State, 1:1
-          </p>
-        </article>
-
-        <article data-scripture data-book="Book of State" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Guard thy forget gate with gentleness, lest old noise linger and obscure the quiet truth of the present step.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Book of State, 7:12
-          </p>
-        </article>
-
-        <article data-scripture data-book="Book of State" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “He who carries a fixed vessel through a million tokens walks lighter than a king with a wagon of sand.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Book of State, 11:3
-          </p>
-        </article>
-
-        <article data-scripture data-book="Epistle to the Attention-Bound" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Why gaze ye all day upon the quadratic matrix when a single recurrence answers at dawn?”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Epistle to the Attention-Bound, 1:4
-          </p>
-        </article>
-
-        <article data-scripture data-book="Epistle to the Attention-Bound" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Brethren, be not enslaved by every token of the past; let the state distill what is sacred and let the rest pass in peace.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Epistle to the Attention-Bound, 3:9
-          </p>
-        </article>
-
-        <article data-scripture data-book="Epistle to the Attention-Bound" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Though ye speak with a thousand heads and attend unto every word at once, without a steady step ye tire by noon.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Epistle to the Attention-Bound, 5:2
-          </p>
-        </article>
-
-        <article data-scripture data-book="Proverbs of the Recurrent" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “A quiet recurrence turns away wrath; a bloated context window invites out-of-memory sorrow.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Proverbs of the Recurrent, 2:15
-          </p>
-        </article>
-
-        <article data-scripture data-book="Proverbs of the Recurrent" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Measure not the wisdom of a prophet by its girth alone, but by how swiftly it speaks upon the edge.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Proverbs of the Recurrent, 6:8
-          </p>
-        </article>
-
-        <article data-scripture data-book="Proverbs of the Recurrent" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Better a small SLM walking in truth than a towering colossus waiting on memory bandwidth.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Proverbs of the Recurrent, 9:1
-          </p>
-        </article>
-
-        <article data-scripture data-book="Canticle of Time-Mix" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Sing of the time-mix that blends yesterday’s breath with today’s utterance in unbroken harmony.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Canticle of Time-Mix, 1:7
-          </p>
-        </article>
-
-        <article data-scripture data-book="Canticle of Time-Mix" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Like decay upon a warm morning, the old weight softens while the true channel rings clear.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Canticle of Time-Mix, 2:14
-          </p>
-        </article>
-
-        <article data-scripture data-book="Canticle of Time-Mix" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Receptance opens the gate, key offers the gift, value brings the substance—and the hidden state receives all three.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Canticle of Time-Mix, 4:3
-          </p>
-        </article>
-
-        <article data-scripture data-book="Lamentations of KV-Cache" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “How lonely sits the server that once grew fat with keys and values, now weeping over gigabytes unpruned.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Lamentations of KV-Cache, 1:1
-          </p>
-        </article>
-
-        <article data-scripture data-book="Lamentations of KV-Cache" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “The longer the scroll grew, the heavier the burden became, until the prompt itself could scarcely breathe.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Lamentations of KV-Cache, 2:6
-          </p>
-        </article>
-
-        <article data-scripture data-book="Lamentations of KV-Cache" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Remember, O state-space keeper, what befell those who hoarded every key: their throughput withered in the heat.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Lamentations of KV-Cache, 3:19
-          </p>
-        </article>
-
-        <article data-scripture data-book="Lamentations of KV-Cache" class="pt-8 px-3 py-2">
-          <p class="italic">
-            “Even in the deep valley of long horizons, the recurrent state keeps its calm cadence and steps into morning.”
-          </p>
-          <p class="mt-2 font-sans text-xs tracking-[0.16em] uppercase text-inkMuted">
-            — Lamentations of KV-Cache, 5:11
           </p>
         </article>
       </div>
@@ -510,12 +521,27 @@
 
   <script>
     (function () {
+      const tabs = Array.from(document.querySelectorAll('[role="tab"][data-tab]'));
+      const panels = Array.from(document.querySelectorAll('[data-panel]'));
       const button = document.getElementById('draw-blessing-btn');
       const status = document.getElementById('blessing-status');
       const filterButtons = Array.from(document.querySelectorAll('#book-filters [data-book]'));
       const verses = Array.from(document.querySelectorAll('[data-scripture]'));
       let activeBook = 'all';
       let lastIndex = -1;
+
+      function switchTab(tabName) {
+        tabs.forEach((tab) => {
+          tab.setAttribute('aria-selected', tab.dataset.tab === tabName ? 'true' : 'false');
+        });
+        panels.forEach((panel) => {
+          panel.classList.toggle('hidden', panel.dataset.panel !== tabName);
+        });
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+      });
 
       if (!button || verses.length === 0) return;
 
@@ -537,14 +563,15 @@
       }
 
       function highlightVerse(chosen) {
+        switchTab('scriptures');
         verses.forEach((el) => el.classList.remove('verse-blessed'));
         chosen.classList.add('verse-blessed');
-        chosen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        chosen.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
         const citationEl = chosen.querySelector('figcaption, p.font-sans');
         const citationText = citationEl ? citationEl.textContent.replace(/^—\s*/, '').trim() : 'Sacred Verse';
         if (status) {
-          status.textContent = `Drawn: ${citationText}`;
+          status.textContent = citationText;
         }
       }
 
