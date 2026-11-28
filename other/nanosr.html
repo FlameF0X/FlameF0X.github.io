@@ -3,209 +3,240 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101511">
-  <title>NanoSR | Image Enhancement</title>
+  <meta name="theme-color" content="#f4f5f1">
+  <meta name="description" content="A straightforward image upscaling and restoration workspace.">
+  <title>NanoSR | Image Restoration</title>
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #0c100d;
-      --surface: #131a15;
-      --surface-2: #19221b;
-      --surface-3: #202b22;
-      --border: #2b382d;
-      --border-soft: #202a22;
-      --text: #edf2e9;
-      --muted: #9aa79a;
-      --subtle: #6f7d70;
-      --accent: #c7f36b;
-      --accent-strong: #a9dc47;
-      --danger: #ff827e;
-      --radius: 16px;
-      --shadow: 0 18px 50px rgba(0,0,0,.23);
+      color-scheme: light;
+      --page: #f3f4f0;
+      --surface: #ffffff;
+      --surface-soft: #f8f9f6;
+      --surface-muted: #eef0eb;
+      --line: #dfe3dc;
+      --line-strong: #cbd2c8;
+      --text: #202720;
+      --muted: #657066;
+      --subtle: #879087;
+      --accent: #315b3e;
+      --accent-hover: #264b32;
+      --accent-soft: #edf3ee;
+      --danger: #a33b35;
+      --danger-soft: #fbefed;
+      --radius: 9px;
+      --shadow: 0 16px 48px rgba(20, 28, 20, .14);
     }
+
     * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--page); }
     body {
       margin: 0;
       min-height: 100vh;
       color: var(--text);
-      background:
-        radial-gradient(900px 550px at 85% -10%, rgba(133,190,79,.10), transparent 65%),
-        radial-gradient(700px 500px at -15% 20%, rgba(69,115,78,.10), transparent 62%),
-        var(--bg);
+      background: var(--page);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, select:focus-visible {
-      outline: 2px solid var(--accent); outline-offset: 3px;
-    }
-    .shell { width: min(1440px, calc(100% - 48px)); margin: 0 auto; }
-    .topbar {
-      position: sticky; top: 0; z-index: 20;
-      border-bottom: 1px solid rgba(68,87,69,.55);
-      background: rgba(12,16,13,.82); backdrop-filter: blur(18px);
-    }
-    .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible,
+    .dropzone:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+
+    .shell { width: min(1360px, calc(100% - 48px)); margin: 0 auto; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+    .topbar-inner { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
     .brand-mark {
-      width: 42px; height: 42px; display: grid; place-items: center; flex: 0 0 auto;
-      border-radius: 13px; color: #16200f; background: var(--accent);
-      font-weight: 900; font-size: 18px; letter-spacing: -.08em;
-      box-shadow: 0 0 28px rgba(199,243,107,.14);
+      width: 31px; height: 31px; display: grid; place-items: center; flex: 0 0 auto;
+      color: #fff; background: var(--accent); border-radius: 6px;
+      font-size: 10px; font-weight: 800; letter-spacing: -.04em;
     }
-    .brand h1 { margin: 0; font-size: 15px; font-weight: 750; letter-spacing: -.025em; }
-    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
-    .top-status { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(199,243,107,.65); }
-    main { padding: 34px 0 50px; }
-    .intro { margin: 0 0 25px; }
-    .eyebrow { margin: 0 0 9px; color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: .16em; font-weight: 750; }
-    .intro h2 { margin: 0; font-size: clamp(25px, 3vw, 36px); letter-spacing: -.055em; line-height: 1.12; }
-    .intro p { margin: 11px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; max-width: 630px; }
-    .workspace { display: grid; grid-template-columns: 310px minmax(0,1fr); align-items: start; gap: 20px; }
-    .panel {
-      background: linear-gradient(150deg, rgba(25,34,27,.96), rgba(17,23,18,.98));
-      border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
-    }
-    .controls { padding: 19px; position: sticky; top: 96px; }
-    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-    .panel-heading h3 { margin: 0; font-size: 13px; font-weight: 750; letter-spacing: -.01em; }
-    .tiny-label { color: var(--subtle); font-size: 9px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .brand h1 { margin: 0; font-size: 14px; font-weight: 750; letter-spacing: -.025em; }
+    .brand p { margin: 1px 0 0; color: var(--muted); font-size: 10px; }
+    .top-status { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .status-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #64866b; }
+
+    main { padding: 32px 0 44px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin: 0 0 22px; }
+    .intro-copy { min-width: 0; }
+    .intro h2 { margin: 0; font-size: clamp(25px, 3vw, 32px); line-height: 1.14; letter-spacing: -.045em; font-weight: 690; }
+    .intro p { max-width: 590px; margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .intro-note { color: var(--subtle); font-size: 10px; white-space: nowrap; padding-bottom: 3px; }
+
+    .workspace { display: grid; grid-template-columns: 292px minmax(0, 1fr); align-items: start; gap: 18px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+    .controls { padding: 17px; position: sticky; top: 16px; }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .panel-heading h3, .display-top h3 { margin: 0; font-size: 13px; font-weight: 720; letter-spacing: -.01em; }
+    .panel-heading .subheading { color: var(--subtle); font-size: 10px; }
+
     .dropzone {
-      position: relative; min-height: 185px; padding: 15px; border: 1px dashed #4b5c4a;
-      border-radius: 13px; background: rgba(7,11,8,.3); display: flex; flex-direction: column;
+      position: relative; min-height: 154px; padding: 16px; border: 1px dashed var(--line-strong);
+      border-radius: 7px; background: var(--surface-soft); display: flex; flex-direction: column;
       align-items: center; justify-content: center; text-align: center; overflow: hidden;
-      transition: border-color .18s, background .18s;
+      transition: border-color .15s, background .15s;
     }
-    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(199,243,107,.055); }
-    .dropzone.has-image { padding: 8px; min-height: 185px; }
-    .drop-icon { width: 39px; height: 39px; display: grid; place-items: center; border-radius: 12px; color: var(--accent); background: rgba(199,243,107,.10); margin-bottom: 12px; }
-    .dropzone strong { font-size: 12px; font-weight: 700; }
-    .dropzone small { margin-top: 6px; color: var(--subtle); font-size: 10px; line-height: 1.5; }
-    #sourcePreview { display: none; width: 100%; height: 168px; object-fit: contain; border-radius: 8px; background-color: #0a0e0b; }
-    .source-caption { display: none; position: absolute; left: 15px; right: 15px; bottom: 13px; padding: 6px 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: #f2f4ed; background: rgba(5,8,5,.78); border: 1px solid rgba(255,255,255,.1); border-radius: 7px; font-size: 10px; }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--accent-soft); }
+    .dropzone.has-image { min-height: 154px; padding: 7px; }
+    .drop-icon { width: 29px; height: 29px; display: grid; place-items: center; color: var(--accent); margin-bottom: 9px; }
+    .dropzone strong { font-size: 12px; font-weight: 680; }
+    .dropzone small { margin-top: 5px; color: var(--muted); font-size: 10px; }
+    #sourcePreview { display: none; width: 100%; height: 138px; object-fit: contain; border-radius: 4px; background: #ecefea; }
+    .source-caption {
+      display: none; position: absolute; left: 12px; right: 12px; bottom: 10px; padding: 5px 7px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left;
+      color: #fff; background: rgba(25, 32, 26, .82); border-radius: 4px; font-size: 10px;
+    }
     .dropzone.has-image #sourcePreview { display: block; }
     .dropzone.has-image .drop-copy { display: none; }
     .dropzone.has-image .source-caption { display: block; }
     .file-input { display: none; }
-    .button-row { display: flex; gap: 8px; margin-top: 10px; }
+
+    .button-row { display: flex; gap: 7px; margin-top: 9px; }
     .btn {
-      min-height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border);
-      color: var(--text); background: var(--surface-2); font-size: 11px; font-weight: 700;
-      transition: transform .15s, border-color .15s, background .15s;
+      min-height: 36px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 6px;
+      color: var(--text); background: var(--surface); font-size: 11px; font-weight: 650;
+      transition: background .12s, border-color .12s, color .12s;
     }
-    .btn:hover { border-color: #60745d; background: var(--surface-3); }
+    .btn:hover { border-color: #9eaa9f; background: var(--surface-soft); }
     .btn:active { transform: translateY(1px); }
-    .btn.primary { color: #17200f; background: var(--accent); border-color: var(--accent); }
-    .btn.primary:hover { background: #d5fa88; }
-    .btn.subtle { color: var(--muted); background: transparent; }
-    .btn:disabled { opacity: .48; cursor: not-allowed; }
+    .btn.primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn.subtle { color: var(--muted); border-color: transparent; background: transparent; }
+    .btn.subtle:hover { color: var(--text); background: var(--surface-muted); }
+    .btn:disabled { opacity: .48; cursor: not-allowed; transform: none; }
     .button-row .btn { flex: 1; }
-    .divider { height: 1px; background: var(--border-soft); margin: 19px 0; }
-    .field { margin-top: 15px; }
+
+    .divider { height: 1px; background: var(--line); margin: 17px 0; }
+    .field { margin-top: 14px; }
     .field:first-of-type { margin-top: 0; }
-    .field label, .field .label-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: #c4cec1; font-size: 10px; font-weight: 700; }
+    .field label, .field .label-line { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-bottom: 6px; color: #39443a; font-size: 11px; font-weight: 650; }
     .field select {
-      width: 100%; height: 39px; padding: 0 11px; border: 1px solid var(--border); border-radius: 9px;
-      color: var(--text); background: #101711; font-size: 11px;
+      width: 100%; height: 37px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 6px;
+      color: var(--text); background: #fff; font-size: 11px;
     }
-    .field select:disabled { opacity: .45; cursor: not-allowed; }
-    .field input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-    .range-ends { display: flex; justify-content: space-between; color: var(--subtle); font-size: 9px; margin-top: 3px; }
-    .value-pill { color: var(--accent); background: rgba(199,243,107,.10); padding: 3px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
-    .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 10px; border: 1px solid var(--border-soft); background: #0e140f; }
-    .segmented button { min-height: 31px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 10px; font-weight: 700; }
-    .segmented button.active { color: #17200f; background: var(--accent); }
-    .helper { margin: 15px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.6; }
-    .run-btn { width: 100%; margin-top: 18px; min-height: 42px; }
+    .field select:disabled { color: var(--subtle); background: var(--surface-soft); cursor: not-allowed; }
+    .field-help { margin: 5px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.45; }
+    .field input[type="range"] { display: block; width: 100%; accent-color: var(--accent); cursor: pointer; }
+    .range-ends { display: flex; justify-content: space-between; color: var(--subtle); font-size: 9px; margin-top: 2px; }
+    .value-pill { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    .advanced { margin-top: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
+    .advanced summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; font-weight: 650; cursor: pointer; list-style: none; }
+    .advanced summary::-webkit-details-marker { display: none; }
+    .advanced summary::after { content: "+"; color: var(--subtle); font-size: 16px; font-weight: 400; line-height: 1; }
+    .advanced[open] summary::after { content: "−"; }
+    .advanced-content { padding-top: 3px; }
+    .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-soft); }
+    .segmented button { min-height: 29px; border: 0; border-radius: 4px; color: var(--muted); background: transparent; font-size: 10px; font-weight: 650; }
+    .segmented button.active { color: var(--accent); background: #e6eee7; }
+
+    .run-btn { width: 100%; min-height: 40px; margin-top: 17px; font-size: 11px; }
+    .helper { margin: 10px 0 0; color: var(--subtle); font-size: 10px; line-height: 1.55; }
+
     .display { min-width: 0; }
-    .display-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
-    .display-top h3 { margin: 0; font-size: 13px; font-weight: 750; }
-    .display-top p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
-    .display-actions { display: flex; align-items: center; gap: 8px; }
-    .status-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .display-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 1px 0 12px; }
+    .display-top p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .display-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    .status-chip { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; white-space: nowrap; }
     .status-chip .status-dot { width: 6px; height: 6px; }
-    .status-chip.busy { color: var(--accent); border-color: rgba(199,243,107,.35); }
-    .empty-state, .processing-state { min-height: 570px; padding: 30px; display: flex; align-items: center; justify-content: center; text-align: center; }
-    .empty-inner { max-width: 440px; }
-    .sample-art { width: min(100%, 340px); aspect-ratio: 16 / 10; object-fit: cover; border: 1px solid var(--border); border-radius: 13px; margin: 0 auto 22px; box-shadow: 0 15px 45px rgba(0,0,0,.3); }
-    .empty-state h4 { margin: 0; font-size: 16px; letter-spacing: -.02em; }
-    .empty-state p { margin: 9px auto 17px; max-width: 340px; color: var(--muted); font-size: 11px; line-height: 1.65; }
-    .empty-state .btn { min-width: 150px; }
-    .processing-state { display: none; flex-direction: column; gap: 15px; }
-    .spinner { width: 43px; height: 43px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .85s linear infinite; }
+    .status-chip.busy { color: var(--accent); }
+    .status-chip.error { color: var(--danger); }
+    .download-group { display: flex; align-items: center; gap: 8px; }
+    .download-hint { color: var(--subtle); font-size: 9px; white-space: nowrap; }
+
+    .empty-state, .processing-state { min-height: 510px; padding: 30px; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .empty-inner { max-width: 390px; }
+    .empty-icon { width: 40px; height: 40px; display: grid; place-items: center; margin: 0 auto 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: var(--surface-soft); }
+    .empty-state h4 { margin: 0; font-size: 14px; font-weight: 700; }
+    .empty-state p { margin: 7px auto 16px; max-width: 330px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .processing-state { flex-direction: column; gap: 12px; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .processing-state h4 { margin: 0; font-size: 14px; }
+    .processing-state h4 { margin: 0; font-size: 13px; }
     .processing-state p { margin: 0; color: var(--muted); font-size: 11px; }
-    .results { display: none; }
-    .metrics-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; margin-bottom: 12px; }
-    .metrics-left { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
-    .metrics-left strong { color: var(--text); font-weight: 700; }
-    .metrics-right { display: flex; gap: 16px; flex-wrap: wrap; color: var(--subtle); font-size: 10px; }
-    .metrics-right strong { color: #dce5d7; font-weight: 650; }
-    .image-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 11px; }
-    .image-card { min-width: 0; padding: 10px; }
-    .image-card.featured { border-color: rgba(199,243,107,.42); box-shadow: 0 15px 42px rgba(0,0,0,.25), inset 0 0 0 1px rgba(199,243,107,.035); }
-    .image-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 24px; margin-bottom: 8px; }
-    .image-card-head h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; font-size: 10px; font-weight: 750; }
-    .image-card-head span { color: var(--subtle); font-size: 8px; white-space: nowrap; }
+
+    .results { min-width: 0; }
+    .metrics-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 9px 12px; margin-bottom: 10px; color: var(--muted); font-size: 10px; }
+    .metrics-left, .metrics-right { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .metrics-left strong, .metrics-right strong { color: var(--text); font-weight: 650; }
+    .metrics-separator { width: 1px; height: 12px; background: var(--line-strong); margin: 0 2px; }
+    .stale-notice { margin-bottom: 10px; padding: 9px 11px; border: 1px solid #e8d9ba; border-radius: 6px; color: #795b27; background: #fbf7ed; font-size: 10px; }
+    .image-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .image-card { min-width: 0; padding: 9px; }
+    .image-card.is-output { border-color: #aebdae; }
+    .image-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 23px; margin-bottom: 7px; }
+    .image-card-head h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; font-size: 11px; font-weight: 680; }
+    .image-card-head span { color: var(--subtle); font-size: 9px; white-space: nowrap; }
     .image-stage {
-      position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden;
-      border-radius: 9px; border: 1px solid var(--border-soft); background-color: #090d0a;
-      background-image: linear-gradient(45deg,#131a15 25%,transparent 25%),linear-gradient(-45deg,#131a15 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#131a15 75%),linear-gradient(-45deg,transparent 75%,#131a15 75%);
-      background-size: 18px 18px; background-position: 0 0,0 9px,9px -9px,-9px 0;
-      cursor: crosshair;
+      position: relative; aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden;
+      border: 1px solid #e4e7e1; border-radius: 5px; background: #f1f3ef; cursor: crosshair;
     }
-    .image-stage img { width: 100%; height: 100%; object-fit: contain; transform: scale(1); transform-origin: center; transition: transform .12s ease-out; pointer-events: none; }
-    .stage-note { position: absolute; bottom: 8px; left: 8px; padding: 5px 7px; color: #d5ddd0; background: rgba(7,10,8,.8); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; font-size: 8px; pointer-events: none; }
-    .image-card.featured .stage-note { color: #1b250f; background: var(--accent); border-color: transparent; font-weight: 800; }
-    .delta-note { display: none; color: var(--muted); font-size: 9px; line-height: 1.5; margin: 9px 2px 0; }
-    .info-card { display: flex; gap: 12px; align-items: flex-start; padding: 15px 16px; margin-top: 12px; }
-    .info-icon { width: 29px; height: 29px; flex: 0 0 auto; display: grid; place-items: center; color: var(--accent); background: rgba(199,243,107,.10); border-radius: 9px; }
-    .info-card h4 { margin: 1px 0 5px; font-size: 10px; font-weight: 750; }
-    .info-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
-    .asset-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(3,7,4,.78); backdrop-filter: blur(10px); }
-    .asset-modal[hidden] { display: none; }
-    .asset-dialog { width: min(900px, 100%); max-height: min(82vh, 760px); overflow: auto; padding: 20px; border: 1px solid var(--border); border-radius: 17px; background: #111912; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
-    .asset-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 16px; }
-    .asset-dialog-head h3 { margin: 0; font-size: 15px; }
-    .asset-dialog-head p { margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
-    .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
-    .asset-option { min-width: 0; padding: 8px; text-align: left; color: var(--text); border: 1px solid var(--border); border-radius: 11px; background: #0c130e; }
-    .asset-option:hover { border-color: var(--accent); background: #172119; }
-    .asset-option img { display: block; width: 100%; height: 112px; object-fit: contain; border-radius: 7px; background: #080d09; }
-    .asset-option span { display: block; overflow: hidden; margin-top: 8px; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-    .asset-message { grid-column: 1 / -1; padding: 25px 10px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
-    .toast-wrap { position: fixed; z-index: 70; right: 20px; bottom: 20px; display: grid; gap: 8px; }
-    .toast { max-width: min(380px, calc(100vw - 40px)); padding: 11px 14px; color: var(--text); background: #18211a; border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); font-size: 11px; animation: toast-in .18s ease-out; }
-    .toast.error { border-color: rgba(255,130,126,.45); color: #ffaaa6; }
-    .toast.success { border-color: rgba(199,243,107,.4); color: var(--accent); }
-    @keyframes toast-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    footer { border-top: 1px solid var(--border-soft); padding: 17px 0 22px; color: var(--subtle); font-size: 9px; }
+    .image-stage img { display: block; width: 100%; height: 100%; object-fit: contain; transform: scale(1); transform-origin: center; transition: transform .12s ease-out; pointer-events: none; }
+    .stage-note { position: absolute; left: 7px; bottom: 7px; padding: 3px 5px; color: #fff; background: rgba(31, 39, 32, .78); border-radius: 3px; font-size: 8px; letter-spacing: .02em; pointer-events: none; }
+    .image-card.is-output .stage-note { color: #fff; background: rgba(49, 91, 62, .88); }
+    .delta-note { display: none; color: var(--muted); font-size: 10px; line-height: 1.5; margin: 8px 1px 0; }
+    .zoom-help { margin: 8px 1px 0; color: var(--subtle); font-size: 9px; }
+    .info-card { padding: 11px 1px 0; margin-top: 9px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .info-card strong { color: #455046; font-weight: 680; }
+
+    .asset-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(20, 27, 21, .5); }
+    .asset-dialog { width: min(880px, 100%); max-height: min(84vh, 760px); overflow: auto; padding: 18px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
+    .asset-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 14px; }
+    .asset-dialog-head h3 { margin: 0; font-size: 14px; }
+    .asset-dialog-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .asset-search { width: 100%; height: 36px; margin-bottom: 12px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); background: #fff; font-size: 11px; }
+    .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 9px; }
+    .asset-option { min-width: 0; padding: 7px; text-align: left; color: var(--text); border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    .asset-option:hover { border-color: #9eaa9f; background: var(--surface-soft); }
+    .asset-option img { display: block; width: 100%; height: 100px; object-fit: contain; border-radius: 3px; background: #f0f2ed; }
+    .asset-option span { display: block; overflow: hidden; margin-top: 6px; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .asset-message { grid-column: 1 / -1; padding: 28px 10px; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+
+    .toast-wrap { position: fixed; z-index: 70; right: 16px; bottom: 16px; display: grid; gap: 7px; }
+    .toast { max-width: min(380px, calc(100vw - 32px)); padding: 10px 12px; color: var(--text); background: #fff; border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: var(--shadow); font-size: 11px; animation: toast-in .16s ease-out; }
+    .toast.error { border-color: #e5bcb8; color: var(--danger); background: var(--danger-soft); }
+    .toast.success { border-color: #c4d5c7; color: var(--accent); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    footer { border-top: 1px solid var(--line); padding: 14px 0 18px; color: var(--subtle); font-size: 9px; }
     .footer-inner { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-    @media (max-width: 1050px) {
-      .workspace { grid-template-columns: 285px minmax(0,1fr); }
-      .image-grid { grid-template-columns: 1fr 1fr; }
+
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 270px minmax(0, 1fr); gap: 13px; }
+      .controls { padding: 14px; }
+      .image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .image-card:last-child { grid-column: 1 / -1; }
       .image-card:last-child .image-stage { aspect-ratio: 16 / 9; }
     }
     @media (max-width: 760px) {
       .shell { width: min(100% - 28px, 620px); }
-      .topbar-inner { min-height: 66px; }
-      .top-status { font-size: 0; gap: 0; }
+      .topbar-inner { min-height: 58px; }
+      main { padding-top: 24px; }
+      .intro { align-items: flex-start; flex-direction: column; gap: 7px; margin-bottom: 17px; }
+      .intro-note { white-space: normal; }
       .workspace { grid-template-columns: 1fr; }
       .controls { position: static; }
-      .empty-state, .processing-state { min-height: 390px; }
-      main { padding-top: 25px; }
+      .empty-state, .processing-state { min-height: 330px; }
     }
     @media (max-width: 520px) {
+      .shell { width: calc(100% - 24px); }
+      .top-status { font-size: 10px; }
+      .intro h2 { font-size: 27px; }
       .image-grid { grid-template-columns: 1fr; }
       .image-card:last-child { grid-column: auto; }
-      .image-card:last-child .image-stage, .image-stage { aspect-ratio: 1 / 1; }
+      .image-card:last-child .image-stage, .image-stage { aspect-ratio: 4 / 3; }
       .display-top { align-items: flex-start; flex-direction: column; }
-      .metrics-right { gap: 9px; }
-      .intro h2 { font-size: 27px; }
+      .display-actions { width: 100%; justify-content: space-between; }
+      .download-hint { white-space: normal; text-align: right; }
+      .metrics-bar { align-items: flex-start; flex-direction: column; }
+      .asset-modal { padding: 10px; }
+      .asset-dialog { padding: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
@@ -213,56 +244,59 @@
   <header class="topbar">
     <div class="shell topbar-inner">
       <div class="brand">
+        <div class="brand-mark" aria-hidden="true">NS</div>
         <div>
-          <h1>NanoSR <span style="color:var(--muted);font-weight:500"></span></h1>
-          <p>Super-resolution and image restoration</p>
+          <h1>NanoSR</h1>
+          <p>Image restoration</p>
         </div>
       </div>
-      <div class="top-status"><span class="status-dot"></span><span id="topStatus">Ready to process</span></div>
+      <div class="top-status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span><span id="topStatus">Waiting for image</span></div>
     </div>
   </header>
 
   <main class="shell">
     <section class="intro">
-      <p class="eyebrow">Image enhancement workspace</p>
-      <h2>Make low-res images<br>look a little less low-res.</h2>
-      <p>Choose an image, select a model, and compare the reconstruction against a conventional resized baseline. No mysterious dashboard machinery required.</p>
+      <div class="intro-copy">
+        <h2>Enhance an image</h2>
+        <p>Choose an image and a model, then compare the result with a standard resize.</p>
+      </div>
+      <div class="intro-note">PNG · JPG · WEBP · GIF · AVIF · BMP · up to 25 MB</div>
     </section>
 
     <div class="workspace">
       <aside class="panel controls" aria-label="Image and model settings">
         <div class="panel-heading">
-          <h3>Source image</h3>
-          <span class="tiny-label">01 / Input</span>
+          <h3>Image</h3>
+          <span class="subheading">Input</span>
         </div>
-        <div id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Choose or drop an image">
+        <div id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Choose an image or drop one here">
           <div class="drop-copy">
             <div class="drop-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M20 16.5v2A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-2"/></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M20 16.5v2A1.5 1.5 0 0 1 18.5 20h-13A1.5 1.5 0 0 1 4 18.5v-2"/></svg>
             </div>
             <strong>Drop an image here</strong>
-            <small>or click to browse · PNG, JPG, WEBP</small>
+            <small>or click to browse</small>
           </div>
-          <img id="sourcePreview" alt="Selected source preview">
+          <img id="sourcePreview" alt="Selected image preview">
           <span id="sourceCaption" class="source-caption"></span>
         </div>
-        <input id="fileInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+        <input id="fileInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif,image/bmp">
         <div class="button-row">
           <button id="browseBtn" class="btn" type="button">Browse files</button>
-          <button id="sampleBtn" class="btn primary" type="button">Repository assets</button>
+          <button id="sampleBtn" class="btn" type="button">Sample images</button>
         </div>
 
         <div class="divider"></div>
         <div class="panel-heading">
-          <h3>Model settings</h3>
-          <span class="tiny-label">02 / Configure</span>
+          <h3>Model</h3>
+          <span class="subheading">Settings</span>
         </div>
         <div class="field">
           <label for="modelSelect">Model</label>
           <select id="modelSelect">
-            <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x · 6× super-resolution</option>
-            <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet · restoration</option>
-            <option value="Nano-RestoreNet-2 (denoise / upscale / enhance)">Nano-RestoreNet-2 · restoration</option>
+            <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x · 6× upscale</option>
+            <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet</option>
+            <option value="Nano-RestoreNet-2 (denoise / upscale / enhance)">Nano-RestoreNet-2</option>
           </select>
         </div>
         <div class="field">
@@ -272,95 +306,107 @@
             <option value="upscale">Upscale · 2×</option>
             <option value="enhance">Enhance</option>
           </select>
+          <p class="field-help">Available with RestoreNet models.</p>
         </div>
-        <div class="field">
-          <div class="label-line"><label for="tolerance" style="margin:0">Difference sensitivity</label><span id="toleranceValue" class="value-pill">10</span></div>
-          <input id="tolerance" type="range" min="1" max="50" value="10">
-          <div class="range-ends"><span>More detail</span><span>Less noise</span></div>
-        </div>
-        <div class="field">
-          <div class="label-line"><span>Baseline rendering</span><span class="tiny-label">Comparison only</span></div>
-          <div class="segmented" role="group" aria-label="Baseline interpolation mode">
-            <button id="nearestBtn" class="active" type="button" aria-pressed="true">Nearest</button>
-            <button id="smoothBtn" type="button" aria-pressed="false">Smooth</button>
+
+        <details class="advanced" id="comparisonOptions">
+          <summary>Comparison options</summary>
+          <div class="advanced-content">
+            <div class="field">
+              <div class="label-line"><label for="tolerance" style="margin:0">Difference threshold</label><span id="toleranceValue" class="value-pill">10</span></div>
+              <input id="tolerance" type="range" min="1" max="50" value="10">
+              <div class="range-ends"><span>Show more changes</span><span>Reduce noise</span></div>
+            </div>
+            <div class="field">
+              <div class="label-line"><span>Resize method</span></div>
+              <div class="segmented" role="group" aria-label="Baseline interpolation mode">
+                <button id="nearestBtn" class="active" type="button" aria-pressed="true">Nearest</button>
+                <button id="smoothBtn" type="button" aria-pressed="false">Smooth</button>
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
+
         <button id="runBtn" class="btn primary run-btn" type="button" disabled>Run enhancement</button>
-        <p class="helper">The model runs through the hosted NanoSR Gradio Space. Your original image is used to build the comparison baseline in this browser.</p>
+        <p class="helper">Your image is sent to the hosted NanoSR model for processing. It is not processed locally.</p>
       </aside>
 
       <section class="display" aria-label="Image comparison results">
         <div class="display-top">
           <div>
-            <h3>Comparison</h3>
-            <p>Source baseline, model output, and pixel difference.</p>
+            <h3>Preview</h3>
+            <p>Compare the resized baseline, model output and pixel differences.</p>
           </div>
           <div class="display-actions">
-            <span id="statusChip" class="status-chip"><span class="status-dot"></span><span id="statusText">Waiting for image</span></span>
-            <button id="downloadBtn" class="btn subtle" type="button" hidden>Export image</button>
+            <span id="statusChip" class="status-chip"><span class="status-dot" aria-hidden="true"></span><span id="statusText">Waiting for image</span></span>
+            <div class="download-group">
+              <span id="downloadHint" class="download-hint" hidden>Includes NanoSR watermark</span>
+              <button id="downloadBtn" class="btn" type="button" hidden>Download PNG</button>
+            </div>
           </div>
         </div>
 
         <div id="emptyState" class="panel empty-state">
           <div class="empty-inner">
-            <img class="sample-art" src="assets/sample.png" alt="Image asset preview">
-            <h4>Start with an image</h4>
-            <p>Upload your own image or choose one from the FlameF0X repository assets folder.</p>
-            <button id="emptySampleBtn" class="btn primary" type="button">Choose repository image</button>
+            <div class="empty-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            </div>
+            <h4 id="emptyTitle">No image selected</h4>
+            <p id="emptyDescription">Add an image using the panel on the left. The comparison will appear here.</p>
+            <button id="emptySampleBtn" class="btn" type="button">Choose a sample image</button>
           </div>
         </div>
 
-        <div id="processingState" class="panel processing-state" aria-live="polite">
+        <div id="processingState" class="panel processing-state" aria-live="polite" hidden>
           <div class="spinner" aria-hidden="true"></div>
           <h4>Processing image</h4>
           <p id="processingText">Connecting to NanoSR…</p>
         </div>
 
-        <div id="results" class="results">
+        <div id="results" class="results" hidden>
           <div class="panel metrics-bar">
-            <div class="metrics-left"><span class="status-dot"></span><strong>Comparison ready</strong><span id="modelUsed">NanoSR-6x</span></div>
-            <div class="metrics-right"><span>Output <strong id="resolutionValue">—</strong></span><span>Zoom <strong>3×</strong></span><span>Pointer <strong id="pointerValue">—</strong></span></div>
+            <div class="metrics-left"><strong id="modelUsed">NanoSR-6x</strong><span class="metrics-separator" aria-hidden="true"></span><span>Output <strong id="resolutionValue">—</strong></span></div>
+            <div class="metrics-right"><span>Zoom inspection is synchronized across previews</span></div>
           </div>
+          <div id="staleNotice" class="stale-notice" role="status" hidden>Settings changed. Run enhancement again to update this comparison.</div>
           <div class="image-grid">
             <article class="panel image-card">
-              <div class="image-card-head"><h4>Resized baseline</h4><span id="baselineLabel">NEAREST</span></div>
-              <div class="image-stage zoom-stage"><img id="baselineImage" alt="Resized source baseline"><span class="stage-note">STANDARD RESIZE</span></div>
+              <div class="image-card-head"><h4>Standard resize</h4><span id="baselineLabel">NEAREST</span></div>
+              <div class="image-stage zoom-stage" title="Move over the image to inspect detail"><img id="baselineImage" alt="Standard resized baseline"><span class="stage-note">BASELINE</span></div>
             </article>
-            <article class="panel image-card featured">
-              <div class="image-card-head"><h4>AI reconstruction</h4><span>MODEL OUTPUT</span></div>
-              <div class="image-stage zoom-stage"><img id="outputImage" alt="AI-enhanced result"><span class="stage-note" id="outputLabel">NANOSR 6×</span></div>
+            <article class="panel image-card is-output">
+              <div class="image-card-head"><h4>Enhanced result</h4><span>MODEL OUTPUT</span></div>
+              <div class="image-stage zoom-stage" title="Move over the image to inspect detail"><img id="outputImage" alt="Enhanced image result"><span class="stage-note" id="outputLabel">NANOSR 6×</span></div>
             </article>
             <article class="panel image-card">
               <div class="image-card-head"><h4>Difference map</h4><span>PIXEL DELTA</span></div>
-              <div class="image-stage zoom-stage"><img id="deltaImage" alt="Difference map between baseline and model output"><span class="stage-note">CHANGED PIXELS</span></div>
+              <div class="image-stage zoom-stage" title="Move over the image to inspect detail"><img id="deltaImage" alt="Pixel difference map"><span class="stage-note">CHANGED PIXELS</span></div>
               <p id="deltaNote" class="delta-note"></p>
             </article>
           </div>
-          <div class="panel info-card">
-            <div class="info-icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>
-            </div>
-            <div><h4>Reading the difference map</h4><p>Brighter regions mark pixels where the model output differs from a basic resized version. This shows where changes occurred, not whether every change is objectively better.</p></div>
-          </div>
+          <p class="zoom-help">Move over any preview to zoom into the same area across all three images.</p>
+          <div class="info-card"><strong>About the difference map:</strong> brighter areas show where the model output differs from a standard resize. A difference does not automatically mean an improvement.</div>
         </div>
       </section>
     </div>
   </main>
 
-  <footer><div class="shell footer-inner"><span>NanoSR Image Lab</span><span>Powered by FlameF0X / NanoSR-6x</span></div></footer>
+  <footer><div class="shell footer-inner"><span>NanoSR</span><span>Image restoration workspace</span></div></footer>
+
   <div id="assetModal" class="asset-modal" hidden>
     <section class="asset-dialog" role="dialog" aria-modal="true" aria-labelledby="assetDialogTitle">
       <div class="asset-dialog-head">
         <div>
-          <h3 id="assetDialogTitle">Choose an image</h3>
-          <p>Images discovered in FlameF0X.github.io/assets. Selecting one loads it into NanoSR.</p>
+          <h3 id="assetDialogTitle">Sample images</h3>
+          <p>Choose an image from the project repository.</p>
         </div>
         <button id="closeAssetModal" class="btn subtle" type="button" aria-label="Close image picker">Close</button>
       </div>
-      <div id="assetGrid" class="asset-grid"><div class="asset-message">Loading repository images…</div></div>
+      <input id="assetSearch" class="asset-search" type="search" placeholder="Filter sample images…" aria-label="Filter sample images" disabled>
+      <div id="assetGrid" class="asset-grid"><div class="asset-message">Loading images…</div></div>
     </section>
   </div>
-  <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
   <script type="module">
     import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
@@ -379,13 +425,15 @@
     const ui = {
       dropZone: $("dropZone"), fileInput: $("fileInput"), browseBtn: $("browseBtn"), sampleBtn: $("sampleBtn"),
       emptySampleBtn: $("emptySampleBtn"), sourcePreview: $("sourcePreview"), sourceCaption: $("sourceCaption"),
-      assetModal: $("assetModal"), assetGrid: $("assetGrid"), closeAssetModal: $("closeAssetModal"),
+      assetModal: $("assetModal"), assetGrid: $("assetGrid"), assetSearch: $("assetSearch"), closeAssetModal: $("closeAssetModal"),
       modelSelect: $("modelSelect"), taskSelect: $("taskSelect"), tolerance: $("tolerance"), toleranceValue: $("toleranceValue"),
       nearestBtn: $("nearestBtn"), smoothBtn: $("smoothBtn"), runBtn: $("runBtn"), topStatus: $("topStatus"),
-      statusChip: $("statusChip"), statusText: $("statusText"), emptyState: $("emptyState"), processingState: $("processingState"),
-      processingText: $("processingText"), results: $("results"), modelUsed: $("modelUsed"), resolutionValue: $("resolutionValue"),
-      pointerValue: $("pointerValue"), baselineImage: $("baselineImage"), outputImage: $("outputImage"), deltaImage: $("deltaImage"),
-      baselineLabel: $("baselineLabel"), outputLabel: $("outputLabel"), deltaNote: $("deltaNote"), downloadBtn: $("downloadBtn"), toastWrap: $("toastWrap")
+      statusChip: $("statusChip"), statusText: $("statusText"), emptyState: $("emptyState"), emptyTitle: $("emptyTitle"),
+      emptyDescription: $("emptyDescription"), processingState: $("processingState"), processingText: $("processingText"),
+      results: $("results"), staleNotice: $("staleNotice"), modelUsed: $("modelUsed"), resolutionValue: $("resolutionValue"),
+      baselineImage: $("baselineImage"), outputImage: $("outputImage"), deltaImage: $("deltaImage"),
+      baselineLabel: $("baselineLabel"), outputLabel: $("outputLabel"), deltaNote: $("deltaNote"),
+      downloadBtn: $("downloadBtn"), downloadHint: $("downloadHint"), toastWrap: $("toastWrap")
     };
 
     const state = {
@@ -397,10 +445,13 @@
       task: "denoise",
       interpolation: "pixelated",
       running: false,
-      queued: false,
+      dirty: false,
       revision: 0,
       clientPromise: null,
-      repositoryAssets: null
+      repositoryAssets: null,
+      modalReturnFocus: null,
+      completedModel: MODEL_SR,
+      completedTask: "denoise"
     };
 
     function toast(message, type = "info") {
@@ -411,20 +462,30 @@
       window.setTimeout(() => node.remove(), 4200);
     }
 
+    function updateRunButton() {
+      ui.runBtn.disabled = !state.sourceFile || state.running;
+      ui.runBtn.textContent = state.running ? "Processing…" : state.outputUrl ? "Run again" : "Run enhancement";
+      ui.modelSelect.disabled = state.running;
+      ui.taskSelect.disabled = state.running || !RESTORE_MODELS.has(state.model);
+    }
+
     function setStatus(message, mode = "ready") {
       ui.statusText.textContent = message;
-      ui.topStatus.textContent = mode === "busy" ? "Processing image" : mode === "error" ? "Processing failed" : "Ready to process";
+      ui.topStatus.textContent = message;
       ui.statusChip.classList.toggle("busy", mode === "busy");
+      ui.statusChip.classList.toggle("error", mode === "error");
       const dot = ui.statusChip.querySelector(".status-dot");
-      dot.style.background = mode === "error" ? "var(--danger)" : "var(--accent)";
-      ui.runBtn.disabled = !state.sourceFile || state.running;
+      dot.style.background = mode === "error" ? "var(--danger)" : mode === "busy" ? "var(--accent)" : "#64866b";
+      updateRunButton();
     }
 
     function showView(view) {
-      ui.emptyState.style.display = view === "empty" ? "flex" : "none";
-      ui.processingState.style.display = view === "processing" ? "flex" : "none";
-      ui.results.style.display = view === "results" ? "block" : "none";
-      if (view !== "results") ui.downloadBtn.hidden = true;
+      ui.emptyState.hidden = view !== "empty";
+      ui.processingState.hidden = view !== "processing";
+      ui.results.hidden = view !== "results";
+      const canDownload = view === "results" && Boolean(state.outputUrl) && !state.dirty;
+      ui.downloadBtn.hidden = !canDownload;
+      ui.downloadHint.hidden = !canDownload;
     }
 
     function syncControls() {
@@ -432,9 +493,25 @@
       state.task = ui.taskSelect.value;
       const restore = RESTORE_MODELS.has(state.model);
       const displayName = state.model.split(" (")[0];
-      ui.taskSelect.disabled = !restore;
-      ui.outputLabel.textContent = restore ? `RESTORE · ${state.task.toUpperCase()}` : "NANOSR 6×";
-      ui.modelUsed.textContent = restore ? `${displayName} · ${state.task}` : "NanoSR-6x";
+      ui.taskSelect.disabled = !restore || state.running;
+      // Keep the label tied to the visible result until a new run completes.
+      if (!state.outputUrl) {
+        ui.outputLabel.textContent = restore ? `${displayName} · ${state.task}` : "NANOSR 6×";
+      }
+      updateRunButton();
+    }
+
+    function markSettingsChanged() {
+      if (state.outputUrl) {
+        state.dirty = true;
+        ui.staleNotice.hidden = false;
+        ui.downloadBtn.hidden = true;
+        ui.downloadHint.hidden = true;
+        setStatus("Settings changed");
+      } else if (state.sourceFile) {
+        setStatus("Ready to run");
+      }
+      updateRunButton();
     }
 
     function setInterpolation(mode) {
@@ -452,7 +529,6 @@
       ui.sourcePreview.src = url;
       ui.sourceCaption.textContent = name;
       ui.dropZone.classList.add("has-image");
-      ui.runBtn.disabled = false;
     }
 
     function readFileAsDataURL(file) {
@@ -461,6 +537,16 @@
         reader.onload = () => resolve(String(reader.result));
         reader.onerror = () => reject(new Error("Could not read this image file."));
         reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("Could not load this image. Try another file."));
+        image.src = url;
       });
     }
 
@@ -475,17 +561,22 @@
       }
       try {
         const dataUrl = await readFileAsDataURL(file);
+        await loadImage(dataUrl);
         state.revision += 1;
         state.sourceFile = file;
         state.sourceUrl = dataUrl;
         state.sourceName = file.name || "image";
         state.outputUrl = null;
+        state.dirty = false;
         updateSourcePreview(dataUrl, state.sourceName);
+        ui.emptyTitle.textContent = "Ready to enhance";
+        ui.emptyDescription.textContent = "Your image is loaded. Choose a model, then run enhancement when you're ready.";
+        ui.emptySampleBtn.textContent = "Choose another sample";
+        ui.staleNotice.hidden = true;
         showView("empty");
-        setStatus("Image loaded");
-        requestRun();
+        setStatus("Image ready");
       } catch (error) {
-        toast(error.message, "error");
+        toast(error.message || "Could not read this image.", "error");
       }
     }
 
@@ -496,7 +587,6 @@
       const discovered = [];
       const imageExtensions = /\.(png|jpe?g|webp|gif|bmp|avif)$/i;
 
-      // Walk subfolders too, so the picker covers the whole repository assets tree.
       while (directories.length) {
         const directory = directories.shift();
         if (visited.has(directory)) continue;
@@ -506,7 +596,7 @@
           headers: { Accept: "application/vnd.github+json" }
         });
         if (!response.ok) {
-          if (response.status === 403 || response.status === 429) throw new Error("GitHub's unauthenticated API limit was reached. Try again later or use Browse files.");
+          if (response.status === 403 || response.status === 429) throw new Error("GitHub's image-list limit was reached. Try again later or browse a file from your device.");
           throw new Error(`Could not read ${directory} (HTTP ${response.status}).`);
         }
         const entries = await response.json();
@@ -527,39 +617,55 @@
       return state.repositoryAssets;
     }
 
+    function renderAssetGrid(filter = "") {
+      const assets = (state.repositoryAssets || []).filter((asset) => asset.name.toLowerCase().includes(filter.trim().toLowerCase()));
+      ui.assetGrid.replaceChildren();
+      if (!assets.length) {
+        ui.assetGrid.append(Object.assign(document.createElement("div"), {
+          className: "asset-message",
+          textContent: filter ? "No sample images match that search." : "No images were found in the repository assets folder."
+        }));
+        return;
+      }
+      for (const asset of assets) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "asset-option";
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.alt = "";
+        image.src = asset.url;
+        const label = document.createElement("span");
+        label.textContent = asset.name;
+        button.append(image, label);
+        button.addEventListener("click", () => loadRepositoryAsset(asset));
+        ui.assetGrid.append(button);
+      }
+    }
+
     async function openAssetPicker() {
+      state.modalReturnFocus = document.activeElement;
       ui.assetModal.hidden = false;
-      ui.assetGrid.replaceChildren(Object.assign(document.createElement("div"), { className: "asset-message", textContent: "Loading repository images…" }));
+      ui.assetSearch.value = "";
+      ui.assetSearch.disabled = true;
+      ui.assetGrid.replaceChildren(Object.assign(document.createElement("div"), { className: "asset-message", textContent: "Loading sample images…" }));
+      ui.closeAssetModal.focus();
       try {
-        const assets = await getRepositoryAssets();
-        ui.assetGrid.replaceChildren();
-        if (!assets.length) {
-          ui.assetGrid.append(Object.assign(document.createElement("div"), {
-            className: "asset-message",
-            textContent: "No raster images were found in the repository assets folder. You can still use Browse files to upload an image."
-          }));
-          return;
-        }
-        for (const asset of assets) {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "asset-option";
-          const image = document.createElement("img");
-          image.loading = "lazy";
-          image.alt = "";
-          image.src = asset.url;
-          const label = document.createElement("span");
-          label.textContent = asset.name;
-          button.append(image, label);
-          button.addEventListener("click", () => loadRepositoryAsset(asset));
-          ui.assetGrid.append(button);
-        }
+        await getRepositoryAssets();
+        renderAssetGrid();
+        ui.assetSearch.disabled = false;
+        ui.assetSearch.focus();
       } catch (error) {
         ui.assetGrid.replaceChildren(Object.assign(document.createElement("div"), {
           className: "asset-message",
-          textContent: `${error.message} You can still use Browse files.`
+          textContent: `${error.message} You can still browse files from your device.`
         }));
       }
+    }
+
+    function closeAssetPicker() {
+      ui.assetModal.hidden = true;
+      if (state.modalReturnFocus && typeof state.modalReturnFocus.focus === "function") state.modalReturnFocus.focus();
     }
 
     async function loadRepositoryAsset(asset) {
@@ -568,10 +674,10 @@
         if (!response.ok) throw new Error(`Could not download ${asset.name} (HTTP ${response.status}).`);
         const blob = await response.blob();
         const file = new File([blob], asset.name, { type: blob.type || "image/png" });
-        ui.assetModal.hidden = true;
+        closeAssetPicker();
         await loadSourceFile(file);
       } catch (error) {
-        toast(error.message || "Could not load that repository image.", "error");
+        toast(error.message || "Could not load that sample image.", "error");
       }
     }
 
@@ -586,80 +692,70 @@
     }
 
     function requestRun() {
-      if (!state.sourceFile) return;
-      if (state.running) {
-        state.queued = true;
-        return;
-      }
-      runQueue();
+      if (!state.sourceFile || state.running) return;
+      runEnhancement();
     }
 
-    async function runQueue() {
+    async function runEnhancement() {
       if (state.running || !state.sourceFile) return;
       state.running = true;
-      ui.runBtn.disabled = true;
+      const revision = state.revision;
+      const file = state.sourceFile;
+      const sourceUrl = state.sourceUrl;
+      const model = state.model;
+      const task = state.task;
+      showView("processing");
+      setStatus("Connecting to NanoSR…", "busy");
+      ui.processingText.textContent = `Sending ${file.name || "image"} to the hosted model…`;
+      updateRunButton();
+
       try {
-        do {
-          state.queued = false;
-          const revision = state.revision;
-          const file = state.sourceFile;
-          const sourceUrl = state.sourceUrl;
-          const model = state.model;
-          const task = state.task;
-          showView("processing");
-          setStatus("Connecting to model…", "busy");
-          ui.processingText.textContent = `Sending ${file.name || "image"} to ${SPACE_ID}…`;
-          try {
-            const client = await getClient();
-            const result = await client.predict(API_NAME, {
-              input_img: file,
-              model_choice: model,
-              task
-            });
-            const output = result?.data?.[0];
-            const outputUrl = typeof output === "string" ? output : output?.url;
-            if (!outputUrl) throw new Error("The model returned no output image.");
-            if (revision !== state.revision) {
-              state.queued = true;
-              continue;
-            }
-            state.outputUrl = outputUrl;
-            ui.processingText.textContent = "Building the comparison views…";
-            await renderComparison(sourceUrl, outputUrl);
-            if (revision !== state.revision) {
-              state.queued = true;
-              continue;
-            }
-            showView("results");
-            ui.downloadBtn.hidden = false;
-            setStatus("Comparison ready");
-            toast("Image enhancement complete.", "success");
-          } catch (error) {
-            if (revision !== state.revision) {
-              state.queued = true;
-              continue;
-            }
-            console.error("NanoSR request failed:", error);
-            showView("empty");
-            setStatus("Processing failed", "error");
-            toast(error.message || "The model request failed.", "error");
-          }
-        } while (state.queued);
+        const client = await getClient();
+        if (revision !== state.revision) return;
+        const result = await client.predict(API_NAME, {
+          input_img: file,
+          model_choice: model,
+          task
+        });
+        if (revision !== state.revision) return;
+        const output = result?.data?.[0];
+        const outputUrl = typeof output === "string" ? output : output?.url;
+        if (!outputUrl) throw new Error("The model returned no output image.");
+
+        state.outputUrl = outputUrl;
+        ui.processingText.textContent = "Preparing the comparison…";
+        await renderComparison(sourceUrl, outputUrl);
+        if (revision !== state.revision) return;
+
+        state.dirty = false;
+        state.completedModel = model;
+        state.completedTask = task;
+        const displayName = model.split(" (")[0];
+        ui.modelUsed.textContent = RESTORE_MODELS.has(model) ? `${displayName} · ${task}` : "NanoSR-6x · 6× upscale";
+        ui.outputLabel.textContent = RESTORE_MODELS.has(model) ? `${displayName} · ${task}` : "NANOSR 6×";
+        ui.staleNotice.hidden = true;
+        showView("results");
+        setStatus("Complete");
+        toast("Enhancement complete.", "success");
+      } catch (error) {
+        if (revision !== state.revision) return;
+        console.error("NanoSR request failed:", error);
+        ui.emptyTitle.textContent = "Processing failed";
+        ui.emptyDescription.textContent = "Your source image is still loaded. Check the connection or try again.";
+        ui.emptySampleBtn.textContent = "Choose another sample";
+        showView("empty");
+        setStatus("Processing failed", "error");
+        toast(error.message || "The model request failed.", "error");
       } finally {
         state.running = false;
-        ui.runBtn.disabled = !state.sourceFile;
-        if (state.queued && state.sourceFile) requestRun();
+        updateRunButton();
+        if (revision !== state.revision) {
+          ui.emptyTitle.textContent = "Ready to enhance";
+          ui.emptyDescription.textContent = "Your image is loaded. Choose a model, then run enhancement when you're ready.";
+          showView("empty");
+          setStatus("Image ready");
+        }
       }
-    }
-
-    function loadImage(url) {
-      return new Promise((resolve, reject) => {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error("Could not load an image for comparison."));
-        image.src = url;
-      });
     }
 
     async function renderComparison(sourceUrl, outputUrl) {
@@ -673,7 +769,7 @@
       ui.deltaNote.style.display = "none";
       ui.deltaNote.textContent = "";
 
-      // Limit the analysis canvas size to avoid excessive memory use with very large outputs.
+      // Cap the working canvas to keep large outputs from exhausting browser memory.
       const scale = Math.min(1, Math.sqrt(12000000 / (originalWidth * originalHeight)));
       const width = Math.max(1, Math.round(originalWidth * scale));
       const height = Math.max(1, Math.round(originalHeight * scale));
@@ -698,26 +794,22 @@
         const delta = deltaContext.createImageData(width, height);
         const sensitivity = Number(ui.tolerance.value);
         for (let index = 0; index < basePixels.length; index += 4) {
-          const difference = (Math.abs(basePixels[index] - outputPixels[index]) +
+          const difference = (
+            Math.abs(basePixels[index] - outputPixels[index]) +
             Math.abs(basePixels[index + 1] - outputPixels[index + 1]) +
-            Math.abs(basePixels[index + 2] - outputPixels[index + 2])) / 3;
-          if (difference > sensitivity) {
-            delta.data[index] = Math.min(255, difference * 1.5);
-            delta.data[index + 1] = Math.min(255, difference * 4.5);
-            delta.data[index + 2] = Math.min(255, difference * .1);
-            delta.data[index + 3] = 255;
-          } else {
-            delta.data[index] = 4;
-            delta.data[index + 1] = 7;
-            delta.data[index + 2] = 5;
-            delta.data[index + 3] = 255;
-          }
+            Math.abs(basePixels[index + 2] - outputPixels[index + 2])
+          ) / 3;
+          const value = difference > sensitivity ? Math.min(255, (difference - sensitivity) * 3.2) : 12;
+          delta.data[index] = value;
+          delta.data[index + 1] = value;
+          delta.data[index + 2] = value;
+          delta.data[index + 3] = 255;
         }
         deltaContext.putImageData(delta, 0, 0);
         ui.deltaImage.src = deltaCanvas.toDataURL("image/png");
       } catch (error) {
         console.warn("Difference map unavailable (likely a cross-origin image):", error);
-        ui.deltaNote.textContent = "The model output is visible, but the browser did not allow pixel-level analysis of this hosted image.";
+        ui.deltaNote.textContent = "The result is visible, but this image host blocks pixel-level comparison.";
         ui.deltaNote.style.display = "block";
       }
       ui.baselineImage.style.imageRendering = state.interpolation === "pixelated" ? "pixelated" : "auto";
@@ -736,21 +828,17 @@
     }
 
     async function downloadOutput() {
-      if (!state.outputUrl) return;
+      if (!state.outputUrl || state.dirty || state.running) return;
       const buttonLabel = ui.downloadBtn.textContent;
       ui.downloadBtn.disabled = true;
-      ui.downloadBtn.textContent = "Preparing export…";
+      ui.downloadBtn.textContent = "Preparing…";
       try {
-        // Load the original model output and the local watermark asset at full resolution.
-        // The output must be CORS-readable for canvas export; otherwise the browser blocks
-        // pixel access and we cannot safely promise a watermarked download.
         const output = await loadImage(state.outputUrl);
-        let logo;
+        let logo = null;
         try {
           logo = await loadImage(REPO_LOGO_URL);
-        } catch (remoteLogoError) {
-          console.warn("Repository logo unavailable; using the bundled fallback logo.", remoteLogoError);
-          logo = await loadImage(new URL("assets/logo.png", document.baseURI).href);
+        } catch (logoError) {
+          console.warn("NanoSR logo could not be loaded; using a text watermark instead.", logoError);
         }
 
         const canvas = document.createElement("canvas");
@@ -760,19 +848,27 @@
         if (!context) throw new Error("Could not create the export canvas.");
         context.drawImage(output, 0, 0, canvas.width, canvas.height);
 
-        // Size the mark proportionally, with comfortable padding from the lower-right edge.
-        const logoWidth = Math.min(canvas.width * 0.12, 180);
-        const logoHeight = logoWidth * (logo.naturalHeight / logo.naturalWidth);
         const margin = Math.max(10, Math.round(Math.min(canvas.width, canvas.height) * 0.025));
-        const x = Math.max(0, canvas.width - logoWidth - margin);
-        const y = Math.max(0, canvas.height - logoHeight - margin);
         context.save();
-        context.globalAlpha = 0.9;
-        context.drawImage(logo, x, y, logoWidth, logoHeight);
+        context.globalAlpha = 0.88;
+        if (logo) {
+          const logoWidth = Math.min(canvas.width * 0.12, 180);
+          const logoHeight = logoWidth * (logo.naturalHeight / logo.naturalWidth);
+          context.drawImage(logo, Math.max(0, canvas.width - logoWidth - margin), Math.max(0, canvas.height - logoHeight - margin), logoWidth, logoHeight);
+        } else {
+          const fontSize = Math.max(12, Math.round(Math.min(canvas.width, canvas.height) * 0.025));
+          context.font = `600 ${fontSize}px system-ui, sans-serif`;
+          context.textAlign = "right";
+          context.textBaseline = "bottom";
+          context.fillStyle = "#ffffff";
+          context.shadowColor = "rgba(0,0,0,.55)";
+          context.shadowBlur = Math.max(2, fontSize * .2);
+          context.fillText("NanoSR", canvas.width - margin, canvas.height - margin);
+        }
         context.restore();
 
         const blob = await new Promise((resolve, reject) => {
-          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Could not encode the watermarked PNG.")), "image/png");
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Could not encode the PNG.")), "image/png");
         });
         const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -783,12 +879,12 @@
         link.click();
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
-        toast("Watermarked PNG exported.", "success");
+        toast("Watermarked PNG downloaded.", "success");
       } catch (error) {
-        console.error("Watermarked export failed:", error);
+        console.error("PNG export failed:", error);
         const message = error?.message || "Could not export this image.";
         if (message.toLowerCase().includes("taint") || message.toLowerCase().includes("cross-origin") || message.toLowerCase().includes("load")) {
-          toast("The image host blocked canvas access, so a watermarked export is unavailable for this result.", "error");
+          toast("The image host blocked canvas access, so this result cannot be exported here.", "error");
         } else {
           toast(message, "error");
         }
@@ -826,24 +922,43 @@
       const file = event.dataTransfer?.files?.[0];
       if (file) loadSourceFile(file);
     });
+
     ui.sampleBtn.addEventListener("click", openAssetPicker);
     ui.emptySampleBtn.addEventListener("click", openAssetPicker);
-    ui.closeAssetModal.addEventListener("click", () => { ui.assetModal.hidden = true; });
+    ui.closeAssetModal.addEventListener("click", closeAssetPicker);
+    ui.assetSearch.addEventListener("input", () => renderAssetGrid(ui.assetSearch.value));
     ui.assetModal.addEventListener("click", (event) => {
-      if (event.target === ui.assetModal) ui.assetModal.hidden = true;
+      if (event.target === ui.assetModal) closeAssetPicker();
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !ui.assetModal.hidden) ui.assetModal.hidden = true;
+      if (ui.assetModal.hidden) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeAssetPicker();
+      }
+      if (event.key === "Tab") {
+        const focusable = [...ui.assetModal.querySelectorAll("button:not(:disabled), input:not(:disabled)")];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
     });
+
     ui.modelSelect.addEventListener("change", () => {
       syncControls();
-      if (state.sourceFile) { state.revision += 1; requestRun(); }
+      markSettingsChanged();
     });
     ui.taskSelect.addEventListener("change", () => {
       syncControls();
-      if (state.sourceFile && RESTORE_MODELS.has(state.model)) { state.revision += 1; requestRun(); }
+      markSettingsChanged();
     });
-    ui.runBtn.addEventListener("click", () => requestRun());
+    ui.runBtn.addEventListener("click", requestRun);
     ui.tolerance.addEventListener("input", () => {
       ui.toleranceValue.textContent = ui.tolerance.value;
       if (state.outputUrl && state.sourceUrl) renderComparison(state.sourceUrl, state.outputUrl);
@@ -852,21 +967,20 @@
     ui.smoothBtn.addEventListener("click", () => setInterpolation("smooth"));
     ui.downloadBtn.addEventListener("click", downloadOutput);
 
-    // Hovering any comparison image zooms all comparison views around the same point.
+    // Hovering any preview zooms all three around the same relative point.
     document.querySelectorAll(".zoom-stage").forEach((stage) => {
       stage.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "touch") return;
         const bounds = stage.getBoundingClientRect();
         const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
         const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
         document.querySelectorAll(".zoom-stage img").forEach((image) => {
           image.style.transformOrigin = `${x}% ${y}%`;
-          image.style.transform = "scale(3)";
+          image.style.transform = "scale(2)";
         });
-        ui.pointerValue.textContent = `${Math.round(x)}%, ${Math.round(y)}%`;
       });
       stage.addEventListener("pointerleave", () => {
         document.querySelectorAll(".zoom-stage img").forEach((image) => image.style.transform = "scale(1)");
-        ui.pointerValue.textContent = "—";
       });
     });
 
