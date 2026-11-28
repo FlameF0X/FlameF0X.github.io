@@ -262,6 +262,7 @@
           <select id="modelSelect">
             <option value="NanoSR-6x (6x super-resolution)">NanoSR-6x · 6× super-resolution</option>
             <option value="Nano-RestoreNet (denoise / upscale / enhance)">Nano-RestoreNet · restoration</option>
+            <option value="Nano-RestoreNet-2 (denoise / upscale / enhance)">Nano-RestoreNet-2 · restoration</option>
           </select>
         </div>
         <div class="field">
@@ -370,7 +371,9 @@
     const REPO_ASSET_RAW = "https://raw.githubusercontent.com/FlameF0X/FlameF0X.github.io/main/assets/";
     const REPO_LOGO_URL = `${REPO_ASSET_RAW}logo.png`;
     const MODEL_SR = "NanoSR-6x (6x super-resolution)";
-    const MODEL_RESTORE = "Nano-RestoreNet (denoise / upscale / enhance)";
+    const MODEL_RESTORE_1 = "Nano-RestoreNet (denoise / upscale / enhance)";
+    const MODEL_RESTORE_2 = "Nano-RestoreNet-2 (denoise / upscale / enhance)";
+    const RESTORE_MODELS = new Set([MODEL_RESTORE_1, MODEL_RESTORE_2]);
 
     const $ = (id) => document.getElementById(id);
     const ui = {
@@ -427,10 +430,11 @@
     function syncControls() {
       state.model = ui.modelSelect.value;
       state.task = ui.taskSelect.value;
-      const restore = state.model === MODEL_RESTORE;
+      const restore = RESTORE_MODELS.has(state.model);
+      const displayName = state.model.split(" (")[0];
       ui.taskSelect.disabled = !restore;
       ui.outputLabel.textContent = restore ? `RESTORE · ${state.task.toUpperCase()}` : "NANOSR 6×";
-      ui.modelUsed.textContent = restore ? `Nano-RestoreNet · ${state.task}` : "NanoSR-6x";
+      ui.modelUsed.textContent = restore ? `${displayName} · ${state.task}` : "NanoSR-6x";
     }
 
     function setInterpolation(mode) {
@@ -837,7 +841,7 @@
     });
     ui.taskSelect.addEventListener("change", () => {
       syncControls();
-      if (state.sourceFile && state.model === MODEL_RESTORE) { state.revision += 1; requestRun(); }
+      if (state.sourceFile && RESTORE_MODELS.has(state.model)) { state.revision += 1; requestRun(); }
     });
     ui.runBtn.addEventListener("click", () => requestRun());
     ui.tolerance.addEventListener("input", () => {
